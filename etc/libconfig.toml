@@ -12,7 +12,7 @@
   vpc_provider_type = "vpc-share"
   encryption = false
   iks_token_exchange_endpoint_private_url = "https://us-south.containers.cloud.ibm.com"
-  containers_api_csrf_token = "58a100b5-46b0-41db-9a61-a415747d7993"
+  containers_api_csrf_token = ""
   max_retry_attempt  = 2 # 10 times with exponential re-try with max gap max_retry_gap
   max_retry_gap =  120 # 2 minutes
   api_version = "2021-04-24"   #"2019-07-02"
