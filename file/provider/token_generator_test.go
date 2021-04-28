@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	"github.com/IBM/ibmcloud-volume-interface/provider/auth"
 )
 
 func TestTokenGenerator(t *testing.T) {
@@ -42,46 +41,5 @@ func TestTokenGenerator(t *testing.T) {
 	assert.Nil(t, signedToken)
 	assert.NotNil(t, err)
 
-	tg.tokenKID = "sample_key"
-	signedToken, err = tg.getServiceToken(cf, *logger)
-	assert.Nil(t, signedToken)
-	assert.NotNil(t, err)
-
-	cf = provider.ContextCredentials{
-		AuthType:     provider.IAMAccessToken,
-		Credential:   TestProviderAccessToken,
-		IAMAccountID: TestIKSAccountID,
-		UserID:       TestIKSAccountID,
-	}
-
-	tg.tokenKID = "no_sample_key"
-	signedToken, err = tg.getServiceToken(cf, *logger)
-	assert.NotNil(t, signedToken)
-	assert.Nil(t, err)
-
-	signedToken, err = tg.getServiceToken(cf, *logger)
-	assert.NotNil(t, signedToken)
-	assert.Nil(t, err)
-
-	tg.tokenKID = "no_sample_key"
-	cf = provider.ContextCredentials{
-		AuthType:     auth.IMSToken,
-		Credential:   TestProviderAccessToken,
-		IAMAccountID: TestIKSAccountID,
-		UserID:       TestIKSAccountID,
-	}
-	signedToken, err = tg.getServiceToken(cf, *logger)
-	assert.NotNil(t, signedToken)
-	assert.Nil(t, err)
-
-	tg.tokenKID = "sample_key_invalid"
-	cf = provider.ContextCredentials{
-		AuthType:     auth.IMSToken,
-		Credential:   TestProviderAccessToken,
-		IAMAccountID: TestIKSAccountID,
-		UserID:       TestIKSAccountID,
-	}
-	signedToken, err = tg.getServiceToken(cf, *logger)
-	assert.NotNil(t, signedToken)
-	assert.Nil(t, err)
+	//TODO do we need to write test cases for valid/invalid keys ?
 }
