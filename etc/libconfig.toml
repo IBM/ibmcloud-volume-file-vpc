@@ -1,0 +1,23 @@
+[server]
+  debug_trace = false
+
+[vpc]
+  vpc_enabled = true
+  g2_token_exchange_endpoint_url = "https://iam.bluemix.net"
+  g2_riaas_endpoint_url = "https://us-south.iaas.cloud.ibm.com"
+  g2_riaas_endpoint_private_url = "https://us-south.iaas.cloud.ibm.com"
+  g2_resource_group_id = "832b3da0130e4a78a2d5a6c62e79a745"
+  g2_api_key = ""
+  provider_type = "g2"
+  vpc_provider_type = "vpc-share"
+  encryption = false
+  iks_token_exchange_endpoint_private_url = "https://us-south.containers.cloud.ibm.com"
+  containers_api_csrf_token = ""
+  max_retry_attempt  = 2 # 10 times with exponential re-try with max gap max_retry_gap
+  max_retry_gap =  120 # 2 minutes
+  api_version = "2021-04-24"   #"2019-07-02"
+  vpc_api_generation = 2
+  vpc_api_timeout = "120s"
+
+[API]
+  PassthroughSecret = ""
