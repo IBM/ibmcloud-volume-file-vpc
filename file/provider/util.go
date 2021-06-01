@@ -271,7 +271,7 @@ func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logg
 
 	if vpcShareTarget == nil {
 		logger.Info("VPC Share Target details are empty")
-		return
+		return &provider.VolumeAccessPoint{}
 	}
 
 	logger.Debug("Share Target details of VPC client", zap.Reflect("models.ShareTarget", vpcShareTarget))
