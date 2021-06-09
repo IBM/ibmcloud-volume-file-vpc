@@ -253,11 +253,16 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 	var respAccessPointlist = []provider.VolumeAccessPoint{}
 
 	shareTargetlist := vpcVolume.ShareTargets
-	if shareTargetlist != nil && len(*shareTargetlist) > 0 {
-		for _, shareTargetItem := range *shareTargetlist {
-			volumeAccessPointResponse := FromProviderToLibVolumeAccessPoint(&shareTargetItem, logger)
-			respAccessPointlist = append(respAccessPointlist, *volumeAccessPointResponse)
-		}
+
+	//If there exists no share target return empty list
+	if shareTargetlist == nil || len(*shareTargetlist) == 0 {
+		libVolume.VolumeAccessPoints = &respAccessPointlist
+		return
+	}
+
+	for _, shareTargetItem := range *shareTargetlist {
+		volumeAccessPointResponse := FromProviderToLibVolumeAccessPoint(&shareTargetItem, logger)
+		respAccessPointlist = append(respAccessPointlist, *volumeAccessPointResponse)
 	}
 
 	libVolume.VolumeAccessPoints = &respAccessPointlist
