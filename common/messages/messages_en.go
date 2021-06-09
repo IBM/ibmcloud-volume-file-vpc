@@ -133,7 +133,7 @@ var messagesEn = map[string]util.Message{
 		Description: "The specified volume capacity '%d' is not valid. ",
 		Type:        util.InvalidRequest,
 		RC:          400,
-		Action:      "Verify the specified volume capacity. The volume capacity must be a positive number between 10 GB and 16000 GB. ",
+		Action:      "Verify the specified volume capacity. The volume capacity must be a positive number between 10 GB and maximum allowed value for the respective storage profile. Refer IBM Cloud File Storage for VPC documentation https://cloud.ibm.com/docs/vpc?topic=vpc-file-storage-profiles.",
 	},
 	"EmptyResourceGroup": {
 		Code:        "EmptyResourceGroup",
