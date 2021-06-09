@@ -266,8 +266,8 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 
 // FromProviderToLibVolumeAccessPoint converting vpc provider share target type to generic lib volume accessPoint Type
 func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logger *zap.Logger) (libVolumeAccessPoint *provider.VolumeAccessPoint) {
-	logger.Debug("Entry of FromProviderToLibVolumeAccessPoint method...")
-	defer logger.Debug("Exit from FromProviderToLibVolumeAccessPoint method...")
+	logger.Info("Entry of FromProviderToLibVolumeAccessPoint method...")
+	defer logger.Info("Exit from FromProviderToLibVolumeAccessPoint method...")
 
 	if vpcShareTarget == nil {
 		logger.Info("VPC Share Target details are empty")
