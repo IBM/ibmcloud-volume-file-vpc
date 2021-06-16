@@ -74,14 +74,14 @@ var messagesEn = map[string]util.Message{
 	},
 	"AccessPointWithAPIDFindFailed": {
 		Code:        AccessPointWithAPIDFindFailed,
-		Description: "No volume access point could not be found for the specified volume ID '%s' and access point ID '%s'",
+		Description: "No volume access point could be found for the specified volume ID '%s' and access point ID '%s'",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
 		Action:      "Verify that a volume access point for your volume exists.Check if volume ID and access point ID is valid",
 	},
 	"AccessPointWithVPCIDFindFailed": {
 		Code:        AccessPointWithVPCIDFindFailed,
-		Description: "No volume access point could not be found for the specified volume ID '%s' and VPC ID %s",
+		Description: "No volume access point could be found for the specified volume ID '%s' and VPC ID %s",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
 		Action:      "Verify that a volume access point for your volume exists.Check if volume ID and VPC ID is valid",
