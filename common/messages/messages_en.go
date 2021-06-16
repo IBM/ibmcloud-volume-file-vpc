@@ -74,14 +74,14 @@ var messagesEn = map[string]util.Message{
 	},
 	"AccessPointWithAPIDFindFailed": {
 		Code:        AccessPointWithAPIDFindFailed,
-		Description: "No volume access point could not be found for the specified volume ID '%s' and access point ID '%s' or VPC ID %s",
+		Description: "No volume access point could be found for the specified volume ID '%s' and access point ID '%s'",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
 		Action:      "Verify that a volume access point for your volume exists.Check if volume ID and access point ID is valid",
 	},
 	"AccessPointWithVPCIDFindFailed": {
 		Code:        AccessPointWithVPCIDFindFailed,
-		Description: "No volume access point could not be found for the specified volume ID '%s' and VPC ID %s",
+		Description: "No volume access point could be found for the specified volume ID '%s' and VPC ID %s",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
 		Action:      "Verify that a volume access point for your volume exists.Check if volume ID and VPC ID is valid",
@@ -133,7 +133,7 @@ var messagesEn = map[string]util.Message{
 		Description: "The specified volume capacity '%d' is not valid. ",
 		Type:        util.InvalidRequest,
 		RC:          400,
-		Action:      "Verify the specified volume capacity. The volume capacity must be a positive number between 10 GB and 16000 GB. ",
+		Action:      "Verify the specified volume capacity. The volume capacity must be a positive number between 10 GB and maximum allowed value for the respective storage profile. Refer IBM Cloud File Storage for VPC documentation https://cloud.ibm.com/docs/vpc?topic=vpc-file-storage-profiles.",
 	},
 	"EmptyResourceGroup": {
 		Code:        "EmptyResourceGroup",

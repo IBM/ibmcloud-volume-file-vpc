@@ -249,6 +249,56 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		libVolume.Az = vpcVolume.Zone.Name
 	}
 	libVolume.CRN = vpcVolume.CRN
+
+	var respAccessPointlist = []provider.VolumeAccessPoint{}
+
+	shareTargetlist := vpcVolume.ShareTargets
+
+	//If there exists no share target return empty list
+	if shareTargetlist == nil || len(*shareTargetlist) == 0 {
+		libVolume.VolumeAccessPoints = &respAccessPointlist
+		return
+	}
+
+	for _, shareTargetItem := range *shareTargetlist {
+		volumeAccessPointResponse := FromProviderToLibVolumeAccessPoint(&shareTargetItem, logger)
+		respAccessPointlist = append(respAccessPointlist, *volumeAccessPointResponse)
+	}
+
+	libVolume.VolumeAccessPoints = &respAccessPointlist
+	return
+}
+
+// FromProviderToLibVolumeAccessPoint converting vpc provider share target type to generic lib volume accessPoint Type
+func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logger *zap.Logger) (libVolumeAccessPoint *provider.VolumeAccessPoint) {
+	logger.Info("Entry of FromProviderToLibVolumeAccessPoint method...")
+	defer logger.Info("Exit from FromProviderToLibVolumeAccessPoint method...")
+
+	if vpcShareTarget == nil {
+		logger.Info("VPC Share Target details are empty")
+		return &provider.VolumeAccessPoint{}
+	}
+
+	logger.Debug("Share Target details of VPC client", zap.Reflect("models.ShareTarget", vpcShareTarget))
+
+	libVolumeAccessPoint = &provider.VolumeAccessPoint{
+		ID:        vpcShareTarget.ID,
+		Href:      vpcShareTarget.Href,
+		Name:      vpcShareTarget.Name,
+		Status:    vpcShareTarget.Status,
+		MountPath: &vpcShareTarget.MountPath,
+		VPC:       vpcShareTarget.VPC,
+		CreatedAt: vpcShareTarget.CreatedAt,
+	}
+
+	if vpcShareTarget.Zone != nil {
+		libVolumeAccessPoint.Zone = &provider.Zone{
+			Name: vpcShareTarget.Zone.Name,
+			Href: vpcShareTarget.Zone.Href,
+		}
+
+	}
+
 	return
 }
 
