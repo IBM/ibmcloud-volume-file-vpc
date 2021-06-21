@@ -212,6 +212,83 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedRequesting_unclassified_er
 	}
 }
 
+func TestExchangeAccessTokenForIMSToken(t *testing.T) {
+	logger := zap.New(
+		zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority),
+		zap.AddCaller(),
+	)
+	httpSetup()
+
+	// IAM endpoint
+	mux.HandleFunc("/v1/iam/apikey",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			fmt.Fprint(w, `{"token": "at_success"}`)
+		},
+	)
+
+	iksAuthConfig := &IksAuthConfiguration{
+		PrivateAPIRoute: server.URL,
+	}
+
+	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
+	assert.NoError(t, err)
+
+	r, err := tes.ExchangeAccessTokenForIMSToken(iam.AccessToken{}, logger)
+	assert.Nil(t, r)
+}
+
+func TestExchangeIAMAPIKeyForIMSToken(t *testing.T) {
+	logger := zap.New(
+		zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority),
+		zap.AddCaller(),
+	)
+	httpSetup()
+
+	// IAM endpoint
+	mux.HandleFunc("/v1/iam/apikey",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			fmt.Fprint(w, `{"token": "at_success"}`)
+		},
+	)
+
+	iksAuthConfig := &IksAuthConfiguration{
+		PrivateAPIRoute: server.URL,
+	}
+
+	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
+	assert.NoError(t, err)
+
+	r, err := tes.ExchangeIAMAPIKeyForIMSToken("apikey", logger)
+	assert.Nil(t, r)
+}
+
+func TestGetIAMAccountIDFromAccessToken(t *testing.T) {
+	logger := zap.New(
+		zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority),
+		zap.AddCaller(),
+	)
+	httpSetup()
+
+	// IAM endpoint
+	mux.HandleFunc("/v1/iam/apikey",
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(200)
+			fmt.Fprint(w, `{"token": "at_success"}`)
+		},
+	)
+
+	iksAuthConfig := &IksAuthConfiguration{
+		PrivateAPIRoute: server.URL,
+	}
+
+	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
+	assert.NoError(t, err)
+
+	r, err := tes.GetIAMAccountIDFromAccessToken(iam.AccessToken{}, logger)
+	assert.Equal(t, "Not required to implement", r)
+}
 func Test_IKSExchangeIAMAPIKeyForAccessToken(t *testing.T) {
 	var testCases = []struct {
 		name               string

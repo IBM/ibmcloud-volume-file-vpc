@@ -43,6 +43,11 @@ func TestNewIBMCloudStorageProvider(t *testing.T) {
 	ibmCloudProvider, err := NewIBMCloudStorageProvider(configPath, logger)
 	assert.Nil(t, err)
 	assert.NotNil(t, ibmCloudProvider)
+
+	configPath = filepath.Join(pwd, "..", "test-fixtures", "slconfig-invalid.toml")
+	ibmCloudProvider, err = NewIBMCloudStorageProvider(configPath, logger)
+	assert.Nil(t, err)
+	assert.NotNil(t, ibmCloudProvider)
 }
 
 func TestGetProviderSession(t *testing.T) {
@@ -71,6 +76,9 @@ func TestGetProviderSession(t *testing.T) {
 	proSession, err := ibmCloudProvider.GetProviderSession(nil, logger)
 	assert.NotNil(t, err)     //TODO: It should be Nil
 	assert.Nil(t, proSession) // TODO: It should be NotNil
+
+	clusterInfo := ibmCloudProvider.GetClusterInfo()
+	assert.NotNil(t, clusterInfo)
 }
 
 func TestGetTestProvider(t *testing.T) {
@@ -79,6 +87,15 @@ func TestGetTestProvider(t *testing.T) {
 	defer teardown()
 	fakeIBMProvider, _ := GetTestProvider(t, logger)
 	assert.NotNil(t, fakeIBMProvider)
+}
+
+func TestGetConfig(t *testing.T) {
+	// Creating test logger
+	logger, teardown := GetTestLogger(t)
+	defer teardown()
+	fakeIBMProvider, _ := GetTestProvider(t, logger)
+	config := fakeIBMProvider.GetConfig()
+	assert.NotNil(t, config)
 }
 
 func TestNewFakeIBMCloudStorageProvider(t *testing.T) {

@@ -98,7 +98,7 @@ func GetTestLogger(t *testing.T) (logger *zap.Logger, teardown func()) {
 // GetTestProvider ...
 func GetTestProvider(t *testing.T, logger *zap.Logger) (*IBMCloudStorageProvider, error) {
 	logger.Info("GetTestProvider-Getting New test Provider")
-	// vpcBlockConfig struct
+	// vpcFileConfig struct
 	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig: &config.VPCProviderConfig{
 			Enabled:         true,

@@ -28,11 +28,15 @@ import (
 func TestNewVPCFileContextCredentialsFactory(t *testing.T) {
 	conf := &vpcconfig.VPCFileConfig{
 		VPCConfig: &config.VPCProviderConfig{
-			Enabled:         true,
-			EndpointURL:     "test-iam-url",
-			VPCTimeout:      "30s",
-			IamClientID:     "test-iam_client_id",
-			IamClientSecret: "test-iam_client_secret",
+			Enabled:                    true,
+			EndpointURL:                "test-iam-url",
+			VPCTimeout:                 "30s",
+			IamClientID:                "test-iam_client_id",
+			IamClientSecret:            "test-iam_client_secret",
+			IKSTokenExchangePrivateURL: "https://us-south.containers.cloud.ibm.com",
+		},
+		APIConfig: &config.APIConfig{
+			PassthroughSecret: "xyz",
 		},
 	}
 

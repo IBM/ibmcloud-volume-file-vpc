@@ -109,6 +109,22 @@ func TestCreateVolume(t *testing.T) {
 				Size:   int64(10),
 				Iops:   int64(1000),
 				Zone:   &models.Zone{Name: "test-zone"},
+				ShareTargets: &[]models.ShareTarget{
+					{
+						ID: "testVolumeAccessPointId",
+						VPC: &provider.VPC{
+							ID: "1234",
+						},
+						Zone: &models.Zone{Name: "test-zone"},
+					},
+					{
+						ID: "testVolumeAccessPointId",
+						VPC: &provider.VPC{
+							ID: "1234",
+						},
+						Zone: &models.Zone{Name: "test-zone"},
+					},
+				},
 			},
 			providerVolume: provider.Volume{
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
