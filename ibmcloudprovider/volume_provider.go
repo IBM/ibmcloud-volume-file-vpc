@@ -24,8 +24,8 @@ import (
 
 	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
-	provider_file_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
-	vpcfileconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
+	provider_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
+	vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
 	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
@@ -58,7 +58,7 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		conf.VPC.APIVersion = fmt.Sprintf("%d-%02d-%02d", dateTime.Year(), dateTime.Month(), dateTime.Day())
 	} else {
 		logger.Warn("Failed to parse VPC_API_VERSION, setting default value")
-		conf.VPC.APIVersion = "2020-07-02" // setting default values
+		conf.VPC.APIVersion = "2021-04-20" // setting default values
 	}
 
 	logger.Info("Fetching clusterInfo")
@@ -97,14 +97,14 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		}
 	}
 
-	vpcFileConfig := &vpcfileconfig.VPCFileConfig{
+	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
 		APIConfig:    conf.API,
 		ServerConfig: conf.Server,
 	}
 
 	// Prepare provider registry
-	registry, err := provider_file_util.InitProviders(vpcFileConfig, logger)
+	registry, err := provider_util.InitProviders(vpcFileConfig, logger)
 	if err != nil {
 		logger.Fatal("Error configuring providers", local.ZapError(err))
 	}
@@ -135,12 +135,12 @@ func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logg
 		}
 	}
 
-	vpcfileConfig := &vpcfileconfig.VPCFileConfig{
+	vpcfileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    icp.ProviderConfig.VPC,
 		APIConfig:    icp.ProviderConfig.API,
 		ServerConfig: icp.ProviderConfig.Server,
 	}
-	session, isFatal, err := provider_file_util.OpenProviderSessionWithContext(ctx, vpcfileConfig, icp.Registry, icp.ProviderName, logger)
+	session, isFatal, err := provider_util.OpenProviderSessionWithContext(ctx, vpcfileConfig, icp.Registry, icp.ProviderName, logger)
 
 	if err != nil || isFatal {
 		logger.Error("Failed to get provider session", zap.Reflect("Error", err))
