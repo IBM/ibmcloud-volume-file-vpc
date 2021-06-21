@@ -18,9 +18,9 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/IBM/ibm-csi-common/pkg/utils"
 	provider_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
 	vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
-	"github.com/IBM/ibmcloud-volume-file-vpc/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider/fake"

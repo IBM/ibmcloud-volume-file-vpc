@@ -22,10 +22,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
 	provider_file_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
 	vpcfileconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
-	"github.com/IBM/ibmcloud-volume-file-vpc/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"

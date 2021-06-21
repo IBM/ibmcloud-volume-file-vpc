@@ -18,7 +18,7 @@
 package ibmcloudprovider
 
 import (
-	"github.com/IBM/ibmcloud-volume-file-vpc/pkg/utils"
+	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
