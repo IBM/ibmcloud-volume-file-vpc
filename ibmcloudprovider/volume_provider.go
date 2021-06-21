@@ -121,10 +121,6 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	return cloudProvider, nil
 }
 
-func isRunningInIKS() bool {
-	return true //TODO Check the master KUBE version
-}
-
 // GetProviderSession ...
 func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error) {
 	logger.Info("IBMCloudStorageProvider-GetProviderSession...")
