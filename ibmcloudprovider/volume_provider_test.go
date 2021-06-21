@@ -32,14 +32,14 @@ func TestNewIBMCloudStorageProvider(t *testing.T) {
 	}
 
 	// As its required by NewIBMCloudStorageProvider
-	secretConfigPath := filepath.Join(pwd, "..", "..", "test-fixtures", "valid")
+	secretConfigPath := filepath.Join(pwd, "..", "test-fixtures", "valid")
 	err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
 	defer os.Unsetenv("SECRET_CONFIG_PATH")
 	if err != nil {
 		t.Errorf("This test will fail because of %v", err)
 	}
 
-	configPath := filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig.toml")
+	configPath := filepath.Join(pwd, "..", "test-fixtures", "slconfig.toml")
 	ibmCloudProvider, err := NewIBMCloudStorageProvider(configPath, logger)
 	assert.Nil(t, err)
 	assert.NotNil(t, ibmCloudProvider)
@@ -56,14 +56,14 @@ func TestGetProviderSession(t *testing.T) {
 	}
 
 	// As its required by NewIBMCloudStorageProvider
-	secretConfigPath := filepath.Join(pwd, "..", "..", "test-fixtures", "valid")
+	secretConfigPath := filepath.Join(pwd, "..", "test-fixtures", "valid")
 	err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
 	defer os.Unsetenv("SECRET_CONFIG_PATH")
 	if err != nil {
 		t.Errorf("This test will fail because of %v", err)
 	}
 
-	configPath := filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig.toml")
+	configPath := filepath.Join(pwd, "..", "test-fixtures", "slconfig.toml")
 	ibmCloudProvider, err := NewIBMCloudStorageProvider(configPath, logger)
 	assert.Nil(t, err)
 	assert.NotNil(t, ibmCloudProvider)
