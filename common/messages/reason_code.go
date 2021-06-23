@@ -32,4 +32,6 @@ const (
 	CreateVolumeAccessPointTimedOut = "CreateVolumeAccessPointTimedOut"
 	//DeleteVolumeAccessPointTimedOut indicates the delete volume access point is not completed within the specified time out
 	DeleteVolumeAccessPointTimedOut = "DeleteVolumeAccessPointTimedOut"
+	//MultipleVolAccessPointFound indicates that volume has more than one access point
+	MultipleVolAccessPointFound = "MultipleVolAccessPointFound"
 )
