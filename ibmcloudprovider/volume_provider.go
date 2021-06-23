@@ -49,7 +49,7 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	// Load config file
 	conf, err := config.ReadConfig(configPath, logger)
 	if err != nil {
-		logger.Fatal("Error loading configuration")
+		logger.Error("Error loading configuration")
 		return nil, err
 	}
 	// Get only VPC_API_VERSION, in "2019-07-02T00:00:00.000Z" case vpc need only 2019-07-02"
@@ -64,7 +64,7 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	logger.Info("Fetching clusterInfo")
 	clusterInfo, err := utils.NewClusterInfo(logger)
 	if err != nil {
-		logger.Fatal("Unable to load ClusterInfo", local.ZapError(err))
+		logger.Error("Unable to load ClusterInfo", local.ZapError(err))
 		return nil, err
 	}
 	logger.Info("Fetched clusterInfo..")
@@ -74,13 +74,13 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 			logger.Info("Creating NewAPIKeyImpl...")
 			apiKeyImp, err := utils.NewAPIKeyImpl(logger)
 			if err != nil {
-				logger.Fatal("Unable to create API key getter", local.ZapError(err))
+				logger.Error("Unable to create API key getter", local.ZapError(err))
 				return nil, err
 			}
 			logger.Info("Created NewAPIKeyImpl...")
 			err = apiKeyImp.UpdateIAMKeys(conf)
 			if err != nil {
-				logger.Fatal("Unable to get API key", local.ZapError(err))
+				logger.Error("Unable to get API key", local.ZapError(err))
 				return nil, err
 			}
 		}
@@ -106,7 +106,8 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	// Prepare provider registry
 	registry, err := provider_util.InitProviders(vpcFileConfig, logger)
 	if err != nil {
-		logger.Fatal("Error configuring providers", local.ZapError(err))
+		logger.Error("Error configuring providers", local.ZapError(err))
+		return nil, err
 	}
 
 	providerName := conf.VPC.VPCVolumeType
