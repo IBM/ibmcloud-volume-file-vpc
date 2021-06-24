@@ -28,17 +28,17 @@ import (
 )
 
 // maxRetryAttempt ...
-var maxRetryAttempt = 10
+var maxRetryAttempt = 0
 
 // maxRetryGap ...
-var maxRetryGap = 60
+var maxRetryGap = 0
 
 // retryGap ...
-var retryGap = 10
+var retryGap = 0
 
 //ConstantRetryGap ...
 const (
-	ConstantRetryGap = 10 // seconds
+	ConstantRetryGap = 0 // seconds
 )
 
 var volumeIDPartsCount = 5
