@@ -111,9 +111,6 @@ func GetTestProvider(t *testing.T, logger *zap.Logger) (*IBMCloudStorageProvider
 			IamClientID:     IAMClientID,
 			IamClientSecret: IAMClientSecret,
 		},
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: "",
-		},
 		ServerConfig: &config.ServerConfig{
 			DebugTrace: true,
 		},

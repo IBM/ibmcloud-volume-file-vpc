@@ -93,7 +93,6 @@ func main() {
 
 	vpcFileConfig := &vpcfileconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
-		APIConfig:    conf.API,
 		ServerConfig: conf.Server,
 	}
 

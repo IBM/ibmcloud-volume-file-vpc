@@ -6,9 +6,6 @@
   iam_client_id = 123
   iam_client_secret = 123
   iam_api_key = 123
-  refresh_token = 123
-  containers_api_route = "api_endpoint"
-  containers_api_route_private = "private_api_endpoint"
 
 [vpc]
   vpc_enabled = 123

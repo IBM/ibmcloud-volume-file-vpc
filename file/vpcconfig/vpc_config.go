@@ -24,6 +24,5 @@ import (
 // VPCFileConfig ...
 type VPCFileConfig struct {
 	VPCConfig    *config.VPCProviderConfig
-	APIConfig    *config.APIConfig
 	ServerConfig *config.ServerConfig
 }

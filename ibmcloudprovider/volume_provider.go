@@ -91,15 +91,8 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		conf.Bluemix.CSRFToken = string([]byte{}) // TODO~ Need to remove it
 	}
 
-	if conf.API == nil {
-		conf.API = &config.APIConfig{
-			PassthroughSecret: string([]byte{}), // // TODO~ Need to remove it
-		}
-	}
-
 	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
-		APIConfig:    conf.API,
 		ServerConfig: conf.Server,
 	}
 
@@ -126,15 +119,8 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error) {
 	logger.Info("IBMCloudStorageProvider-GetProviderSession...")
 
-	if icp.ProviderConfig.API == nil {
-		icp.ProviderConfig.API = &config.APIConfig{
-			PassthroughSecret: string([]byte{}), // // TODO~ Need to remove it
-		}
-	}
-
 	vpcfileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    icp.ProviderConfig.VPC,
-		APIConfig:    icp.ProviderConfig.API,
 		ServerConfig: icp.ProviderConfig.Server,
 	}
 	session, isFatal, err := provider_util.OpenProviderSessionWithContext(ctx, vpcfileConfig, icp.Registry, icp.ProviderName, logger)

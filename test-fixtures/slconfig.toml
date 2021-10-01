@@ -6,14 +6,10 @@
   iam_client_id = "bx"
   iam_client_secret = "bx"
   iam_api_key = "XXX"
-  refresh_token = ""
-  containers_api_route = "api_endpoint"
-  containers_api_route_private = "private_api_endpoint"
 
 [vpc]
   vpc_enabled = true
-  vpc_block_provider_name = "vpc-classic"
-  vpc_volume_type="vpc-block"
+  vpc_volume_type="vpc-share"
   encryption = true
   vpc_api_timeout = "120s"
   max_retry_attempt  = 10 # 10 times with exponential re-try with max gap max_retry_gap

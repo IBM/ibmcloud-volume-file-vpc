@@ -35,9 +35,6 @@ func TestNewVPCFileContextCredentialsFactory(t *testing.T) {
 			IamClientSecret:            "test-iam_client_secret",
 			IKSTokenExchangePrivateURL: "https://us-south.containers.cloud.ibm.com",
 		},
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: "xyz",
-		},
 	}
 
 	contextCredentials, err := NewVPCContextCredentialsFactory(conf)
