@@ -86,11 +86,6 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		}
 	}
 
-	// Update the CSRF  Token
-	if conf.Bluemix.PrivateAPIRoute != "" {
-		conf.Bluemix.CSRFToken = string([]byte{}) // TODO~ Need to remove it
-	}
-
 	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
 		ServerConfig: conf.Server,
