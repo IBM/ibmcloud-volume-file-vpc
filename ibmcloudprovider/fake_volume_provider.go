@@ -137,8 +137,7 @@ func GetTestProvider(t *testing.T, logger *zap.Logger) (*IBMCloudStorageProvider
 			APIVersion:      TestAPIVersion,
 		},
 		IKS: &config.IKSConfig{
-			Enabled:              true,
-			IKSBlockProviderName: "iks-block",
+			Enabled: true,
 		},
 	}
 

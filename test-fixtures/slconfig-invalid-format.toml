@@ -9,7 +9,6 @@
 
 [vpc]
   vpc_enabled = 123
-  vpc_block_provider_name = 123
   vpc_volume_type=112
   encryption = 12
   vpc_api_timeout = "120s"

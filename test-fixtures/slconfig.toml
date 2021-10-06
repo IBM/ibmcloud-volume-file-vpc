@@ -14,5 +14,5 @@
   vpc_api_timeout = "120s"
   max_retry_attempt  = 10 # 10 times with exponential re-try with max gap max_retry_gap
   max_retry_gap =  120 # 2 minutes
-  api_version = "2019-07-02T00:00:00.000Z"
+  api_version = "2021-04-20"
   vpc_api_generation = 1
