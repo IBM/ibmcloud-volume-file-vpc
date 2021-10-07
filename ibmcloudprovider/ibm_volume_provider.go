@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-// Package utils ...
-package utils
+// Package ibmcloudprovider ...
+package ibmcloudprovider
 
 import (
+	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-interface/config"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
+	"go.uber.org/zap"
+	"golang.org/x/net/context"
 )
 
-// VPCFileConfig ...
-type VPCFileConfig struct {
-	VPCConfig    *config.VPCProviderConfig
-	ServerConfig *config.ServerConfig
+// CloudProviderInterface ...
+type CloudProviderInterface interface {
+	GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error)
+	GetConfig() *config.Config
+	GetClusterInfo() *utils.ClusterInfo
 }

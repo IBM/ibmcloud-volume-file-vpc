@@ -184,6 +184,12 @@ var messagesEn = map[string]util.Message{
 		RC:          400,
 		Action:      "Please verify that the start volume ID is correct and whether you have access to the volume ID.",
 	},
+	VolumeAccessPointExist: {
+		Code:        VolumeAccessPointExist,
+		Description: "The volume ID '%s' could not be deleted from your VPC. Volume has access points which needs to deleted.Please go through the list of VPCs = '%v'",
+		Type:        util.DeletionFailed,
+		Action:      "User need to review all access points and delete them first before deleting volume.", //TODO once cli will be ready then we need to update this error message
+	},
 }
 
 // InitMessages ...

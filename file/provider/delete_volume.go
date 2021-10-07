@@ -39,6 +39,22 @@ func (vpcs *VPCSession) DeleteVolume(volume *provider.Volume) (err error) {
 		return err
 	}
 
+	existingVol, err := vpcs.GetVolume(volume.VolumeID)
+	if err != nil {
+		return err
+	}
+
+	//If there exists any access point for volume we should abort delete
+	if existingVol.VolumeAccessPoints != nil && len(*existingVol.VolumeAccessPoints) != 0 {
+		var vpcIDList = []string{}
+		for _, volAccessPoint := range *existingVol.VolumeAccessPoints {
+			if volAccessPoint.VPC != nil {
+				vpcIDList = append(vpcIDList, volAccessPoint.VPC.ID)
+			}
+		}
+		return userError.GetUserError(string(userError.VolumeAccessPointExist), nil, volume.VolumeID, vpcIDList)
+	}
+
 	vpcs.Logger.Info("Deleting file share from VPC provider...")
 	err = retry(vpcs.Logger, func() error {
 		vpcs.Logger.Info("Calling VPC client for file share deletion...")

@@ -36,7 +36,6 @@ func NewVPCContextCredentialsFactory(config *vpcfileconfig.VPCFileConfig) (*auth
 		authIKSConfig := &vpciam.IksAuthConfiguration{
 			IamAPIKey:       config.VPCConfig.APIKey,
 			PrivateAPIRoute: config.VPCConfig.IKSTokenExchangePrivateURL, // Only for private cluster
-			CSRFToken:       config.APIConfig.PassthroughSecret,          // required for private cluster
 		}
 		ccf.TokenExchangeService, err = vpciam.NewTokenExchangeIKSService(authIKSConfig)
 	}

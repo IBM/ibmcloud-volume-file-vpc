@@ -54,7 +54,7 @@ func TestDeleteVolume(t *testing.T) {
 		verify func(t *testing.T, err error)
 	}{
 		{
-			testCaseName: "Not supported yet",
+			testCaseName: "Success Case",
 			providerVolume: &provider.Volume{
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("Test volume"),
@@ -64,8 +64,53 @@ func TestDeleteVolume(t *testing.T) {
 					Profile: &provider.Profile{Name: "tier-10iops"},
 				},
 			},
+
+			baseVolume: &models.Share{
+				ID:           "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:         "test volume name",
+				Status:       models.StatusType("OK"),
+				Iops:         int64(1000),
+				Zone:         &models.Zone{Name: "test-zone"},
+				ShareTargets: &[]models.ShareTarget{},
+			},
+
 			verify: func(t *testing.T, err error) {
 				assert.Nil(t, err)
+			},
+		}, {
+			testCaseName: "Failure can't delete volume as there exists volume access point",
+			providerVolume: &provider.Volume{
+				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:     String("Test volume"),
+				Capacity: Int(10),
+				Iops:     String("1000"),
+				VPCVolume: provider.VPCVolume{
+					Profile: &provider.Profile{Name: "tier-10iops"},
+				},
+			},
+
+			baseVolume: &models.Share{
+				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:   "test volume name",
+				Status: models.StatusType("OK"),
+				Iops:   int64(1000),
+				Zone:   &models.Zone{Name: "test-zone"},
+				ShareTargets: &[]models.ShareTarget{
+					{
+						ID: "testVolumeAccessPointId",
+						VPC: &provider.VPC{
+							ID: "1234",
+						},
+						Zone: &models.Zone{Name: "test-zone"},
+					},
+				},
+			},
+
+			expectedErr:        "",
+			expectedReasonCode: "",
+
+			verify: func(t *testing.T, err error) {
+				assert.NotNil(t, err)
 			},
 		}, {
 			testCaseName:       "False positive: No volume being sent",

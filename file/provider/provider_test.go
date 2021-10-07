@@ -111,10 +111,6 @@ func TestNewProvider(t *testing.T) {
 
 	// GC private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: CsrfToken,
-		},
-
 		VPCConfig: &config.VPCProviderConfig{
 			Enabled:                    true,
 			PrivateEndpointURL:         PrivateRIaaSEndpoint,
@@ -131,9 +127,6 @@ func TestNewProvider(t *testing.T) {
 
 	// gc mix test
 	conf = &vpcconfig.VPCFileConfig{
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: CsrfToken,
-		},
 		VPCConfig: &config.VPCProviderConfig{
 			Enabled:            true,
 			PrivateEndpointURL: PrivateRIaaSEndpoint,
@@ -164,10 +157,6 @@ func TestNewProvider(t *testing.T) {
 
 	// gen2 private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: CsrfToken,
-		},
-
 		VPCConfig: &config.VPCProviderConfig{
 			Enabled:                    true,
 			G2EndpointPrivateURL:       PrivateRIaaSEndpoint,
@@ -185,10 +174,6 @@ func TestNewProvider(t *testing.T) {
 
 	// gen2 mix test
 	conf = &vpcconfig.VPCFileConfig{
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: CsrfToken,
-		},
-
 		VPCConfig: &config.VPCProviderConfig{
 			Enabled:                    true,
 			G2EndpointPrivateURL:       PrivateRIaaSEndpoint,
@@ -218,9 +203,6 @@ func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error)
 
 	logger.Info("Getting New test Provider")
 	conf := &vpcconfig.VPCFileConfig{
-		APIConfig: &config.APIConfig{
-			PassthroughSecret: CsrfToken,
-		},
 		ServerConfig: &config.ServerConfig{
 			DebugTrace: true,
 		},
