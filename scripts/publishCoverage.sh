@@ -75,11 +75,11 @@ COMMIT_RANGE=(${TRAVIS_COMMIT_RANGE//.../ })
 
 # Generate result message for log and PR
 if (( $(echo "$OLD_COVERAGE > $NEW_COVERAGE" | bc -l) )); then
-	RESULT_MESSAGE=":red_circle: Coverage decreased from [$OLD_COVERAGE%](https://pages.github.com/$TRAVIS_REPO_SLUG/coverage/${COMMIT_RANGE[0]}/cover.html) to [$NEW_COVERAGE%](https://pages.github.com/$TRAVIS_REPO_SLUG/coverage/${COMMIT_RANGE[1]}/cover.html)"
+	RESULT_MESSAGE=":red_circle: Coverage decreased from [$OLD_COVERAGE%] to [$NEW_COVERAGE%]"
 elif (( $(echo "$OLD_COVERAGE == $NEW_COVERAGE" | bc -l) )); then
-	RESULT_MESSAGE=":thumbsup: Coverage remained same at [$NEW_COVERAGE%](https://pages.github.com/$TRAVIS_REPO_SLUG/coverage/${COMMIT_RANGE[1]}/cover.html)"
+	RESULT_MESSAGE=":thumbsup: Coverage remained same at [$NEW_COVERAGE%]"
 else
-	RESULT_MESSAGE=":thumbsup: Coverage increased from [$OLD_COVERAGE%](https://pages.github.com/$TRAVIS_REPO_SLUG/coverage/${COMMIT_RANGE[0]}/cover.html) to [$NEW_COVERAGE%](https://pages.github.com/$TRAVIS_REPO_SLUG/coverage/${COMMIT_RANGE[1]}/cover.html)"
+	RESULT_MESSAGE=":thumbsup: Coverage increased from [$OLD_COVERAGE%] to [$NEW_COVERAGE%]"
 fi
 
 # Update gh-pages branch or PR
@@ -91,5 +91,5 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 	git push origin
 else
         # Updates PR with coverage
-        curl -i -H "Authorization: token $GHE_TOKEN" https://github.com/api/v3/repos/$TRAVIS_REPO_SLUG/issues/$TRAVIS_PULL_REQUEST/comments --data '{"body": "'"$RESULT_MESSAGE"'"}'
+        curl -X POST -H "Authorization: token $GHE_TOKEN" "https://github.com/api/v3/repos/$TRAVIS_REPO_SLUG/issues/$TRAVIS_PULL_REQUEST/comments" -H 'Content-Type: application/json' --data '{"body": "'"$RESULT_MESSAGE"'"}'
 fi
