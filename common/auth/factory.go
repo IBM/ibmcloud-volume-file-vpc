@@ -18,7 +18,6 @@
 package auth
 
 import (
-	vpciam "github.com/IBM/ibmcloud-volume-file-vpc/common/iam"
 	vpcfileconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
 	"github.com/IBM/ibmcloud-volume-interface/provider/auth"
 	"github.com/IBM/ibmcloud-volume-interface/provider/iam"
@@ -32,13 +31,6 @@ func NewVPCContextCredentialsFactory(config *vpcfileconfig.VPCFileConfig) (*auth
 		IamClientSecret: config.VPCConfig.IamClientSecret,
 	}
 	ccf, err := auth.NewContextCredentialsFactory(authConfig)
-	if config.VPCConfig.IKSTokenExchangePrivateURL != "" {
-		authIKSConfig := &vpciam.IksAuthConfiguration{
-			IamAPIKey:       config.VPCConfig.APIKey,
-			PrivateAPIRoute: config.VPCConfig.IKSTokenExchangePrivateURL, // Only for private cluster
-		}
-		ccf.TokenExchangeService, err = vpciam.NewTokenExchangeIKSService(authIKSConfig)
-	}
 	if err != nil {
 		return nil, err
 	}
