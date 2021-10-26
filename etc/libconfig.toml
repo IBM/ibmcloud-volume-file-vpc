@@ -2,7 +2,7 @@
   debug_trace = false
 
 [vpc]
-  iam_client_id = "bx"
+  iam_client_id = ""
   iam_client_secret = ""
   vpc_enabled = true
   vpc_volume_type="vpc-share"
