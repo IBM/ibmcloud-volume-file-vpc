@@ -32,7 +32,7 @@ For building the library `GO` should be installed on the system
    ## Build test program
 
    ```
-   $ cd cd samples
+   $ cd samples
    $ go build
 
    ```
