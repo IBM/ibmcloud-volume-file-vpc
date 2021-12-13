@@ -57,35 +57,33 @@ func InitProviders(conf *vpcfileconfig.VPCFileConfig, logger *zap.Logger) (regis
 }
 
 // OpenProviderSession ...
-func OpenProviderSession(conf *vpcfileconfig.VPCFileConfig, providers registry.Providers, providerID string, ctxLogger *zap.Logger) (session provider.Session, fatal bool, err error) {
-	return OpenProviderSessionWithContext(context.TODO(), conf, providers, providerID, ctxLogger)
+func OpenProviderSession(prov local.Provider, vpcfileconf *vpcfileconfig.VPCFileConfig, providers registry.Providers, providerID string, ctxLogger *zap.Logger) (session provider.Session, fatal bool, err error) {
+	return OpenProviderSessionWithContext(context.TODO(), prov, vpcfileconf, providerID, ctxLogger)
 }
 
 // OpenProviderSessionWithContext ...
-func OpenProviderSessionWithContext(ctx context.Context, conf *vpcfileconfig.VPCFileConfig, providers registry.Providers, providerID string, ctxLogger *zap.Logger) (session provider.Session, fatal bool, err error) {
-	prov, err := providers.Get(providerID)
-	if err != nil {
-		ctxLogger.Error("Not able to get the said provider, might be its not registered", local.ZapError(err))
-		fatal = true
-		return
-	}
-
+func OpenProviderSessionWithContext(ctx context.Context, prov local.Provider, vpcfileconf *vpcfileconfig.VPCFileConfig, providerID string, ctxLogger *zap.Logger) (provider.Session, bool, error) {
+	ctxLogger.Info("Fetching provider session")
 	ccf, err := prov.ContextCredentialsFactory(nil)
 	if err != nil {
-		fatal = true
-		return
+		ctxLogger.Error("Unable to fetch credentials", local.ZapError(err))
+		return nil, true, err
 	}
 	ctxLogger.Info("Calling provider/utils/init_provider.go GenerateContextCredentials")
-	contextCredentials, err := GenerateContextCredentials(conf, providerID, ccf, ctxLogger)
-	if err == nil {
-		session, err = prov.OpenSession(ctx, contextCredentials, ctxLogger)
+	contextCredentials, err := GenerateContextCredentials(vpcfileconf, providerID, ccf, ctxLogger)
+	if err != nil {
+		ctxLogger.Error("Unable to generate credentials", local.ZapError(err))
+		return nil, true, err
 	}
 
+	session, err := prov.OpenSession(ctx, contextCredentials, ctxLogger)
 	if err != nil {
-		fatal = true
-		ctxLogger.Error("Failed to open provider session", local.ZapError(err), zap.Bool("Fatal", fatal))
+		ctxLogger.Error("Failed to open provider session", local.ZapError(err))
+		return nil, true, err
 	}
-	return
+
+	ctxLogger.Info("Successfully fetched provider session")
+	return session, false, nil
 }
 
 // GenerateContextCredentials ...

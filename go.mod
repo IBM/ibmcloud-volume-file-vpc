@@ -3,9 +3,10 @@ module github.com/IBM/ibmcloud-volume-file-vpc
 go 1.16
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibm-csi-common v1.0.0-beta10
-	github.com/IBM/ibmcloud-volume-interface v1.0.0-beta8
+	github.com/IBM/ibm-csi-common v1.0.0-beta12
+	github.com/IBM/ibmcloud-volume-interface v1.0.0-beta9
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/satori/go.uuid v1.2.0
