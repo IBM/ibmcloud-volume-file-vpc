@@ -305,6 +305,20 @@ func TestOpenSession(t *testing.T) {
 	assert.Nil(t, sessn)
 }
 
+func TestUpdateAPIKey(t *testing.T) {
+	logger, teardown := GetTestLogger(t)
+	defer teardown()
+
+	vpcp, _ := GetTestProvider(t, logger)
+
+	config := vpcp.Config
+	err := vpcp.UpdateAPIKey(config, logger)
+	assert.NotNil(t, err)
+
+	err = vpcp.UpdateAPIKey(nil, logger)
+	assert.NotNil(t, err)
+}
+
 func GetTestOpenSession(t *testing.T, logger *zap.Logger) (sessn *VPCSession, uc, sc *fakes.RegionalAPI, err error) {
 	vpcp, err := GetTestProvider(t, logger)
 

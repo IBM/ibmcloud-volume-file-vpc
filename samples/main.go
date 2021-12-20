@@ -135,7 +135,12 @@ func main() {
 		requestID := uid.NewV4().String()
 		ctxLogger = ctxLogger.With(zap.String("RequestID", requestID))
 		ctx := context.WithValue(context.TODO(), provider.RequestID, requestID)
-		sess, _, err := provider_file_util.OpenProviderSessionWithContext(ctx, vpcFileConfig, providerRegistry, providerName, ctxLogger)
+		prov, err := providerRegistry.Get(providerName)
+		if err != nil {
+			ctxLogger.Error("Not able to get the said provider, might be its not registered", local.ZapError(err))
+			continue
+		}
+		sess, _, err := provider_file_util.OpenProviderSessionWithContext(ctx, prov, vpcFileConfig, providerName, ctxLogger)
 		if err != nil {
 			ctxLogger.Error("Failed to get session", zap.Reflect("Error", err))
 			continue

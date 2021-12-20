@@ -188,3 +188,8 @@ func (ficp *FakeIBMCloudStorageProvider) GetConfig() *config.Config {
 func (ficp *FakeIBMCloudStorageProvider) GetClusterInfo() *utils.ClusterInfo {
 	return ficp.ClusterInfo
 }
+
+// UpdateAPIKey ...
+func (ficp *FakeIBMCloudStorageProvider) UpdateAPIKey(logger *zap.Logger) error {
+	return nil
+}

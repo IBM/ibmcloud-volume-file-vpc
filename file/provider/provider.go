@@ -27,7 +27,6 @@ import (
 	"time"
 
 	vpcauth "github.com/IBM/ibmcloud-volume-file-vpc/common/auth"
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas"
 	vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
@@ -152,7 +151,7 @@ func NewProvider(conf *vpcconfig.VPCFileConfig, logger *zap.Logger) (local.Provi
 			ResourceGroup: conf.VPCConfig.ResourceGroupID,
 		},
 	}
-	userError.MessagesEn = messages.InitMessages()
+	userError.MessagesEn = userError.InitMessages()
 	return provider, nil
 }
 
@@ -252,4 +251,29 @@ func getPrivateEndpoint(logger *zap.Logger, publicEndPoint string) string {
 		return publicEndPoint
 	}
 	return ""
+}
+
+// UpdateAPIKey ...
+func (vpcp *VPCFileProvider) UpdateAPIKey(conf interface{}, logger *zap.Logger) error {
+	logger.Info("Updating api key in vpc file provider")
+	vpcConfig, ok := conf.(*vpcconfig.VPCFileConfig)
+	if !ok {
+		logger.Error("Error fetching vpc file config from interface")
+		return errors.New("error unmarshaling vpc file config")
+	}
+	if vpcp.ContextCF == nil {
+		logger.Error("Error updating api key, context credentials is not intiliazed")
+		return errors.New("credentials not initliazed in the provider")
+	}
+	err := vpcp.ContextCF.UpdateAPIKey(vpcConfig.VPCConfig.G2APIKey, logger)
+	if err != nil {
+		logger.Error("Error updating api key in provider", zap.Error(err))
+		return err
+	}
+	// Updating the api key in VPC file provider
+	vpcp.Config.VPCConfig.APIKey = vpcConfig.VPCConfig.G2APIKey
+	vpcp.Config.VPCConfig.G2APIKey = vpcConfig.VPCConfig.G2APIKey
+	vpcp.tokenGenerator.config.G2APIKey = vpcConfig.VPCConfig.G2APIKey
+	vpcp.tokenGenerator.config.APIKey = vpcConfig.VPCConfig.G2APIKey
+	return nil
 }
