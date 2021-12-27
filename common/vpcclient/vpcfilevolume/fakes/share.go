@@ -65,6 +65,21 @@ type FileShareService struct {
 		result1 *http.Response
 		result2 error
 	}
+	ExpandVolumeStub        func(string, *models.Share, *zap.Logger) (*models.Share, error)
+	expandVolumeMutex       sync.RWMutex
+	expandVolumeArgsForCall []struct {
+		arg1 string
+		arg2 *models.Share
+		arg3 *zap.Logger
+	}
+	expandVolumeReturns struct {
+		result1 *models.Share
+		result2 error
+	}
+	expandVolumeReturnsOnCall map[int]struct {
+		result1 *models.Share
+		result2 error
+	}
 	GetFileShareStub        func(string, *zap.Logger) (*models.Share, error)
 	getFileShareMutex       sync.RWMutex
 	getFileShareArgsForCall []struct {
@@ -175,6 +190,26 @@ func (fake *FileShareService) CreateFileShare(arg1 *models.Share, arg2 *zap.Logg
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FileShareService) ExpandVolume(arg1 string, arg2 *models.Share, arg3 *zap.Logger) (*models.Share, error) {
+	fake.expandVolumeMutex.Lock()
+	ret, specificReturn := fake.expandVolumeReturnsOnCall[len(fake.expandVolumeArgsForCall)]
+	fake.expandVolumeArgsForCall = append(fake.expandVolumeArgsForCall, struct {
+		arg1 string
+		arg2 *models.Share
+		arg3 *zap.Logger
+	}{arg1, arg2, arg3})
+	fake.recordInvocation("ExpandVolume", []interface{}{arg1, arg2, arg3})
+	fake.expandVolumeMutex.Unlock()
+	if fake.ExpandVolumeStub != nil {
+		return fake.ExpandVolumeStub(arg1, arg2, arg3)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	fakeReturns := fake.expandVolumeReturns
 	return fakeReturns.result1, fakeReturns.result2
 }
 

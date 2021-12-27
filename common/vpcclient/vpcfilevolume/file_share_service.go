@@ -55,8 +55,11 @@ type FileShareManager interface {
 	// Get the file share by using share ID and target name
 	GetFileShareTargetByName(targetName string, shareID string, ctxLogger *zap.Logger) (*models.ShareTarget, error)
 
-	//DeleteFileShareTarget delete the share target by share ID and target ID/VPC ID/Subnet ID
+	// DeleteFileShareTarget delete the share target by share ID and target ID/VPC ID/Subnet ID
 	DeleteFileShareTarget(shareTargetDeleteRequest *models.ShareTarget, ctxLogger *zap.Logger) (*http.Response, error)
+
+	//ExpandVolume expand the share by share ID and target
+	ExpandVolume(shareID string, shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
 }
 
 // FileShareService ...
