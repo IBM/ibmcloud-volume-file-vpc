@@ -52,7 +52,7 @@ func TestExpandVolume(t *testing.T) {
 			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-				Status: models.StatusType("available"),
+				Status: models.StatusType("stable"),
 				Size:   int64(10),
 				Iops:   int64(1000),
 				Zone:   &models.Zone{Name: "test-zone"},
