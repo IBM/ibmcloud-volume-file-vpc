@@ -116,7 +116,7 @@ func main() {
 
 	valid := true
 	for valid {
-		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n Your choice?:")
+		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n Your choice?:")
 
 		var choiceN int
 		var volumeID, targetID string
@@ -481,6 +481,24 @@ func main() {
 			} else {
 				errr = updateRequestID(errr, requestID)
 				ctxLogger.Info("FAILED wait for delete volume target...", zap.Reflect("Error", errr))
+			}
+			fmt.Printf("\n\n")
+		} else if choiceN == 22 {
+			var capacity int64
+			fmt.Println("You selected choice to expand volume")
+			share := &provider.ExpandVolumeRequest{}
+			fmt.Printf("Please enter volume ID to exand: ")
+			_, _ = fmt.Scanf("%s", &volumeID)
+			fmt.Printf("Please enter new capacity: ")
+			_, _ = fmt.Scanf("%d", &capacity)
+			share.VolumeID = volumeID
+			share.Capacity = capacity
+			expandedVolumeSize, er11 := sess.ExpandVolume(*share)
+			if er11 == nil {
+				ctxLogger.Info("Successfully expanded volume ================>", zap.Reflect("Volume ID", expandedVolumeSize))
+			} else {
+				er11 = updateRequestID(er11, requestID)
+				ctxLogger.Info("failed to expand================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
 			}
 			fmt.Printf("\n\n")
 		} else {

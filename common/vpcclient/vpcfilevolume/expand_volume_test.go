@@ -49,10 +49,10 @@ func TestExpandVolume(t *testing.T) {
 		{
 			name:    "Verify that the volume expanded correctly",
 			status:  http.StatusOK,
-			content: "{\"id\":\"volume-id\",\"name\":\"volume-name\",\"capacity\":300,\"iops\":3000,\"status\":\"pending\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:vol1\"}",
+			content: "{\"id\":\"share-id\",\"name\":\"share-name\",\"size\":300,\"iops\":3000,\"lifecycle_state\":\"updating\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:vol1\"}",
 			verify: func(t *testing.T, volume *models.Share, err error) {
 				if assert.NotNil(t, volume) {
-					assert.Equal(t, "volume-id", volume.ID)
+					assert.Equal(t, "share-id", volume.ID)
 					assert.Equal(t, int64(300), volume.Size)
 				}
 			},
@@ -77,15 +77,15 @@ func TestExpandVolume(t *testing.T) {
 			}
 
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/volumes/volume-id", http.MethodPatch, nil, testcase.status, testcase.content, nil)
-
+			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/share-id", http.MethodPatch, nil, testcase.status, testcase.content, nil)
+			logger.Info("tested SetupMuxResponse")
 			defer teardown()
 
 			logger.Info("Test case being executed", zap.Reflect("testcase", testcase.name))
 
 			volumeService := vpcfilevolume.New(client)
 
-			volume, err := volumeService.ExpandVolume("volume-id", template, logger)
+			volume, err := volumeService.ExpandVolume("share-id", template, logger)
 			logger.Info("Volume details", zap.Reflect("volume", volume))
 
 			if testcase.expectErr != "" && assert.Error(t, err) {

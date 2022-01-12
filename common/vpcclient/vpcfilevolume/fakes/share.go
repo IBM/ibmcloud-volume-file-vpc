@@ -193,71 +193,6 @@ func (fake *FileShareService) CreateFileShare(arg1 *models.Share, arg2 *zap.Logg
 	return fakeReturns.result1, fakeReturns.result2
 }
 
-func (fake *FileShareService) ExpandVolume(arg1 string, arg2 *models.Share, arg3 *zap.Logger) (*models.Share, error) {
-	fake.expandVolumeMutex.Lock()
-	ret, specificReturn := fake.expandVolumeReturnsOnCall[len(fake.expandVolumeArgsForCall)]
-	fake.expandVolumeArgsForCall = append(fake.expandVolumeArgsForCall, struct {
-		arg1 string
-		arg2 *models.Share
-		arg3 *zap.Logger
-	}{arg1, arg2, arg3})
-	fake.recordInvocation("ExpandVolume", []interface{}{arg1, arg2, arg3})
-	fake.expandVolumeMutex.Unlock()
-	if fake.ExpandVolumeStub != nil {
-		return fake.ExpandVolumeStub(arg1, arg2, arg3)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	fakeReturns := fake.expandVolumeReturns
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FileShareService) ExpandVolumeReturns(result1 *models.Share, result2 error) {
-	fake.expandVolumeMutex.Lock()
-	defer fake.expandVolumeMutex.Unlock()
-	fake.ExpandVolumeStub = nil
-	fake.expandVolumeReturns = struct {
-		result1 *models.Share
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FileShareService) ExpandVolumeCallCount() int {
-	fake.expandVolumeMutex.RLock()
-	defer fake.expandVolumeMutex.RUnlock()
-	return len(fake.expandVolumeArgsForCall)
-}
-
-func (fake *FileShareService) ExpandVolumeCalls(stub func(string, *models.Share, *zap.Logger) (*models.Share, error)) {
-	fake.expandVolumeMutex.Lock()
-	defer fake.expandVolumeMutex.Unlock()
-	fake.ExpandVolumeStub = stub
-}
-
-func (fake *FileShareService) ExpandVolumeArgsForCall(i int) (string, *models.Share, *zap.Logger) {
-	fake.expandVolumeMutex.RLock()
-	defer fake.expandVolumeMutex.RUnlock()
-	argsForCall := fake.expandVolumeArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
-}
-
-func (fake *FileShareService) ExpandVolumeReturnsOnCall(i int, result1 *models.Share, result2 error) {
-	fake.expandVolumeMutex.Lock()
-	defer fake.expandVolumeMutex.Unlock()
-	fake.ExpandVolumeStub = nil
-	if fake.expandVolumeReturnsOnCall == nil {
-		fake.expandVolumeReturnsOnCall = make(map[int]struct {
-			result1 *models.Share
-			result2 error
-		})
-	}
-	fake.expandVolumeReturnsOnCall[i] = struct {
-		result1 *models.Share
-		result2 error
-	}{result1, result2}
-}
-
 func (fake *FileShareService) CreateFileShareCallCount() int {
 	fake.createFileShareMutex.RLock()
 	defer fake.createFileShareMutex.RUnlock()
@@ -491,6 +426,72 @@ func (fake *FileShareService) DeleteFileShareTargetReturnsOnCall(i int, result1 
 	}
 	fake.deleteFileShareTargetReturnsOnCall[i] = struct {
 		result1 *http.Response
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FileShareService) ExpandVolume(arg1 string, arg2 *models.Share, arg3 *zap.Logger) (*models.Share, error) {
+	fake.expandVolumeMutex.Lock()
+	ret, specificReturn := fake.expandVolumeReturnsOnCall[len(fake.expandVolumeArgsForCall)]
+	fake.expandVolumeArgsForCall = append(fake.expandVolumeArgsForCall, struct {
+		arg1 string
+		arg2 *models.Share
+		arg3 *zap.Logger
+	}{arg1, arg2, arg3})
+	stub := fake.ExpandVolumeStub
+	fakeReturns := fake.expandVolumeReturns
+	fake.recordInvocation("ExpandVolume", []interface{}{arg1, arg2, arg3})
+	fake.expandVolumeMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FileShareService) ExpandVolumeCallCount() int {
+	fake.expandVolumeMutex.RLock()
+	defer fake.expandVolumeMutex.RUnlock()
+	return len(fake.expandVolumeArgsForCall)
+}
+
+func (fake *FileShareService) ExpandVolumeCalls(stub func(string, *models.Share, *zap.Logger) (*models.Share, error)) {
+	fake.expandVolumeMutex.Lock()
+	defer fake.expandVolumeMutex.Unlock()
+	fake.ExpandVolumeStub = stub
+}
+
+func (fake *FileShareService) ExpandVolumeArgsForCall(i int) (string, *models.Share, *zap.Logger) {
+	fake.expandVolumeMutex.RLock()
+	defer fake.expandVolumeMutex.RUnlock()
+	argsForCall := fake.expandVolumeArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
+}
+
+func (fake *FileShareService) ExpandVolumeReturns(result1 *models.Share, result2 error) {
+	fake.expandVolumeMutex.Lock()
+	defer fake.expandVolumeMutex.Unlock()
+	fake.ExpandVolumeStub = nil
+	fake.expandVolumeReturns = struct {
+		result1 *models.Share
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FileShareService) ExpandVolumeReturnsOnCall(i int, result1 *models.Share, result2 error) {
+	fake.expandVolumeMutex.Lock()
+	defer fake.expandVolumeMutex.Unlock()
+	fake.ExpandVolumeStub = nil
+	if fake.expandVolumeReturnsOnCall == nil {
+		fake.expandVolumeReturnsOnCall = make(map[int]struct {
+			result1 *models.Share
+			result2 error
+		})
+	}
+	fake.expandVolumeReturnsOnCall[i] = struct {
+		result1 *models.Share
 		result2 error
 	}{result1, result2}
 }
@@ -901,9 +902,9 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.deleteFileShareMutex.RUnlock()
 	fake.deleteFileShareTargetMutex.RLock()
 	defer fake.deleteFileShareTargetMutex.RUnlock()
-	fake.getFileShareMutex.RLock()
 	fake.expandVolumeMutex.RLock()
 	defer fake.expandVolumeMutex.RUnlock()
+	fake.getFileShareMutex.RLock()
 	defer fake.getFileShareMutex.RUnlock()
 	fake.getFileShareByNameMutex.RLock()
 	defer fake.getFileShareByNameMutex.RUnlock()
