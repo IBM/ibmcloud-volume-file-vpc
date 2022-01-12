@@ -73,6 +73,6 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 		return -1, userError.GetUserError("VolumeNotInValidState", err, share.ID)
 	}
 
-	vpcs.Logger.Info("Volume got valid (available) state", zap.Reflect("VolumeDetails", share))
+	vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", share))
 	return expandVolumeRequest.Capacity, nil
 }

@@ -66,7 +66,7 @@ func TestExpandVolume(t *testing.T) {
 		{
 			name:    "False positive: What if the volume ID is not matched",
 			status:  http.StatusOK,
-			content: "{\"id\":\"wrong-vol\",\"name\":\"wrong-vol\",\"capacity\":10,\"iops\":3000,\"status\":\"pending\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:wrong-vol\", \"tags\":[\"Wrong Tag\"]}",
+			content: "{\"id\":\"wrong-vol\",\"name\":\"wrong-vol\",\"size\":10,\"iops\":3000,\"lifecycle_state\":\"updating\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:wrong-vol\", \"tags\":[\"Wrong Tag\"]}",
 		},
 	}
 
