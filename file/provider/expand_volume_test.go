@@ -95,6 +95,19 @@ func TestExpandVolume(t *testing.T) {
 			newSize:      5,
 			expectedSize: 10,
 		},
+		{
+			testCaseName: "Correct size but stuck in pending state",
+			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+			baseVolume: &models.Share{
+				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+				Status: models.StatusType("pending"),
+				Size:   int64(10),
+				Iops:   int64(1000),
+				Zone:   &models.Zone{Name: "test-zone"},
+			},
+			newSize:      20,
+			expectedSize: -1,
+		},
 	}
 
 	for _, testcase := range testCases {
