@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ func TestExpandVolume(t *testing.T) {
 		expectedReasonCode string
 	}{
 		{
-			testCaseName: "OK",
+			testCaseName: "New size greater than current size -> success",
 			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
@@ -61,11 +61,11 @@ func TestExpandVolume(t *testing.T) {
 			expectedSize: 20,
 		},
 		{
-			testCaseName: "same size-success",
+			testCaseName: "New size same as current size -> success",
 			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-				Status: models.StatusType("available"),
+				Status: models.StatusType("stable"),
 				Size:   int64(10),
 				Iops:   int64(1000),
 				Zone:   &models.Zone{Name: "test-zone"},
@@ -81,6 +81,19 @@ func TestExpandVolume(t *testing.T) {
 			expectedReasonCode: "ErrorUnclassified",
 			newSize:            10,
 			expectedSize:       -1,
+		},
+		{
+			testCaseName: "New size less than current size",
+			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+			baseVolume: &models.Share{
+				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+				Status: models.StatusType("stable"),
+				Size:   int64(10),
+				Iops:   int64(1000),
+				Zone:   &models.Zone{Name: "test-zone"},
+			},
+			newSize:      5,
+			expectedSize: 10,
 		},
 	}
 

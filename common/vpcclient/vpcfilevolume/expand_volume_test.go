@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2022 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ func TestExpandVolume(t *testing.T) {
 			status: http.StatusNoContent,
 		},
 		{
-			name:    "Verify that the volume expanded correctly",
+			name:    "Verify that the volume expanded correctly if correct size is given",
 			status:  http.StatusOK,
 			content: "{\"id\":\"share-id\",\"name\":\"share-name\",\"size\":300,\"iops\":3000,\"lifecycle_state\":\"updating\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:vol1\"}",
 			verify: func(t *testing.T, volume *models.Share, err error) {
