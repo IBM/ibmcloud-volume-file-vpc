@@ -49,7 +49,6 @@ func TestExpandVolume(t *testing.T) {
 	}{
 		{
 			testCaseName: "New size greater than current size -> success",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 				Status: models.StatusType("stable"),
@@ -62,7 +61,6 @@ func TestExpandVolume(t *testing.T) {
 		},
 		{
 			testCaseName: "New size same as current size -> success",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 				Status: models.StatusType("stable"),
@@ -75,7 +73,6 @@ func TestExpandVolume(t *testing.T) {
 		},
 		{
 			testCaseName:       "volume not found",
-			volumeID:           "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume:         nil,
 			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'Wrong volume ID' volume ID is not valid. Please check https://cloud.ibm.com/docs/infrastructure/vpc?topic=vpc-rias-error-messages#volume_id_invalid, BackendError:, RC:400}",
 			expectedReasonCode: "ErrorUnclassified",
@@ -84,7 +81,6 @@ func TestExpandVolume(t *testing.T) {
 		},
 		{
 			testCaseName: "New size less than current size",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 				Status: models.StatusType("stable"),
@@ -97,7 +93,6 @@ func TestExpandVolume(t *testing.T) {
 		},
 		{
 			testCaseName: "Correct size but stuck in pending state",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume: &models.Share{
 				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 				Status: models.StatusType("pending"),
@@ -131,7 +126,7 @@ func TestExpandVolume(t *testing.T) {
 				fileShareService.GetFileShareReturns(testcase.baseVolume, nil)
 				fileShareService.ExpandVolumeReturns(testcase.baseVolume, nil)
 			}
-			requestExp := provider.ExpandVolumeRequest{VolumeID: testcase.volumeID, Capacity: testcase.newSize}
+			requestExp := provider.ExpandVolumeRequest{VolumeID: testcase.baseVolume.ID, Capacity: testcase.newSize}
 			size, err := vpcs.ExpandVolume(requestExp)
 
 			if testcase.expectedErr != "" {

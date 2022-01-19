@@ -34,7 +34,8 @@ func TestExpandVolume(t *testing.T) {
 	defer logger.Sync()
 
 	testCases := []struct {
-		name string
+		name     string
+		template *models.Share
 		// Response
 		status  int
 		content string
@@ -43,11 +44,17 @@ func TestExpandVolume(t *testing.T) {
 		verify    func(*testing.T, *models.Share, error)
 	}{
 		{
-			name:   "Verify that the correct endpoint is invoked",
+			name: "Verify that the correct endpoint is invoked",
+			template: &models.Share{
+				Size: 300,
+			},
 			status: http.StatusNoContent,
 		},
 		{
-			name:    "Verify that the volume expanded correctly if correct size is given",
+			name: "Verify that the volume expanded correctly if correct size is given",
+			template: &models.Share{
+				Size: 300,
+			},
 			status:  http.StatusOK,
 			content: "{\"id\":\"share-id\",\"name\":\"share-name\",\"size\":300,\"iops\":3000,\"lifecycle_state\":\"updating\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:vol1\"}",
 			verify: func(t *testing.T, volume *models.Share, err error) {
@@ -58,13 +65,19 @@ func TestExpandVolume(t *testing.T) {
 			},
 		},
 		{
-			name:      "Verify that a 404 is returned to the caller",
+			name: "Verify that a 404 is returned to the caller",
+			template: &models.Share{
+				Size: 300,
+			},
 			status:    http.StatusNotFound,
 			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
 			expectErr: "Trace Code:, testerr Please check ",
 		},
 		{
-			name:    "False positive: What if the volume ID is not matched",
+			name: "False positive: What if the volume ID is not matched",
+			template: &models.Share{
+				Size: 300,
+			},
 			status:  http.StatusOK,
 			content: "{\"id\":\"wrong-vol\",\"name\":\"wrong-vol\",\"size\":10,\"iops\":3000,\"lifecycle_state\":\"updating\",\"zone\":{\"name\":\"test-1\",\"href\":\"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1\"},\"crn\":\"crn:v1:bluemix:public:is:test-1:a/rg1::volume:wrong-vol\", \"tags\":[\"Wrong Tag\"]}",
 		},
@@ -72,10 +85,6 @@ func TestExpandVolume(t *testing.T) {
 
 	for _, testcase := range testCases {
 		t.Run(testcase.name, func(t *testing.T) {
-			template := &models.Share{
-				Size: 300,
-			}
-
 			mux, client, teardown := test.SetupServer(t)
 			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/share-id", http.MethodPatch, nil, testcase.status, testcase.content, nil)
 			logger.Info("tested SetupMuxResponse")
@@ -85,7 +94,7 @@ func TestExpandVolume(t *testing.T) {
 
 			volumeService := vpcfilevolume.New(client)
 
-			volume, err := volumeService.ExpandVolume("share-id", template, logger)
+			volume, err := volumeService.ExpandVolume("share-id", testcase.template, logger)
 			logger.Info("Volume details", zap.Reflect("volume", volume))
 
 			if testcase.expectErr != "" && assert.Error(t, err) {
