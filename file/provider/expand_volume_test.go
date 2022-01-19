@@ -108,6 +108,7 @@ func TestExpandVolume(t *testing.T) {
 	for _, testcase := range testCases {
 		t.Run(testcase.testCaseName, func(t *testing.T) {
 			logger.Info("Started")
+			var requestExp provider.ExpandVolumeRequest
 			vpcs, uc, sc, err := GetTestOpenSession(t, logger)
 			assert.NotNil(t, vpcs)
 			assert.NotNil(t, uc)
@@ -126,7 +127,12 @@ func TestExpandVolume(t *testing.T) {
 				fileShareService.GetFileShareReturns(testcase.baseVolume, nil)
 				fileShareService.ExpandVolumeReturns(testcase.baseVolume, nil)
 			}
-			requestExp := provider.ExpandVolumeRequest{VolumeID: testcase.baseVolume.ID, Capacity: testcase.newSize}
+			if testcase.baseVolume != nil {
+				requestExp = provider.ExpandVolumeRequest{VolumeID: testcase.baseVolume.ID, Capacity: testcase.newSize}
+			} else {
+				requestExp = provider.ExpandVolumeRequest{VolumeID: "", Capacity: testcase.newSize}
+			}
+
 			size, err := vpcs.ExpandVolume(requestExp)
 
 			if testcase.expectedErr != "" {
