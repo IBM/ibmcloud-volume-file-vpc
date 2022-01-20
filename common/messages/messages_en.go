@@ -49,42 +49,42 @@ var messagesEn = map[string]util.Message{
 		Description: "The volume ID '%d' could not be deleted from your VPC.",
 		Type:        util.DeletionFailed,
 		RC:          500,
-		Action:      "Verify that the volume ID exists. Run 'ibmcloud is volumes' to list available volumes in your account. If the ID is correct, try to delete the volume with the 'ibmcloud is volume-delete' command. ",
+		Action:      "Verify that the volume ID exists. Run 'ibmcloud is shares' to list available volumes in your account. If the ID is correct, try to delete the volume with the 'ibmcloud is volume-delete' command. ",
 	},
 	"FailedToUpdateVolume": {
 		Code:        "FailedToUpdateVolume",
 		Description: "The volume ID '%d' could not be updated",
 		Type:        util.UpdateFailed,
 		RC:          500,
-		Action:      "Verify that the volume ID exists. Run 'ibmcloud is volumes' to list available volumes in your account.",
+		Action:      "Verify that the volume ID exists. Run 'ibmcloud is shares' to list available volumes in your account.",
 	},
 	"StorageFindFailedWithVolumeId": {
 		Code:        "StorageFindFailedWithVolumeId",
 		Description: "A volume with the specified volume ID '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Verify that the volume ID exists. Run 'ibmcloud is volumes' to list available volumes in your account.",
+		Action:      "Verify that the volume ID exists. Run 'ibmcloud is shares' to list available volumes in your account.",
 	},
 	"StorageFindFailedWithVolumeName": {
 		Code:        "StorageFindFailedWithVolumeName",
 		Description: "A volume with the specified volume name '%s' does not exist.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Verify that the specified volume exists. Run 'ibmcloud is volumes' to list available volumes in your account.",
+		Action:      "Verify that the specified volume exists. Run 'ibmcloud is shares' to list available volumes in your account.",
 	},
 	"AccessPointWithAPIDFindFailed": {
 		Code:        AccessPointWithAPIDFindFailed,
 		Description: "No volume access point could be found for the specified volume ID '%s' and access point ID '%s'",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
-		Action:      "Verify that a volume access point for your volume exists.Check if volume ID and access point ID is valid",
+		Action:      "Verify that a volume access point for your volume exists. Run `ibmcloud is share-targets <VOLUME_ID>` to list all mount targets for a file share. Check if volume ID and access point ID is valid",
 	},
 	"AccessPointWithVPCIDFindFailed": {
 		Code:        AccessPointWithVPCIDFindFailed,
 		Description: "No volume access point could be found for the specified volume ID '%s' and VPC ID %s",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
-		Action:      "Verify that a volume access point for your volume exists.Check if volume ID and VPC ID is valid",
+		Action:      "Verify that a volume access point for your volume exists. Run `ibmcloud is share-targets <VOLUME_ID>` to list all mount targets for a file share. Check if volume ID and VPC ID is valid",
 	},
 	"CreateVolumeAccessPointFailed": {
 		Code:        CreateVolumeAccessPointFailed,
@@ -119,14 +119,14 @@ var messagesEn = map[string]util.Message{
 		Description: "The specified volume ID '%s' is not valid.",
 		Type:        util.InvalidRequest,
 		RC:          400,
-		Action:      "Verify that the volume ID exists. Run 'ibmcloud is volumes' to list available volumes in your account.",
+		Action:      "Verify that the volume ID exists. Run 'ibmcloud is shares' to list available volumes in your account.",
 	},
 	"InvalidVolumeName": {
 		Code:        "InvalidVolumeName",
 		Description: "The specified volume name '%s' is not valid. ",
 		Type:        util.InvalidRequest,
 		RC:          400,
-		Action:      "Verify that the volume name exists. Run 'ibmcloud is volumes' to list available volumes in your account.",
+		Action:      "Verify that the volume name exists. Run 'ibmcloud is shares' to list available volumes in your account.",
 	},
 	"VolumeCapacityInvalid": {
 		Code:        "VolumeCapacityInvalid",
@@ -168,7 +168,7 @@ var messagesEn = map[string]util.Message{
 		Description: "Unable to fetch list of volumes.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Run 'ibmcloud is volumes' to list available volumes in your account.",
+		Action:      "Unable to list volumes. Run 'ibmcloud is shares' to list available volumes in your account.",
 	},
 	"InvalidListVolumesLimit": {
 		Code:        "InvalidListVolumesLimit",
@@ -188,7 +188,7 @@ var messagesEn = map[string]util.Message{
 		Code:        VolumeAccessPointExist,
 		Description: "The volume ID '%s' could not be deleted from your VPC. Volume has access points which needs to deleted.Please go through the list of VPCs = '%v'",
 		Type:        util.DeletionFailed,
-		Action:      "User need to review all access points and delete them first before deleting volume.", //TODO once cli will be ready then we need to update this error message
+		Action:      "User need to review all access points and delete them first before deleting volume. Run `ibmcloud is share-targets <VOLUME_ID>` to get the mount targets for the file share. ",
 	},
 }
 
