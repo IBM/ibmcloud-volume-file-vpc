@@ -42,14 +42,14 @@ var messagesEn = map[string]util.Message{
 		Description: "Failed to create volume with the storage provider",
 		Type:        util.ProvisioningFailed,
 		RC:          500,
-		Action:      "Review the error that is returned. If the volume creation service is currently unavailable, try to manually create the volume with the 'ibmcloud is volume-create' command.",
+		Action:      "Review the error that is returned. If the volume creation service is currently unavailable, try to manually create the volume with the 'ibmcloud is share-create' command.",
 	},
 	"FailedToDeleteVolume": {
 		Code:        "FailedToDeleteVolume",
 		Description: "The volume ID '%d' could not be deleted from your VPC.",
 		Type:        util.DeletionFailed,
 		RC:          500,
-		Action:      "Verify that the volume ID exists. Run 'ibmcloud is shares' to list available volumes in your account. If the ID is correct, try to delete the volume with the 'ibmcloud is volume-delete' command. ",
+		Action:      "Verify that the volume ID exists. Run 'ibmcloud is shares' to list available volumes in your account. If the ID is correct, try to delete the volume with the 'ibmcloud is share-delete' command. ",
 	},
 	"FailedToUpdateVolume": {
 		Code:        "FailedToUpdateVolume",
@@ -77,14 +77,14 @@ var messagesEn = map[string]util.Message{
 		Description: "No volume access point could be found for the specified volume ID '%s' and access point ID '%s'",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
-		Action:      "Verify that a volume access point for your volume exists. Run `ibmcloud is share-targets <VOLUME_ID>` to list all mount targets for a file share. Check if volume ID and access point ID is valid",
+		Action:      "Verify that a volume access point for your volume exists. Run `ibmcloud is share-targets <VOLUME_ID>` to list all volume access point for a file share. Check if volume ID and access point ID is valid",
 	},
 	"AccessPointWithVPCIDFindFailed": {
 		Code:        AccessPointWithVPCIDFindFailed,
 		Description: "No volume access point could be found for the specified volume ID '%s' and VPC ID %s",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
-		Action:      "Verify that a volume access point for your volume exists. Run `ibmcloud is share-targets <VOLUME_ID>` to list all mount targets for a file share. Check if volume ID and VPC ID is valid",
+		Action:      "Verify that a volume access point for your volume exists. Run `ibmcloud is share-targets <VOLUME_ID>` to list all volume access point for a file share. Check if volume ID and VPC ID is valid",
 	},
 	"CreateVolumeAccessPointFailed": {
 		Code:        CreateVolumeAccessPointFailed,
@@ -109,7 +109,7 @@ var messagesEn = map[string]util.Message{
 	},
 	"DeleteVolumeAccessPointTimedOut": {
 		Code:        DeleteVolumeAccessPointTimedOut,
-		Description: "The volume ID '%s' could not be delete access point ID '%s'",
+		Description: "The volume ID '%s' could not delete access point ID '%s'",
 		Type:        util.DeleteVolumeAccessPointFailed,
 		RC:          500,
 		Action:      "Verify that the specified volume ID has active volume access points.",
@@ -188,7 +188,7 @@ var messagesEn = map[string]util.Message{
 		Code:        VolumeAccessPointExist,
 		Description: "The volume ID '%s' could not be deleted from your VPC. Volume has access points which needs to deleted.Please go through the list of VPCs = '%v'",
 		Type:        util.DeletionFailed,
-		Action:      "User need to review all access points and delete them first before deleting volume. Run `ibmcloud is share-targets <VOLUME_ID>` to get the mount targets for the file share. ",
+		Action:      "User need to review all access points and delete them first before deleting volume. Run `ibmcloud is share-targets <VOLUME_ID>` to get the volume access point for the file share. ",
 	},
 }
 
