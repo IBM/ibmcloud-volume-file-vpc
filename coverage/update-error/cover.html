@@ -1,0 +1,3933 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>auth: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/IBM/ibmcloud-volume-file-vpc/common/auth/factory.go (87.5%)</option>
+				
+				<option value="file1">github.com/IBM/ibmcloud-volume-file-vpc/common/iam/token_exchange_iks.go (91.8%)</option>
+				
+				<option value="file2">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/authentication.go (80.0%)</option>
+				
+				<option value="file3">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/client.go (100.0%)</option>
+				
+				<option value="file4">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/params.go (100.0%)</option>
+				
+				<option value="file5">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/request.go (76.0%)</option>
+				
+				<option value="file6">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/config.go (100.0%)</option>
+				
+				<option value="file7">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/riaas.go (100.0%)</option>
+				
+				<option value="file8">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/create_file_share.go (100.0%)</option>
+				
+				<option value="file9">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/create_file_share_target.go (100.0%)</option>
+				
+				<option value="file10">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/delete_file_share.go (100.0%)</option>
+				
+				<option value="file11">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/delete_file_share_target.go (100.0%)</option>
+				
+				<option value="file12">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/file_share_service.go (100.0%)</option>
+				
+				<option value="file13">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/get_file_share.go (100.0%)</option>
+				
+				<option value="file14">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/get_file_share_target.go (96.0%)</option>
+				
+				<option value="file15">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/list_file_share_targets.go (100.0%)</option>
+				
+				<option value="file16">github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/list_file_shares.go (100.0%)</option>
+				
+				<option value="file17">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/create_volume.go (100.0%)</option>
+				
+				<option value="file18">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/create_volume_access_point.go (100.0%)</option>
+				
+				<option value="file19">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/delete_volume.go (91.7%)</option>
+				
+				<option value="file20">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/delete_volume_access_point.go (87.1%)</option>
+				
+				<option value="file21">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/get_volume.access_point.go (100.0%)</option>
+				
+				<option value="file22">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/get_volume.go (100.0%)</option>
+				
+				<option value="file23">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/list_volumes.go (91.2%)</option>
+				
+				<option value="file24">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/provider.go (64.6%)</option>
+				
+				<option value="file25">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/session.go (100.0%)</option>
+				
+				<option value="file26">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/token_generator.go (47.7%)</option>
+				
+				<option value="file27">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/update_volume.go (100.0%)</option>
+				
+				<option value="file28">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/util.go (91.8%)</option>
+				
+				<option value="file29">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/wait_for_create_volume_access_point.go (100.0%)</option>
+				
+				<option value="file30">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/wait_for_delete_volume_access_point.go (100.0%)</option>
+				
+				<option value="file31">github.com/IBM/ibmcloud-volume-file-vpc/file/provider/wait_for_valid_volume_state.go (100.0%)</option>
+				
+				<option value="file32">github.com/IBM/ibmcloud-volume-file-vpc/ibmcloudprovider/fake_volume_provider.go (88.5%)</option>
+				
+				<option value="file33">github.com/IBM/ibmcloud-volume-file-vpc/ibmcloudprovider/volume_provider.go (45.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package auth ...
+package auth
+
+import (
+        vpciam "github.com/IBM/ibmcloud-volume-file-vpc/common/iam"
+        vpcfileconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
+        "github.com/IBM/ibmcloud-volume-interface/provider/auth"
+        "github.com/IBM/ibmcloud-volume-interface/provider/iam"
+)
+
+// NewVPCContextCredentialsFactory ...
+func NewVPCContextCredentialsFactory(config *vpcfileconfig.VPCFileConfig) (*auth.ContextCredentialsFactory, error) <span class="cov8" title="1">{
+        authConfig := &amp;iam.AuthConfiguration{
+                IamURL:          config.VPCConfig.TokenExchangeURL,
+                IamClientID:     config.VPCConfig.IamClientID,
+                IamClientSecret: config.VPCConfig.IamClientSecret,
+        }
+        ccf, err := auth.NewContextCredentialsFactory(authConfig)
+        if config.VPCConfig.IKSTokenExchangePrivateURL != "" </span><span class="cov8" title="1">{
+                authIKSConfig := &amp;vpciam.IksAuthConfiguration{
+                        IamAPIKey:       config.VPCConfig.APIKey,
+                        PrivateAPIRoute: config.VPCConfig.IKSTokenExchangePrivateURL, // Only for private cluster
+                }
+                ccf.TokenExchangeService, err = vpciam.NewTokenExchangeIKSService(authIKSConfig)
+        }</span>
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return ccf, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package iam ...
+package iam
+
+import (
+        "errors"
+        "fmt"
+        "net/http"
+        "time"
+
+        "github.com/IBM-Cloud/ibm-cloud-cli-sdk/common/rest"
+        "github.com/IBM/ibmcloud-volume-interface/config"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "github.com/IBM/ibmcloud-volume-interface/provider/iam"
+        "go.uber.org/zap"
+)
+
+// tokenExchangeIKSService ...
+type tokenExchangeIKSService struct {
+        iksAuthConfig *IksAuthConfiguration
+        httpClient    *http.Client
+}
+
+// IksAuthConfiguration ...
+type IksAuthConfiguration struct {
+        PrivateAPIRoute string
+        IamAPIKey       string
+        CSRFToken       string
+}
+
+// TokenExchangeService ...
+var _ iam.TokenExchangeService = &amp;tokenExchangeIKSService{}
+
+// NewTokenExchangeIKSService ...
+func NewTokenExchangeIKSService(iksAuthConfig *IksAuthConfiguration) (iam.TokenExchangeService, error) <span class="cov8" title="1">{
+        httpClient, err := config.GeneralCAHttpClient()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;tokenExchangeIKSService{
+                iksAuthConfig: iksAuthConfig,
+                httpClient:    httpClient,
+        }, nil</span>
+}
+
+// tokenExchangeIKSRequest ...
+type tokenExchangeIKSRequest struct {
+        tes          *tokenExchangeIKSService
+        request      *rest.Request
+        client       *rest.Client
+        logger       *zap.Logger
+        errorRetrier *util.ErrorRetrier
+}
+
+// tokenExchangeIKSResponse ...
+type tokenExchangeIKSResponse struct {
+        AccessToken string `json:"token"`
+        //ImsToken    string `json:"ims_token"`
+}
+
+// ExchangeRefreshTokenForAccessToken ...
+func (tes *tokenExchangeIKSService) ExchangeRefreshTokenForAccessToken(refreshToken string, logger *zap.Logger) (*iam.AccessToken, error) <span class="cov8" title="1">{
+        r := tes.newTokenExchangeRequest(logger)
+        return r.exchangeForAccessToken()
+}</span>
+
+// ExchangeIAMAPIKeyForAccessToken ...
+func (tes *tokenExchangeIKSService) ExchangeIAMAPIKeyForAccessToken(iamAPIKey string, logger *zap.Logger) (*iam.AccessToken, error) <span class="cov8" title="1">{
+        r := tes.newTokenExchangeRequest(logger)
+        return r.exchangeForAccessToken()
+}</span>
+
+// newTokenExchangeRequest ...
+func (tes *tokenExchangeIKSService) newTokenExchangeRequest(logger *zap.Logger) *tokenExchangeIKSRequest <span class="cov8" title="1">{
+        client := rest.NewClient()
+        client.HTTPClient = tes.httpClient
+        retyrInterval, _ := time.ParseDuration("3s")
+        return &amp;tokenExchangeIKSRequest{
+                tes:          tes,
+                request:      rest.PostRequest(fmt.Sprintf("%s/v1/iam/apikey", tes.iksAuthConfig.PrivateAPIRoute)),
+                client:       client,
+                logger:       logger,
+                errorRetrier: util.NewErrorRetrier(40, retyrInterval, logger),
+        }
+}</span>
+
+// ExchangeAccessTokenForIMSToken ...
+func (tes *tokenExchangeIKSService) ExchangeAccessTokenForIMSToken(accessToken iam.AccessToken, logger *zap.Logger) (*iam.IMSToken, error) <span class="cov0" title="0">{
+        return nil, nil
+}</span>
+
+// ExchangeIAMAPIKeyForIMSToken ...
+func (tes *tokenExchangeIKSService) ExchangeIAMAPIKeyForIMSToken(iamAPIKey string, logger *zap.Logger) (*iam.IMSToken, error) <span class="cov0" title="0">{
+        return nil, nil
+}</span>
+
+func (tes *tokenExchangeIKSService) GetIAMAccountIDFromAccessToken(accessToken iam.AccessToken, logger *zap.Logger) (accountID string, err error) <span class="cov0" title="0">{
+        return "Not required to implement", nil
+}</span>
+
+// exchangeForAccessToken ...
+func (r *tokenExchangeIKSRequest) exchangeForAccessToken() (*iam.AccessToken, error) <span class="cov8" title="1">{
+        var iamResp *tokenExchangeIKSResponse
+        var err error
+        err = r.errorRetrier.ErrorRetry(func() (error, bool) </span><span class="cov8" title="1">{
+                iamResp, err = r.sendTokenExchangeRequest()
+                return err, !iam.IsConnectionError(err) // Skip retry if its not connection error
+        }</span>)
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;iam.AccessToken{Token: iamResp.AccessToken}, nil</span>
+}
+
+// sendTokenExchangeRequest ...
+func (r *tokenExchangeIKSRequest) sendTokenExchangeRequest() (*tokenExchangeIKSResponse, error) <span class="cov8" title="1">{
+        r.logger.Info("In tokenExchangeIKSRequest's sendTokenExchangeRequest()")
+        // Set headers
+        r.request = r.request.Add("X-CSRF-TOKEN", r.tes.iksAuthConfig.CSRFToken)
+        // Setting body
+        var apikey = struct {
+                APIKey string `json:"apikey"`
+        }{
+                APIKey: r.tes.iksAuthConfig.IamAPIKey,
+        }
+        r.request = r.request.Body(&amp;apikey)
+
+        var successV tokenExchangeIKSResponse
+        var errorV = struct {
+                ErrorCode        string `json:"code"`
+                ErrorDescription string `json:"description"`
+                ErrorType        string `json:"type"`
+                IncidentID       string `json:"incidentID"`
+        }{}
+
+        r.logger.Info("Sending IAM token exchange request to container api server")
+        resp, err := r.client.Do(r.request, &amp;successV, &amp;errorV)
+        if err != nil </span><span class="cov8" title="1">{
+                r.logger.Error("IAM token exchange request failed", zap.Reflect("Response", resp), zap.Error(err))
+                return nil,
+                        util.NewError("ErrorUnclassified",
+                                "IAM token exchange request failed", err)
+        }</span>
+
+        <span class="cov8" title="1">if resp != nil &amp;&amp; resp.StatusCode == 200 </span><span class="cov8" title="1">{
+                r.logger.Debug("IAM token exchange request successful")
+                return &amp;successV, nil
+        }</span>
+        // closing resp body only when some issues, in case of success its not required
+        // to close here
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        if errorV.ErrorDescription != "" </span><span class="cov8" title="1">{
+                r.logger.Error("IAM token exchange request failed with message",
+                        zap.Int("StatusCode", resp.StatusCode), zap.Reflect("API IncidentID", errorV.IncidentID),
+                        zap.Reflect("Error", errorV))
+
+                err := util.NewError("ErrorFailedTokenExchange",
+                        "IAM token exchange request failed: "+errorV.ErrorDescription,
+                        errors.New(errorV.ErrorCode+" "+errorV.ErrorType+", Description: "+errorV.ErrorDescription+", API IncidentID:"+errorV.IncidentID))
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">r.logger.Error("Unexpected IAM token exchange response",
+                zap.Int("StatusCode", resp.StatusCode), zap.Reflect("Response", resp))
+
+        return nil,
+                util.NewError("ErrorUnclassified",
+                        "Unexpected IAM token exchange response")</span>
+}
+
+// UpdateAPIKey ...
+func (tes *tokenExchangeIKSService) UpdateAPIKey(apiKey string, logger *zap.Logger) error <span class="cov8" title="1">{
+        logger.Info("Updating api key")
+        if tes.iksAuthConfig == nil </span><span class="cov8" title="1">{
+                return errors.New("failed to update api key")
+        }</span>
+        <span class="cov8" title="1">tes.iksAuthConfig.IamAPIKey = apiKey
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package client ...
+package client
+
+import (
+        "errors"
+)
+
+// ErrAuthenticationRequired is returned if a request is made before an authentication
+// token has been provided to the client
+var ErrAuthenticationRequired = errors.New("authentication token required")
+
+type authenticationHandler struct {
+        authToken     string
+        resourceGroup string
+}
+
+// Before is called before each request
+func (a *authenticationHandler) Before(request *Request) error <span class="cov8" title="1">{
+        request.resourceGroup = a.resourceGroup
+
+        if a.authToken == "" </span><span class="cov0" title="0">{
+                return ErrAuthenticationRequired
+        }</span>
+        <span class="cov8" title="1">request.headers.Set("Authorization", "Bearer "+a.authToken)
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package client ...
+package client
+
+import (
+        "context"
+        "io"
+        "net/http"
+        "net/url"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+)
+
+// handler ...
+type handler interface {
+        Before(request *Request) error
+}
+
+// SessionClient provides an interface for a REST API client
+// go:generate counterfeiter -o fakes/client.go --fake-name SessionClient . SessionClient
+type SessionClient interface {
+        NewRequest(operation *Operation) *Request
+        WithDebug(writer io.Writer) SessionClient
+        WithAuthToken(authToken string) SessionClient
+        WithPathParameter(name, value string) SessionClient
+        WithQueryValue(name, value string) SessionClient
+}
+
+type client struct {
+        baseURL       string
+        httpClient    *http.Client
+        pathParams    Params
+        queryValues   url.Values
+        authenHandler handler
+        debugWriter   io.Writer
+        resourceGroup string
+        contextID     string
+        context       context.Context
+}
+
+// New creates a new instance of a SessionClient
+func New(ctx context.Context, baseURL string, queryValues url.Values, httpClient *http.Client, contextID string, resourceGroupID string) SessionClient <span class="cov8" title="1">{
+        return &amp;client{
+                baseURL:       baseURL,
+                httpClient:    httpClient,
+                pathParams:    Params{},
+                queryValues:   queryValues,
+                authenHandler: &amp;authenticationHandler{},
+                contextID:     contextID,
+                context:       ctx,
+                resourceGroup: resourceGroupID,
+        }
+}</span>
+
+// NewRequest creates a request and configures it with the supplied operation
+func (c *client) NewRequest(operation *Operation) *Request <span class="cov8" title="1">{
+        headers := http.Header{}
+        headers.Set("Accept", "application/json")
+        headers.Set("User-Agent", models.UserAgent)
+        if c.contextID != "" </span><span class="cov8" title="1">{
+                headers.Set("X-Request-ID", c.contextID)
+                headers.Set("X-Transaction-ID", c.contextID) // To avoid IKS cloudflare overriding X-Request-ID
+        }</span>
+
+        <span class="cov8" title="1">if c.resourceGroup != "" </span><span class="cov8" title="1">{
+                headers.Set("X-Auth-Resource-Group-ID", c.resourceGroup)
+        }</span>
+
+        // Copy the query values to a new map
+        <span class="cov8" title="1">qv := url.Values{}
+        for k, v := range c.queryValues </span><span class="cov8" title="1">{
+                qv[k] = v
+        }</span>
+
+        <span class="cov8" title="1">return &amp;Request{
+                httpClient:    c.httpClient,
+                context:       c.context,
+                baseURL:       c.baseURL,
+                operation:     operation,
+                pathParams:    c.pathParams.Copy(),
+                authenHandler: c.authenHandler,
+                headers:       headers,
+                debugWriter:   c.debugWriter,
+                resourceGroup: c.resourceGroup,
+                queryValues:   qv,
+        }</span>
+}
+
+// WithDebug enables debug for this SessionClient, outputting to the supplied writer
+func (c *client) WithDebug(writer io.Writer) SessionClient <span class="cov8" title="1">{
+        c.debugWriter = writer
+        return c
+}</span>
+
+// WithAuthToken supplies the authentication token to use for all requests made by this session
+func (c *client) WithAuthToken(authToken string) SessionClient <span class="cov8" title="1">{
+        c.authenHandler = &amp;authenticationHandler{
+                authToken: authToken,
+        }
+        return c
+}</span>
+
+// WithPathParameter adds a path parameter to the request
+func (c *client) WithPathParameter(name, value string) SessionClient <span class="cov8" title="1">{
+        c.pathParams[name] = value
+        return c
+}</span>
+
+// WithQueryValue adds a query parameter to the request
+func (c *client) WithQueryValue(name, value string) SessionClient <span class="cov8" title="1">{
+        c.queryValues.Set(name, value)
+        return c
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package client ...
+package client
+
+// Params ...
+type Params map[string]string
+
+// Copy performs a shallow copy of a Params object
+func (p Params) Copy() Params <span class="cov8" title="1">{
+        params := Params{}
+        for k, v := range p </span><span class="cov8" title="1">{
+                params[k] = v
+        }</span>
+        <span class="cov8" title="1">return params</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package client ...
+package client
+
+import (
+        "context"
+        "fmt"
+        "io"
+        "net/http"
+        "net/http/httputil"
+        "net/url"
+        "reflect"
+        "regexp"
+        "strings"
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/payload"
+        "github.com/fatih/structs"
+)
+
+// Operation defines the API operation to be invoked
+type Operation struct {
+        Name        string
+        Method      string
+        PathPattern string
+}
+
+// Request defines the properties of an API request. It can then be invoked to
+// call the underlying API specified by the supplied operation
+type Request struct {
+        httpClient    *http.Client
+        baseURL       string
+        authenHandler handler
+
+        context context.Context
+
+        operation  *Operation
+        pathParams Params
+        headers    http.Header
+
+        debugWriter io.Writer
+
+        queryValues     url.Values
+        bodyProvider    BodyProvider
+        successConsumer ResponseConsumer
+        errorConsumer   ResponseConsumer
+        resourceGroup   string
+}
+
+// BodyProvider declares an interface that describes an HTTP body, for
+// both request and response
+type BodyProvider interface {
+        ContentType() string
+        Body() (io.Reader, error)
+}
+
+// ResponseConsumer ...
+type ResponseConsumer interface {
+        Consume(io.Reader) error
+        Receiver() interface{}
+}
+
+func (r *Request) path() string <span class="cov8" title="1">{
+        path := r.operation.PathPattern
+        for k, v := range r.pathParams </span><span class="cov0" title="0">{
+                path = strings.Replace(path, "{"+k+"}", v, -1)
+        }</span>
+        <span class="cov8" title="1">return path</span>
+}
+
+// URL constructs the full URL for a request
+func (r *Request) URL() string <span class="cov8" title="1">{
+        baseURL, baseErr := url.Parse(r.baseURL)
+        if baseErr != nil </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">if !strings.HasSuffix(baseURL.Path, "/") </span><span class="cov8" title="1">{
+                baseURL.Path += "/"
+        }</span>
+        <span class="cov8" title="1">pathURL, pathErr := url.Parse(r.path())
+        if pathErr != nil </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+        <span class="cov8" title="1">resolvedURL := baseURL.ResolveReference(pathURL)
+        resolvedURL.RawQuery = r.queryValues.Encode()
+
+        return resolvedURL.String()</span>
+}
+
+// PathParameter sets a path parameter to be resolved on invocation of a request
+func (r *Request) PathParameter(name, value string) *Request <span class="cov0" title="0">{
+        r.pathParams[name] = value
+        return r
+}</span>
+
+// AddQueryValue ...
+func (r *Request) AddQueryValue(key, value string) *Request <span class="cov8" title="1">{
+        if r.queryValues == nil </span><span class="cov0" title="0">{
+                r.queryValues = url.Values{}
+        }</span>
+        <span class="cov8" title="1">r.queryValues.Add(key, value)
+        return r</span>
+}
+
+// SetQueryValue ...
+func (r *Request) SetQueryValue(key, value string) *Request <span class="cov0" title="0">{
+        if r.queryValues == nil </span><span class="cov0" title="0">{
+                r.queryValues = url.Values{}
+        }</span>
+        <span class="cov0" title="0">r.queryValues.Set(key, value)
+        return r</span>
+}
+
+// JSONBody converts the supplied argument to JSON to use as the body of a request
+func (r *Request) JSONBody(p interface{}) *Request <span class="cov8" title="1">{
+        if r.operation.Method == http.MethodPost &amp;&amp; reflect.ValueOf(p).Kind() == reflect.Struct </span><span class="cov0" title="0">{
+                structs.DefaultTagName = "json"
+                m := structs.Map(p)
+
+                if r.resourceGroup != "" </span><span class="cov0" title="0">{
+                        m["resourceGroup"] = r.resourceGroup
+                }</span>
+
+                <span class="cov0" title="0">r.bodyProvider = payload.NewJSONBodyProvider(m)</span>
+        } else<span class="cov8" title="1"> {
+                r.bodyProvider = payload.NewJSONBodyProvider(p)
+        }</span>
+        <span class="cov8" title="1">return r</span>
+}
+
+// MultipartFileBody configures the POST payload to be sent in multi-part format. The
+// content is read from the supplied Reader.
+func (r *Request) MultipartFileBody(name string, contents io.Reader) *Request <span class="cov8" title="1">{
+        r.bodyProvider = payload.NewMultipartFileBody(name, contents)
+        return r
+}</span>
+
+// JSONSuccess configures the receiver to use to process a JSON response
+// for a successful (2xx) response
+func (r *Request) JSONSuccess(receiver interface{}) *Request <span class="cov8" title="1">{
+        r.successConsumer = payload.NewJSONConsumer(receiver)
+        return r
+}</span>
+
+// JSONError configures the error to populate in the event of an unsuccessful
+// (non-2xx) response
+func (r *Request) JSONError(receiver error) *Request <span class="cov8" title="1">{
+        r.errorConsumer = payload.NewJSONConsumer(receiver)
+        return r
+}</span>
+
+// Invoke performs the request, and populates the response or error as appropriate
+func (r *Request) Invoke() (*http.Response, error) <span class="cov8" title="1">{
+        err := r.authenHandler.Before(r)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var body io.Reader
+        if r.bodyProvider != nil </span><span class="cov8" title="1">{
+                body, err = r.bodyProvider.Body()
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">if contentType := r.bodyProvider.ContentType(); contentType != "" </span><span class="cov8" title="1">{
+                        r.headers.Set("Content-Type", contentType)
+                }</span>
+        }
+
+        <span class="cov8" title="1">httpRequest, err := http.NewRequest(r.operation.Method, r.URL(), body)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for k, v := range r.headers </span><span class="cov8" title="1">{
+                httpRequest.Header[k] = v
+        }</span>
+
+        <span class="cov8" title="1">r.debugRequest(httpRequest)
+
+        resp, err := r.httpClient.Do(httpRequest.WithContext(r.context))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+
+        r.debugResponse(resp)
+
+        switch </span>{
+        case resp.StatusCode == http.StatusNoContent:<span class="cov0" title="0">
+                break</span>
+
+        case resp.StatusCode &gt;= 200 &amp;&amp; resp.StatusCode &lt;= 299:<span class="cov8" title="1">
+                if r.successConsumer != nil </span><span class="cov8" title="1">{
+                        err = r.successConsumer.Consume(resp.Body)
+                }</span>
+
+        default:<span class="cov8" title="1">
+                if r.errorConsumer != nil </span><span class="cov8" title="1">{
+                        err = r.errorConsumer.Consume(resp.Body)
+                        if err == nil </span><span class="cov8" title="1">{
+                                err = r.errorConsumer.Receiver().(error)
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return resp, err</span>
+}
+
+func (r *Request) debugRequest(req *http.Request) <span class="cov8" title="1">{
+        if r.debugWriter == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">multipart := strings.Contains(req.Header.Get("Content-Type"), "multipart/form-data")
+        dumpedRequest, err := httputil.DumpRequest(req, !multipart)
+        if err != nil </span><span class="cov0" title="0">{
+                r.debugf("Error dumping request\n%s\n", err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">r.debugf("\nREQUEST: [%s]\n%s\n", time.Now().Format(time.RFC3339), sanitize(dumpedRequest))
+        if multipart </span><span class="cov8" title="1">{
+                r.debugf("[MULTIPART/FORM-DATA CONTENT HIDDEN]\n")
+        }</span>
+}
+
+func (r *Request) debugResponse(resp *http.Response) <span class="cov8" title="1">{
+        if r.debugWriter == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">dumpedResponse, err := httputil.DumpResponse(resp, true)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(r.debugWriter, "Error dumping response\n%s\n", err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">r.debugf("\nRESPONSE: [%s]\n%s\n", time.Now().Format(time.RFC3339), sanitize(dumpedResponse))</span>
+}
+
+func (r *Request) debugf(format string, args ...interface{}) <span class="cov8" title="1">{
+        fmt.Fprintf(r.debugWriter, format, args...)
+}</span>
+
+// RedactedFillin used as a replacement string in debug logs for sensitive data
+const RedactedFillin = "[REDACTED]"
+
+func sanitize(input []byte) string <span class="cov8" title="1">{
+        sanitized := string(input)
+
+        re := regexp.MustCompile(`(?mi)^Authorization: .*`)
+        sanitized = re.ReplaceAllString(sanitized, "Authorization: "+RedactedFillin)
+
+        re = regexp.MustCompile(`(?mi)^X-Auth-Token: .*`)
+        sanitized = re.ReplaceAllString(sanitized, "X-Auth-Token: "+RedactedFillin)
+
+        re = regexp.MustCompile(`(?mi)^APIKey: .*`)
+        sanitized = re.ReplaceAllString(sanitized, "APIKey: "+RedactedFillin)
+
+        sanitized = sanitizeJSON("key", sanitized)
+        sanitized = sanitizeJSON("password", sanitized)
+        sanitized = sanitizeJSON("passphrase", sanitized)
+
+        return sanitized
+}</span>
+
+func sanitizeJSON(propertySubstring string, json string) string <span class="cov8" title="1">{
+        regex := regexp.MustCompile(fmt.Sprintf(`(?i)"([^"]*%s[^"]*)":\s*"[^\,]*"`, propertySubstring))
+        return regex.ReplaceAllString(json, fmt.Sprintf(`"$1":"%s"`, RedactedFillin))
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package riaas ...
+package riaas
+
+import (
+        "context"
+        "io"
+        "net/http"
+)
+
+// Config for the Session
+type Config struct {
+        BaseURL       string
+        AccountID     string
+        Username      string
+        APIKey        string
+        ResourceGroup string
+        Password      string
+        ContextID     string
+
+        DebugWriter   io.Writer
+        HTTPClient    *http.Client
+        Context       context.Context
+        APIVersion    string
+        APIGeneration int
+}
+
+func (c Config) httpClient() *http.Client <span class="cov8" title="1">{
+        if c.HTTPClient != nil </span><span class="cov8" title="1">{
+                return c.HTTPClient
+        }</span>
+
+        <span class="cov8" title="1">return http.DefaultClient</span>
+}
+
+func (c Config) baseURL() string <span class="cov8" title="1">{
+        return c.BaseURL
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package riaas ...
+package riaas
+
+import (
+        "context"
+        "net/url"
+        "strconv"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
+)
+
+// RegionalAPI is the main interface for the RIAAS API client. From here, service
+// objects for the individual parts of the API can be obtained
+//go:generate counterfeiter -o fakes/regional_api.go --fake-name RegionalAPI . RegionalAPI
+type RegionalAPI interface {
+        Login(token string) error
+
+        FileShareService() vpcfilevolume.FileShareManager
+}
+
+var _ RegionalAPI = &amp;Session{}
+
+// Session is a base implementation of the RegionalAPI interface
+type Session struct {
+        client client.SessionClient
+        config Config
+}
+
+// New creates a new Session volume, using the supplied config
+func New(config Config) (*Session, error) <span class="cov8" title="1">{
+        ctx := config.Context
+        if ctx == nil </span><span class="cov8" title="1">{
+                ctx = context.Background()
+        }</span>
+
+        // Default API version
+        <span class="cov8" title="1">backendAPIVersion := models.APIVersion
+
+        // Overwrite if the version is passed
+        if len(config.APIVersion) &gt; 0 </span><span class="cov8" title="1">{
+                backendAPIVersion = config.APIVersion
+        }</span>
+
+        // Overwrite if the generation is passed
+        <span class="cov8" title="1">apiGen := models.APIGeneration
+        if config.APIGeneration &gt; 0 </span><span class="cov8" title="1">{
+                apiGen = config.APIGeneration
+        }</span>
+
+        <span class="cov8" title="1">queryValues := url.Values{
+                "version":    []string{backendAPIVersion},
+                "generation": []string{strconv.Itoa(apiGen)},
+        }
+
+        riaasClient := client.New(ctx, config.baseURL(), queryValues, config.httpClient(), config.ContextID, config.ResourceGroup)
+
+        if config.DebugWriter != nil </span><span class="cov8" title="1">{
+                riaasClient.WithDebug(config.DebugWriter)
+        }</span>
+        <span class="cov8" title="1">return &amp;Session{
+                client: riaasClient,
+                config: config,
+        }, nil</span>
+}
+
+// Login configures the session with the supplied Authentication token
+// which is used for all requests to the API
+func (s *Session) Login(token string) error <span class="cov8" title="1">{
+        s.client.WithAuthToken(token)
+        return nil
+}</span>
+
+// VolumeFileService returns the Volume service for managing file volumes
+func (s *Session) FileShareService() vpcfilevolume.FileShareManager <span class="cov8" title="1">{
+        return vpcfilevolume.New(s.client)
+}</span>
+
+// RegionalAPIClientProvider declares an interface for a provider that can supply a new
+// RegionalAPI client session
+//go:generate counterfeiter -o fakes/client_provider.go --fake-name RegionalAPIClientProvider . RegionalAPIClientProvider
+type RegionalAPIClientProvider interface {
+        New(config Config) (RegionalAPI, error)
+}
+
+// DefaultRegionalAPIClientProvider declares a basic client provider that delegates to
+// New(). Can be used for dependency injection.
+type DefaultRegionalAPIClientProvider struct {
+}
+
+var _ RegionalAPIClientProvider = DefaultRegionalAPIClientProvider{}
+
+// New creates a new Session volume, using the supplied config
+func (d DefaultRegionalAPIClientProvider) New(config Config) (RegionalAPI, error) <span class="cov8" title="1">{
+        return New(config)
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// CreateFileShare POSTs to v1/shares
+func (vs *FileShareService) CreateFileShare(shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend CreateFileShare")
+        defer ctxLogger.Debug("Exit Backend CreateFileShare")
+
+        defer util.TimeTracker("CreateFileShare", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "CreateFileShare",
+                Method:      "POST",
+                PathPattern: sharesPath,
+        }
+
+        var share models.Share
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", request.URL()), zap.Reflect("Payload", shareTemplate), zap.Reflect("Operation", operation))
+
+        _, err := request.JSONBody(shareTemplate).JSONSuccess(&amp;share).JSONError(&amp;apiErr).Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;share, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package instances ...
+package vpcfilevolume
+
+import (
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// CreateFileShareTarget POSTs to /shares/{share-id}/target
+// creates file share target with given share target details
+func (vs *FileShareService) CreateFileShareTarget(fileShareTargetRequest *models.ShareTarget, ctxLogger *zap.Logger) (*models.ShareTarget, error) <span class="cov8" title="1">{
+        methodName := "FileShareService.CreateFileShareTarget"
+        defer util.TimeTracker(methodName, time.Now())
+        defer metrics.UpdateDurationFromStart(ctxLogger, methodName, time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "CreateFileShareTarget",
+                Method:      "POST",
+                PathPattern: shareIDPath + shareTargetsPath,
+        }
+
+        var shareTarget models.ShareTarget
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+
+        ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", request.URL()), zap.Reflect("Payload", fileShareTargetRequest), zap.Reflect("Operation", operation), zap.Reflect("PathParameters", fileShareTargetRequest.ShareID))
+
+        req := request.PathParameter(shareIDParam, fileShareTargetRequest.ShareID)
+
+        _, err := req.JSONBody(fileShareTargetRequest).JSONSuccess(&amp;shareTarget).JSONError(&amp;apiErr).Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">ctxLogger.Info("Successfully created the file share target")
+        return &amp;shareTarget, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// DeleteFileShare DELETEs to /shares/{share-id}
+func (vs *FileShareService) DeleteFileShare(shareID string, ctxLogger *zap.Logger) error <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend DeleteFileShare")
+        defer ctxLogger.Debug("Exit Backend DeleteFileShare")
+
+        defer util.TimeTracker("DeleteVolume", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "DeleteFileShare",
+                Method:      "DELETE",
+                PathPattern: shareIDPath,
+        }
+
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+
+        _, err := request.PathParameter(shareIDParam, shareID).JSONError(&amp;apiErr).Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "net/http"
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// DeleteFileShareTarget DELETE to /shares/{share-id}/target/{target-id}
+func (vs *FileShareService) DeleteFileShareTarget(deleteShareTargetRequest *models.ShareTarget, ctxLogger *zap.Logger) (*http.Response, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend DeleteFileShareTarget")
+        defer ctxLogger.Debug("Exit Backend DeleteFileShareTarget")
+
+        defer util.TimeTracker("DeleteFileShareTarget", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "DeleteFileShareTarget",
+                Method:      "DELETE",
+                PathPattern: shareIDPath + shareTargetIDPath,
+        }
+
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+
+        resp, err := request.PathParameter(shareIDParam, deleteShareTargetRequest.ShareID).PathParameter(shareTargetIDParam, deleteShareTargetRequest.ID).JSONError(&amp;apiErr).Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                ctxLogger.Error("Error occurred while deleting file share target", zap.Error(err))
+                if resp != nil &amp;&amp; resp.StatusCode == http.StatusNotFound </span><span class="cov8" title="1">{
+                        // file share target is deleted. So do not want to retry
+                        ctxLogger.Info("Exit DeleteFileShareTarget", zap.Any("resp", resp.StatusCode), zap.Error(err), zap.Error(apiErr))
+                        return resp, apiErr
+                }</span>
+        }
+        <span class="cov8" title="1">ctxLogger.Info("DeleteFileShareTarget successfull")
+        return resp, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "net/http"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "go.uber.org/zap"
+)
+
+// FileShareManager operations
+//go:generate counterfeiter -o fakes/share.go --fake-name FileShareService . FileShareManager
+type FileShareManager interface {
+        // Create the file share with authorisation by passing required information in the share object
+        CreateFileShare(volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
+
+        // Get all file shares lists by using filter options
+        ListFileShares(limit int, start string, filters *models.ListShareFilters, ctxLogger *zap.Logger) (*models.ShareList, error)
+
+        // Get the file share by using ID
+        GetFileShare(shareID string, ctxLogger *zap.Logger) (*models.Share, error)
+
+        // Get the file share by using share name
+        GetFileShareByName(shareName string, ctxLogger *zap.Logger) (*models.Share, error)
+
+        // Delete the file share
+        DeleteFileShare(shareID string, ctxLogger *zap.Logger) error
+
+        //CreateFileShareTarget creates file share target
+        CreateFileShareTarget(shareTargetRequest *models.ShareTarget, ctxLogger *zap.Logger) (*models.ShareTarget, error)
+
+        // Get file share target lists by using share ID
+        ListFileShareTargets(shareID string, filters *models.ListShareTargetFilters, ctxLogger *zap.Logger) (*models.ShareTargetList, error)
+
+        // Get the file share target by using share ID and target ID
+        GetFileShareTarget(shareID string, targetID string, ctxLogger *zap.Logger) (*models.ShareTarget, error)
+
+        // Get the file share by using share ID and target name
+        GetFileShareTargetByName(targetName string, shareID string, ctxLogger *zap.Logger) (*models.ShareTarget, error)
+
+        //DeleteFileShareTarget delete the share target by share ID and target ID/VPC ID/Subnet ID
+        DeleteFileShareTarget(shareTargetDeleteRequest *models.ShareTarget, ctxLogger *zap.Logger) (*http.Response, error)
+}
+
+// FileShareService ...
+type FileShareService struct {
+        client client.SessionClient
+}
+
+var _ FileShareManager = &amp;FileShareService{}
+
+// New ...
+func New(client client.SessionClient) FileShareManager <span class="cov8" title="1">{
+        return &amp;FileShareService{
+                client: client,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// GetFileShare POSTs to /shares/{share-id}
+func (vs *FileShareService) GetFileShare(shareID string, ctxLogger *zap.Logger) (*models.Share, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend GetFileShare")
+        defer ctxLogger.Debug("Exit Backend GetFileShare")
+
+        defer util.TimeTracker("GetFileShare", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "GetFileShare",
+                Method:      "GET",
+                PathPattern: shareIDPath,
+        }
+
+        var share models.Share
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+
+        req := request.PathParameter(shareIDParam, shareID)
+        _, err := req.JSONSuccess(&amp;share).JSONError(&amp;apiErr).Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;share, nil</span>
+}
+
+// GetFileShareByName GETs /shares
+func (vs *FileShareService) GetFileShareByName(shareName string, ctxLogger *zap.Logger) (*models.Share, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend GetFileShareByName")
+        defer ctxLogger.Debug("Exit Backend GetFileShareByName")
+
+        defer util.TimeTracker("GetFileShareByName", time.Now())
+
+        // Get the file share details for a single file share, ListFileShareFilters will return only 1 file share in list
+        filters := &amp;models.ListShareFilters{ShareName: shareName}
+        shares, err := vs.ListFileShares(1, "", filters, ctxLogger)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if shares != nil </span><span class="cov8" title="1">{
+                shareslist := shares.Shares
+                if len(shareslist) &gt; 0 </span><span class="cov8" title="1">{
+                        return shareslist[0], nil
+                }</span>
+        }
+        <span class="cov8" title="1">return nil, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// GetFileShareTarget GETs to /shares/{share-id}/targets/{target-id}
+func (vs *FileShareService) GetFileShareTarget(shareID string, targetID string, ctxLogger *zap.Logger) (*models.ShareTarget, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend GetFileShareTarget")
+        defer ctxLogger.Debug("Exit Backend GetFileShareTarget")
+
+        defer util.TimeTracker("GetFileShareTarget", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "GetFileShareTarget",
+                Method:      "GET",
+                PathPattern: shareIDPath + shareTargetIDPath,
+        }
+
+        var shareTarget models.ShareTarget
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+
+        req := request.PathParameter(shareIDParam, shareID).PathParameter(shareTargetIDParam, targetID)
+
+        _, err := req.JSONSuccess(&amp;shareTarget).JSONError(&amp;apiErr).Invoke()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;shareTarget, nil</span>
+}
+
+// GetFileShareTargetByName GETs /shares/{share-id}/targets by target name
+func (vs *FileShareService) GetFileShareTargetByName(shareID string, targetName string, ctxLogger *zap.Logger) (*models.ShareTarget, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend GetFileShareTargetByName")
+        defer ctxLogger.Debug("Exit Backend GetFileShareTargetByName")
+
+        defer util.TimeTracker("GetFileShareTargetByName", time.Now())
+
+        // Get the file share target details for a single share target, ListFileShareTargets will return only 1 share target in list
+        filters := &amp;models.ListShareTargetFilters{ShareTargetName: targetName}
+        targets, err := vs.ListFileShareTargets(targetName, filters, ctxLogger)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">if targets != nil </span><span class="cov8" title="1">{
+                targetslist := targets.ShareTargets
+                if len(targetslist) &gt; 0 </span><span class="cov8" title="1">{
+                        return targetslist[0], nil
+                }</span>
+        }
+        <span class="cov8" title="1">return nil, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// ListFileShareTargets GETs /shares/{share-id}/targets
+func (vs *FileShareService) ListFileShareTargets(shareID string, filters *models.ListShareTargetFilters, ctxLogger *zap.Logger) (*models.ShareTargetList, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend ListFileShareTargets")
+        defer ctxLogger.Debug("Exit Backend ListFileShareTargets")
+
+        defer util.TimeTracker("ListFileShareTargets", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "ListFileShareTargets",
+                Method:      "GET",
+                PathPattern: shareIDPath + shareTargetsPath,
+        }
+
+        var targets models.ShareTargetList
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+
+        req := request.PathParameter(shareIDParam, shareID)
+
+        req = req.JSONSuccess(&amp;targets).JSONError(&amp;apiErr)
+
+        if filters != nil </span><span class="cov8" title="1">{
+                if filters.ShareTargetName != "" </span><span class="cov8" title="1">{
+                        req.AddQueryValue("name", filters.ShareTargetName)
+                }</span>
+        }
+
+        <span class="cov8" title="1">_, err := req.Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;targets, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package vpcfilevolume ...
+package vpcfilevolume
+
+import (
+        "strconv"
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// ListFileShares GETs /shares
+func (vs *FileShareService) ListFileShares(limit int, start string, filters *models.ListShareFilters, ctxLogger *zap.Logger) (*models.ShareList, error) <span class="cov8" title="1">{
+        ctxLogger.Debug("Entry Backend ListFileShares")
+        defer ctxLogger.Debug("Exit Backend ListFileShares")
+
+        defer util.TimeTracker("ListFileShares", time.Now())
+
+        operation := &amp;client.Operation{
+                Name:        "ListFileShares",
+                Method:      "GET",
+                PathPattern: sharesPath,
+        }
+
+        var shares models.ShareList
+        var apiErr models.Error
+
+        request := vs.client.NewRequest(operation)
+        ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+
+        req := request.JSONSuccess(&amp;shares).JSONError(&amp;apiErr)
+
+        if limit &gt; 0 </span><span class="cov8" title="1">{
+                req.AddQueryValue("limit", strconv.Itoa(limit))
+        }</span>
+
+        <span class="cov8" title="1">if start != "" </span><span class="cov8" title="1">{
+                req.AddQueryValue("start", start)
+        }</span>
+
+        <span class="cov8" title="1">if filters != nil </span><span class="cov8" title="1">{
+                if filters.ResourceGroupID != "" </span><span class="cov8" title="1">{
+                        req.AddQueryValue("resource_group.id", filters.ResourceGroupID)
+                }</span>
+                <span class="cov8" title="1">if filters.ShareName != "" </span><span class="cov8" title="1">{
+                        req.AddQueryValue("name", filters.ShareName)
+                }</span>
+        }
+
+        <span class="cov8" title="1">_, err := req.Invoke()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;shares, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+const (
+        minSize = 10    //10 GB
+        maxSize = 16000 //16 TB
+)
+
+// CreateVolume creates file share
+func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeResponse *provider.Volume, err error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of CreateVolume method...")
+        defer vpcs.Logger.Debug("Exit from CreateVolume method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "CreateVolume", time.Now())
+
+        vpcs.Logger.Info("Basic validation for CreateVolume request... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
+        resourceGroup, err := validateVolumeRequest(volumeRequest)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
+
+        // Build the share template to send to backend
+        //TODO currently IOPS not supported as part of file share request
+        shareTemplate := &amp;models.Share{
+                Name:          *volumeRequest.Name,
+                Size:          int64(*volumeRequest.Capacity),
+                InitialOwner:  (*models.InitialOwner)(volumeRequest.InitialOwner),
+                ResourceGroup: &amp;resourceGroup,
+                Profile: &amp;models.Profile{
+                        Name: volumeRequest.VPCVolume.Profile.Name,
+                },
+                Zone: &amp;models.Zone{
+                        Name: volumeRequest.Az,
+                },
+        }
+
+        var encryptionKeyCRN string
+        if volumeRequest.VPCVolume.VolumeEncryptionKey != nil &amp;&amp; len(volumeRequest.VPCVolume.VolumeEncryptionKey.CRN) &gt; 0 </span><span class="cov8" title="1">{
+                encryptionKeyCRN = volumeRequest.VPCVolume.VolumeEncryptionKey.CRN
+                shareTemplate.EncryptionKey = &amp;models.EncryptionKey{CRN: encryptionKeyCRN}
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Calling VPC provider for volume creation...")
+        var volume *models.Share
+        err = retry(vpcs.Logger, func() error </span><span class="cov8" title="1">{
+                volume, err = vpcs.Apiclient.FileShareService().CreateFileShare(shareTemplate, vpcs.Logger)
+                return err
+        }</span>)
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                vpcs.Logger.Debug("Failed to create volume from VPC provider", zap.Reflect("BackendError", err))
+                return nil, userError.GetUserError("FailedToPlaceOrder", err)
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully created volume from VPC provider...", zap.Reflect("VolumeDetails", volume))
+
+        vpcs.Logger.Info("Waiting for volume to be in valid (stable) state", zap.Reflect("VolumeDetails", volume))
+        err = WaitForValidVolumeState(vpcs, volume.ID)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, userError.GetUserError("VolumeNotInValidState", err, volume.ID)
+        }</span>
+        <span class="cov8" title="1">vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", volume))
+
+        // Converting share to lib volume type
+        volumeResponse = FromProviderToLibVolume(volume, vpcs.Logger)
+        // VPC does have region yet . So use requested region in response
+        volumeResponse.Region = volumeRequest.Region
+
+        /* // TBD Return reuested tag as is if not tags returned by backend
+        if len(volumeResponse.Tags) == 0 &amp;&amp; len(volumeRequest.Tags) &gt; 0 {
+                volumeResponse.Tags = volumeRequest.Tags
+        } */
+        vpcs.Logger.Info("VolumeResponse", zap.Reflect("volumeResponse", volumeResponse))
+
+        return volumeResponse, err</span>
+}
+
+// validateVolumeRequest validating volume request
+func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup, error) <span class="cov8" title="1">{
+        resourceGroup := models.ResourceGroup{}
+
+        // Volume name should not be empty
+        if volumeRequest.Name == nil </span><span class="cov8" title="1">{
+                return resourceGroup, userError.GetUserError("InvalidVolumeName", nil, nil)
+        }</span> else<span class="cov8" title="1"> if len(*volumeRequest.Name) == 0 </span><span class="cov8" title="1">{
+                return resourceGroup, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
+        }</span>
+
+        // Capacity should not be empty
+        <span class="cov8" title="1">if volumeRequest.Capacity == nil </span><span class="cov8" title="1">{
+                return resourceGroup, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
+        }</span> else<span class="cov8" title="1"> if *volumeRequest.Capacity &lt; minSize </span><span class="cov8" title="1">{
+                return resourceGroup, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
+        }</span>
+
+        // validate and add resource group ID or Name whichever is provided by user
+        <span class="cov8" title="1">if volumeRequest.VPCVolume.ResourceGroup == nil </span><span class="cov8" title="1">{
+                return resourceGroup, userError.GetUserError("EmptyResourceGroup", nil)
+        }</span>
+
+        // validate and add resource group ID or Name whichever is provided by user
+        <span class="cov8" title="1">if len(volumeRequest.VPCVolume.ResourceGroup.ID) == 0 &amp;&amp; len(volumeRequest.VPCVolume.ResourceGroup.Name) == 0 </span><span class="cov8" title="1">{
+                return resourceGroup, userError.GetUserError("EmptyResourceGroupIDandName", nil)
+        }</span>
+
+        <span class="cov8" title="1">if len(volumeRequest.VPCVolume.ResourceGroup.ID) &gt; 0 </span><span class="cov8" title="1">{
+                resourceGroup.ID = volumeRequest.VPCVolume.ResourceGroup.ID
+        }</span>
+        <span class="cov8" title="1">if len(volumeRequest.VPCVolume.ResourceGroup.Name) &gt; 0 </span><span class="cov8" title="1">{
+                // get the resource group ID from resource group name as Name is not supported by RIaaS
+                resourceGroup.Name = volumeRequest.VPCVolume.ResourceGroup.Name
+        }</span>
+        <span class="cov8" title="1">return resourceGroup, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
+
+        "go.uber.org/zap"
+)
+
+//VpcVolumeAccessPoint ...
+const (
+        StatusStable   = "stable"
+        StatusDeleting = "deleting"
+        StatusDeleted  = "deleted"
+)
+
+// VolumeAccessPoint create volume target based on given volume accessPoint request
+func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provider.VolumeAccessPointRequest) (*provider.VolumeAccessPointResponse, error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of CreateVolumeAccessPoint method...")
+        defer vpcs.Logger.Debug("Exit from CreateVolumeAccessPoint method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "CreateVolumeAccessPoint", time.Now())
+        var err error
+        vpcs.Logger.Info("Validating basic inputs for CreateVolumeAccessPoint method...", zap.Reflect("volumeAccessPointRequest", volumeAccessPointRequest))
+        err = vpcs.validateVolumeAccessPointRequest(volumeAccessPointRequest)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var volumeAccessPointResult *models.ShareTarget
+        var varp *provider.VolumeAccessPointResponse
+
+        volumeAccessPoint := models.NewShareTarget(volumeAccessPointRequest)
+
+        err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                /*First , check if volume target is already created
+                Even if we remove this check RIAAS will respond "shares_target_vpc_duplicate" erro code.
+                We need to again do GetVolumeAccessPoint to fetch the already created access point */
+                vpcs.Logger.Info("Checking if volume accessPoint is already created by other thread")
+                currentVolAccessPoint, err := vpcs.GetVolumeAccessPoint(volumeAccessPointRequest)
+                if err == nil &amp;&amp; currentVolAccessPoint != nil </span><span class="cov8" title="1">{
+                        vpcs.Logger.Info("Volume accessPoint is already created", zap.Reflect("currentVolAccessPoint", currentVolAccessPoint))
+                        varp = currentVolAccessPoint
+                        return nil, true // stop retry volume accessPoint already created
+                }</span>
+
+                //Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
+                <span class="cov8" title="1">vpcs.Logger.Info("Creating volume accessPoint from VPC provider...")
+                volumeAccessPointResult, err = vpcs.Apiclient.FileShareService().CreateFileShareTarget(&amp;volumeAccessPoint, vpcs.Logger)
+                // Keep retry, until we get the proper volumeAccessPointResult object
+                if err != nil &amp;&amp; volumeAccessPointResult == nil </span><span class="cov8" title="1">{
+                        return err, skipRetryForObviousErrors(err)
+                }</span>
+                <span class="cov8" title="1">varp = volumeAccessPointResult.ToVolumeAccessPointResponse()
+
+                return err, true</span> // stop retry as no error
+        })
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                userErr := userError.GetUserError(string(userError.CreateVolumeAccessPointFailed), err, volumeAccessPointRequest.VolumeID, volumeAccessPointRequest.VPCID)
+                return nil, userErr
+        }</span>
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully created volume accessPoint from VPC provider", zap.Reflect("volumeAccessPointResponse", varp))
+        varp.VolumeID = volumeAccessPointRequest.VolumeID
+        return varp, nil</span>
+}
+
+// validateVolume validating volume ID and VPC ID
+func (vpcs *VPCSession) validateVolumeAccessPointRequest(volumeAccessPointRequest provider.VolumeAccessPointRequest) error <span class="cov8" title="1">{
+        var err error
+        // Check for VolumeID - required validation
+        if len(volumeAccessPointRequest.VolumeID) == 0 </span><span class="cov8" title="1">{
+                err = userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VolumeID")
+                vpcs.Logger.Error("volumeAccessPointRequest.VolumeID is required", zap.Error(err))
+                return err
+        }</span>
+        // Check for VPC ID - required validation
+        <span class="cov8" title="1">if len(volumeAccessPointRequest.VPCID) == 0 &amp;&amp; len(volumeAccessPointRequest.SubnetID) == 0 &amp;&amp; len(volumeAccessPointRequest.AccessPointID) == 0 </span><span class="cov8" title="1">{
+                err = userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID")
+                vpcs.Logger.Error("One of volumeAccessPointRequest.VPCID, volumeAccessPointRequest.SubnetID and volumeAccessPointRequest.AccessPoint is required", zap.Error(err))
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+// DeleteVolume deletes the file share
+func (vpcs *VPCSession) DeleteVolume(volume *provider.Volume) (err error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of DeleteVolume method...")
+        defer vpcs.Logger.Debug("Exit from DeleteVolume method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "DeleteVolume", time.Now())
+
+        vpcs.Logger.Info("Validating basic inputs for DeleteVolume method...", zap.Reflect("VolumeDetails", volume))
+        err = validateVolume(volume)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">existingVol, err := vpcs.GetVolume(volume.VolumeID)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        //If there exists any access point for volume we should abort delete
+        <span class="cov8" title="1">if existingVol.VolumeAccessPoints != nil &amp;&amp; len(*existingVol.VolumeAccessPoints) != 0 </span><span class="cov8" title="1">{
+                var vpcIDList = []string{}
+                for _, volAccessPoint := range *existingVol.VolumeAccessPoints </span><span class="cov8" title="1">{
+                        if volAccessPoint.VPC != nil </span><span class="cov8" title="1">{
+                                vpcIDList = append(vpcIDList, volAccessPoint.VPC.ID)
+                        }</span>
+                }
+                <span class="cov8" title="1">return userError.GetUserError(string(userError.VolumeAccessPointExist), nil, volume.VolumeID, vpcIDList)</span>
+        }
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Deleting file share from VPC provider...")
+        err = retry(vpcs.Logger, func() error </span><span class="cov8" title="1">{
+                vpcs.Logger.Info("Calling VPC client for file share deletion...")
+                err = vpcs.Apiclient.FileShareService().DeleteFileShare(volume.VolumeID, vpcs.Logger)
+                return err
+        }</span>)
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                return userError.GetUserError("FailedToDeleteVolume", err, volume.VolumeID)
+        }</span>
+
+        <span class="cov8" title="1">err = WaitForVolumeDeletion(vpcs, volume.VolumeID)
+        if err != nil </span><span class="cov0" title="0">{
+                return userError.GetUserError("FailedToDeleteVolume", err, volume.VolumeID)
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully deleted volume from VPC provider")
+        return err</span>
+}
+
+// validateVolume validating volume ID
+func validateVolume(volume *provider.Volume) (err error) <span class="cov8" title="1">{
+        if volume == nil </span><span class="cov8" title="1">{
+                err = userError.GetUserError("InvalidVolumeID", nil, nil)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if IsValidVolumeIDFormat(volume.VolumeID) </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">err = userError.GetUserError("InvalidVolumeID", nil, volume.VolumeID)
+        return</span>
+}
+
+// WaitForVolumeDeletion checks the volume for valid status
+func WaitForVolumeDeletion(vpcs *VPCSession, volumeID string) (err error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of WaitForVolumeDeletion method...")
+        defer vpcs.Logger.Debug("Exit from WaitForVolumeDeletion method...")
+        var skip = false
+
+        vpcs.Logger.Info("Getting volume details from VPC provider...", zap.Reflect("VolumeID", volumeID))
+
+        err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                _, err = vpcs.Apiclient.FileShareService().GetFileShare(volumeID, vpcs.Logger)
+                // Keep retry, until GetVolume returns volume not found
+                if err != nil </span><span class="cov0" title="0">{
+                        skip = skipRetry(err.(*models.Error))
+                        return nil, skip
+                }</span>
+                <span class="cov8" title="1">return err, false</span> // continue retry as we are not seeing error which means volume is stable
+        })
+
+        <span class="cov8" title="1">if err == nil &amp;&amp; skip </span><span class="cov0" title="0">{
+                vpcs.Logger.Info("Volume got deleted.", zap.Reflect("volumeID", volumeID))
+        }</span>
+        <span class="cov8" title="1">return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+
+        "net/http"
+        "time"
+
+        "go.uber.org/zap"
+)
+
+// DeleteVolumeAccessPoint deletes file share target for given volume VolumeAccessPoint request
+func (vpcs *VPCSession) DeleteVolumeAccessPoint(deleteAccessPointRequest provider.VolumeAccessPointRequest) (*http.Response, error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of DeleteVolumeAccessPoint method...")
+        defer vpcs.Logger.Debug("Exit from DeleteVolumeAccessPoint method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "DeleteVolumeAccessPoint", time.Now())
+        var err error
+        vpcs.Logger.Info("Validating basic inputs for delete AccessPoint method...", zap.Reflect("deleteAccessPointRequest", deleteAccessPointRequest))
+        err = vpcs.validateVolumeAccessPointRequest(deleteAccessPointRequest)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var response *http.Response
+        var volumeAccessPoint models.ShareTarget
+
+        err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                // First , check if volume AccessPoint is already deleted to given instance
+                vpcs.Logger.Info("Checking if volume AccessPoint is already deleted ")
+                currentVolumeAccessPoint, err := vpcs.GetVolumeAccessPoint(deleteAccessPointRequest)
+                if err == nil &amp;&amp; currentVolumeAccessPoint != nil &amp;&amp; currentVolumeAccessPoint.Status != StatusDeleting &amp;&amp; currentVolumeAccessPoint.Status != StatusDeleted </span><span class="cov8" title="1">{
+                        // If no error and current volume AccessPoint is not already in deleting or deleted state ( i.e in stable or pending state) attempt to delete
+                        vpcs.Logger.Info("Found volume AccessPoint", zap.Reflect("currentVolAccessPoint", currentVolumeAccessPoint))
+                        volumeAccessPoint := models.NewShareTarget(deleteAccessPointRequest)
+                        volumeAccessPoint.ShareID = currentVolumeAccessPoint.VolumeID
+                        volumeAccessPoint.ID = currentVolumeAccessPoint.AccessPointID
+                        vpcs.Logger.Info("Deleting volume AccessPoint from VPC provider...")
+                        response, err = vpcs.Apiclient.FileShareService().DeleteFileShareTarget(&amp;volumeAccessPoint, vpcs.Logger)
+
+                        //Retry in case of all errors
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err, false
+                        }</span>
+                }
+                <span class="cov8" title="1">vpcs.Logger.Info("No volume access point found for", zap.Reflect("currentVolumeAccessPoint", currentVolumeAccessPoint), zap.Error(err))
+                // consider volume delete success if its  already  in deleting, pending deletion or VolumeAccessPoint is not found
+                response = &amp;http.Response{
+                        StatusCode: http.StatusOK,
+                }
+                return nil, true</span> // skip retry if volume AccessPoint is not found OR already in deleting, pending deletion state
+        })
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                userErr := userError.GetUserError(string(userError.DeleteVolumeAccessPointFailed), err, deleteAccessPointRequest.VolumeID, volumeAccessPoint.ID)
+                vpcs.Logger.Error("Volume AccessPoint delete failed with error", zap.Error(err))
+                return response, userErr
+        }</span>
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully deleted volume AccessPoint from VPC provider", zap.Reflect("resp", response))
+        return response, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "errors"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+// GetVolumeAccessPoint  get the file share target based on the request
+func (vpcs *VPCSession) GetVolumeAccessPoint(volumeAccessPointRequest provider.VolumeAccessPointRequest) (*provider.VolumeAccessPointResponse, error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of GetVolumeAccessPoint method...", zap.Reflect("volumeAccessPointRequest", volumeAccessPointRequest))
+        defer vpcs.Logger.Debug("Exit from GetVolumeAccessPoint method...")
+        var err error
+        vpcs.Logger.Info("Validating basic inputs for GetVolumeAccessPoint method...", zap.Reflect("volumeAccessPointRequest", volumeAccessPointRequest))
+        err = vpcs.validateVolumeAccessPointRequest(volumeAccessPointRequest)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var volumeAccessPointResponse *provider.VolumeAccessPointResponse
+        volumeAccessPoint := models.NewShareTarget(volumeAccessPointRequest)
+        if len(volumeAccessPoint.ID) &gt; 0 </span><span class="cov8" title="1">{
+                //Get volume AccessPoint by target ID if it is specified
+                volumeAccessPointResponse, err = vpcs.getVolumeAccessPointByID(volumeAccessPoint)
+        }</span> else<span class="cov8" title="1"> {
+                // Get volume AccessPoint by VPC ID. This is inefficient operation which requires iteration over volume target list
+                volumeAccessPointResponse, err = vpcs.getVolumeAccessPointByVPCID(volumeAccessPoint)
+        }</span>
+        <span class="cov8" title="1">vpcs.Logger.Info("Volume access point response", zap.Reflect("volumeAccessPointResponse", volumeAccessPointResponse), zap.Error(err))
+        return volumeAccessPointResponse, err</span>
+}
+
+func (vpcs *VPCSession) getVolumeAccessPointByID(volumeAccessPointRequest models.ShareTarget) (*provider.VolumeAccessPointResponse, error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of getVolumeAccessPointByID()")
+        defer vpcs.Logger.Debug("Exit from getVolumeAccessPointByID()")
+        vpcs.Logger.Info("Getting VolumeAccessPoint from VPC provider...")
+        var err error
+        var volumeAccessPointResult *models.ShareTarget
+
+        err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                volumeAccessPointResult, err = vpcs.Apiclient.FileShareService().GetFileShareTarget(volumeAccessPointRequest.ShareID, volumeAccessPointRequest.ID, vpcs.Logger)
+                // Keep retry, until we get the proper volumeAccessPointResponse object
+                if err != nil &amp;&amp; volumeAccessPointResult == nil </span><span class="cov8" title="1">{
+                        return err, skipRetryForObviousErrors(err)
+                }</span>
+                <span class="cov8" title="1">return err, true</span> // stop retry as no error
+        })
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                // API call is failed
+                userErr := userError.GetUserError(string(userError.AccessPointWithAPIDFindFailed), err, volumeAccessPointRequest.ShareID, volumeAccessPointRequest.ID)
+                return nil, userErr
+        }</span>
+
+        <span class="cov8" title="1">volumeAccessPointResponse := volumeAccessPointResult.ToVolumeAccessPointResponse()
+        volumeAccessPointResponse.VolumeID = volumeAccessPointRequest.ShareID
+
+        vpcs.Logger.Info("Successfully retrieved volume AccessPoint", zap.Reflect("volumeAccessPointResponse", volumeAccessPointResponse))
+        return volumeAccessPointResponse, err</span>
+}
+
+func (vpcs *VPCSession) getVolumeAccessPointByVPCID(volumeAccessPointRequest models.ShareTarget) (*provider.VolumeAccessPointResponse, error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of getVolumeAccessPointByVPCID()")
+        defer vpcs.Logger.Debug("Exit from getVolumeAccessPointByVPCID()")
+        vpcs.Logger.Info("Getting VolumeTargetList from VPC provider...")
+        var volumeAccessPointList *models.ShareTargetList
+        var err error
+        err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                volumeAccessPointList, err = vpcs.Apiclient.FileShareService().ListFileShareTargets(volumeAccessPointRequest.ShareID, nil, vpcs.Logger)
+                // Keep retry, until we get the proper volumeAccessPointResponse object
+                if err != nil </span><span class="cov8" title="1">{
+                        return err, skipRetryForObviousErrors(err)
+                }</span>
+                <span class="cov8" title="1">return err, true</span> // stop retry as no error
+        })
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                // API call is failed
+                userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), err, volumeAccessPointRequest.ShareID, volumeAccessPointRequest.VPC.ID)
+                return nil, userErr
+        }</span>
+        // Iterate over the volume AccessPoint list for given volume
+        <span class="cov8" title="1">if volumeAccessPointList != nil </span><span class="cov8" title="1">{
+                for _, volumeAccessPointItem := range volumeAccessPointList.ShareTargets </span><span class="cov8" title="1">{
+                        // Check if VPC ID is matching with requested VPC ID in volume target list
+                        if volumeAccessPointItem.VPC != nil &amp;&amp; volumeAccessPointItem.VPC.ID == volumeAccessPointRequest.VPC.ID </span><span class="cov8" title="1">{
+                                vpcs.Logger.Info("Successfully found volume AccessPoint", zap.Reflect("volumeAccessPoint", volumeAccessPointItem))
+                                volumeAccessPointResponse := volumeAccessPointItem.ToVolumeAccessPointResponse()
+                                volumeAccessPointResponse.VolumeID = volumeAccessPointRequest.ShareID
+
+                                vpcs.Logger.Info("Successfully fetched volume AccessPoint from VPC provider", zap.Reflect("volumeTargetResponse", volumeAccessPointResponse))
+                                return volumeAccessPointResponse, nil
+                        }</span>
+                }
+        }
+        // No volume AccessPoint found in the  list. So return error
+        <span class="cov8" title="1">userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), errors.New("no volume access point found"), volumeAccessPointRequest.ShareID, volumeAccessPointRequest.VPC.ID)
+        vpcs.Logger.Error("Volume AccessPoint not found", zap.Error(err))
+        return nil, userErr</span>
+}
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+// GetVolume gets the file share by using ID
+func (vpcs *VPCSession) GetVolume(id string) (respVolume *provider.Volume, err error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of GetVolume method...")
+        defer vpcs.Logger.Debug("Exit from GetVolume method...")
+
+        vpcs.Logger.Info("Basic validation for volume ID...", zap.Reflect("VolumeID", id))
+        // validating volume ID
+        err = validateVolumeID(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Getting volume details from VPC provider...", zap.Reflect("VolumeID", id))
+
+        var volume *models.Share
+        err = retry(vpcs.Logger, func() error </span><span class="cov8" title="1">{
+                volume, err = vpcs.Apiclient.FileShareService().GetFileShare(id, vpcs.Logger)
+                return err
+        }</span>)
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                return nil, userError.GetUserError("StorageFindFailedWithVolumeId", err, id)
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully retrieved volume details from VPC backend", zap.Reflect("VolumeDetails", volume))
+
+        // Converting volume to lib volume type
+        respVolume = FromProviderToLibVolume(volume, vpcs.Logger)
+        return respVolume, err</span>
+}
+
+// GetVolumeByName ...
+func (vpcs *VPCSession) GetVolumeByName(name string) (respVolume *provider.Volume, err error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of GetVolumeByName method...")
+        defer vpcs.Logger.Debug("Exit from GetVolumeByName method...")
+
+        vpcs.Logger.Info("Basic validation for volume Name...", zap.Reflect("VolumeName", name))
+        if len(name) &lt;= 0 </span><span class="cov8" title="1">{
+                err = userError.GetUserError("InvalidVolumeName", nil, name)
+                return
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Getting volume details from VPC provider...", zap.Reflect("VolumeName", name))
+
+        var volume *models.Share
+        err = retry(vpcs.Logger, func() error </span><span class="cov8" title="1">{
+                volume, err = vpcs.Apiclient.FileShareService().GetFileShareByName(name, vpcs.Logger)
+                return err
+        }</span>)
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                return nil, userError.GetUserError("StorageFindFailedWithVolumeName", err, name)
+        }</span>
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully retrieved volume details from VPC backend", zap.Reflect("VolumeDetails", volume))
+
+        // Converting volume to lib volume type
+        respVolume = FromProviderToLibVolume(volume, vpcs.Logger)
+        return respVolume, err</span>
+}
+
+// validateVolumeID validating basic volume ID
+func validateVolumeID(volumeID string) (err error) <span class="cov8" title="1">{
+        if IsValidVolumeIDFormat(volumeID) </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">err = userError.GetUserError("InvalidVolumeID", nil, volumeID)
+        return</span>
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "fmt"
+        "strings"
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+const (
+        maxLimit                 = 100
+        startVolumeIDNotFoundMsg = "start parameter is not valid"
+)
+
+// ListVolumes list all file shares
+func (vpcs *VPCSession) ListVolumes(limit int, start string, tags map[string]string) (*provider.VolumeList, error) <span class="cov8" title="1">{
+        vpcs.Logger.Info("Entry ListVolumes", zap.Reflect("start", start), zap.Reflect("filters", tags))
+        defer vpcs.Logger.Info("Exit ListVolumes", zap.Reflect("start", start), zap.Reflect("filters", tags))
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "ListVolumes", time.Now())
+
+        if limit &lt; 0 </span><span class="cov8" title="1">{
+                return nil, userError.GetUserError("InvalidListVolumesLimit", nil, limit)
+        }</span>
+
+        <span class="cov8" title="1">if limit &gt; maxLimit </span><span class="cov0" title="0">{
+                vpcs.Logger.Warn(fmt.Sprintf("listVolumes requested max entries of %v, supports values &lt;= %v so defaulting value back to %v", limit, maxLimit, maxLimit))
+                limit = maxLimit
+        }</span>
+
+        <span class="cov8" title="1">filters := &amp;models.ListShareFilters{
+                ResourceGroupID: tags["resource_group.id"],
+                ShareName:       tags["name"],
+        }
+
+        vpcs.Logger.Info("Getting volumes list from VPC provider...", zap.Reflect("start", start), zap.Reflect("filters", filters))
+
+        var volumes *models.ShareList
+        var err error
+        err = retry(vpcs.Logger, func() error </span><span class="cov8" title="1">{
+                volumes, err = vpcs.Apiclient.FileShareService().ListFileShares(limit, start, filters, vpcs.Logger)
+                return err
+        }</span>)
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                if strings.Contains(err.Error(), startVolumeIDNotFoundMsg) </span><span class="cov8" title="1">{
+                        return nil, userError.GetUserError("StartVolumeIDNotFound", err, start)
+                }</span>
+                <span class="cov8" title="1">return nil, userError.GetUserError("ListVolumesFailed", err)</span>
+        }
+
+        <span class="cov8" title="1">vpcs.Logger.Info("Successfully retrieved volumes list from VPC backend", zap.Reflect("VolumesList", volumes))
+
+        var respVolumesList = &amp;provider.VolumeList{}
+        if volumes != nil </span><span class="cov8" title="1">{
+                if volumes.Next != nil </span><span class="cov8" title="1">{
+                        var next string
+                        // "Next":{"href":"https://eu-gb.iaas.cloud.ibm.com/v1/volumes?start=3e898aa7-ac71-4323-952d-a8d741c65a68\u0026limit=1\u0026name=eu-gb-1"}
+                        if strings.Contains(volumes.Next.Href, "start=") </span><span class="cov0" title="0">{
+                                next = strings.Split(strings.Split(volumes.Next.Href, "start=")[1], "\u0026")[0]
+                        }</span> else<span class="cov8" title="1"> {
+                                vpcs.Logger.Warn("Volumes.Next.Href is not in expected format", zap.Reflect("volumes.Next.Href", volumes.Next.Href))
+                        }</span>
+                        <span class="cov8" title="1">respVolumesList.Next = next</span>
+                }
+
+                <span class="cov8" title="1">volumeslist := volumes.Shares
+                if len(volumeslist) &gt; 0 </span><span class="cov8" title="1">{
+                        for _, volItem := range volumeslist </span><span class="cov8" title="1">{
+                                volumeResponse := FromProviderToLibVolume(volItem, vpcs.Logger)
+                                respVolumesList.Volumes = append(respVolumesList.Volumes, volumeResponse)
+                        }</span>
+                }
+        }
+        <span class="cov8" title="1">return respVolumesList, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "context"
+        "errors"
+        "fmt"
+        "net/http"
+        "os"
+        "strings"
+        "time"
+
+        vpcauth "github.com/IBM/ibmcloud-volume-file-vpc/common/auth"
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas"
+        vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
+        "github.com/IBM/ibmcloud-volume-interface/config"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "github.com/IBM/ibmcloud-volume-interface/provider/iam"
+        "github.com/IBM/ibmcloud-volume-interface/provider/local"
+        "go.uber.org/zap"
+)
+
+const (
+        // VPCNextGen ...
+        VPCNextGen = "g2"
+        // PrivatePrefix ...
+        PrivatePrefix = "private-"
+        // BasePrivateURL ...
+        BasePrivateURL = "https://" + PrivatePrefix
+        // HTTPSLength ...
+        HTTPSLength = 8
+        // NEXTGenProvider ...
+        NEXTGenProvider = 2
+)
+
+// VPCFileProvider implements provider.Provider
+type VPCFileProvider struct {
+        timeout        time.Duration
+        Config         *vpcconfig.VPCFileConfig
+        tokenGenerator *tokenGenerator
+        ContextCF      local.ContextCredentialsFactory
+
+        ClientProvider riaas.RegionalAPIClientProvider
+        httpClient     *http.Client
+        APIConfig      riaas.Config
+}
+
+var _ local.Provider = &amp;VPCFileProvider{}
+
+// NewProvider initialises an instance of an IaaS provider.
+func NewProvider(conf *vpcconfig.VPCFileConfig, logger *zap.Logger) (local.Provider, error) <span class="cov8" title="1">{
+        logger.Info("Entering NewProvider")
+
+        if conf.VPCConfig == nil </span><span class="cov0" title="0">{
+                return nil, errors.New("incomplete config for VPCFileProvider")
+        }</span>
+
+        //Do config validation and enable only one generationType (i.e VPC-Classic | VPC-NG)
+        <span class="cov8" title="1">gcConfigFound := (conf.VPCConfig.EndpointURL != "" || conf.VPCConfig.PrivateEndpointURL != "") &amp;&amp; (conf.VPCConfig.TokenExchangeURL != "" || conf.VPCConfig.IKSTokenExchangePrivateURL != "") &amp;&amp; (conf.VPCConfig.APIKey != "") &amp;&amp; (conf.VPCConfig.ResourceGroupID != "")
+        g2ConfigFound := (conf.VPCConfig.G2EndpointPrivateURL != "" || conf.VPCConfig.G2EndpointURL != "") &amp;&amp; (conf.VPCConfig.IKSTokenExchangePrivateURL != "" || conf.VPCConfig.G2TokenExchangeURL != "") &amp;&amp; (conf.VPCConfig.G2APIKey != "") &amp;&amp; (conf.VPCConfig.G2ResourceGroupID != "")
+        //if both config found, look for VPCTypeEnabled, otherwise default to GC
+        //Incase of NG configurations, override the base properties.
+        if (gcConfigFound &amp;&amp; g2ConfigFound &amp;&amp; conf.VPCConfig.VPCTypeEnabled == VPCNextGen) || (!gcConfigFound &amp;&amp; g2ConfigFound) </span><span class="cov0" title="0">{
+                // overwrite the common variable in case of g2 i.e gen2, first preferences would be private endpoint
+                if conf.VPCConfig.G2EndpointPrivateURL != "" </span><span class="cov0" title="0">{
+                        conf.VPCConfig.EndpointURL = conf.VPCConfig.G2EndpointPrivateURL
+                }</span> else<span class="cov0" title="0"> {
+                        conf.VPCConfig.EndpointURL = conf.VPCConfig.G2EndpointURL
+                }</span>
+
+                // update iam based public toke exchange endpoint
+                <span class="cov0" title="0">conf.VPCConfig.TokenExchangeURL = conf.VPCConfig.G2TokenExchangeURL
+
+                conf.VPCConfig.APIKey = conf.VPCConfig.G2APIKey
+                conf.VPCConfig.ResourceGroupID = conf.VPCConfig.G2ResourceGroupID
+
+                //Set API Generation As 2 (if unspecified in config/ENV-VAR)
+                if conf.VPCConfig.G2VPCAPIGeneration &lt;= 0 </span><span class="cov0" title="0">{
+                        conf.VPCConfig.G2VPCAPIGeneration = NEXTGenProvider
+                }</span>
+                <span class="cov0" title="0">conf.VPCConfig.VPCAPIGeneration = conf.VPCConfig.G2VPCAPIGeneration
+
+                //Set the APIVersion Date, it can be different in GC and NG
+                if conf.VPCConfig.G2APIVersion != "" </span><span class="cov0" title="0">{
+                        conf.VPCConfig.APIVersion = conf.VPCConfig.G2APIVersion
+                }</span>
+
+                //set provider-type (this usually comes from the secret)
+                <span class="cov0" title="0">if conf.VPCConfig.VPCBlockProviderType != VPCNextGen </span><span class="cov0" title="0">{
+                        conf.VPCConfig.VPCBlockProviderType = VPCNextGen
+                }</span>
+
+                //Mark this as enabled/active
+                <span class="cov0" title="0">if conf.VPCConfig.VPCTypeEnabled != VPCNextGen </span><span class="cov0" title="0">{
+                        conf.VPCConfig.VPCTypeEnabled = VPCNextGen
+                }</span>
+        }
+
+        <span class="cov8" title="1">contextCF, err := vpcauth.NewVPCContextCredentialsFactory(conf)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">timeoutString := conf.VPCConfig.VPCTimeout
+        if timeoutString == "" || timeoutString == "0s" </span><span class="cov8" title="1">{
+                logger.Info("Using VPC default timeout")
+                timeoutString = "120s"
+        }</span>
+        <span class="cov8" title="1">timeout, err := time.ParseDuration(timeoutString)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">httpClient, err := config.GeneralCAHttpClientWithTimeout(timeout)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Failed to prepare HTTP client", util.ZapError(err))
+                return nil, err
+        }</span>
+
+        // SetRetryParameters sets the retry logic parameters
+        <span class="cov8" title="1">SetRetryParameters(conf.VPCConfig.MaxRetryAttempt, conf.VPCConfig.MaxRetryGap)
+        provider := &amp;VPCFileProvider{
+                timeout:        timeout,
+                Config:         conf,
+                tokenGenerator: &amp;tokenGenerator{config: conf.VPCConfig},
+                ContextCF:      contextCF,
+                httpClient:     httpClient,
+                APIConfig: riaas.Config{
+                        BaseURL:       conf.VPCConfig.EndpointURL,
+                        HTTPClient:    httpClient,
+                        APIVersion:    conf.VPCConfig.APIVersion,
+                        APIGeneration: conf.VPCConfig.VPCAPIGeneration,
+                        ResourceGroup: conf.VPCConfig.ResourceGroupID,
+                },
+        }
+        userError.MessagesEn = userError.InitMessages()
+        return provider, nil</span>
+}
+
+// ContextCredentialsFactory ...
+func (vpcp *VPCFileProvider) ContextCredentialsFactory(zone *string) (local.ContextCredentialsFactory, error) <span class="cov8" title="1">{
+        //  Datacenter name not required by VPC provider implementation
+        return vpcp.ContextCF, nil
+}</span>
+
+// OpenSession opens a session on the provider
+func (vpcp *VPCFileProvider) OpenSession(ctx context.Context, contextCredentials provider.ContextCredentials, ctxLogger *zap.Logger) (provider.Session, error) <span class="cov8" title="1">{
+        ctxLogger.Info("Entering OpenSession")
+        defer metrics.UpdateDurationFromStart(ctxLogger, "OpenSession", time.Now())
+        defer func() </span><span class="cov8" title="1">{
+                ctxLogger.Debug("Exiting OpenSession")
+        }</span>()
+
+        // validate that we have what we need - i.e. valid credentials
+        <span class="cov8" title="1">if contextCredentials.Credential == "" </span><span class="cov8" title="1">{
+                return nil, util.NewError("Error Insufficient Authentication", "No authentication credential provided")
+        }</span>
+
+        <span class="cov8" title="1">if vpcp.Config.ServerConfig.DebugTrace </span><span class="cov8" title="1">{
+                vpcp.APIConfig.DebugWriter = os.Stdout
+        }</span>
+
+        <span class="cov8" title="1">if vpcp.ClientProvider == nil </span><span class="cov8" title="1">{
+                vpcp.ClientProvider = riaas.DefaultRegionalAPIClientProvider{}
+        }</span>
+        <span class="cov8" title="1">ctxLogger.Debug("", zap.Reflect("apiConfig.BaseURL", vpcp.APIConfig.BaseURL))
+
+        if ctx != nil &amp;&amp; ctx.Value(provider.RequestID) != nil </span><span class="cov0" title="0">{
+                // set ContextID only of speicifed in the context
+                vpcp.APIConfig.ContextID = fmt.Sprintf("%v", ctx.Value(provider.RequestID))
+                ctxLogger.Info("", zap.Reflect("apiConfig.ContextID", vpcp.APIConfig.ContextID))
+        }</span>
+        <span class="cov8" title="1">client, err := vpcp.ClientProvider.New(vpcp.APIConfig)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Create a token for all other API calls
+        <span class="cov8" title="1">token, err := getAccessToken(contextCredentials, ctxLogger)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">ctxLogger.Debug("", zap.Reflect("Token", token.Token))
+
+        err = client.Login(token.Token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // Update retry logic default values
+        <span class="cov8" title="1">if vpcp.Config.VPCConfig.MaxRetryAttempt &gt; 0 </span><span class="cov8" title="1">{
+                ctxLogger.Debug("", zap.Reflect("MaxRetryAttempt", vpcp.Config.VPCConfig.MaxRetryAttempt))
+                maxRetryAttempt = vpcp.Config.VPCConfig.MaxRetryAttempt
+        }</span>
+        <span class="cov8" title="1">if vpcp.Config.VPCConfig.MaxRetryGap &gt; 0 </span><span class="cov8" title="1">{
+                ctxLogger.Debug("", zap.Reflect("MaxRetryGap", vpcp.Config.VPCConfig.MaxRetryGap))
+                maxRetryGap = vpcp.Config.VPCConfig.MaxRetryGap
+        }</span>
+
+        <span class="cov8" title="1">vpcSession := &amp;VPCSession{
+                VPCAccountID:       contextCredentials.IAMAccountID,
+                Config:             vpcp.Config,
+                ContextCredentials: contextCredentials,
+                VolumeType:         "vpc-share",
+                Provider:           VPC,
+                Apiclient:          client,
+                Logger:             ctxLogger,
+                APIRetry:           NewFlexyRetryDefault(),
+        }
+
+        return vpcSession, nil</span>
+}
+
+// getAccessToken ...
+func getAccessToken(creds provider.ContextCredentials, logger *zap.Logger) (token *iam.AccessToken, err error) <span class="cov8" title="1">{
+        switch creds.AuthType </span>{
+        case provider.IAMAccessToken:<span class="cov8" title="1">
+                token = &amp;iam.AccessToken{Token: creds.Credential}</span>
+        default:<span class="cov0" title="0">
+                err = errors.New("unknown AuthType")</span>
+        }
+        <span class="cov8" title="1">return</span>
+}
+
+// getPrivateEndpoint ...
+func getPrivateEndpoint(logger *zap.Logger, publicEndPoint string) string <span class="cov8" title="1">{
+        logger.Info("In getPrivateEndpoint, RIaaS public endpoint", zap.Reflect("URL", publicEndPoint))
+        if !strings.Contains(publicEndPoint, PrivatePrefix) </span><span class="cov8" title="1">{
+                if len(publicEndPoint) &gt; HTTPSLength </span><span class="cov8" title="1">{
+                        return BasePrivateURL + publicEndPoint[HTTPSLength:]
+                }</span>
+        } else<span class="cov8" title="1"> {
+                return publicEndPoint
+        }</span>
+        <span class="cov8" title="1">return ""</span>
+}
+
+// UpdateAPIKey ...
+func (vpcp *VPCFileProvider) UpdateAPIKey(conf interface{}, logger *zap.Logger) error <span class="cov8" title="1">{
+        logger.Info("Updating api key in vpc file provider")
+        vpcConfig, ok := conf.(*vpcconfig.VPCFileConfig)
+        if !ok </span><span class="cov8" title="1">{
+                logger.Error("Error fetching vpc file config from interface")
+                return errors.New("error unmarshaling vpc file config")
+        }</span>
+        <span class="cov8" title="1">if vpcp.ContextCF == nil </span><span class="cov8" title="1">{
+                logger.Error("Error updating api key, context credentials is not intiliazed")
+                return errors.New("credentials not initliazed in the provider")
+        }</span>
+        <span class="cov0" title="0">err := vpcp.ContextCF.UpdateAPIKey(vpcConfig.VPCConfig.G2APIKey, logger)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Error updating api key in provider", zap.Error(err))
+                return err
+        }</span>
+        // Updating the api key in VPC file provider
+        <span class="cov0" title="0">vpcp.Config.VPCConfig.APIKey = vpcConfig.VPCConfig.G2APIKey
+        vpcp.Config.VPCConfig.G2APIKey = vpcConfig.VPCConfig.G2APIKey
+        vpcp.tokenGenerator.config.G2APIKey = vpcConfig.VPCConfig.G2APIKey
+        vpcp.tokenGenerator.config.APIKey = vpcConfig.VPCConfig.G2APIKey
+        return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas"
+        vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+
+        "go.uber.org/zap"
+)
+
+// VPCSession implements lib.Session
+type VPCSession struct {
+        provider.DefaultVolumeProvider
+        VPCAccountID       string
+        Config             *vpcconfig.VPCFileConfig
+        ContextCredentials provider.ContextCredentials
+        VolumeType         provider.VolumeType
+        Provider           provider.VolumeProvider
+        Apiclient          riaas.RegionalAPI
+        APIVersion         string
+        Logger             *zap.Logger
+        APIRetry           FlexyRetry
+}
+
+const (
+
+        // VPC storage provider
+        VPC = provider.VolumeProvider("VPC-SHARE")
+        // VolumeType ...
+        VolumeType = provider.VolumeType("vpc-share")
+)
+
+// Close at present does nothing
+func (*VPCSession) Close() {<span class="cov8" title="1">
+        // Do nothing for now
+}</span>
+
+// GetProviderDisplayName returns the name of the VPC provider
+func (vpcs *VPCSession) GetProviderDisplayName() provider.VolumeProvider <span class="cov8" title="1">{
+        return VPC
+}</span>
+
+// ProviderName ...
+func (vpcs *VPCSession) ProviderName() provider.VolumeProvider <span class="cov8" title="1">{
+        return VPC
+}</span>
+
+// Type ...
+func (vpcs *VPCSession) Type() provider.VolumeType <span class="cov8" title="1">{
+        return VolumeType
+}</span>
+</pre>
+		
+		<pre class="file" id="file26" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "crypto/rsa"
+        "errors"
+        "io/ioutil"
+        "path/filepath"
+        "time"
+
+        "github.com/dgrijalva/jwt-go"
+        "go.uber.org/zap"
+
+        "github.com/IBM/ibmcloud-volume-interface/config"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "github.com/IBM/ibmcloud-volume-interface/provider/auth"
+        "github.com/IBM/ibmcloud-volume-interface/provider/local"
+)
+
+// tokenGenerator ...
+type tokenGenerator struct {
+        config *config.VPCProviderConfig
+
+        tokenKID        string
+        tokenTTL        time.Duration
+        tokenBeforeTime time.Duration
+
+        privateKey *rsa.PrivateKey // Secret. Do not export
+}
+
+// readConfig ...
+func (tg *tokenGenerator) readConfig(logger zap.Logger) (err error) <span class="cov8" title="1">{
+        logger.Info("Entering readConfig")
+        defer func() </span><span class="cov8" title="1">{
+                logger.Info("Exiting readConfig", zap.Duration("tokenTTL", tg.tokenTTL), zap.Duration("tokenBeforeTime", tg.tokenBeforeTime), zap.String("tokenKID", tg.tokenKID), local.ZapError(err))
+        }</span>()
+
+        <span class="cov8" title="1">if tg.privateKey != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">path := filepath.Join(GetEtcPath(), tg.tokenKID)
+
+        pem, err := ioutil.ReadFile(filepath.Clean(path))
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Error("Error reading PEM", local.ZapError(err))
+                return
+        }</span>
+
+        <span class="cov0" title="0">privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(pem)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Error parsing PEM", local.ZapError(err))
+                return
+        }</span>
+
+        <span class="cov0" title="0">tg.privateKey = privateKey
+
+        return</span>
+}
+
+// buildToken ...
+func (tg *tokenGenerator) buildToken(contextCredentials provider.ContextCredentials, ts time.Time, logger zap.Logger) (token *jwt.Token, err error) <span class="cov8" title="1">{
+        logger.Info("Entering getJWTToken", zap.Reflect("contextCredentials", contextCredentials))
+        defer func() </span><span class="cov8" title="1">{
+                logger.Info("Exiting getJWTToken", zap.Reflect("token", token), local.ZapError(err))
+        }</span>()
+
+        <span class="cov8" title="1">err = tg.readConfig(logger)
+        if err != nil </span><span class="cov8" title="1">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">claims := jwt.MapClaims{
+                "iss": "armada",
+                "exp": ts.Add(tg.tokenTTL).Unix(),
+                "nbf": ts.Add(tg.tokenBeforeTime).Unix(),
+                "iat": ts.Unix(),
+        }
+
+        switch </span>{
+        case contextCredentials.UserID == "":<span class="cov0" title="0">
+                errStr := "User ID is not configured"
+                logger.Error(errStr)
+                err = errors.New(errStr)
+                return</span>
+
+        case contextCredentials.AuthType == auth.IMSToken:<span class="cov0" title="0">
+                claims["ims_user_id"] = contextCredentials.UserID</span>
+
+        default:<span class="cov0" title="0">
+                claims["ims_username"] = contextCredentials.UserID</span>
+        }
+
+        <span class="cov0" title="0">token = jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+        token.Header["kid"] = tg.tokenKID
+
+        return</span>
+}
+
+// getServiceToken ...
+func (tg *tokenGenerator) getServiceToken(contextCredentials provider.ContextCredentials, logger zap.Logger) (signedToken *string, err error) <span class="cov8" title="1">{
+        token, err := tg.buildToken(contextCredentials, time.Now(), logger)
+        if err != nil </span><span class="cov8" title="1">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">signedString, err := token.SignedString(tg.privateKey)
+        if err != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov0" title="0">signedToken = &amp;signedString
+
+        return</span>
+}
+
+// GetEtcPath returns the path to the etc directory
+func GetEtcPath() string <span class="cov8" title="1">{
+        goPath := config.GetGoPath()
+        srcPath := filepath.Join("src", "github.com", "IBM",
+                "ibmcloud-volume-file-vpc")
+        return filepath.Join(goPath, srcPath, "etc")
+}</span>
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "errors"
+
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+)
+
+// UpdateVolume POSTs to /volumes
+func (vpc *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error <span class="cov8" title="1">{
+        return errors.New("unsupported Operation")
+}</span>
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "strconv"
+        "strings"
+        "time"
+
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+// maxRetryAttempt ...
+var maxRetryAttempt = 10
+
+// maxRetryGap ...
+var maxRetryGap = 60
+
+// retryGap ...
+var retryGap = 10
+
+//ConstantRetryGap ...
+const (
+        ConstantRetryGap = 10 // seconds
+)
+
+var volumeIDPartsCount = 5
+
+//TODO need to introduce file share related to error codes
+var skipErrorCodes = map[string]bool{
+        "shares_profile_iops_not_allowed":   true,
+        "shares_profile_capacity_invalid":   true,
+        "shares_zone_not_found":             true,
+        "shares_bad_request":                true,
+        "shares_resource_group_bad_request": true,
+        "shares_vpc_not_found":              true,
+        "shares_not_found":                  true,
+        "shares_target_not_found":           true,
+        "bad_field":                         true,
+        "shares_name_duplicate":             true,
+        "shares_status_pending":             false,
+        "internal_error":                    false,
+        "invalid_route":                     false,
+        "service_error":                     false,
+}
+
+// retry ...
+func retry(logger *zap.Logger, retryfunc func() error) error <span class="cov8" title="1">{
+        var err error
+
+        for i := 0; i &lt; maxRetryAttempt; i++ </span><span class="cov8" title="1">{
+                if i &gt; 0 </span><span class="cov8" title="1">{
+                        time.Sleep(time.Duration(retryGap) * time.Second)
+                }</span>
+                <span class="cov8" title="1">err = retryfunc()
+                if err != nil </span><span class="cov8" title="1">{
+                        //Skip retry for the below type of Errors
+                        modelError, ok := err.(*models.Error)
+                        if !ok </span><span class="cov8" title="1">{
+                                continue</span>
+                        }
+                        <span class="cov8" title="1">if skipRetry(modelError) </span><span class="cov0" title="0">{
+                                break</span>
+                        }
+                        <span class="cov8" title="1">if i &gt;= 1 </span><span class="cov8" title="1">{
+                                retryGap = 2 * retryGap
+                                if retryGap &gt; maxRetryGap </span><span class="cov8" title="1">{
+                                        retryGap = maxRetryGap
+                                }</span>
+                        }
+                        <span class="cov8" title="1">if (i + 1) &lt; maxRetryAttempt </span><span class="cov8" title="1">{
+                                logger.Info("Error while executing the function. Re-attempting execution ..", zap.Int("attempt..", i+2), zap.Int("retry-gap", retryGap), zap.Int("max-retry-Attempts", maxRetryAttempt), zap.Error(err))
+                        }</span>
+                        <span class="cov8" title="1">continue</span>
+                }
+                <span class="cov8" title="1">return err</span>
+        }
+        <span class="cov8" title="1">return err</span>
+}
+
+// skipRetry skip retry as per listed error codes
+func skipRetry(err *models.Error) bool <span class="cov8" title="1">{
+        for _, errorItem := range err.Errors </span><span class="cov8" title="1">{
+                skipStatus, ok := skipErrorCodes[string(errorItem.Code)]
+                if ok </span><span class="cov8" title="1">{
+                        return skipStatus
+                }</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+// skipRetryForObviousErrors skip retry as per listed error codes
+func skipRetryForObviousErrors(err error) bool <span class="cov8" title="1">{
+
+        // Only for RIaaS attachment related calls error
+        riaasError, ok := err.(*models.Error)
+        if ok </span><span class="cov0" title="0">{
+                return skipRetry(riaasError)
+        }</span>
+        <span class="cov8" title="1">return false</span>
+}
+
+// FlexyRetry ...
+type FlexyRetry struct {
+        maxRetryAttempt int
+        maxRetryGap     int
+}
+
+// NewFlexyRetryDefault ...
+func NewFlexyRetryDefault() FlexyRetry <span class="cov8" title="1">{
+        return FlexyRetry{
+                // Default values as we configuration
+                maxRetryAttempt: maxRetryAttempt,
+                maxRetryGap:     maxRetryGap,
+        }
+}</span>
+
+// NewFlexyRetry ...
+func NewFlexyRetry(maxRtyAtmpt int, maxrRtyGap int) FlexyRetry <span class="cov0" title="0">{
+        return FlexyRetry{
+                maxRetryAttempt: maxRtyAtmpt,
+                maxRetryGap:     maxrRtyGap,
+        }
+}</span>
+
+// FlexyRetry ...
+func (fRetry *FlexyRetry) FlexyRetry(logger *zap.Logger, funcToRetry func() (error, bool)) error <span class="cov8" title="1">{
+        var err error
+        var stopRetry bool
+        for i := 0; i &lt; fRetry.maxRetryAttempt; i++ </span><span class="cov8" title="1">{
+                if i &gt; 0 </span><span class="cov8" title="1">{
+                        time.Sleep(time.Duration(retryGap) * time.Second)
+                }</span>
+                // Call function which required retry, retry is decided by function itself
+                <span class="cov8" title="1">err, stopRetry = funcToRetry()
+                if stopRetry </span><span class="cov8" title="1">{
+                        break</span>
+                }
+
+                // Update retry gap as per exponentioal
+                <span class="cov8" title="1">if i &gt;= 1 </span><span class="cov8" title="1">{
+                        retryGap = 2 * retryGap
+                        if retryGap &gt; fRetry.maxRetryGap </span><span class="cov8" title="1">{
+                                retryGap = fRetry.maxRetryGap
+                        }</span>
+                }
+                <span class="cov8" title="1">if (i + 1) &lt; fRetry.maxRetryAttempt </span><span class="cov8" title="1">{
+                        logger.Info("UNEXPECTED RESULT, Re-attempting execution ..", zap.Int("attempt..", i+2),
+                                zap.Int("retry-gap", retryGap), zap.Int("max-retry-Attempts", fRetry.maxRetryAttempt),
+                                zap.Bool("stopRetry", stopRetry), zap.Error(err))
+                }</span>
+        }
+        <span class="cov8" title="1">return err</span>
+}
+
+// FlexyRetryWithConstGap ...
+func (fRetry *FlexyRetry) FlexyRetryWithConstGap(logger *zap.Logger, funcToRetry func() (error, bool)) error <span class="cov8" title="1">{
+        var err error
+        var stopRetry bool
+        // lets have more number of try for wait for attach and detach specially
+        totalAttempt := fRetry.maxRetryAttempt * 4 // 40 time as per default values i.e 400 seconds
+        for i := 0; i &lt; totalAttempt; i++ </span><span class="cov8" title="1">{
+                if i &gt; 0 </span><span class="cov8" title="1">{
+                        time.Sleep(time.Duration(ConstantRetryGap) * time.Second)
+                }</span>
+                // Call function which required retry, retry is decided by function itself
+                <span class="cov8" title="1">err, stopRetry = funcToRetry()
+                if stopRetry </span><span class="cov8" title="1">{
+                        break</span>
+                }
+
+                <span class="cov8" title="1">if (i + 1) &lt; totalAttempt </span><span class="cov8" title="1">{
+                        logger.Info("UNEXPECTED RESULT from FlexyRetryWithConstGap, Re-attempting execution ..", zap.Int("attempt..", i+2),
+                                zap.Int("retry-gap", ConstantRetryGap), zap.Int("max-retry-Attempts", totalAttempt),
+                                zap.Bool("stopRetry", stopRetry), zap.Error(err))
+                }</span>
+        }
+        <span class="cov8" title="1">return err</span>
+}
+
+// ToInt ...
+func ToInt(valueInInt string) int <span class="cov8" title="1">{
+        value, err := strconv.Atoi(valueInInt)
+        if err != nil </span><span class="cov8" title="1">{
+                return 0
+        }</span>
+        <span class="cov8" title="1">return value</span>
+}
+
+// ToInt64 ...
+func ToInt64(valueInInt string) int64 <span class="cov8" title="1">{
+        value, err := strconv.ParseInt(valueInInt, 10, 64)
+        if err != nil </span><span class="cov8" title="1">{
+                return 0
+        }</span>
+        <span class="cov8" title="1">return value</span>
+}
+
+// FromProviderToLibVolume converting vpc provider share type to generic lib volume type
+func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVolume *provider.Volume) <span class="cov8" title="1">{
+        logger.Debug("Entry of FromProviderToLibVolume method...")
+        defer logger.Debug("Exit from FromProviderToLibVolume method...")
+
+        if vpcVolume == nil </span><span class="cov0" title="0">{
+                logger.Info("Volume details are empty")
+                return
+        }</span>
+
+        <span class="cov8" title="1">if vpcVolume.Zone == nil </span><span class="cov0" title="0">{
+                logger.Info("Volume zone is empty")
+                return
+        }</span>
+
+        <span class="cov8" title="1">logger.Debug("Volume details of VPC client", zap.Reflect("models.Volume", vpcVolume))
+
+        volumeCap := int(vpcVolume.Size)
+        iops := strconv.Itoa(int(vpcVolume.Iops))
+        var createdDate time.Time
+        if vpcVolume.CreatedAt != nil </span><span class="cov8" title="1">{
+                createdDate = *vpcVolume.CreatedAt
+        }</span>
+
+        <span class="cov8" title="1">libVolume = &amp;provider.Volume{
+                VolumeID:     vpcVolume.ID,
+                Provider:     VPC,
+                Capacity:     &amp;volumeCap,
+                Iops:         &amp;iops,
+                VolumeType:   VolumeType,
+                CreationTime: createdDate,
+        }
+        if vpcVolume.Zone != nil </span><span class="cov8" title="1">{
+                libVolume.Az = vpcVolume.Zone.Name
+        }</span>
+        <span class="cov8" title="1">libVolume.CRN = vpcVolume.CRN
+
+        var respAccessPointlist = []provider.VolumeAccessPoint{}
+
+        shareTargetlist := vpcVolume.ShareTargets
+
+        //If there exists no share target return empty list
+        if shareTargetlist == nil || len(*shareTargetlist) == 0 </span><span class="cov8" title="1">{
+                libVolume.VolumeAccessPoints = &amp;respAccessPointlist
+                return
+        }</span>
+
+        <span class="cov8" title="1">for _, shareTargetItem := range *shareTargetlist </span><span class="cov8" title="1">{
+                volumeAccessPointResponse := FromProviderToLibVolumeAccessPoint(&amp;shareTargetItem, logger)
+                respAccessPointlist = append(respAccessPointlist, *volumeAccessPointResponse)
+        }</span>
+
+        <span class="cov8" title="1">libVolume.VolumeAccessPoints = &amp;respAccessPointlist
+        return</span>
+}
+
+// FromProviderToLibVolumeAccessPoint converting vpc provider share target type to generic lib volume accessPoint Type
+func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logger *zap.Logger) (libVolumeAccessPoint *provider.VolumeAccessPoint) <span class="cov8" title="1">{
+        logger.Info("Entry of FromProviderToLibVolumeAccessPoint method...")
+        defer logger.Info("Exit from FromProviderToLibVolumeAccessPoint method...")
+
+        if vpcShareTarget == nil </span><span class="cov0" title="0">{
+                logger.Info("VPC Share Target details are empty")
+                return &amp;provider.VolumeAccessPoint{}
+        }</span>
+
+        <span class="cov8" title="1">logger.Debug("Share Target details of VPC client", zap.Reflect("models.ShareTarget", vpcShareTarget))
+
+        libVolumeAccessPoint = &amp;provider.VolumeAccessPoint{
+                ID:        vpcShareTarget.ID,
+                Href:      vpcShareTarget.Href,
+                Name:      vpcShareTarget.Name,
+                Status:    vpcShareTarget.Status,
+                MountPath: &amp;vpcShareTarget.MountPath,
+                VPC:       vpcShareTarget.VPC,
+                CreatedAt: vpcShareTarget.CreatedAt,
+        }
+
+        if vpcShareTarget.Zone != nil </span><span class="cov8" title="1">{
+                libVolumeAccessPoint.Zone = &amp;provider.Zone{
+                        Name: vpcShareTarget.Zone.Name,
+                        Href: vpcShareTarget.Zone.Href,
+                }
+
+        }</span>
+
+        <span class="cov8" title="1">return</span>
+}
+
+// IsValidVolumeIDFormat validating(gc has 5 parts and NG has 6 parts)
+func IsValidVolumeIDFormat(volID string) bool <span class="cov8" title="1">{
+        parts := strings.Split(volID, "-")
+        return len(parts) &gt;= volumeIDPartsCount
+}</span>
+
+// SetRetryParameters sets the retry logic parameters
+func SetRetryParameters(maxAttempts int, maxGap int) <span class="cov8" title="1">{
+        if maxAttempts &gt; 0 </span><span class="cov8" title="1">{
+                maxRetryAttempt = maxAttempts
+        }</span>
+
+        <span class="cov8" title="1">if maxGap &gt; 0 </span><span class="cov8" title="1">{
+                maxRetryGap = maxGap
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file29" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "go.uber.org/zap"
+)
+
+// WaitForCreateVolumeAccessPoint checks if file share target is created and is stable state
+func (vpcs *VPCSession) WaitForCreateVolumeAccessPoint(AccessPointRequest provider.VolumeAccessPointRequest) (*provider.VolumeAccessPointResponse, error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of WaitForCreateVolumeAccessPoint file method...")
+        defer vpcs.Logger.Debug("Exit from WaitForCreateVolumeAccessPoint file method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "WaitForCreateVolumeAccessPoint", time.Now())
+
+        vpcs.Logger.Info("Getting volume target details from VPC file provider...", zap.Reflect("VolumeID", AccessPointRequest.VolumeID), zap.Reflect("VPCID", AccessPointRequest.VPCID))
+
+        vpcs.Logger.Info("Validating basic inputs for WaitForCreateVolumeAccessPoint method...", zap.Reflect("volumeAccessPointTemplate", AccessPointRequest))
+        err := vpcs.validateVolumeAccessPointRequest(AccessPointRequest)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var currentVolAccessPoint *provider.VolumeAccessPointResponse
+        err = vpcs.APIRetry.FlexyRetryWithConstGap(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                currentVolAccessPoint, err = vpcs.GetVolumeAccessPoint(AccessPointRequest)
+                if err != nil </span><span class="cov8" title="1">{
+                        // Need to stop retry as there is an error while getting volume target
+                        // considering that vpcs.GetVolumeAccessPoint already re-tried
+                        return err, true
+                }</span>
+                // Stop retry in case of volume target is stable
+                <span class="cov8" title="1">return err, currentVolAccessPoint != nil &amp;&amp; currentVolAccessPoint.Status == StatusStable</span>
+        })
+
+        // Success case, checks are required in case of timeout happened and volume is still not attached state
+        <span class="cov8" title="1">if err == nil &amp;&amp; (currentVolAccessPoint != nil &amp;&amp; currentVolAccessPoint.Status == StatusStable) </span><span class="cov8" title="1">{
+                return currentVolAccessPoint, nil
+        }</span>
+
+        <span class="cov8" title="1">userErr := userError.GetUserError(string(userError.CreateVolumeAccessPointTimedOut), nil, AccessPointRequest.VolumeID, AccessPointRequest.AccessPointID)
+        vpcs.Logger.Info("Wait for AccessPoint creation timed out", zap.Error(userErr))
+
+        return nil, userErr</span>
+}
+</pre>
+		
+		<pre class="file" id="file30" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
+        "go.uber.org/zap"
+)
+
+// WaitForDeleteVolumeAccessPoint waits for file share target to be deleted. e.g waits till no file share target is found
+func (vpcs *VPCSession) WaitForDeleteVolumeAccessPoint(deleteAccessPointRequest provider.VolumeAccessPointRequest) error <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of WaitForDeleteVolumeAccessPoint method...")
+        defer vpcs.Logger.Debug("Exit from WaitForDeleteVolumeAccessPoint method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "WaitForDeleteVolumeAccessPoint", time.Now())
+        var err error
+        vpcs.Logger.Info("Validating basic inputs for WaitForDeleteVolumeAccessPoint method...", zap.Reflect("deleteAccessPointRequest", deleteAccessPointRequest))
+        err = vpcs.validateVolumeAccessPointRequest(deleteAccessPointRequest)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = vpcs.APIRetry.FlexyRetryWithConstGap(vpcs.Logger, func() (error, bool) </span><span class="cov8" title="1">{
+                _, err := vpcs.GetVolumeAccessPoint(deleteAccessPointRequest)
+                // In case of error we should not retry as there are two conditions for error
+                // 1- some issues at endpoint side --&gt; Which is already covered in vpcs.GetVolumeAccessPoint
+                // 2- AccessPoint not found i.e err != nil --&gt; in this case we should not re-try as it has been deleted
+                if err != nil </span><span class="cov8" title="1">{
+                        return err, true
+                }</span>
+                <span class="cov8" title="1">return err, false</span>
+        })
+
+        // Could be a success case
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                if errMsg, ok := err.(util.Message); ok </span><span class="cov8" title="1">{
+                        if errMsg.Code == userError.AccessPointWithAPIDFindFailed </span><span class="cov8" title="1">{
+                                vpcs.Logger.Info("Volume AccessPoint delete is complete")
+                                return nil
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">userErr := userError.GetUserError(string(userError.DeleteVolumeAccessPointTimedOut), err, deleteAccessPointRequest.VolumeID, deleteAccessPointRequest.AccessPointID)
+        vpcs.Logger.Info("Wait for delete AccessPoint timed out", zap.Error(userErr))
+        return userErr</span>
+}
+</pre>
+		
+		<pre class="file" id="file31" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package provider ...
+package provider
+
+import (
+        "time"
+
+        userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+        "github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+        "go.uber.org/zap"
+)
+
+// WaitForValidVolumeState checks the file share for valid status
+func WaitForValidVolumeState(vpcs *VPCSession, volumeID string) (err error) <span class="cov8" title="1">{
+        vpcs.Logger.Debug("Entry of WaitForValidVolumeState file method...")
+        defer vpcs.Logger.Debug("Exit from WaitForValidVolumeState file method...")
+        defer metrics.UpdateDurationFromStart(vpcs.Logger, "WaitForValidVolumeState", time.Now())
+
+        vpcs.Logger.Info("Getting file share details from VPC file provider...", zap.Reflect("VolumeID", volumeID))
+
+        var volume *models.Share
+        err = retry(vpcs.Logger, func() error </span><span class="cov8" title="1">{
+                volume, err = vpcs.Apiclient.FileShareService().GetFileShare(volumeID, vpcs.Logger)
+                if err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">vpcs.Logger.Info("Getting file share details from VPC provider...", zap.Reflect("volume", volume))
+                if volume != nil &amp;&amp; volume.Status == StatusStable </span><span class="cov8" title="1">{
+                        vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", volume))
+                        return nil
+                }</span>
+                <span class="cov8" title="1">return userError.GetUserError("VolumeNotInValidState", err, volumeID)</span>
+        })
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov8" title="1">{
+                vpcs.Logger.Info("Volume could not get valid (stable) state", zap.Reflect("VolumeDetails", volume))
+                return userError.GetUserError("VolumeNotInValidState", err, volumeID)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file32" style="display: none">/*
+Copyright 2018 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package ibmcloudprovider
+
+import (
+        "bytes"
+        "testing"
+
+        "github.com/IBM/ibm-csi-common/pkg/utils"
+        provider_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
+        vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
+        "github.com/IBM/ibmcloud-volume-interface/config"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider/fake"
+        "github.com/IBM/ibmcloud-volume-interface/provider/local"
+        "go.uber.org/zap"
+        "go.uber.org/zap/zapcore"
+        "golang.org/x/net/context"
+)
+
+const (
+        // TestProviderAccountID ...
+        TestProviderAccountID = "test-provider-account"
+
+        // TestProviderAccessToken ...
+        TestProviderAccessToken = "test-provider-access-token"
+
+        // TestIKSAccountID ...
+        TestIKSAccountID = "test-iks-account"
+
+        // TestZone ...
+        TestZone = "test-zone"
+
+        // IAMURL ...
+        IAMURL = "test-iam-url"
+
+        // IAMClientID ...
+        IAMClientID = "test-iam_client_id"
+
+        // IAMClientSecret ...
+        IAMClientSecret = "test-iam_client_secret"
+
+        // IAMAPIKey ...
+        IAMAPIKey = "test-iam_api_key"
+
+        // RefreshToken ...
+        RefreshToken = "test-refresh_token"
+
+        // TestEndpointURL ...
+        TestEndpointURL = "http://some_endpoint"
+
+        // TestAPIVersion ...
+        TestAPIVersion = "2019-07-02"
+)
+
+// GetTestLogger ...
+func GetTestLogger(t *testing.T) (logger *zap.Logger, teardown func()) <span class="cov8" title="1">{
+
+        atom := zap.NewAtomicLevel()
+        atom.SetLevel(zap.DebugLevel)
+
+        encoderCfg := zap.NewProductionEncoderConfig()
+        encoderCfg.TimeKey = "timestamp"
+        encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+
+        buf := &amp;bytes.Buffer{}
+
+        logger = zap.New(
+                zapcore.NewCore(
+                        zapcore.NewJSONEncoder(encoderCfg),
+                        zapcore.AddSync(buf),
+                        atom,
+                ),
+                zap.AddCaller(),
+        )
+
+        teardown = func() </span><span class="cov8" title="1">{
+                _ = logger.Sync()
+                if t.Failed() </span><span class="cov0" title="0">{
+                        t.Log(buf)
+                }</span>
+        }
+        <span class="cov8" title="1">return</span>
+}
+
+// GetTestProvider ...
+func GetTestProvider(t *testing.T, logger *zap.Logger) (*IBMCloudStorageProvider, error) <span class="cov8" title="1">{
+        logger.Info("GetTestProvider-Getting New test Provider")
+        // vpcFileConfig struct
+        vpcFileConfig := &amp;vpcconfig.VPCFileConfig{
+                VPCConfig: &amp;config.VPCProviderConfig{
+                        Enabled:         true,
+                        VPCVolumeType:   "vpc-share",
+                        EndpointURL:     TestEndpointURL,
+                        VPCTimeout:      "30s",
+                        MaxRetryAttempt: 5,
+                        MaxRetryGap:     10,
+                        APIVersion:      TestAPIVersion,
+                        IamClientID:     IAMClientID,
+                        IamClientSecret: IAMClientSecret,
+                },
+                ServerConfig: &amp;config.ServerConfig{
+                        DebugTrace: true,
+                },
+        }
+        // full config struct
+        conf := &amp;config.Config{
+                Server: &amp;config.ServerConfig{
+                        DebugTrace: true,
+                },
+                Bluemix: &amp;config.BluemixConfig{
+                        IamURL:          IAMURL,
+                        IamClientID:     IAMClientID,
+                        IamClientSecret: IAMClientSecret,
+                        IamAPIKey:       IAMClientSecret,
+                        RefreshToken:    RefreshToken,
+                },
+                VPC: &amp;config.VPCProviderConfig{
+                        Enabled:         true,
+                        VPCVolumeType:   "vpc-share",
+                        EndpointURL:     TestEndpointURL,
+                        VPCTimeout:      "30s",
+                        MaxRetryAttempt: 5,
+                        MaxRetryGap:     10,
+                        APIVersion:      TestAPIVersion,
+                },
+                IKS: &amp;config.IKSConfig{
+                        Enabled: true,
+                },
+        }
+
+        // Prepare provider registry
+        registry, err := provider_util.InitProviders(vpcFileConfig, logger)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Fatal("Error configuring providers", local.ZapError(err))
+        }</span>
+
+        <span class="cov8" title="1">cloudProvider := &amp;IBMCloudStorageProvider{
+                ProviderName:   "vpc-share",
+                ProviderConfig: conf,
+                Registry:       registry,
+                ClusterInfo:    nil,
+        }
+        logger.Info("Successfully read provider configuration...")
+        return cloudProvider, nil</span>
+}
+
+// FakeIBMCloudStorageProvider Provider
+type FakeIBMCloudStorageProvider struct {
+        ProviderName   string
+        ProviderConfig *config.Config
+        ClusterInfo    *utils.ClusterInfo
+        fakeSession    *fake.FakeSession
+}
+
+var _ CloudProviderInterface = &amp;FakeIBMCloudStorageProvider{}
+
+// NewFakeIBMCloudStorageProvider ...
+func NewFakeIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*FakeIBMCloudStorageProvider, error) <span class="cov8" title="1">{
+        return &amp;FakeIBMCloudStorageProvider{ProviderName: "FakeIBMCloudStorageProvider",
+                ProviderConfig: &amp;config.Config{VPC: &amp;config.VPCProviderConfig{VPCVolumeType: "VPCFakeProvider"}},
+                ClusterInfo:    &amp;utils.ClusterInfo{}, fakeSession: &amp;fake.FakeSession{}}, nil
+}</span>
+
+// GetProviderSession ...
+func (ficp *FakeIBMCloudStorageProvider) GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error) <span class="cov8" title="1">{
+        return ficp.fakeSession, nil
+}</span>
+
+// GetConfig ...
+func (ficp *FakeIBMCloudStorageProvider) GetConfig() *config.Config <span class="cov8" title="1">{
+        return ficp.ProviderConfig
+}</span>
+
+// GetClusterInfo ...
+func (ficp *FakeIBMCloudStorageProvider) GetClusterInfo() *utils.ClusterInfo <span class="cov8" title="1">{
+        return ficp.ClusterInfo
+}</span>
+
+// UpdateAPIKey ...
+func (ficp *FakeIBMCloudStorageProvider) UpdateAPIKey(logger *zap.Logger) error <span class="cov0" title="0">{
+        return nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file33" style="display: none">/**
+ * Copyright 2021 IBM Corp.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Package ibmcloudprovider ...
+package ibmcloudprovider
+
+import (
+        "errors"
+        "fmt"
+        "os"
+        "path/filepath"
+        "strings"
+        "time"
+
+        "github.com/BurntSushi/toml"
+        "github.com/IBM/ibm-csi-common/pkg/messages"
+        "github.com/IBM/ibm-csi-common/pkg/utils"
+        "github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
+        provider_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
+        vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
+        "github.com/IBM/ibmcloud-volume-interface/config"
+        "github.com/IBM/ibmcloud-volume-interface/lib/provider"
+        "github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
+        "github.com/IBM/ibmcloud-volume-interface/provider/local"
+        "go.uber.org/zap"
+        "golang.org/x/net/context"
+)
+
+// IBMCloudStorageProvider Provider
+type IBMCloudStorageProvider struct {
+        ProviderName   string
+        ProviderConfig *config.Config
+        Registry       registry.Providers
+        ClusterInfo    *utils.ClusterInfo
+}
+
+var _ CloudProviderInterface = &amp;IBMCloudStorageProvider{}
+
+// NewIBMCloudStorageProvider ...
+func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMCloudStorageProvider, error) <span class="cov8" title="1">{
+        logger.Info("NewIBMCloudStorageProvider-Reading provider configuration...")
+        // Load config file
+        conf, err := config.ReadConfig(configPath, logger)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Error loading configuration")
+                return nil, err
+        }</span>
+        // Get only VPC_API_VERSION, in "2019-07-02T00:00:00.000Z" case vpc need only 2019-07-02"
+        <span class="cov8" title="1">dateTime, err := time.Parse(time.RFC3339, conf.VPC.APIVersion)
+        if err == nil </span><span class="cov0" title="0">{
+                conf.VPC.APIVersion = fmt.Sprintf("%d-%02d-%02d", dateTime.Year(), dateTime.Month(), dateTime.Day())
+        }</span> else<span class="cov8" title="1"> {
+                logger.Warn("Failed to parse VPC_API_VERSION, setting default value")
+                conf.VPC.APIVersion = "2021-04-20" // setting default values
+        }</span>
+
+        <span class="cov8" title="1">logger.Info("Fetching clusterInfo")
+        clusterInfo, err := utils.NewClusterInfo(logger)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Error("Unable to load ClusterInfo", local.ZapError(err))
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">logger.Info("Fetched clusterInfo..")
+        if conf.Bluemix.Encryption || conf.VPC.Encryption </span><span class="cov8" title="1">{
+                if os.Getenv("IKS_ENABLED") == "True" </span><span class="cov0" title="0">{
+                        // api Key if encryption is enabled
+                        logger.Info("Creating NewAPIKeyImpl...")
+                        apiKeyImp, err := utils.NewAPIKeyImpl(logger)
+                        if err != nil </span><span class="cov0" title="0">{
+                                logger.Error("Unable to create API key getter", local.ZapError(err))
+                                return nil, err
+                        }</span>
+                        <span class="cov0" title="0">logger.Info("Created NewAPIKeyImpl...")
+                        err = apiKeyImp.UpdateIAMKeys(conf)
+                        if err != nil </span><span class="cov0" title="0">{
+                                logger.Error("Unable to get API key", local.ZapError(err))
+                                return nil, err
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">vpcFileConfig := &amp;vpcconfig.VPCFileConfig{
+                VPCConfig:    conf.VPC,
+                ServerConfig: conf.Server,
+        }
+
+        // Prepare provider registry
+        registry, err := provider_util.InitProviders(vpcFileConfig, logger)
+        if err != nil </span><span class="cov8" title="1">{
+                logger.Error("Error configuring providers", local.ZapError(err))
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">providerName := conf.VPC.VPCVolumeType
+
+        cloudProvider := &amp;IBMCloudStorageProvider{
+                ProviderName:   providerName,
+                ProviderConfig: conf,
+                Registry:       registry,
+                ClusterInfo:    clusterInfo,
+        }
+        logger.Info("Successfully read provider configuration")
+        return cloudProvider, nil</span>
+}
+
+// GetProviderSession ...
+func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error) <span class="cov8" title="1">{
+        logger.Info("IBMCloudStorageProvider-GetProviderSession...")
+
+        prov, err := icp.Registry.Get(icp.ProviderName)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Not able to get the said provider, might be its not registered", local.ZapError(err))
+                return nil, err
+        }</span>
+
+        // Populating vpcfileConfig which is used to open session
+        <span class="cov8" title="1">vpcfileConfig := &amp;vpcconfig.VPCFileConfig{
+                VPCConfig:    icp.ProviderConfig.VPC,
+                ServerConfig: icp.ProviderConfig.Server,
+        }
+
+        for retryCount := 0; retryCount &lt; utils.MaxRetryAttemptForSessions; retryCount++ </span><span class="cov8" title="1">{
+                session, _, err := provider_util.OpenProviderSessionWithContext(ctx, prov, vpcfileConfig, icp.ProviderName, logger)
+                if err == nil </span><span class="cov0" title="0">{
+                        logger.Info("Successfully got the provider session", zap.Reflect("ProviderName", session.ProviderName()))
+                        return session, nil
+                }</span>
+                <span class="cov8" title="1">logger.Error("Failed to get provider session", zap.Reflect("Error", err))
+                // In the second retry, if there's an error, it will be returned without the need for validating it further.
+                if retryCount == 1 </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                // If the error is related to invalid api key or invalid user, update api key will be called
+                <span class="cov8" title="1">if providerError, ok := err.(provider.Error); ok &amp;&amp; providerError.Code() == reasoncode.ErrorFailedTokenExchange &amp;&amp; (strings.Contains(strings.ToLower(providerError.Error()), messages.APIKeyNotFound) || strings.Contains(strings.ToLower(providerError.Error()), messages.UserNotFound)) </span><span class="cov0" title="0">{
+                        // Waiting for minute expecting the API key to be updated in config
+                        time.Sleep(time.Minute * 1)
+                        err := icp.UpdateAPIKey(logger)
+                        if err != nil </span><span class="cov0" title="0">{
+                                logger.Error("Failed to update api key in cloud storage provider", zap.Error(err))
+                                return nil, err
+                        }</span>
+                        // Updating the vpc block config with the newly read api key which is further used open provider session in the 2nd retry
+                        <span class="cov0" title="0">vpcfileConfig.VPCConfig.APIKey = icp.ProviderConfig.VPC.G2APIKey
+                        vpcfileConfig.VPCConfig.G2APIKey = icp.ProviderConfig.VPC.G2APIKey
+                        // Continuing the open provider session in next attempt after updating the api key
+                        continue</span>
+                }
+                // returning error if it isn't related to invalid api key/user
+                <span class="cov8" title="1">return nil, err</span>
+        }
+
+        <span class="cov0" title="0">return nil, errors.New(messages.ErrAPIKeyNotFound)</span>
+}
+
+// GetConfig ...
+func (icp *IBMCloudStorageProvider) GetConfig() *config.Config <span class="cov8" title="1">{
+        return icp.ProviderConfig
+}</span>
+
+// GetClusterInfo ...
+func (icp *IBMCloudStorageProvider) GetClusterInfo() *utils.ClusterInfo <span class="cov8" title="1">{
+        return icp.ClusterInfo
+}</span>
+
+// UpdateAPIKey ...
+func (icp *IBMCloudStorageProvider) UpdateAPIKey(logger *zap.Logger) error <span class="cov8" title="1">{
+        logger.Info("Updating API key in cloud storage provider")
+        // Populating vpc file config structure, which will be used for updating vpc file provider
+        vpcfileConfig := &amp;vpcconfig.VPCFileConfig{
+                VPCConfig:    icp.ProviderConfig.VPC,
+                ServerConfig: icp.ProviderConfig.Server,
+        }
+        // Storing a backup of the existing api key, to make sure the newly read api key isn't the same as the old one
+        // Hence avoiding fetching session with the same api key again
+        vpcAPIKey := vpcfileConfig.VPCConfig.G2APIKey
+
+        if icp.ProviderConfig.IKS != nil &amp;&amp; (icp.ProviderConfig.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True") &amp;&amp; icp.ProviderConfig.VPC.Encryption </span><span class="cov0" title="0">{
+                apiKeyImp, err := utils.NewAPIKeyImpl(logger)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Error("Unable to create API key getter", zap.Reflect("Error", err))
+                        return err
+                }</span>
+                <span class="cov0" title="0">logger.Info("Created NewAPIKeyImpl...")
+                // Call to update cloud storage provider with api key
+                err = apiKeyImp.UpdateIAMKeys(icp.ProviderConfig)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Error("Unable to get API key", local.ZapError(err))
+                        return err
+                }</span>
+                // If the retrieved API key is the same as previous one, return error
+                <span class="cov0" title="0">if vpcAPIKey == icp.ProviderConfig.VPC.G2APIKey </span><span class="cov0" title="0">{
+                        logger.Error("API key is not reset")
+                        return errors.New(messages.ErrAPIKeyNotFound)
+                }</span>
+                // Updating the api key in vpc block config which will further be used to update the provider
+                <span class="cov0" title="0">vpcfileConfig.VPCConfig.APIKey = icp.ProviderConfig.VPC.G2APIKey
+                vpcfileConfig.VPCConfig.G2APIKey = icp.ProviderConfig.VPC.G2APIKey</span>
+        } else<span class="cov8" title="1"> {
+                // Reading config again to read the api key
+                conf := new(config.Config)
+                configPath := filepath.Join(config.GetConfPathDir(), utils.ConfigFileName)
+                _, err := toml.DecodeFile(configPath, conf)
+                if err != nil </span><span class="cov8" title="1">{
+                        logger.Error("Failed to parse config file", zap.Error(err))
+                        return err
+                }</span>
+
+                // If the retrieved API key is the same as previous one, return error
+                <span class="cov0" title="0">if vpcAPIKey == conf.VPC.G2APIKey </span><span class="cov0" title="0">{
+                        logger.Error("API is not reset")
+                        return errors.New(messages.ErrAPIKeyNotFound)
+                }</span>
+                // Updating the api key in cloud storage provider and vpc block config which will further be used to update the provider
+                <span class="cov0" title="0">icp.ProviderConfig.VPC.APIKey = conf.VPC.APIKey
+                icp.ProviderConfig.VPC.G2APIKey = conf.VPC.G2APIKey
+                vpcfileConfig.VPCConfig.APIKey = conf.VPC.G2APIKey
+                vpcfileConfig.VPCConfig.G2APIKey = conf.VPC.G2APIKey</span>
+        }
+
+        <span class="cov0" title="0">prov, err := icp.Registry.Get(icp.ProviderName)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Not able to get the said provider, it might not registered", local.ZapError(err))
+                return errors.New(messages.ErrUpdatingAPIKey)
+        }</span>
+
+        // Updating the api key in provider using the updated vpc block config
+        <span class="cov0" title="0">err = prov.UpdateAPIKey(vpcfileConfig, logger)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error("Failed to update API key in the provider", local.ZapError(err))
+                return errors.New(messages.ErrUpdatingAPIKey)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
