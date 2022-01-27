@@ -51,6 +51,13 @@ var messagesEn = map[string]util.Message{
 		RC:          500,
 		Action:      "Verify that the volume ID exists. Run 'ibmcloud is volumes' to list available volumes in your account. If the ID is correct, try to delete the volume with the 'ibmcloud is volume-delete' command. ",
 	},
+	"FailedToExpandVolume": {
+		Code:        "FailedToExpandVolume",
+		Description: "The volume ID '%d' could not be expanded from your VPC.",
+		Type:        util.ExpansionFailed,
+		RC:          500,
+		Action:      "Verify that the volume ID exists. If the ID is correct, check that expected capacity is valid and supported",
+	},
 	"FailedToUpdateVolume": {
 		Code:        "FailedToUpdateVolume",
 		Description: "The volume ID '%d' could not be updated",
