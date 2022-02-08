@@ -74,10 +74,10 @@ var messagesEn = map[string]util.Message{
 	},
 	"AccessPointWithAPIDFindFailed": {
 		Code:        AccessPointWithAPIDFindFailed,
-		Description: "No mount target could be found for the specified file share ID '%s' and mount point ID '%s'",
+		Description: "No mount target could be found for the specified file share ID '%s' and mount target ID '%s'",
 		Type:        util.VolumeAccessPointFindFailed,
 		RC:          400,
-		Action:      "Verify that a mount point for your file share exists. Run `ibmcloud is share-targets <SHARE_ID>` to list all mount targets for a file share. Check if file share ID and mount target ID is valid",
+		Action:      "Verify that a mount target for your file share exists. Run `ibmcloud is share-targets <SHARE_ID>` to list all mount targets for a file share. Check if file share ID and mount target ID is valid",
 	},
 	"AccessPointWithVPCIDFindFailed": {
 		Code:        AccessPointWithVPCIDFindFailed,
@@ -88,7 +88,7 @@ var messagesEn = map[string]util.Message{
 	},
 	"CreateVolumeAccessPointFailed": {
 		Code:        CreateVolumeAccessPointFailed,
-		Description: "The file share ID '%s' could not create mount taregt for VPC ID %s.",
+		Description: "The file share ID '%s' could not create mount target for VPC ID %s.",
 		Type:        util.CreateVolumeAccessPointFailed,
 		RC:          500,
 		Action:      "Verify that the file share ID and VPC ID exist.",
