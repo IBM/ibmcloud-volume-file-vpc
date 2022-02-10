@@ -5,11 +5,12 @@ go 1.16
 require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibm-csi-common v1.0.0-beta12
-	github.com/IBM/ibmcloud-volume-interface v1.0.0-beta9
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/IBM/ibm-csi-common v1.0.0-beta15
+	github.com/IBM/ibmcloud-volume-interface v1.0.0-beta10
 	github.com/fatih/structs v1.1.0
-	github.com/satori/go.uuid v1.2.0
+	github.com/gofrs/uuid v4.2.0+incompatible
+	github.com/golang-jwt/jwt/v4 v4.2.0
+	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0 // indirect
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
