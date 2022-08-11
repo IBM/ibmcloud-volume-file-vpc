@@ -28,8 +28,9 @@ import (
 )
 
 const (
-	minSize = 10    //10 GB
-	maxSize = 16000 //16 TB
+	minSize       = 10    //10 GB
+	maxSize       = 16000 //16 TB
+	customProfile = "custom-iops"
 )
 
 // CreateVolume creates file share
@@ -39,18 +40,18 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "CreateVolume", time.Now())
 
 	vpcs.Logger.Info("Basic validation for CreateVolume request... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
-	resourceGroup, err := validateVolumeRequest(volumeRequest)
+	resourceGroup, iops, err := validateVolumeRequest(volumeRequest)
 	if err != nil {
 		return nil, err
 	}
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
 
 	// Build the share template to send to backend
-	//TODO currently IOPS not supported as part of file share request
 	shareTemplate := &models.Share{
 		Name:          *volumeRequest.Name,
 		Size:          int64(*volumeRequest.Capacity),
 		InitialOwner:  (*models.InitialOwner)(volumeRequest.InitialOwner),
+		Iops:          iops,
 		ResourceGroup: &resourceGroup,
 		Profile: &models.Profile{
 			Name: volumeRequest.VPCVolume.Profile.Name,
@@ -102,31 +103,44 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 }
 
 // validateVolumeRequest validating volume request
-func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup, error) {
+func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup, int64, error) {
 	resourceGroup := models.ResourceGroup{}
+	var iops int64
+	iops = 0
 
 	// Volume name should not be empty
 	if volumeRequest.Name == nil {
-		return resourceGroup, userError.GetUserError("InvalidVolumeName", nil, nil)
+		return resourceGroup, iops, userError.GetUserError("InvalidVolumeName", nil, nil)
 	} else if len(*volumeRequest.Name) == 0 {
-		return resourceGroup, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
+		return resourceGroup, iops, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
 	}
 
 	// Capacity should not be empty
 	if volumeRequest.Capacity == nil {
-		return resourceGroup, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
+		return resourceGroup, iops, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
 	} else if *volumeRequest.Capacity < minSize {
-		return resourceGroup, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
+		return resourceGroup, iops, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
+	}
+
+	// Read user provided error, no harm to pass the 0 values to RIaaS in case of tiered profiles
+	if volumeRequest.Iops != nil {
+		iops = ToInt64(*volumeRequest.Iops)
+	}
+	if volumeRequest.VPCVolume.Profile == nil {
+		return resourceGroup, iops, userError.GetUserError("VolumeProfileEmpty", nil)
+	}
+	if volumeRequest.VPCVolume.Profile.Name != customProfile && iops > 0 {
+		return resourceGroup, iops, userError.GetUserError("VolumeProfileIopsInvalid", nil)
 	}
 
 	// validate and add resource group ID or Name whichever is provided by user
 	if volumeRequest.VPCVolume.ResourceGroup == nil {
-		return resourceGroup, userError.GetUserError("EmptyResourceGroup", nil)
+		return resourceGroup, iops, userError.GetUserError("EmptyResourceGroup", nil)
 	}
 
 	// validate and add resource group ID or Name whichever is provided by user
 	if len(volumeRequest.VPCVolume.ResourceGroup.ID) == 0 && len(volumeRequest.VPCVolume.ResourceGroup.Name) == 0 {
-		return resourceGroup, userError.GetUserError("EmptyResourceGroupIDandName", nil)
+		return resourceGroup, iops, userError.GetUserError("EmptyResourceGroupIDandName", nil)
 	}
 
 	if len(volumeRequest.VPCVolume.ResourceGroup.ID) > 0 {
@@ -136,5 +150,5 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 		// get the resource group ID from resource group name as Name is not supported by RIaaS
 		resourceGroup.Name = volumeRequest.VPCVolume.ResourceGroup.Name
 	}
-	return resourceGroup, nil
+	return resourceGroup, iops, nil
 }
