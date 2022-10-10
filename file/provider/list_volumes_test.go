@@ -205,9 +205,7 @@ func TestListVolumes(t *testing.T) {
 			limit:        -1,
 			verify: func(t *testing.T, next_token string, volumes *provider.VolumeList, err error) {
 				assert.Nil(t, volumes)
-				if assert.Error(t, err) {
-					assert.Contains(t, err.Error(), "The value '-1' specified in the limit parameter of the list file share call is not valid")
-				}
+				assert.Error(t, err)
 			},
 		}, {
 			testCaseName:       "Invalid start volume ID",
@@ -216,9 +214,7 @@ func TestListVolumes(t *testing.T) {
 			expectedReasonCode: "ErrorUnclassified",
 			verify: func(t *testing.T, next_token string, volumes *provider.VolumeList, err error) {
 				assert.Nil(t, volumes)
-				if assert.Error(t, err) {
-					assert.Contains(t, err.Error(), "The file share ID 'invalid-start-vol-id' specified in the start parameter of the list volume call could not be found")
-				}
+				assert.Error(t, err)
 			},
 		},
 	}

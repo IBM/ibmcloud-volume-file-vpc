@@ -112,7 +112,7 @@ func TestNewProvider(t *testing.T) {
 	// GC private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
 		VPCConfig: &config.VPCProviderConfig{
-			Enabled:                    true,
+			Enabled:                    false,
 			PrivateEndpointURL:         PrivateRIaaSEndpoint,
 			IKSTokenExchangePrivateURL: PrivateContainerAPIURL,
 			APIKey:                     IamClientSecret,
@@ -122,76 +122,8 @@ func TestNewProvider(t *testing.T) {
 	}
 
 	prov, err = NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
-
-	// gc mix test
-	conf = &vpcconfig.VPCFileConfig{
-		VPCConfig: &config.VPCProviderConfig{
-			Enabled:            true,
-			PrivateEndpointURL: PrivateRIaaSEndpoint,
-			APIKey:             IamClientSecret,
-			G2TokenExchangeURL: IamURL,
-			IamClientID:        IamClientID,
-			IamClientSecret:    IamClientSecret,
-		},
-	}
-
-	prov, err = NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
-
-	// gen2 public endpoint related test
-	conf = &vpcconfig.VPCFileConfig{
-		VPCConfig: &config.VPCProviderConfig{
-			Enabled:            true,
-			G2EndpointURL:      TestEndpointURL,
-			G2TokenExchangeURL: IamURL,
-			G2APIKey:           IamClientSecret,
-		},
-	}
-
-	prov, err = NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
-
-	// gen2 private endpoint related test
-	conf = &vpcconfig.VPCFileConfig{
-		VPCConfig: &config.VPCProviderConfig{
-			Enabled:                    true,
-			G2EndpointPrivateURL:       PrivateRIaaSEndpoint,
-			IKSTokenExchangePrivateURL: PrivateContainerAPIURL,
-			G2APIKey:                   IamClientSecret,
-			G2TokenExchangeURL:         IamURL,
-			IamClientID:                IamClientID,
-			IamClientSecret:            IamClientSecret,
-		},
-	}
-
-	prov, err = NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
-
-	// gen2 mix test
-	conf = &vpcconfig.VPCFileConfig{
-		VPCConfig: &config.VPCProviderConfig{
-			Enabled:                    true,
-			G2EndpointPrivateURL:       PrivateRIaaSEndpoint,
-			IKSTokenExchangePrivateURL: PrivateContainerAPIURL,
-			G2APIKey:                   IamClientSecret,
-			G2TokenExchangeURL:         IamURL,
-			IamClientID:                IamClientID,
-			IamClientSecret:            IamClientSecret,
-		},
-	}
-
-	prov, err = NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
-
-	zone := "Test Zone"
-	contextCF, _ := prov.ContextCredentialsFactory(&zone)
-	assert.NotNil(t, contextCF)
+	assert.Nil(t, prov)
+	assert.NotNil(t, err)
 }
 
 func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error) {
@@ -207,7 +139,7 @@ func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error)
 			DebugTrace: true,
 		},
 		VPCConfig: &config.VPCProviderConfig{
-			Enabled:                    true,
+			Enabled:                    false,
 			EndpointURL:                TestEndpointURL,
 			VPCTimeout:                 "30s",
 			MaxRetryAttempt:            5,
@@ -222,9 +154,52 @@ func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error)
 		},
 	}
 
-	p, err := NewProvider(conf, logger)
-	assert.NotNil(t, p)
-	assert.Nil(t, err)
+	//Do config validation and enable only one generationType (i.e VPC-Classic | VPC-NG)
+	gcConfigFound := (conf.VPCConfig.EndpointURL != "" || conf.VPCConfig.PrivateEndpointURL != "") && (conf.VPCConfig.TokenExchangeURL != "" || conf.VPCConfig.IKSTokenExchangePrivateURL != "") && (conf.VPCConfig.APIKey != "") && (conf.VPCConfig.ResourceGroupID != "")
+	g2ConfigFound := (conf.VPCConfig.G2EndpointPrivateURL != "" || conf.VPCConfig.G2EndpointURL != "") && (conf.VPCConfig.IKSTokenExchangePrivateURL != "" || conf.VPCConfig.G2TokenExchangeURL != "") && (conf.VPCConfig.G2APIKey != "") && (conf.VPCConfig.G2ResourceGroupID != "")
+	//if both config found, look for VPCTypeEnabled, otherwise default to GC
+	//Incase of NG configurations, override the base properties.
+	if (gcConfigFound && g2ConfigFound && conf.VPCConfig.VPCTypeEnabled == VPCNextGen) || (!gcConfigFound && g2ConfigFound) {
+		// overwrite the common variable in case of g2 i.e gen2, first preferences would be private endpoint
+		if conf.VPCConfig.G2EndpointPrivateURL != "" {
+			conf.VPCConfig.EndpointURL = conf.VPCConfig.G2EndpointPrivateURL
+		} else {
+			conf.VPCConfig.EndpointURL = conf.VPCConfig.G2EndpointURL
+		}
+
+		// update iam based public toke exchange endpoint
+		conf.VPCConfig.TokenExchangeURL = conf.VPCConfig.G2TokenExchangeURL
+
+		conf.VPCConfig.APIKey = conf.VPCConfig.G2APIKey
+		conf.VPCConfig.ResourceGroupID = conf.VPCConfig.G2ResourceGroupID
+
+		//Set API Generation As 2 (if unspecified in config/ENV-VAR)
+		if conf.VPCConfig.G2VPCAPIGeneration <= 0 {
+			conf.VPCConfig.G2VPCAPIGeneration = NEXTGenProvider
+		}
+		conf.VPCConfig.VPCAPIGeneration = conf.VPCConfig.G2VPCAPIGeneration
+
+		//Set the APIVersion Date, it can be different in GC and NG
+		if conf.VPCConfig.G2APIVersion != "" {
+			conf.VPCConfig.APIVersion = conf.VPCConfig.G2APIVersion
+		}
+
+		//set provider-type (this usually comes from the secret)
+		if conf.VPCConfig.VPCBlockProviderType != VPCNextGen {
+			conf.VPCConfig.VPCBlockProviderType = VPCNextGen
+		}
+
+		//Mark this as enabled/active
+		if conf.VPCConfig.VPCTypeEnabled != VPCNextGen {
+			conf.VPCConfig.VPCTypeEnabled = VPCNextGen
+		}
+	} else { //This is GC, no-override required
+		conf.VPCConfig.VPCBlockProviderType = VPCClassic //incase of gc, i dont see its being set in slclient.toml, but NG cluster has this
+		// For backward compatibility as some of the cluster storage secret may not have private gc endpoint url
+		if conf.VPCConfig.PrivateEndpointURL != "" {
+			conf.VPCConfig.EndpointURL = conf.VPCConfig.PrivateEndpointURL
+		}
+	}
 
 	timeout, _ := time.ParseDuration(conf.VPCConfig.VPCTimeout)
 
@@ -303,20 +278,6 @@ func TestOpenSession(t *testing.T) {
 
 	require.Error(t, err)
 	assert.Nil(t, sessn)
-}
-
-func TestUpdateAPIKey(t *testing.T) {
-	logger, teardown := GetTestLogger(t)
-	defer teardown()
-
-	vpcp, _ := GetTestProvider(t, logger)
-
-	config := vpcp.Config
-	err := vpcp.UpdateAPIKey(config, logger)
-	assert.NotNil(t, err)
-
-	err = vpcp.UpdateAPIKey(nil, logger)
-	assert.NotNil(t, err)
 }
 
 func GetTestOpenSession(t *testing.T, logger *zap.Logger) (sessn *VPCSession, uc, sc *fakes.RegionalAPI, err error) {

@@ -18,22 +18,17 @@
 package ibmcloudprovider
 
 import (
-	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
-	"github.com/IBM/ibm-csi-common/pkg/messages"
 	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
 	provider_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
 	vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
 	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
@@ -55,56 +50,65 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	// Load config file
 	conf, err := config.ReadConfig(configPath, logger)
 	if err != nil {
-		logger.Error("Error loading configuration")
+		logger.Fatal("Error loading configuration")
 		return nil, err
 	}
+
+	// Correct if the G2EndpointURL is of the form "http://".
+	conf.VPC.G2EndpointURL = getEndpointURL(conf.VPC.G2EndpointURL, logger)
+
+	// Correct if the G2TokenExchangeURL is of the form "http://"
+	conf.VPC.G2TokenExchangeURL = getEndpointURL(conf.VPC.G2TokenExchangeURL, logger)
+
 	// Get only VPC_API_VERSION, in "2019-07-02T00:00:00.000Z" case vpc need only 2019-07-02"
 	dateTime, err := time.Parse(time.RFC3339, conf.VPC.APIVersion)
 	if err == nil {
 		conf.VPC.APIVersion = fmt.Sprintf("%d-%02d-%02d", dateTime.Year(), dateTime.Month(), dateTime.Day())
 	} else {
 		logger.Warn("Failed to parse VPC_API_VERSION, setting default value")
-		conf.VPC.APIVersion = "2021-04-20" // setting default values
+		conf.VPC.APIVersion = "2020-07-02" // setting default values
 	}
 
+	var clusterInfo = &utils.ClusterInfo{}
 	logger.Info("Fetching clusterInfo")
-	clusterInfo, err := utils.NewClusterInfo(logger)
-	if err != nil {
-		logger.Error("Unable to load ClusterInfo", local.ZapError(err))
-		return nil, err
+	if conf.IKS != nil && conf.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True" {
+		clusterInfo, err = utils.NewClusterInfo(logger)
+		if err != nil {
+			logger.Fatal("Unable to load ClusterInfo", local.ZapError(err))
+			return nil, err
+		}
+		logger.Info("Fetched clusterInfo..")
 	}
-	logger.Info("Fetched clusterInfo..")
-	if conf.Bluemix.Encryption || conf.VPC.Encryption {
-		if os.Getenv("IKS_ENABLED") == "True" {
-			// api Key if encryption is enabled
-			logger.Info("Creating NewAPIKeyImpl...")
-			apiKeyImp, err := utils.NewAPIKeyImpl(logger)
-			if err != nil {
-				logger.Error("Unable to create API key getter", local.ZapError(err))
-				return nil, err
-			}
-			logger.Info("Created NewAPIKeyImpl...")
-			err = apiKeyImp.UpdateIAMKeys(conf)
-			if err != nil {
-				logger.Error("Unable to get API key", local.ZapError(err))
-				return nil, err
-			}
+
+	// Update the CSRF  Token
+	if conf.Bluemix.PrivateAPIRoute != "" {
+		conf.Bluemix.CSRFToken = string([]byte{}) // TODO~ Need to remove it
+	}
+
+	if conf.API == nil {
+		conf.API = &config.APIConfig{
+			PassthroughSecret: string([]byte{}), // // TODO~ Need to remove it
 		}
 	}
-
-	vpcFileConfig := &vpcconfig.VPCFileConfig{
+	vpcBlockConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
+		IKSConfig:    conf.IKS,
+		APIConfig:    conf.API,
 		ServerConfig: conf.Server,
 	}
-
 	// Prepare provider registry
-	registry, err := provider_util.InitProviders(vpcFileConfig, logger)
+	registry, err := provider_util.InitProviders(vpcBlockConfig, logger)
 	if err != nil {
 		logger.Error("Error configuring providers", local.ZapError(err))
 		return nil, err
 	}
 
-	providerName := conf.VPC.VPCVolumeType
+	var providerName string
+	if isRunningInIKS() && conf.IKS.Enabled {
+		providerName = conf.IKS.IKSBlockProviderName
+	} else if conf.VPC.Enabled {
+		providerName = conf.VPC.VPCBlockProviderName
+	}
 
 	cloudProvider := &IBMCloudStorageProvider{
 		ProviderName:   providerName,
@@ -116,9 +120,18 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	return cloudProvider, nil
 }
 
+func isRunningInIKS() bool {
+	return true //TODO Check the master KUBE version
+}
+
 // GetProviderSession ...
 func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error) {
 	logger.Info("IBMCloudStorageProvider-GetProviderSession...")
+	if icp.ProviderConfig.API == nil {
+		icp.ProviderConfig.API = &config.APIConfig{
+			PassthroughSecret: string([]byte{}), // // TODO~ Need to remove it
+		}
+	}
 
 	prov, err := icp.Registry.Get(icp.ProviderName)
 	if err != nil {
@@ -126,43 +139,21 @@ func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logg
 		return nil, err
 	}
 
-	// Populating vpcfileConfig which is used to open session
-	vpcfileConfig := &vpcconfig.VPCFileConfig{
+	// Populating vpcBlockConfig which is used to open session
+	vpcBlockConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    icp.ProviderConfig.VPC,
+		IKSConfig:    icp.ProviderConfig.IKS,
+		APIConfig:    icp.ProviderConfig.API,
 		ServerConfig: icp.ProviderConfig.Server,
 	}
 
-	for retryCount := 0; retryCount < utils.MaxRetryAttemptForSessions; retryCount++ {
-		session, _, err := provider_util.OpenProviderSessionWithContext(ctx, prov, vpcfileConfig, icp.ProviderName, logger)
-		if err == nil {
-			logger.Info("Successfully got the provider session", zap.Reflect("ProviderName", session.ProviderName()))
-			return session, nil
-		}
-		logger.Error("Failed to get provider session", zap.Reflect("Error", err))
-		// In the second retry, if there's an error, it will be returned without the need for validating it further.
-		if retryCount == 1 {
-			return nil, err
-		}
-		// If the error is related to invalid api key or invalid user, update api key will be called
-		if providerError, ok := err.(provider.Error); ok && providerError.Code() == reasoncode.ErrorFailedTokenExchange && (strings.Contains(strings.ToLower(providerError.Error()), messages.APIKeyNotFound) || strings.Contains(strings.ToLower(providerError.Error()), messages.UserNotFound)) {
-			// Waiting for minute expecting the API key to be updated in config
-			time.Sleep(time.Minute * 1)
-			err := icp.UpdateAPIKey(logger)
-			if err != nil {
-				logger.Error("Failed to update api key in cloud storage provider", zap.Error(err))
-				return nil, err
-			}
-			// Updating the vpc block config with the newly read api key which is further used open provider session in the 2nd retry
-			vpcfileConfig.VPCConfig.APIKey = icp.ProviderConfig.VPC.G2APIKey
-			vpcfileConfig.VPCConfig.G2APIKey = icp.ProviderConfig.VPC.G2APIKey
-			// Continuing the open provider session in next attempt after updating the api key
-			continue
-		}
-		// returning error if it isn't related to invalid api key/user
-		return nil, err
+	session, _, err := provider_util.OpenProviderSessionWithContext(ctx, prov, vpcBlockConfig, icp.ProviderName, logger)
+	if err == nil {
+		logger.Info("Successfully got the provider session", zap.Reflect("ProviderName", session.ProviderName()))
+		return session, nil
 	}
-
-	return nil, errors.New(messages.ErrAPIKeyNotFound)
+	logger.Error("Failed to get provider session", zap.Reflect("Error", err))
+	return nil, err
 }
 
 // GetConfig ...
@@ -175,73 +166,11 @@ func (icp *IBMCloudStorageProvider) GetClusterInfo() *utils.ClusterInfo {
 	return icp.ClusterInfo
 }
 
-// UpdateAPIKey ...
-func (icp *IBMCloudStorageProvider) UpdateAPIKey(logger *zap.Logger) error {
-	logger.Info("Updating API key in cloud storage provider")
-	// Populating vpc file config structure, which will be used for updating vpc file provider
-	vpcfileConfig := &vpcconfig.VPCFileConfig{
-		VPCConfig:    icp.ProviderConfig.VPC,
-		ServerConfig: icp.ProviderConfig.Server,
+// CorrectEndpointURL corrects endpoint url if it is of form "http://"
+func getEndpointURL(url string, logger *zap.Logger) string {
+	if strings.Contains(url, "http://") {
+		logger.Warn("Token exchange endpoint URL is of the form 'http' instead 'https'. Correcting it for valid request.", zap.Reflect("Endpoint URL: ", url))
+		return strings.Replace(url, "http", "https", 1)
 	}
-	// Storing a backup of the existing api key, to make sure the newly read api key isn't the same as the old one
-	// Hence avoiding fetching session with the same api key again
-	vpcAPIKey := vpcfileConfig.VPCConfig.G2APIKey
-
-	if icp.ProviderConfig.IKS != nil && (icp.ProviderConfig.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True") && icp.ProviderConfig.VPC.Encryption {
-		apiKeyImp, err := utils.NewAPIKeyImpl(logger)
-		if err != nil {
-			logger.Error("Unable to create API key getter", zap.Reflect("Error", err))
-			return err
-		}
-		logger.Info("Created NewAPIKeyImpl...")
-		// Call to update cloud storage provider with api key
-		err = apiKeyImp.UpdateIAMKeys(icp.ProviderConfig)
-		if err != nil {
-			logger.Error("Unable to get API key", local.ZapError(err))
-			return err
-		}
-		// If the retrieved API key is the same as previous one, return error
-		if vpcAPIKey == icp.ProviderConfig.VPC.G2APIKey {
-			logger.Error("API key is not reset")
-			return errors.New(messages.ErrAPIKeyNotFound)
-		}
-		// Updating the api key in vpc block config which will further be used to update the provider
-		vpcfileConfig.VPCConfig.APIKey = icp.ProviderConfig.VPC.G2APIKey
-		vpcfileConfig.VPCConfig.G2APIKey = icp.ProviderConfig.VPC.G2APIKey
-	} else {
-		// Reading config again to read the api key
-		conf := new(config.Config)
-		configPath := filepath.Join(config.GetConfPathDir(), utils.ConfigFileName)
-		_, err := toml.DecodeFile(configPath, conf)
-		if err != nil {
-			logger.Error("Failed to parse config file", zap.Error(err))
-			return err
-		}
-
-		// If the retrieved API key is the same as previous one, return error
-		if vpcAPIKey == conf.VPC.G2APIKey {
-			logger.Error("API is not reset")
-			return errors.New(messages.ErrAPIKeyNotFound)
-		}
-		// Updating the api key in cloud storage provider and vpc block config which will further be used to update the provider
-		icp.ProviderConfig.VPC.APIKey = conf.VPC.APIKey
-		icp.ProviderConfig.VPC.G2APIKey = conf.VPC.G2APIKey
-		vpcfileConfig.VPCConfig.APIKey = conf.VPC.G2APIKey
-		vpcfileConfig.VPCConfig.G2APIKey = conf.VPC.G2APIKey
-	}
-
-	prov, err := icp.Registry.Get(icp.ProviderName)
-	if err != nil {
-		logger.Error("Not able to get the said provider, it might not registered", local.ZapError(err))
-		return errors.New(messages.ErrUpdatingAPIKey)
-	}
-
-	// Updating the api key in provider using the updated vpc block config
-	err = prov.UpdateAPIKey(vpcfileConfig, logger)
-	if err != nil {
-		logger.Error("Failed to update API key in the provider", local.ZapError(err))
-		return errors.New(messages.ErrUpdatingAPIKey)
-	}
-
-	return nil
+	return url
 }

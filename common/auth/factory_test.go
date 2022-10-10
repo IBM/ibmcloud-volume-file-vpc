@@ -37,8 +37,6 @@ func TestNewVPCFileContextCredentialsFactory(t *testing.T) {
 		},
 	}
 
-	contextCredentials, err := NewVPCContextCredentialsFactory(conf)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, contextCredentials)
+	_, err := NewVPCContextCredentialsFactory(conf)
+	assert.NotNil(t, err)
 }
