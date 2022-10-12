@@ -19,8 +19,6 @@ package ibmcloudprovider
 
 import (
 	"fmt"
-	"os"
-	"strings"
 	"time"
 
 	"github.com/IBM/ibm-csi-common/pkg/utils"
@@ -53,62 +51,36 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		logger.Fatal("Error loading configuration")
 		return nil, err
 	}
-
-	// Correct if the G2EndpointURL is of the form "http://".
-	conf.VPC.G2EndpointURL = getEndpointURL(conf.VPC.G2EndpointURL, logger)
-
-	// Correct if the G2TokenExchangeURL is of the form "http://"
-	conf.VPC.G2TokenExchangeURL = getEndpointURL(conf.VPC.G2TokenExchangeURL, logger)
-
 	// Get only VPC_API_VERSION, in "2019-07-02T00:00:00.000Z" case vpc need only 2019-07-02"
 	dateTime, err := time.Parse(time.RFC3339, conf.VPC.APIVersion)
 	if err == nil {
 		conf.VPC.APIVersion = fmt.Sprintf("%d-%02d-%02d", dateTime.Year(), dateTime.Month(), dateTime.Day())
 	} else {
 		logger.Warn("Failed to parse VPC_API_VERSION, setting default value")
-		conf.VPC.APIVersion = "2020-07-02" // setting default values
+		conf.VPC.APIVersion = "2021-04-20" // setting default values
 	}
 
-	var clusterInfo = &utils.ClusterInfo{}
 	logger.Info("Fetching clusterInfo")
-	if conf.IKS != nil && conf.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True" {
-		clusterInfo, err = utils.NewClusterInfo(logger)
-		if err != nil {
-			logger.Fatal("Unable to load ClusterInfo", local.ZapError(err))
-			return nil, err
-		}
-		logger.Info("Fetched clusterInfo..")
+	clusterInfo, err := utils.NewClusterInfo(logger)
+	if err != nil {
+		logger.Error("Unable to load ClusterInfo", local.ZapError(err))
+		return nil, err
 	}
+	logger.Info("Fetched clusterInfo..")
 
-	// Update the CSRF  Token
-	if conf.Bluemix.PrivateAPIRoute != "" {
-		conf.Bluemix.CSRFToken = string([]byte{}) // TODO~ Need to remove it
-	}
-
-	if conf.API == nil {
-		conf.API = &config.APIConfig{
-			PassthroughSecret: string([]byte{}), // // TODO~ Need to remove it
-		}
-	}
-	vpcBlockConfig := &vpcconfig.VPCFileConfig{
+	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
-		IKSConfig:    conf.IKS,
-		APIConfig:    conf.API,
 		ServerConfig: conf.Server,
 	}
+
 	// Prepare provider registry
-	registry, err := provider_util.InitProviders(vpcBlockConfig, logger)
+	registry, err := provider_util.InitProviders(vpcFileConfig, logger)
 	if err != nil {
 		logger.Error("Error configuring providers", local.ZapError(err))
 		return nil, err
 	}
 
-	var providerName string
-	if isRunningInIKS() && conf.IKS.Enabled {
-		providerName = conf.IKS.IKSBlockProviderName
-	} else if conf.VPC.Enabled {
-		providerName = conf.VPC.VPCBlockProviderName
-	}
+	providerName := conf.VPC.VPCVolumeType
 
 	cloudProvider := &IBMCloudStorageProvider{
 		ProviderName:   providerName,
@@ -120,18 +92,9 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	return cloudProvider, nil
 }
 
-func isRunningInIKS() bool {
-	return true //TODO Check the master KUBE version
-}
-
 // GetProviderSession ...
 func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error) {
 	logger.Info("IBMCloudStorageProvider-GetProviderSession...")
-	if icp.ProviderConfig.API == nil {
-		icp.ProviderConfig.API = &config.APIConfig{
-			PassthroughSecret: string([]byte{}), // // TODO~ Need to remove it
-		}
-	}
 
 	prov, err := icp.Registry.Get(icp.ProviderName)
 	if err != nil {
@@ -139,15 +102,13 @@ func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logg
 		return nil, err
 	}
 
-	// Populating vpcBlockConfig which is used to open session
-	vpcBlockConfig := &vpcconfig.VPCFileConfig{
+	// Populating vpcfileConfig which is used to open session
+	vpcfileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    icp.ProviderConfig.VPC,
-		IKSConfig:    icp.ProviderConfig.IKS,
-		APIConfig:    icp.ProviderConfig.API,
 		ServerConfig: icp.ProviderConfig.Server,
 	}
 
-	session, _, err := provider_util.OpenProviderSessionWithContext(ctx, prov, vpcBlockConfig, icp.ProviderName, logger)
+	session, _, err := provider_util.OpenProviderSessionWithContext(ctx, prov, vpcfileConfig, icp.ProviderName, logger)
 	if err == nil {
 		logger.Info("Successfully got the provider session", zap.Reflect("ProviderName", session.ProviderName()))
 		return session, nil
@@ -164,13 +125,4 @@ func (icp *IBMCloudStorageProvider) GetConfig() *config.Config {
 // GetClusterInfo ...
 func (icp *IBMCloudStorageProvider) GetClusterInfo() *utils.ClusterInfo {
 	return icp.ClusterInfo
-}
-
-// CorrectEndpointURL corrects endpoint url if it is of form "http://"
-func getEndpointURL(url string, logger *zap.Logger) string {
-	if strings.Contains(url, "http://") {
-		logger.Warn("Token exchange endpoint URL is of the form 'http' instead 'https'. Correcting it for valid request.", zap.Reflect("Endpoint URL: ", url))
-		return strings.Replace(url, "http", "https", 1)
-	}
-	return url
 }
