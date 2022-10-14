@@ -112,7 +112,7 @@ func TestNewProvider(t *testing.T) {
 	// GC private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
 		VPCConfig: &config.VPCProviderConfig{
-			Enabled:                    false,
+			Enabled:                    true,
 			PrivateEndpointURL:         PrivateRIaaSEndpoint,
 			IKSTokenExchangePrivateURL: PrivateContainerAPIURL,
 			APIKey:                     IamClientSecret,
@@ -122,8 +122,8 @@ func TestNewProvider(t *testing.T) {
 	}
 
 	prov, err = NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
+	assert.Nil(t, prov)
+	assert.NotNil(t, err)
 }
 
 func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error) {
@@ -139,7 +139,7 @@ func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error)
 			DebugTrace: true,
 		},
 		VPCConfig: &config.VPCProviderConfig{
-			Enabled:                    false,
+			Enabled:                    true,
 			EndpointURL:                TestEndpointURL,
 			VPCTimeout:                 "30s",
 			MaxRetryAttempt:            5,
