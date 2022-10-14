@@ -106,8 +106,8 @@ func TestNewProvider(t *testing.T) {
 	}
 
 	prov, err := NewProvider(conf, logger)
-	assert.NotNil(t, prov)
-	assert.Nil(t, err)
+	assert.Nil(t, prov)
+	assert.NotNil(t, err)
 
 	// GC private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -122,8 +122,8 @@ func TestNewProvider(t *testing.T) {
 	}
 
 	prov, err = NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 }
 
 func GetTestProvider(t *testing.T, logger *zap.Logger) (*VPCFileProvider, error) {
