@@ -55,7 +55,7 @@ func NewTokenExchangeIKSService(iksAuthConfig *IksAuthConfiguration) (iam.TokenE
 	if err != nil {
 		return nil, err
 	}
-	spObject, err := secret_provider.NewSecretProvider()
+	spObject, err := secret_provider.NewSecretProvider(secret_provider.VPC)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (tes *tokenExchangeIKSService) ExchangeRefreshTokenForAccessToken(refreshTo
 // ExchangeIAMAPIKeyForAccessToken ...
 func (tes *tokenExchangeIKSService) ExchangeIAMAPIKeyForAccessToken(iamAPIKey string, logger *zap.Logger) (*iam.AccessToken, error) {
 	logger.Info("Fetching using secret provider")
-	token, _, err := tes.secretprovider.GetDefaultIAMToken(false)
+	token, _, err := tes.secretprovider.GetDefaultIAMToken("VPC File", false)
 	if err != nil {
 		logger.Error("Error fetching iam token", zap.Error(err))
 		return nil, err
