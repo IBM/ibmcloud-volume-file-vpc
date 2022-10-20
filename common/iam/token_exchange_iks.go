@@ -55,7 +55,10 @@ func NewTokenExchangeIKSService(iksAuthConfig *IksAuthConfiguration) (iam.TokenE
 	if err != nil {
 		return nil, err
 	}
-	spObject, err := secret_provider.NewSecretProvider(secret_provider.VPC)
+	providerType := map[string]string{
+		"ProviderType": secret_provider.VPC,
+	}
+	spObject, err := secret_provider.NewSecretProvider(providerType)
 	if err != nil {
 		return nil, err
 	}
