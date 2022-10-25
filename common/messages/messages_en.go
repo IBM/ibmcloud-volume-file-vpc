@@ -53,7 +53,7 @@ var messagesEn = map[string]util.Message{
 	},
 	"FailedToExpandVolume": {
 		Code:        "FailedToExpandVolume",
-		Description: "The volume ID '%d' could not be expanded from your VPC.",
+		Description: "The volume ID '%s' could not be expanded from your VPC.",
 		Type:        util.ExpansionFailed,
 		RC:          500,
 		Action:      "Verify that the volume ID exists. If the ID is correct, check that expected capacity is valid and supported",

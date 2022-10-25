@@ -31,16 +31,19 @@ func NewVPCContextCredentialsFactory(config *vpcfileconfig.VPCFileConfig) (*auth
 		IamClientID:     config.VPCConfig.IamClientID,
 		IamClientSecret: config.VPCConfig.IamClientSecret,
 	}
-	ccf, err := auth.NewContextCredentialsFactory(authConfig)
+	ccf, err := auth.NewContextCredentialsFactory(authConfig, iam.VPC)
+	if err != nil {
+		return nil, err
+	}
 	if config.VPCConfig.IKSTokenExchangePrivateURL != "" {
 		authIKSConfig := &vpciam.IksAuthConfiguration{
 			IamAPIKey:       config.VPCConfig.APIKey,
 			PrivateAPIRoute: config.VPCConfig.IKSTokenExchangePrivateURL, // Only for private cluster
 		}
 		ccf.TokenExchangeService, err = vpciam.NewTokenExchangeIKSService(authIKSConfig)
-	}
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 	return ccf, nil
 }

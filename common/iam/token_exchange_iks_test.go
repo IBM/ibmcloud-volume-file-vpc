@@ -18,6 +18,7 @@
 package iam
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -28,9 +29,11 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/IBM/ibmcloud-volume-interface/config"
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/IBM/ibmcloud-volume-interface/provider/iam"
+	sp "github.com/IBM/secret-utils-lib/pkg/secret_provider"
 )
 
 var (
@@ -52,38 +55,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func Test_IKSUpdateAPIKey(t *testing.T) {
-	logger := zap.New(
-		zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority),
-		zap.AddCaller(),
-	)
-	httpSetup()
-
-	// IAM endpoint
-	mux.HandleFunc("/v1/iam/apikey",
-		func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
-			fmt.Fprint(w, `{"token": "at_success"}`)
-		},
-	)
-
-	iksAuthConfig := &IksAuthConfiguration{
-		PrivateAPIRoute: server.URL,
-	}
-
-	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
-	assert.NoError(t, err)
-
-	err = tes.UpdateAPIKey("invalid", logger)
-	assert.Nil(t, err)
-
-	tes, err = NewTokenExchangeIKSService(nil)
-	assert.NoError(t, err)
-
-	err = tes.UpdateAPIKey("invalid", logger)
-	assert.NotNil(t, err)
-}
-
 func Test_IKSExchangeRefreshTokenForAccessToken_Success(t *testing.T) {
 	logger := zap.New(
 		zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority),
@@ -103,8 +74,12 @@ func Test_IKSExchangeRefreshTokenForAccessToken_Success(t *testing.T) {
 		PrivateAPIRoute: server.URL,
 	}
 
-	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
-	assert.NoError(t, err)
+	var err error
+	tes := new(tokenExchangeIKSService)
+	tes.httpClient, err = config.GeneralCAHttpClient()
+	assert.Nil(t, err)
+	tes.iksAuthConfig = iksAuthConfig
+	tes.secretprovider = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("testrefreshtoken", logger)
 	assert.Nil(t, err)
@@ -141,8 +116,12 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest(t *testing.T
 		PrivateAPIRoute: server.URL,
 	}
 
-	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
-	assert.NoError(t, err)
+	var err error
+	tes := new(tokenExchangeIKSService)
+	tes.httpClient, err = config.GeneralCAHttpClient()
+	assert.Nil(t, err)
+	tes.iksAuthConfig = iksAuthConfig
+	tes.secretprovider = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("badrefreshtoken", logger)
 	assert.Nil(t, r)
@@ -170,8 +149,12 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest_no_message(t
 		PrivateAPIRoute: server.URL,
 	}
 
-	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
-	assert.NoError(t, err)
+	var err error
+	tes := new(tokenExchangeIKSService)
+	tes.httpClient, err = config.GeneralCAHttpClient()
+	assert.Nil(t, err)
+	tes.iksAuthConfig = iksAuthConfig
+	tes.secretprovider = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("badrefreshtoken", logger)
 	assert.Nil(t, r)
@@ -200,8 +183,12 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedWrongApiUrl(t *testing.T) 
 		PrivateAPIRoute: "wrongProtocolURL",
 	}
 
-	tes, err := NewTokenExchangeIKSService(iksAuthConfig)
-	assert.NoError(t, err)
+	var err error
+	tes := new(tokenExchangeIKSService)
+	tes.httpClient, err = config.GeneralCAHttpClient()
+	assert.Nil(t, err)
+	tes.iksAuthConfig = iksAuthConfig
+	tes.secretprovider = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("testrefreshtoken", logger)
 	assert.Nil(t, r)
@@ -214,6 +201,7 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedWrongApiUrl(t *testing.T) 
 	}
 }
 
+/*
 func Test_IKSExchangeRefreshTokenForAccessToken_FailedRequesting_unclassified_error(t *testing.T) {
 	logger := zap.New(
 		zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority),
@@ -243,55 +231,16 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedRequesting_unclassified_er
 		assert.Equal(t, reasoncode.ReasonCode("ErrorUnclassified"), util.ErrorReasonCode(err))
 	}
 }
+*/
 
 func Test_IKSExchangeIAMAPIKeyForAccessToken(t *testing.T) {
 	var testCases = []struct {
-		name               string
-		apiHandler         func(w http.ResponseWriter, r *http.Request)
-		expectedToken      string
-		expectedError      *string
-		expectedReasonCode string
+		name          string
+		expectedError error
 	}{
 		{
-			name: "client error",
-			apiHandler: func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(400)
-			},
-			expectedError:      iam.String("IAM token exchange request failed"),
-			expectedReasonCode: "ErrorUnclassified",
-		},
-		{
-			name: "success 200",
-			apiHandler: func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(200)
-				fmt.Fprint(w, `{ "token": "access_token_123" }`)
-			},
-			expectedToken: "access_token_123",
-			expectedError: nil,
-		},
-		{
-			name: "unauthorised",
-			apiHandler: func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(401)
-				fmt.Fprint(w, `{"description": "not authorised",
-					"code": "authorisation",
-					"type" : "more details",
-					"incidentID" : "1000"
-					}`)
-			},
-			expectedError:      iam.String("IAM token exchange request failed: not authorised"),
-			expectedReasonCode: "ErrorFailedTokenExchange",
-		},
-		{
-			name: "no error message",
-			apiHandler: func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(400)
-				fmt.Fprint(w, `{"code" : "ErrorUnclassified",
-					"incidentID" : "10000"
-					}`)
-			},
-			expectedError:      iam.String("Unexpected IAM token exchange response"),
-			expectedReasonCode: "ErrorUnclassified",
+			name:          "Unable to fetch token",
+			expectedError: errors.New("not nil"),
 		},
 	}
 	for _, testCase := range testCases {
@@ -302,29 +251,53 @@ func Test_IKSExchangeIAMAPIKeyForAccessToken(t *testing.T) {
 			)
 			httpSetup()
 
-			// ResourceController endpoint
-			mux.HandleFunc("/v1/iam/apikey", testCase.apiHandler)
-
 			iksAuthConfig := &IksAuthConfiguration{
 				PrivateAPIRoute: server.URL,
 			}
 
-			tes, err := NewTokenExchangeIKSService(iksAuthConfig)
-			assert.NoError(t, err)
+			var err error
+			tes := new(tokenExchangeIKSService)
+			tes.httpClient, err = config.GeneralCAHttpClient()
+			assert.Nil(t, err)
+			tes.iksAuthConfig = iksAuthConfig
+			tes.secretprovider = new(sp.FakeSecretProvider)
 
-			r, actualError := tes.ExchangeIAMAPIKeyForAccessToken("apikey1", logger)
+			_, actualError := tes.ExchangeIAMAPIKeyForAccessToken("apikey1", logger)
 			if testCase.expectedError == nil {
-				assert.NoError(t, actualError)
-				if assert.NotNil(t, r) {
-					assert.Equal(t, testCase.expectedToken, r.Token)
-				}
+				assert.Nil(t, actualError)
 			} else {
-				if assert.Error(t, actualError) {
-					assert.Equal(t, *testCase.expectedError, actualError.Error())
-					assert.Equal(t, reasoncode.ReasonCode(testCase.expectedReasonCode), util.ErrorReasonCode(actualError))
-				}
-				assert.Nil(t, r)
+				assert.NotNil(t, actualError)
 			}
 		})
 	}
+}
+
+func TestNewTokenExchangeIKSService(t *testing.T) {
+	iksAuthConfig := &IksAuthConfiguration{
+		PrivateAPIRoute: server.URL,
+	}
+
+	_, err := NewTokenExchangeIKSService(iksAuthConfig)
+	assert.NotNil(t, err)
+}
+
+func TestExchangeAccessTokenForIMSToken(t *testing.T) {
+	tes := new(tokenExchangeIKSService)
+	logger = zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority), zap.AddCaller())
+	_, err := tes.ExchangeAccessTokenForIMSToken(iam.AccessToken{}, logger)
+	assert.Nil(t, err)
+}
+
+func TestExchangeIAMAPIKeyForIMSToken(t *testing.T) {
+	tes := new(tokenExchangeIKSService)
+	logger = zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority), zap.AddCaller())
+	_, err := tes.ExchangeIAMAPIKeyForIMSToken("", logger)
+	assert.Nil(t, err)
+}
+
+func TestGetIAMAccountIDFromAccessToken(t *testing.T) {
+	tes := new(tokenExchangeIKSService)
+	logger = zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewDevelopmentEncoderConfig()), consoleDebugging, lowPriority), zap.AddCaller())
+	_, err := tes.GetIAMAccountIDFromAccessToken(iam.AccessToken{}, logger)
+	assert.Nil(t, err)
 }
