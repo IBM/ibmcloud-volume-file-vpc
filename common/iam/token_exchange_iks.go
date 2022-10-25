@@ -93,7 +93,7 @@ func (tes *tokenExchangeIKSService) ExchangeRefreshTokenForAccessToken(refreshTo
 // ExchangeIAMAPIKeyForAccessToken ...
 func (tes *tokenExchangeIKSService) ExchangeIAMAPIKeyForAccessToken(iamAPIKey string, logger *zap.Logger) (*iam.AccessToken, error) {
 	logger.Info("Fetching using secret provider")
-	token, _, err := tes.secretprovider.GetDefaultIAMToken(false, "VPC File")
+	token, _, err := tes.secretprovider.GetDefaultIAMToken(false)
 	if err != nil {
 		logger.Error("Error fetching iam token", zap.Error(err))
 		return nil, err
