@@ -31,7 +31,7 @@ func NewVPCContextCredentialsFactory(config *vpcfileconfig.VPCFileConfig) (*auth
 		IamClientID:     config.VPCConfig.IamClientID,
 		IamClientSecret: config.VPCConfig.IamClientSecret,
 	}
-	ccf, err := auth.NewContextCredentialsFactory(authConfig)
+	ccf, err := auth.NewContextCredentialsFactory(authConfig, iam.VPC)
 	if err != nil {
 		return nil, err
 	}
