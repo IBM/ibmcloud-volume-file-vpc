@@ -21,7 +21,7 @@ require (
 	k8s.io/apimachinery v0.26.4
 =======
 	github.com/IBM/ibm-csi-common v1.0.0-beta21
-	github.com/IBM/ibmcloud-volume-interface v1.1.2-0.20230117072925-04c6f38f4450
+	github.com/IBM/ibmcloud-volume-interface v1.0.1-beta8.0.20230117135716-2306782120fe
 	github.com/IBM/secret-common-lib v1.1.1
 	github.com/IBM/secret-utils-lib v1.1.1
 	github.com/fatih/structs v1.1.0
@@ -92,7 +92,6 @@ require (
 =======
 >>>>>>> ENI support
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
