@@ -26,4 +26,5 @@ const (
 	shareTargetsPath   = "/targets"
 	shareTargetIDParam = "target-id"
 	shareTargetIDPath  = shareTargetsPath + "/{" + shareTargetIDParam + "}"
+	subnets            = Version + "/subnets"
 )

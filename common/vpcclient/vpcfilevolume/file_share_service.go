@@ -60,6 +60,8 @@ type FileShareManager interface {
 
 	//ExpandVolume expand the share by share ID and target
 	ExpandVolume(shareID string, shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
+
+	ListSubnets(limit int, start string, filters *models.ListSubnetFilters, ctxLogger *zap.Logger) (*models.SubnetList, error)
 }
 
 // FileShareService ...

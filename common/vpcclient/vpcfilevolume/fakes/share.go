@@ -169,6 +169,22 @@ type FileShareService struct {
 		result1 *models.ShareList
 		result2 error
 	}
+	ListSubnetsStub        func(int, string, *models.ListSubnetFilters, *zap.Logger) (*models.SubnetList, error)
+	listSubnetsMutex       sync.RWMutex
+	listSubnetsArgsForCall []struct {
+		arg1 int
+		arg2 string
+		arg3 *models.ListSubnetFilters
+		arg4 *zap.Logger
+	}
+	listSubnetsReturns struct {
+		result1 *models.SubnetList
+		result2 error
+	}
+	listSubnetsReturnsOnCall map[int]struct {
+		result1 *models.SubnetList
+		result2 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -891,6 +907,73 @@ func (fake *FileShareService) ListFileSharesReturnsOnCall(i int, result1 *models
 	}{result1, result2}
 }
 
+func (fake *FileShareService) ListSubnets(arg1 int, arg2 string, arg3 *models.ListSubnetFilters, arg4 *zap.Logger) (*models.SubnetList, error) {
+	fake.listSubnetsMutex.Lock()
+	ret, specificReturn := fake.listSubnetsReturnsOnCall[len(fake.listSubnetsArgsForCall)]
+	fake.listSubnetsArgsForCall = append(fake.listSubnetsArgsForCall, struct {
+		arg1 int
+		arg2 string
+		arg3 *models.ListSubnetFilters
+		arg4 *zap.Logger
+	}{arg1, arg2, arg3, arg4})
+	stub := fake.ListSubnetsStub
+	fakeReturns := fake.listSubnetsReturns
+	fake.recordInvocation("ListSubnets", []interface{}{arg1, arg2, arg3, arg4})
+	fake.listSubnetsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FileShareService) ListSubnetsCallCount() int {
+	fake.listSubnetsMutex.RLock()
+	defer fake.listSubnetsMutex.RUnlock()
+	return len(fake.listSubnetsArgsForCall)
+}
+
+func (fake *FileShareService) ListSubnetsCalls(stub func(int, string, *models.ListSubnetFilters, *zap.Logger) (*models.SubnetList, error)) {
+	fake.listSubnetsMutex.Lock()
+	defer fake.listSubnetsMutex.Unlock()
+	fake.ListSubnetsStub = stub
+}
+
+func (fake *FileShareService) ListSubnetsArgsForCall(i int) (int, string, *models.ListSubnetFilters, *zap.Logger) {
+	fake.listSubnetsMutex.RLock()
+	defer fake.listSubnetsMutex.RUnlock()
+	argsForCall := fake.listSubnetsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+}
+
+func (fake *FileShareService) ListSubnetsReturns(result1 *models.SubnetList, result2 error) {
+	fake.listSubnetsMutex.Lock()
+	defer fake.listSubnetsMutex.Unlock()
+	fake.ListSubnetsStub = nil
+	fake.listSubnetsReturns = struct {
+		result1 *models.SubnetList
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FileShareService) ListSubnetsReturnsOnCall(i int, result1 *models.SubnetList, result2 error) {
+	fake.listSubnetsMutex.Lock()
+	defer fake.listSubnetsMutex.Unlock()
+	fake.ListSubnetsStub = nil
+	if fake.listSubnetsReturnsOnCall == nil {
+		fake.listSubnetsReturnsOnCall = make(map[int]struct {
+			result1 *models.SubnetList
+			result2 error
+		})
+	}
+	fake.listSubnetsReturnsOnCall[i] = struct {
+		result1 *models.SubnetList
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -916,6 +999,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.listFileShareTargetsMutex.RUnlock()
 	fake.listFileSharesMutex.RLock()
 	defer fake.listFileSharesMutex.RUnlock()
+	fake.listSubnetsMutex.RLock()
+	defer fake.listSubnetsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

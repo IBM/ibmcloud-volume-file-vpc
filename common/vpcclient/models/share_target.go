@@ -30,8 +30,9 @@ type ShareTarget struct {
 	MountPath string `json:"mount_path,omitempty"`
 	Name      string `json:"name,omitempty"`
 	// Status of share target named - deleted, deleting, failed, pending, stable, updating, waiting, suspended
-	Status string        `json:"lifecycle_state,omitempty"`
-	VPC    *provider.VPC `json:"vpc,omitempty"`
+	Status                  string                   `json:"lifecycle_state,omitempty"`
+	VPC                     *provider.VPC            `json:"vpc,omitempty"`
+	VirtualNetworkInterface *VirtualNetworkInterface `json:"virtual_network_interface,omitempty"`
 	//Share ID this target is associated to
 	ShareID   string     `json:"-"`
 	Zone      *Zone      `json:"zone,omitempty"`
@@ -45,6 +46,15 @@ type ShareTargetList struct {
 	ShareTargets []*ShareTarget `json:"targets,omitempty"`
 	Limit        int            `json:"limit,omitempty"`
 	TotalCount   int            `json:"total_count,omitempty"`
+}
+
+//VirtualNetworkInterface
+type VirtualNetworkInterface struct {
+	Name           string                  `json:"name,omitempty"`
+	SubnetID       string                  `json:"subnet,omitempty"`
+	SecurityGroups []string                `json:"security_groups,omitempty"`
+	PrimaryIP      string                  `json:"primary_ip,omitempty"`
+	ResourceGroup  *provider.ResourceGroup `json:"resource_group,omitempty"`
 }
 
 // NewShareTarget creates ShareTarget from VolumeAccessPointRequest
