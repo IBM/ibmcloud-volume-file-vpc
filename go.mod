@@ -4,7 +4,6 @@ go 1.19
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-<<<<<<< HEAD
 	github.com/IBM/ibm-csi-common v1.1.6
 	github.com/IBM/ibmcloud-volume-interface v1.1.3
 	github.com/IBM/secret-common-lib v1.1.3
@@ -19,22 +18,6 @@ require (
 	golang.org/x/net v0.7.0
 	k8s.io/api v0.26.4
 	k8s.io/apimachinery v0.26.4
-=======
-	github.com/IBM/ibm-csi-common v1.0.0-beta21
-	github.com/IBM/ibmcloud-volume-interface v1.0.1-beta8.0.20230117135716-2306782120fe
-	github.com/IBM/secret-common-lib v1.1.1
-	github.com/IBM/secret-utils-lib v1.1.1
-	github.com/fatih/structs v1.1.0
-	github.com/gofrs/uuid v4.2.0+incompatible
-	github.com/golang-jwt/jwt/v4 v4.2.0
-	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
-	github.com/onsi/gomega v1.19.0
-	github.com/stretchr/testify v1.8.0
-	go.uber.org/zap v1.20.0
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
-	k8s.io/api v0.25.4
-	k8s.io/apimachinery v0.25.4
->>>>>>> ENI support
 	k8s.io/client-go v11.0.1-0.20190516230509-ae8359b20417+incompatible
 )
 
@@ -46,10 +29,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/container-storage-interface/spec v1.7.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-<<<<<<< HEAD
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
-=======
->>>>>>> ENI support
 	github.com/evanphx/json-patch v4.12.0+incompatible // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-openapi/errors v0.19.8 // indirect
@@ -66,19 +46,12 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
-<<<<<<< HEAD
 	github.com/google/go-cmp v0.5.9 // indirect
-=======
-	github.com/google/go-cmp v0.5.6 // indirect
->>>>>>> ENI support
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
-<<<<<<< HEAD
 	github.com/josharian/intern v1.0.0 // indirect
-=======
->>>>>>> ENI support
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
@@ -87,10 +60,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-<<<<<<< HEAD
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-=======
->>>>>>> ENI support
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -102,42 +72,26 @@ require (
 	go.mongodb.org/mongo-driver v1.7.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-<<<<<<< HEAD
 	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
-=======
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
->>>>>>> ENI support
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220502173005-c8bf987b8c21 // indirect
 	google.golang.org/grpc v1.49.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-<<<<<<< HEAD
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
 	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
-=======
-	k8s.io/klog/v2 v2.70.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20220803162953-67bda5d908f1 // indirect
-	k8s.io/utils v0.0.0-20220728103510-ee6ede2d64ed // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
-	sigs.k8s.io/yaml v1.2.0 // indirect
->>>>>>> ENI support
 )
 
 replace (
