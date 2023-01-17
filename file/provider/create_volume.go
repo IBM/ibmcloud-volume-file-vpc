@@ -49,11 +49,12 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
-		Name:          *volumeRequest.Name,
-		Size:          int64(*volumeRequest.Capacity),
-		InitialOwner:  (*models.InitialOwner)(volumeRequest.InitialOwner),
-		Iops:          iops,
-		ResourceGroup: &resourceGroup,
+		Name:              *volumeRequest.Name,
+		Size:              int64(*volumeRequest.Capacity),
+		InitialOwner:      (*models.InitialOwner)(volumeRequest.InitialOwner),
+		Iops:              iops,
+		AccessControlMode: volumeRequest.AccessControlMode,
+		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
 			Name: volumeRequest.VPCVolume.Profile.Name,
 		},

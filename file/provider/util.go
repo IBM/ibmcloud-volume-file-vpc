@@ -39,26 +39,39 @@ var retryGap = 10
 // ConstantRetryGap ...
 const (
 	ConstantRetryGap = 10 // seconds
+	SecurityGroup    = "security_group"
+	pageSize         = 50
 )
 
 var volumeIDPartsCount = 5
 
 // TODO need to introduce file share related to error codes
 var skipErrorCodes = map[string]bool{
-	"shares_profile_iops_not_allowed":   true,
-	"shares_profile_capacity_invalid":   true,
-	"shares_zone_not_found":             true,
-	"shares_bad_request":                true,
-	"shares_resource_group_bad_request": true,
-	"shares_vpc_not_found":              true,
-	"shares_not_found":                  true,
-	"shares_target_not_found":           true,
-	"bad_field":                         true,
-	"shares_name_duplicate":             true,
-	"shares_status_pending":             false,
-	"internal_error":                    false,
-	"invalid_route":                     false,
-	"service_error":                     false,
+	"shares_profile_iops_not_allowed":           true,
+	"shares_profile_capacity_invalid":           true,
+	"shares_zone_not_found":                     true,
+	"shares_bad_request":                        true,
+	"shares_resource_group_bad_request":         true,
+	"shares_vpc_not_found":                      true,
+	"shares_not_found":                          true,
+	"shares_target_not_found":                   true,
+	"shares_target_one_per_vpc":                 true,
+	"bad_field":                                 true,
+	"shares_name_duplicate":                     true,
+	"shares_subnet_zone_mismatch":               true,
+	"targets_primary_ip_id_required":            true,
+	"targets_subnet_and_primary_ip_missing":     true,
+	"targets_primary_ip_not_related_to_subnet":  true,
+	"shares_target_vpc_and_network_interface":   true,
+	"shares_security_group_id_invalid":          true,
+	"targets_primary_ip_address_already_in_use": true,
+	"reserved_ip_not_found":                     true,
+	"shares_subnet_not_found":                   true,
+	"InvalidArgument":                           true,
+	"shares_status_pending":                     false,
+	"internal_error":                            false,
+	"invalid_route":                             false,
+	"service_error":                             false,
 }
 
 // retry ...

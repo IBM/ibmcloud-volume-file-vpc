@@ -26,4 +26,6 @@ const (
 	shareTargetsPath   = "/mount_targets"
 	shareTargetIDParam = "target-id"
 	shareTargetIDPath  = shareTargetsPath + "/{" + shareTargetIDParam + "}"
+	subnets            = Version + "/subnets"
+	securityGroups     = Version + "/security_groups"
 )
