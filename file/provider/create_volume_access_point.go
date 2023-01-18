@@ -75,7 +75,9 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 		}
 
 		volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-			Subnet:         subnet,
+			Subnet: &models.SubnetRef{
+				ID: subnet.ID,
+			},
 			SecurityGroups: volumeAccessPointRequest.SecurityGroups,
 			ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
 		}

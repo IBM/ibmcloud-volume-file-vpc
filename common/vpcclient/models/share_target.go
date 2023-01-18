@@ -51,7 +51,7 @@ type ShareTargetList struct {
 //VirtualNetworkInterface
 type VirtualNetworkInterface struct {
 	Name           string                  `json:"name,omitempty"`
-	Subnet         *Subnet                 `json:"subnet,omitempty"`
+	Subnet         *SubnetRef              `json:"subnet,omitempty"`
 	SecurityGroups []string                `json:"security_groups,omitempty"`
 	PrimaryIP      string                  `json:"primary_ip,omitempty"`
 	ResourceGroup  *provider.ResourceGroup `json:"resource_group,omitempty"`
