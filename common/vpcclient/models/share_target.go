@@ -63,6 +63,9 @@ func NewShareTarget(volumeAccessPointRequest provider.VolumeAccessPointRequest) 
 		Name:    volumeAccessPointRequest.AccessPointName,
 		ShareID: volumeAccessPointRequest.VolumeID,
 		ID:      volumeAccessPointRequest.AccessPointID,
+		VPC: &provider.VPC{
+			ID: volumeAccessPointRequest.VPCID,
+		},
 	}
 
 	return va

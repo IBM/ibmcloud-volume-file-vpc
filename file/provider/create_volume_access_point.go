@@ -74,6 +74,7 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return err, skipRetryForObviousErrors(err)
 		}
 
+		volumeAccessPoint.VPC = nil
 		volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
 			Subnet: &models.SubnetRef{
 				ID: subnet.ID,
