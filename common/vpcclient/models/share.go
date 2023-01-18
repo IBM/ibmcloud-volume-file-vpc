@@ -35,9 +35,10 @@ type Share struct {
 	Profile       *Profile       `json:"profile,omitempty"`
 	CreatedAt     *time.Time     `json:"created_at,omitempty"`
 	// Status of share named - deleted, deleting, failed, pending, stable, updating, waiting, suspended
-	Status       StatusType     `json:"lifecycle_state,omitempty"`
-	ShareTargets *[]ShareTarget `json:"targets,omitempty"`
-	Zone         *Zone          `json:"zone,omitempty"`
+	Status            StatusType     `json:"lifecycle_state,omitempty"`
+	ShareTargets      *[]ShareTarget `json:"targets,omitempty"`
+	Zone              *Zone          `json:"zone,omitempty"`
+	AccessControlMode string         `json:"access_control_mode,omitempty"`
 }
 
 // ListShareTargerFilters ...
