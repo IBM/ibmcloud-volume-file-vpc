@@ -11,6 +11,10 @@
 // Package models ...
 package models
 
+import (
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
+)
+
 // VPC ...
 type VPC struct {
 	Href string `json:"href,omitempty"`
@@ -27,7 +31,7 @@ type Subnet struct {
 	CRN           string         `json:"crn,omitempty"`
 	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
 	Tags          []string       `json:"tags,omitempty"`
-	VPC           *VPC           `json:"vpc,omitempty"`
+	VPC           *provider.VPC  `json:"vpc,omitempty"`
 	Zone          *Zone          `json:"zone,omitempty"`
 }
 

@@ -53,27 +53,7 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 
 	var subnet *models.Subnet
 
-	//TODO first check if the access control mode is Security group i.e ENI
-	err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) {
-
-		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
-		vpcs.Logger.Info("Creating volume accessPoint from VPC provider...")
-		subnet, err = vpcs.GetSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID, vpcs.Logger)
-		// Keep retry, until we get the proper volumeAccessPointResult object
-		if err != nil && volumeAccessPointResult == nil {
-			return err, skipRetryForObviousErrors(err)
-		}
-		varp = volumeAccessPointResult.ToVolumeAccessPointResponse()
-
-		return err, true // stop retry as no error
-	})
-
 	volumeAccessPoint := models.NewShareTarget(volumeAccessPointRequest)
-	volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-		SubnetID:       subnet.ID,
-		SecurityGroups: volumeAccessPointRequest.SecurityGroups,
-		ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
-	}
 
 	err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) {
 		/*First , check if volume target is already created
@@ -85,6 +65,19 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			vpcs.Logger.Info("Volume accessPoint is already created", zap.Reflect("currentVolAccessPoint", currentVolAccessPoint))
 			varp = currentVolAccessPoint
 			return nil, true // stop retry volume accessPoint already created
+		}
+
+		vpcs.Logger.Info("Getting subnet from VPC provider...")
+		subnet, err = vpcs.getSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID)
+		// Keep retry, until we get the proper volumeAccessPointResult object
+		if err != nil && subnet == nil {
+			return err, skipRetryForObviousErrors(err)
+		}
+
+		volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
+			SubnetID:       subnet.ID,
+			SecurityGroups: volumeAccessPointRequest.SecurityGroups,
+			ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
 		}
 
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
@@ -127,9 +120,9 @@ func (vpcs *VPCSession) validateVolumeAccessPointRequest(volumeAccessPointReques
 }
 
 // GetSubnet  get the subnet based on the request
-func (vpcs *VPCSession) GetSubnet(zoneName string, vpcID string, resourceGroupID string, ctxLogger *zap.Logger) (*models.Subnet, error) {
-	ctxLogger.Debug("Entry of GetSubnet method...", zap.Reflect("zoneName", zoneName), zap.Reflect("vpcID", vpcID), zap.Reflect("resourceGroupID", resourceGroupID))
-	defer ctxLogger.Debug("Exit from GetSubnet method...")
+func (vpcs *VPCSession) getSubnet(zoneName string, vpcID string, resourceGroupID string) (*models.Subnet, error) {
+	vpcs.Logger.Debug("Entry of GetSubnet method...", zap.Reflect("zoneName", zoneName), zap.Reflect("vpcID", vpcID), zap.Reflect("resourceGroupID", resourceGroupID))
+	defer vpcs.Logger.Debug("Exit from GetSubnet method...")
 	var err error
 
 	/* err = vpcs.validateVolumeAccessPointRequest(volumeAccessPointRequest)
@@ -138,20 +131,20 @@ func (vpcs *VPCSession) GetSubnet(zoneName string, vpcID string, resourceGroupID
 	} */
 
 	// Get Subnet by VPC ID and zone. This is inefficient operation which requires iteration over subnet list
-	subnet, err := vpcs.getSubnetByVPCIDAndZone(zoneName, vpcID, resourceGroupID, ctxLogger)
-	ctxLogger.Info("Volume access point response", zap.Reflect("subnet", subnet), zap.Error(err))
+	subnet, err := vpcs.getSubnetByVPCIDAndZone(zoneName, vpcID, resourceGroupID)
+	vpcs.Logger.Info("getSubnetByVPCIDAndZone response", zap.Reflect("subnet", subnet), zap.Error(err))
 	return subnet, err
 }
 
-func (vpcs *VPCSession) getSubnetByVPCIDAndZone(zoneName string, vpcID string, resourceGroupID string, ctxLogger *zap.Logger) (*models.Subnet, error) {
-	ctxLogger.Debug("Entry of getSubnetByVPCIDAndZone()")
-	defer ctxLogger.Debug("Exit from getSubnetByVPCIDAndZone()")
-	ctxLogger.Info("Getting VolumeTargetList from VPC provider...")
+func (vpcs *VPCSession) getSubnetByVPCIDAndZone(zoneName string, vpcID string, resourceGroupID string) (*models.Subnet, error) {
+	vpcs.Logger.Debug("Entry of getSubnetByVPCIDAndZone()")
+	defer vpcs.Logger.Debug("Exit from getSubnetByVPCIDAndZone()")
+	vpcs.Logger.Info("Getting getSubnetByVPCIDAndZone from VPC provider...")
 	var err error
 	var subnets *models.SubnetList
 
 	filters := &models.ListSubnetFilters{ResourceGroupID: resourceGroupID}
-	subnets, err = vpcs.Apiclient.FileShareService().ListSubnets(100, "", filters, ctxLogger)
+	subnets, err = vpcs.Apiclient.FileShareService().ListSubnets(100, "", filters, vpcs.Logger)
 
 	if err != nil {
 		// API call is failed
@@ -165,13 +158,13 @@ func (vpcs *VPCSession) getSubnetByVPCIDAndZone(zoneName string, vpcID string, r
 		for _, subnetItem := range subnetList {
 			// Check if VPC ID and zone name is matching with requested input
 			if subnetItem.VPC != nil && subnetItem.VPC.ID == vpcID && subnetItem.Zone != nil && subnetItem.Zone.Name == zoneName {
-				ctxLogger.Info("Successfully found subnet", zap.Reflect("subnetItem", subnetItem))
+				vpcs.Logger.Info("Successfully found subnet", zap.Reflect("subnetItem", subnetItem))
 				return subnetItem, nil
 			}
 		}
 	}
 	// No volume Subnet found in the  list. So return error
 	userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), errors.New("no subnet found"), zoneName, vpcID)
-	ctxLogger.Error("Subnet not found", zap.Error(err))
+	vpcs.Logger.Error("Subnet not found", zap.Error(err))
 	return nil, userErr
 }

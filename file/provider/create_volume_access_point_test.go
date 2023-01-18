@@ -46,6 +46,7 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 		providerVolumeAccessPointResponse provider.VolumeAccessPointResponse
 		baseVolumeAccessPointResponse     *models.ShareTarget
 		volumeTargetList                  *models.ShareTargetList
+		subnetList                        *models.SubnetList
 
 		setup func(providerVolume *provider.Volume)
 
@@ -77,8 +78,10 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 		{
 			testCaseName: "Volume Access Point already exist for the VPCID and VolumeID",
 			providerVolumeAccessPointRequest: provider.VolumeAccessPointRequest{
-				VolumeID: "volume-id1",
-				VPCID:    "VPC-id1",
+				VolumeID:      "volume-id1",
+				VPCID:         "VPC-id1",
+				Zone:          "test-zone",
+				ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 			},
 
 			baseVolumeAccessPointResponse: &models.ShareTarget{
@@ -116,8 +119,10 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 		{
 			testCaseName: "Volume creation failure",
 			providerVolumeAccessPointRequest: provider.VolumeAccessPointRequest{
-				VolumeID: "volume-id1",
-				VPCID:    "VPC-id1",
+				VolumeID:      "volume-id1",
+				VPCID:         "VPC-id1",
+				Zone:          "test-zone",
+				ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 			},
 
 			baseVolumeAccessPointResponse: nil,
@@ -134,8 +139,10 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 		{
 			testCaseName: "Success Case",
 			providerVolumeAccessPointRequest: provider.VolumeAccessPointRequest{
-				VolumeID: "volume-id1",
-				VPCID:    "VPC-id1",
+				VolumeID:      "volume-id1",
+				VPCID:         "VPC-id1",
+				Zone:          "test-zone",
+				ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 			},
 
 			baseVolumeAccessPointResponse: &models.ShareTarget{
@@ -149,6 +156,17 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 			},
 
 			volumeTargetList: nil,
+
+			subnetList: &models.SubnetList{
+				Limit: 50,
+				Subnets: []*models.Subnet{
+					{
+						ID:   "16f293bf-test-4bff-816f-e199c0c65db5",
+						VPC:  &provider.VPC{ID: "VPC-id1"},
+						Zone: &models.Zone{Name: "test-zone"},
+					},
+				},
+			},
 
 			verify: func(t *testing.T, volumeAccessPointResponse *provider.VolumeAccessPointResponse, err error) {
 				assert.NotNil(t, volumeAccessPointResponse)
@@ -173,10 +191,12 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 				volumeService.CreateFileShareTargetReturns(testcase.baseVolumeAccessPointResponse, errors.New(testcase.expectedReasonCode))
 				volumeService.GetFileShareTargetReturns(testcase.baseVolumeAccessPointResponse, errors.New(testcase.expectedReasonCode))
 				volumeService.ListFileShareTargetsReturns(testcase.volumeTargetList, errors.New(testcase.expectedReasonCode))
+				volumeService.ListSubnetsReturns(testcase.subnetList, errors.New(testcase.expectedReasonCode))
 			} else {
 				volumeService.CreateFileShareTargetReturns(testcase.baseVolumeAccessPointResponse, nil)
 				volumeService.GetFileShareTargetReturns(testcase.baseVolumeAccessPointResponse, nil)
 				volumeService.ListFileShareTargetsReturns(testcase.volumeTargetList, nil)
+				volumeService.ListSubnetsReturns(testcase.subnetList, nil)
 			}
 			volumeAccessPoint, err := vpcs.CreateVolumeAccessPoint(testcase.providerVolumeAccessPointRequest)
 			logger.Info("Volume access point details", zap.Reflect("VolumeAccessPointResponse", volumeAccessPoint))
