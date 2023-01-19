@@ -19,6 +19,7 @@ package ibmcloudprovider
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
@@ -61,14 +62,16 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 		conf.VPC.APIVersion = "2021-04-20" // setting default values
 	}
 
-	var clusterInfo utilsConfig.ClusterConfig
+	var clusterInfo = &utils.ClusterInfo{}
 	logger.Info("Fetching clusterInfo")
-	clusterInfo, err = utilsConfig.GetClusterInfo(*k8sClient, logger)
-	if err != nil {
-		logger.Error("Unable to load ClusterInfo", local.ZapError(err))
-		return nil, err
+	if conf.IKS != nil && conf.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True" {
+		clusterInfo, err = utils.NewClusterInfo(logger)
+		if err != nil {
+			logger.Fatal("Unable to load ClusterInfo", local.ZapError(err))
+			return nil, err
+		}
+		logger.Info("Fetched clusterInfo..")
 	}
-	logger.Info("Fetched clusterInfo..")
 
 	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
