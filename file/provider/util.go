@@ -38,7 +38,9 @@ var retryGap = 10
 
 //ConstantRetryGap ...
 const (
-	ConstantRetryGap = 10 // seconds
+	ConstantRetryGap  = 10 // seconds
+	SecurityGroupMode = "security_group"
+	VPCMode           = "vpc"
 )
 
 var volumeIDPartsCount = 5

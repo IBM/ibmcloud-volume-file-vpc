@@ -67,20 +67,24 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return nil, true // stop retry volume accessPoint already created
 		}
 
-		vpcs.Logger.Info("Getting subnet from VPC provider...")
-		subnet, err = vpcs.getSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID)
-		// Keep retry, until we get the proper volumeAccessPointResult object
-		if err != nil && subnet == nil {
-			return err, skipRetryForObviousErrors(err)
-		}
+		// If ENI is enabled
+		if volumeAccessPointRequest.AccessControlMode == SecurityGroupMode {
+			vpcs.Logger.Info("Getting subnet from VPC provider...")
+			subnet, err = vpcs.getSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID)
+			// Keep retry, until we get the proper volumeAccessPointResult object
+			if err != nil && subnet == nil {
+				return err, skipRetryForObviousErrors(err)
+			}
 
-		volumeAccessPoint.VPC = nil
-		volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-			Subnet: &models.SubnetRef{
-				ID: subnet.ID,
-			},
-			SecurityGroups: volumeAccessPointRequest.SecurityGroups,
-			ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
+			volumeAccessPoint.VPC = nil
+			volumeAccessPoint.EncryptionInTransit = volumeAccessPointRequest.EncryptionInTransit
+			volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
+				Subnet: &models.SubnetRef{
+					ID: subnet.ID,
+				},
+				SecurityGroups: volumeAccessPointRequest.SecurityGroups,
+				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
+			}
 		}
 
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint

@@ -52,7 +52,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		Size:              int64(*volumeRequest.Capacity),
 		InitialOwner:      (*models.InitialOwner)(volumeRequest.InitialOwner),
 		Iops:              iops,
-		AccessControlMode: "security_group",
+		AccessControlMode: volumeRequest.AccessControlMode,
 		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
 			Name: volumeRequest.VPCVolume.Profile.Name,
