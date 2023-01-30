@@ -50,12 +50,17 @@ type ShareTargetList struct {
 	TotalCount   int            `json:"total_count,omitempty"`
 }
 
+//PrimaryIPID ...
+type PrimaryIPID struct {
+	ID string `json:"id,omitempty"`
+}
+
 //VirtualNetworkInterface
 type VirtualNetworkInterface struct {
 	Name           string                    `json:"name,omitempty"`
 	Subnet         *SubnetRef                `json:"subnet,omitempty"`
 	SecurityGroups *[]provider.SecurityGroup `json:"security_groups,omitempty"`
-	PrimaryIP      string                    `json:"primary_ip,omitempty"`
+	PrimaryIP      *PrimaryIPID              `json:"primary_ip,omitempty"`
 	ResourceGroup  *provider.ResourceGroup   `json:"resource_group,omitempty"`
 }
 

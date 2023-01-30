@@ -69,21 +69,29 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 
 		// If ENI is enabled
 		if volumeAccessPointRequest.AccessControlMode == SecurityGroupMode {
-			vpcs.Logger.Info("Getting subnet from VPC provider...")
-			subnet, err = vpcs.getSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID)
-			// Keep retry, until we get the proper volumeAccessPointResult object
-			if err != nil && subnet == nil {
-				return err, skipRetryForObviousErrors(err)
-			}
-
 			volumeAccessPoint.VPC = nil
 			volumeAccessPoint.EncryptionInTransit = volumeAccessPointRequest.EncryptionInTransit
 			volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-				Subnet: &models.SubnetRef{
-					ID: subnet.ID,
-				},
 				SecurityGroups: volumeAccessPointRequest.SecurityGroups,
 				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
+			}
+
+			if len(volumeAccessPointRequest.PrimaryIP) == 0 {
+				vpcs.Logger.Info("Getting subnet from VPC provider...")
+				subnet, err = vpcs.getSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID)
+				// Keep retry, until we get the proper volumeAccessPointResult object
+				if err != nil && subnet == nil {
+					return err, skipRetryForObviousErrors(err)
+				}
+
+				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
+					ID: subnet.ID,
+				}
+			} else {
+				vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
+				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = &models.PrimaryIPID{
+					ID: volumeAccessPointRequest.PrimaryIP,
+				}
 			}
 		}
 
