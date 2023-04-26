@@ -36,6 +36,7 @@ import (
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/provider/iam"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	"go.uber.org/zap"
 )
 
@@ -67,55 +68,32 @@ type VPCFileProvider struct {
 var _ local.Provider = &VPCFileProvider{}
 
 // NewProvider initialises an instance of an IaaS provider.
-func NewProvider(conf *vpcconfig.VPCFileConfig, logger *zap.Logger) (local.Provider, error) {
+func NewProvider(conf *vpcconfig.VPCFileConfig, k8sClient *k8s_utils.KubernetesClient, logger *zap.Logger) (local.Provider, error) {
 	logger.Info("Entering NewProvider")
 
 	if conf.VPCConfig == nil {
 		return nil, errors.New("incomplete config for VPCFileProvider")
 	}
 
-	//Do config validation and enable only one generationType (i.e VPC-Classic | VPC-NG)
-	gcConfigFound := (conf.VPCConfig.EndpointURL != "" || conf.VPCConfig.PrivateEndpointURL != "") && (conf.VPCConfig.TokenExchangeURL != "" || conf.VPCConfig.IKSTokenExchangePrivateURL != "") && (conf.VPCConfig.APIKey != "") && (conf.VPCConfig.ResourceGroupID != "")
-	g2ConfigFound := (conf.VPCConfig.G2EndpointPrivateURL != "" || conf.VPCConfig.G2EndpointURL != "") && (conf.VPCConfig.IKSTokenExchangePrivateURL != "" || conf.VPCConfig.G2TokenExchangeURL != "") && (conf.VPCConfig.G2APIKey != "") && (conf.VPCConfig.G2ResourceGroupID != "")
-	//if both config found, look for VPCTypeEnabled, otherwise default to GC
-	//Incase of NG configurations, override the base properties.
-	if (gcConfigFound && g2ConfigFound && conf.VPCConfig.VPCTypeEnabled == VPCNextGen) || (!gcConfigFound && g2ConfigFound) {
-		// overwrite the common variable in case of g2 i.e gen2, first preferences would be private endpoint
-		if conf.VPCConfig.G2EndpointPrivateURL != "" {
-			conf.VPCConfig.EndpointURL = conf.VPCConfig.G2EndpointPrivateURL
-		} else {
-			conf.VPCConfig.EndpointURL = conf.VPCConfig.G2EndpointURL
-		}
-
-		// update iam based public toke exchange endpoint
-		conf.VPCConfig.TokenExchangeURL = conf.VPCConfig.G2TokenExchangeURL
-
-		conf.VPCConfig.APIKey = conf.VPCConfig.G2APIKey
-		conf.VPCConfig.ResourceGroupID = conf.VPCConfig.G2ResourceGroupID
-
-		//Set API Generation As 2 (if unspecified in config/ENV-VAR)
-		if conf.VPCConfig.G2VPCAPIGeneration <= 0 {
-			conf.VPCConfig.G2VPCAPIGeneration = NEXTGenProvider
-		}
-		conf.VPCConfig.VPCAPIGeneration = conf.VPCConfig.G2VPCAPIGeneration
-
-		//Set the APIVersion Date, it can be different in GC and NG
-		if conf.VPCConfig.G2APIVersion != "" {
-			conf.VPCConfig.APIVersion = conf.VPCConfig.G2APIVersion
-		}
-
-		//set provider-type (this usually comes from the secret)
-		if conf.VPCConfig.VPCBlockProviderType != VPCNextGen {
-			conf.VPCConfig.VPCBlockProviderType = VPCNextGen
-		}
-
-		//Mark this as enabled/active
-		if conf.VPCConfig.VPCTypeEnabled != VPCNextGen {
-			conf.VPCConfig.VPCTypeEnabled = VPCNextGen
-		}
+	if conf.VPCConfig.G2EndpointPrivateURL != "" {
+		conf.VPCConfig.G2EndpointURL = conf.VPCConfig.G2EndpointPrivateURL
 	}
 
-	contextCF, err := vpcauth.NewVPCContextCredentialsFactory(conf)
+	//Set API Generation As 2
+	conf.VPCConfig.G2VPCAPIGeneration = NEXTGenProvider
+
+	//Set the APIVersion Date, it can be different in GC and NG
+	if conf.VPCConfig.G2APIVersion != "" {
+		conf.VPCConfig.APIVersion = conf.VPCConfig.G2APIVersion
+	}
+
+	//set provider-type
+	conf.VPCConfig.VPCBlockProviderType = VPCNextGen
+
+	//Mark this as enabled/active
+	conf.VPCConfig.VPCTypeEnabled = VPCNextGen
+
+	contextCF, err := vpcauth.NewVPCContextCredentialsFactory(conf, k8sClient)
 	if err != nil {
 		return nil, err
 	}
@@ -144,11 +122,11 @@ func NewProvider(conf *vpcconfig.VPCFileConfig, logger *zap.Logger) (local.Provi
 		ContextCF:      contextCF,
 		httpClient:     httpClient,
 		APIConfig: riaas.Config{
-			BaseURL:       conf.VPCConfig.EndpointURL,
+			BaseURL:       conf.VPCConfig.G2EndpointURL,
 			HTTPClient:    httpClient,
-			APIVersion:    conf.VPCConfig.APIVersion,
-			APIGeneration: conf.VPCConfig.VPCAPIGeneration,
-			ResourceGroup: conf.VPCConfig.ResourceGroupID,
+			APIVersion:    conf.VPCConfig.G2APIVersion,
+			APIGeneration: conf.VPCConfig.G2VPCAPIGeneration,
+			ResourceGroup: conf.VPCConfig.G2ResourceGroupID,
 		},
 	}
 	userError.MessagesEn = userError.InitMessages()

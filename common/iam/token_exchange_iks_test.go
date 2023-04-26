@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,6 +34,7 @@ import (
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/IBM/ibmcloud-volume-interface/provider/iam"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	sp "github.com/IBM/secret-utils-lib/pkg/secret_provider"
 )
 
@@ -79,7 +81,7 @@ func Test_IKSExchangeRefreshTokenForAccessToken_Success(t *testing.T) {
 	tes.httpClient, err = config.GeneralCAHttpClient()
 	assert.Nil(t, err)
 	tes.iksAuthConfig = iksAuthConfig
-	tes.secretprovider = new(sp.FakeSecretProvider)
+	tes.spObject = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("testrefreshtoken", logger)
 	assert.Nil(t, err)
@@ -121,7 +123,7 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest(t *testing.T
 	tes.httpClient, err = config.GeneralCAHttpClient()
 	assert.Nil(t, err)
 	tes.iksAuthConfig = iksAuthConfig
-	tes.secretprovider = new(sp.FakeSecretProvider)
+	tes.spObject = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("badrefreshtoken", logger)
 	assert.Nil(t, r)
@@ -154,7 +156,7 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest_no_message(t
 	tes.httpClient, err = config.GeneralCAHttpClient()
 	assert.Nil(t, err)
 	tes.iksAuthConfig = iksAuthConfig
-	tes.secretprovider = new(sp.FakeSecretProvider)
+	tes.spObject = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("badrefreshtoken", logger)
 	assert.Nil(t, r)
@@ -188,7 +190,7 @@ func Test_IKSExchangeRefreshTokenForAccessToken_FailedWrongApiUrl(t *testing.T) 
 	tes.httpClient, err = config.GeneralCAHttpClient()
 	assert.Nil(t, err)
 	tes.iksAuthConfig = iksAuthConfig
-	tes.secretprovider = new(sp.FakeSecretProvider)
+	tes.spObject = new(sp.FakeSecretProvider)
 
 	r, err := tes.ExchangeRefreshTokenForAccessToken("testrefreshtoken", logger)
 	assert.Nil(t, r)
@@ -260,7 +262,7 @@ func Test_IKSExchangeIAMAPIKeyForAccessToken(t *testing.T) {
 			tes.httpClient, err = config.GeneralCAHttpClient()
 			assert.Nil(t, err)
 			tes.iksAuthConfig = iksAuthConfig
-			tes.secretprovider = new(sp.FakeSecretProvider)
+			tes.spObject = new(sp.FakeSecretProvider)
 
 			_, actualError := tes.ExchangeIAMAPIKeyForAccessToken("apikey1", logger)
 			if testCase.expectedError == nil {
@@ -277,7 +279,11 @@ func TestNewTokenExchangeIKSService(t *testing.T) {
 		PrivateAPIRoute: server.URL,
 	}
 
-	_, err := NewTokenExchangeIKSService(iksAuthConfig)
+	kc, _ := k8s_utils.FakeGetk8sClientSet()
+	pwd, _ := os.Getwd()
+	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
+	_ = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	_, err := NewTokenExchangeIKSService(iksAuthConfig, &kc)
 	assert.NotNil(t, err)
 }
 

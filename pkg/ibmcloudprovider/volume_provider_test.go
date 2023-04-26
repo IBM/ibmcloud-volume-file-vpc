@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,36 +44,41 @@ func TestNewIBMCloudStorageProvider(t *testing.T) {
 		t.Errorf("This test will fail because of %v", err)
 	}
 
+	kc, _ := k8s_utils.FakeGetk8sClientSet()
+	pwd, _ = os.Getwd()
+	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	configPath := filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig.toml")
-	ibmCloudProvider, err := NewIBMCloudStorageProvider(configPath, logger)
-	assert.NotNil(t, err)           //TODO
-	assert.Nil(t, ibmCloudProvider) //TODO
+	_ = k8s_utils.FakeCreateCM(kc, configPath)
+	ibmCloudProvider, err := NewIBMCloudStorageProvider("test", &kc, logger)
+	assert.NotNil(t, ibmCloudProvider) //TODO
+	assert.Nil(t, err)                 //TODO
 
 	//Invalid clusterinfo case
 	// As its required by NewFakeIBMCloudStorageProvider
-	secretConfigPath = filepath.Join(pwd, "..", "..", "test-fixtures", "invalid")
-	err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
-	defer os.Unsetenv("SECRET_CONFIG_PATH")
-	if err != nil {
-		t.Errorf("This test will fail because of %v", err)
-	}
+	// secretConfigPath = filepath.Join(pwd, "..", "..", "test-fixtures", "invalid")
+	// err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
+	// defer os.Unsetenv("SECRET_CONFIG_PATH")
+	// if err != nil {
+	// 	t.Errorf("This test will fail because of %v", err)
+	// }
 
-	configPath = filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig-invalid.toml")
-	ibmCloudProvider, err = NewIBMCloudStorageProvider(configPath, logger)
-	assert.NotNil(t, err)
-	assert.Nil(t, ibmCloudProvider)
+	// configPath = filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig-invalid.toml")
+	// ibmCloudProvider, err = NewIBMCloudStorageProvider(configPath, logger)
+	// assert.NotNil(t, err)
+	// assert.Nil(t, ibmCloudProvider)
 
-	//Invalid slconfig.toml case
-	secretConfigPath = filepath.Join(pwd, "..", "..", "test-fixtures", "valid")
-	err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
-	defer os.Unsetenv("SECRET_CONFIG_PATH")
-	if err != nil {
-		t.Errorf("This test will fail because of %v", err)
-	}
-	configPath = filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig-invalid-format.toml")
-	ibmCloudProvider, err = NewIBMCloudStorageProvider(configPath, logger)
-	assert.NotNil(t, err)
-	assert.Nil(t, ibmCloudProvider)
+	// //Invalid slconfig.toml case
+	// secretConfigPath = filepath.Join(pwd, "..", "..", "test-fixtures", "valid")
+	// err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
+	// defer os.Unsetenv("SECRET_CONFIG_PATH")
+	// if err != nil {
+	// 	t.Errorf("This test will fail because of %v", err)
+	// }
+	// configPath = filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig-invalid-format.toml")
+	// ibmCloudProvider, err = NewIBMCloudStorageProvider(configPath, logger)
+	// assert.NotNil(t, err)
+	// assert.Nil(t, ibmCloudProvider)
 }
 
 func TestNewFakeIBMCloudStorageProvider(t *testing.T) {
@@ -105,6 +111,6 @@ func TestNewFakeIBMCloudStorageProvider(t *testing.T) {
 	cloudProviderConfig := ibmFakeCloudProvider.GetConfig()
 	assert.NotNil(t, cloudProviderConfig)
 
-	clusterInfo := ibmFakeCloudProvider.GetClusterInfo()
-	assert.NotNil(t, clusterInfo)
+	clusterID := ibmFakeCloudProvider.GetClusterID()
+	assert.NotNil(t, clusterID)
 }

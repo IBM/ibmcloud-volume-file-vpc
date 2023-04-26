@@ -18,10 +18,13 @@
 package auth
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
 	"github.com/IBM/ibmcloud-volume-interface/config"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,6 +40,10 @@ func TestNewVPCFileContextCredentialsFactory(t *testing.T) {
 		},
 	}
 
-	_, err := NewVPCContextCredentialsFactory(conf)
+	kc, _ := k8s_utils.FakeGetk8sClientSet()
+	pwd, _ := os.Getwd()
+	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
+	_ = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	_, err := NewVPCContextCredentialsFactory(conf, &kc)
 	assert.NotNil(t, err)
 }
