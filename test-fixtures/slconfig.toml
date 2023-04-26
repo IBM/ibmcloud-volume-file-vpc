@@ -1,18 +1,21 @@
 [server]
   debug_trace = false
 
-[bluemix]
-  iam_url = "iam_rul"
-  iam_client_id = "bx"
-  iam_client_secret = "bx"
-  iam_api_key = "XXX"
-
 [vpc]
   vpc_enabled = true
-  vpc_volume_type="vpc-share"
-  encryption = true
-  vpc_api_timeout = "120s"
-  max_retry_attempt  = 10 # 10 times with exponential re-try with max gap max_retry_gap
+  g2_token_exchange_endpoint_url = "https://iam.stage1.bluemix.net"
+  g2_riaas_endpoint_url = "https://us-south-stage01.iaasdev.cloud.ibm.com/"
+  g2_riaas_endpoint_private_url = "https://us-south-stage01.iaasdev.cloud.ibm.com"
+  g2_resource_group_id = ""
+  g2_api_key = "api-key"
+  provider_type = "g2"
+  vpc_block_provider_name = "vpc"
+  vpc_volume_type="vpc-block"
+  encryption = false
+  iks_token_exchange_endpoint_private_url = "https://containers.test.cloud.ibm.com"
+  containers_api_csrf_token = ""
+  max_retry_attempt  = 2 # 10 times with exponential re-try with max gap max_retry_gap
   max_retry_gap =  120 # 2 minutes
-  api_version = "2021-04-20"
-  vpc_api_generation = 1
+  api_version = "2020-07-02"   #"2019-07-02"
+  vpc_api_generation = 2
+  vpc_api_timeout = "120s"

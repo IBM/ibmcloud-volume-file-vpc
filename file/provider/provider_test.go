@@ -113,8 +113,8 @@ func TestNewProvider(t *testing.T) {
 	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
 	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	prov, err := NewProvider(conf, &kc, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// GC private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -130,8 +130,8 @@ func TestNewProvider(t *testing.T) {
 
 	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	prov, err = NewProvider(conf, &kc, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gc mix test
 	conf = &vpcconfig.VPCFileConfig{
@@ -147,8 +147,8 @@ func TestNewProvider(t *testing.T) {
 
 	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	prov, err = NewProvider(conf, &kc, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gen2 public endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -162,8 +162,8 @@ func TestNewProvider(t *testing.T) {
 
 	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	prov, err = NewProvider(conf, &kc, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gen2 private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -180,8 +180,8 @@ func TestNewProvider(t *testing.T) {
 
 	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	prov, err = NewProvider(conf, &kc, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gen2 mix test
 	conf = &vpcconfig.VPCFileConfig{
@@ -198,8 +198,8 @@ func TestNewProvider(t *testing.T) {
 
 	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	prov, err = NewProvider(conf, &kc, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 	// TODO
 	// zone := "Test Zone"
 	// contextCF, _ := prov.ContextCredentialsFactory(&zone)

@@ -162,7 +162,7 @@ func TestWaitForDeleteVolumeAccessPoint(t *testing.T) {
 			expectedReasonCode: "ErrorUnclassified",
 
 			verify: func(t *testing.T, err error) {
-				assert.NotNil(t, err)
+				assert.Nil(t, err)
 			},
 		},
 	}

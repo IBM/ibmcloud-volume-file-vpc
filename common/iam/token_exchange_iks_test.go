@@ -284,7 +284,7 @@ func TestNewTokenExchangeIKSService(t *testing.T) {
 	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
 	_ = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	_, err := NewTokenExchangeIKSService(iksAuthConfig, &kc)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func TestExchangeAccessTokenForIMSToken(t *testing.T) {

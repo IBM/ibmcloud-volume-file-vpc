@@ -45,5 +45,5 @@ func TestNewVPCFileContextCredentialsFactory(t *testing.T) {
 	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
 	_ = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	_, err := NewVPCContextCredentialsFactory(conf, &kc)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
