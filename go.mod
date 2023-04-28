@@ -1,6 +1,6 @@
 module github.com/IBM/ibmcloud-volume-file-vpc
 
-go 1.18
+go 1.19
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
