@@ -29,17 +29,18 @@ import (
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 )
 
 // InitProviders initialization for all providers as per configurations
-func InitProviders(conf *vpcfileconfig.VPCFileConfig, logger *zap.Logger) (registry.Providers, error) {
+func InitProviders(conf *vpcfileconfig.VPCFileConfig, k8sClient *k8s_utils.KubernetesClient, logger *zap.Logger) (registry.Providers, error) {
 	var haveProviders bool
 	providerRegistry := &registry.ProviderRegistry{}
 
 	// VPC provider registration
 	if conf.VPCConfig != nil && conf.VPCConfig.Enabled {
 		logger.Info("Configuring VPC File Provider")
-		prov, err := vpc_provider.NewProvider(conf, logger)
+		prov, err := vpc_provider.NewProvider(conf, k8sClient, logger)
 		if err != nil {
 			logger.Info("VPC file provider error!")
 			return nil, err
@@ -94,7 +95,7 @@ func GenerateContextCredentials(conf *vpcfileconfig.VPCFileConfig, providerID st
 	switch {
 	case (conf.VPCConfig != nil && providerID == conf.VPCConfig.VPCVolumeType):
 		ctxLogger.Info("Calling provider/init_provider.go ForIAMAccessToken")
-		return contextCredentialsFactory.ForIAMAccessToken(conf.VPCConfig.APIKey, ctxLogger)
+		return contextCredentialsFactory.ForIAMAccessToken(conf.VPCConfig.G2APIKey, ctxLogger)
 
 	default:
 		return provider.ContextCredentials{}, util.NewError("ErrorInsufficientAuthentication",

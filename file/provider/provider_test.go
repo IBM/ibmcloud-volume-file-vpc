@@ -22,6 +22,8 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -33,6 +35,7 @@ import (
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/provider/auth"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -105,9 +108,13 @@ func TestNewProvider(t *testing.T) {
 		},
 	}
 
-	prov, err := NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	kc, _ := k8s_utils.FakeGetk8sClientSet()
+	pwd, _ := os.Getwd()
+	file := filepath.Join(pwd, "..", "..", "etc", "libconfig.toml")
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	prov, err := NewProvider(conf, &kc, logger)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// GC private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -121,9 +128,10 @@ func TestNewProvider(t *testing.T) {
 		},
 	}
 
-	prov, err = NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	prov, err = NewProvider(conf, &kc, logger)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gc mix test
 	conf = &vpcconfig.VPCFileConfig{
@@ -137,9 +145,10 @@ func TestNewProvider(t *testing.T) {
 		},
 	}
 
-	prov, err = NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	prov, err = NewProvider(conf, &kc, logger)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gen2 public endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -151,9 +160,10 @@ func TestNewProvider(t *testing.T) {
 		},
 	}
 
-	prov, err = NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	prov, err = NewProvider(conf, &kc, logger)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gen2 private endpoint related test
 	conf = &vpcconfig.VPCFileConfig{
@@ -168,9 +178,10 @@ func TestNewProvider(t *testing.T) {
 		},
 	}
 
-	prov, err = NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	prov, err = NewProvider(conf, &kc, logger)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 
 	// gen2 mix test
 	conf = &vpcconfig.VPCFileConfig{
@@ -185,9 +196,10 @@ func TestNewProvider(t *testing.T) {
 		},
 	}
 
-	prov, err = NewProvider(conf, logger)
-	assert.Nil(t, prov)
-	assert.NotNil(t, err)
+	err = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	prov, err = NewProvider(conf, &kc, logger)
+	assert.NotNil(t, prov)
+	assert.Nil(t, err)
 	// TODO
 	// zone := "Test Zone"
 	// contextCF, _ := prov.ContextCredentialsFactory(&zone)

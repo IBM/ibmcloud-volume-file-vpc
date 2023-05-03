@@ -24,11 +24,17 @@ import (
 	"strings"
 	"testing"
 
+	cloudprovider "github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider"
+	"github.com/golang/glog"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/kubernetes/scheme"
+	v1core "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/tools/record"
 
 	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-interface/config"
@@ -73,10 +79,20 @@ func TestAddTags(t *testing.T) {
 		},
 	}
 	logger, _ := GetTestLogger(t)
+	fakeIBMCloudStorageProvider, _ := cloudprovider.NewFakeIBMCloudStorageProvider("configPath", logger)
+
+	broadcaster := record.NewBroadcaster()
+	broadcaster.StartLogging(glog.Infof)
+	clientset := fake.NewSimpleClientset()
+	eventInterface := clientset.CoreV1().Events("")
+	broadcaster.StartRecordingToSink(&v1core.EventSinkImpl{Interface: eventInterface})
+
 	pvw := &PVWatcher{
 		provisionerName: "ibm-csi-driver",
 		logger:          logger,
 		config:          conf,
+		cloudProvider:   fakeIBMCloudStorageProvider,
+		recorder:        broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "pod-name"}),
 	}
 	pv := &v1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{

@@ -32,6 +32,7 @@ import (
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	userError "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	uid "github.com/gofrs/uuid"
 )
 
@@ -78,8 +79,8 @@ func main() {
 	defer logger.Sync()
 
 	// Load config file
-	goPath := os.Getenv("GOPATH")
-	conf, err := config.ReadConfig(goPath+"/src/github.com/IBM/ibmcloud-volume-file-vpc/etc/libconfig.toml", logger)
+	k8sClient, _ := k8s_utils.FakeGetk8sClientSet()
+	conf, err := config.ReadConfig(k8sClient, logger)
 	if err != nil {
 		logger.Fatal("Error loading configuration")
 	}
@@ -96,7 +97,7 @@ func main() {
 		ServerConfig: conf.Server,
 	}
 
-	providerRegistry, err := provider_file_util.InitProviders(vpcFileConfig, logger)
+	providerRegistry, err := provider_file_util.InitProviders(vpcFileConfig, &k8sClient, logger)
 
 	if err != nil {
 		logger.Fatal("Error configuring providers", local.ZapError(err))

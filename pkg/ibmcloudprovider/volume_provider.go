@@ -21,13 +21,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
 	provider_util "github.com/IBM/ibmcloud-volume-file-vpc/file/utils"
 	vpcconfig "github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig"
 	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
+	utilsConfig "github.com/IBM/secret-utils-lib/pkg/config"
+	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
@@ -37,18 +38,18 @@ type IBMCloudStorageProvider struct {
 	ProviderName   string
 	ProviderConfig *config.Config
 	Registry       registry.Providers
-	ClusterInfo    *utils.ClusterInfo
+	ClusterID      string
 }
 
 var _ CloudProviderInterface = &IBMCloudStorageProvider{}
 
 // NewIBMCloudStorageProvider ...
-func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMCloudStorageProvider, error) {
+func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.KubernetesClient, logger *zap.Logger) (*IBMCloudStorageProvider, error) {
 	logger.Info("NewIBMCloudStorageProvider-Reading provider configuration...")
 	// Load config file
-	conf, err := config.ReadConfig(configPath, logger)
+	conf, err := config.ReadConfig(*k8sClient, logger)
 	if err != nil {
-		logger.Fatal("Error loading configuration")
+		logger.Error("Error loading configuration")
 		return nil, err
 	}
 	// Get only VPC_API_VERSION, in "2019-07-02T00:00:00.000Z" case vpc need only 2019-07-02"
@@ -60,8 +61,9 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		conf.VPC.APIVersion = "2021-04-20" // setting default values
 	}
 
+	var clusterInfo utilsConfig.ClusterConfig
 	logger.Info("Fetching clusterInfo")
-	clusterInfo, err := utils.NewClusterInfo(logger)
+	clusterInfo, err = utilsConfig.GetClusterInfo(*k8sClient, logger)
 	if err != nil {
 		logger.Error("Unable to load ClusterInfo", local.ZapError(err))
 		return nil, err
@@ -74,7 +76,7 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 	}
 
 	// Prepare provider registry
-	registry, err := provider_util.InitProviders(vpcFileConfig, logger)
+	registry, err := provider_util.InitProviders(vpcFileConfig, k8sClient, logger)
 	if err != nil {
 		logger.Error("Error configuring providers", local.ZapError(err))
 		return nil, err
@@ -86,7 +88,7 @@ func NewIBMCloudStorageProvider(configPath string, logger *zap.Logger) (*IBMClou
 		ProviderName:   providerName,
 		ProviderConfig: conf,
 		Registry:       registry,
-		ClusterInfo:    clusterInfo,
+		ClusterID:      clusterInfo.ClusterID,
 	}
 	logger.Info("Successfully read provider configuration")
 	return cloudProvider, nil
@@ -122,7 +124,7 @@ func (icp *IBMCloudStorageProvider) GetConfig() *config.Config {
 	return icp.ProviderConfig
 }
 
-// GetClusterInfo ...
-func (icp *IBMCloudStorageProvider) GetClusterInfo() *utils.ClusterInfo {
-	return icp.ClusterInfo
+// GetClusterID ...
+func (icp *IBMCloudStorageProvider) GetClusterID() string {
+	return icp.ClusterID
 }

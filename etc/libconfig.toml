@@ -7,7 +7,7 @@
   g2_riaas_endpoint_url = "https://us-south.iaas.cloud.ibm.com"
   g2_riaas_endpoint_private_url = "https://us-south.iaas.cloud.ibm.com"
   g2_resource_group_id = "832b3da0130e4a78a2d5a6c62e79a745"
-  g2_api_key = ""
+  g2_api_key = "api-key"
   provider_type = "g2"
   vpc_provider_type = "vpc-share"
   encryption = false
