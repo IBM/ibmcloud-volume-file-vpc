@@ -26,6 +26,7 @@ import (
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
+	"net/url"
 
 	"go.uber.org/zap"
 )
@@ -76,7 +77,7 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
 			}
 
-			if len(volumeAccessPointRequest.PrimaryIP) == 0 {
+			if volumeAccessPointRequest.PrimaryIP == nil || len(volumeAccessPointRequest.PrimaryIP.ID) == 0 {
 				vpcs.Logger.Info("Getting subnet from VPC provider...")
 				subnet, err = vpcs.getSubnet(volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID, volumeAccessPointRequest.ResourceGroup.ID)
 				// Keep retry, until we get the proper volumeAccessPointResult object
@@ -87,12 +88,9 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
 					ID: subnet.ID,
 				}
-			} else {
+			} 
 				vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
-				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = &models.PrimaryIPID{
-					ID: volumeAccessPointRequest.PrimaryIP,
-				}
-			}
+				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
 		}
 
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
@@ -159,7 +157,8 @@ func (vpcs *VPCSession) getSubnetByVPCIDAndZone(zoneName string, vpcID string, r
 	var subnets *models.SubnetList
 
 	filters := &models.ListSubnetFilters{ResourceGroupID: resourceGroupID}
-	subnets, err = vpcs.Apiclient.FileShareService().ListSubnets(100, "", filters, vpcs.Logger)
+
+	subnets, err = vpcs.Apiclient.FileShareService().ListSubnets(10, "", filters, vpcs.Logger)
 
 	if err != nil {
 		// API call is failed
