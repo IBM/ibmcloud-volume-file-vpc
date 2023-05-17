@@ -35,7 +35,7 @@ type Subnet struct {
 	Zone          *Zone          `json:"zone,omitempty"`
 }
 
-//SubnetRef ...
+// SubnetRef ...
 type SubnetRef struct {
 	ID string `json:"id,omitempty"`
 }

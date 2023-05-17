@@ -26,12 +26,11 @@ import (
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
-	"net/url"
 
 	"go.uber.org/zap"
 )
 
-//VpcVolumeAccessPoint ...
+// VpcVolumeAccessPoint ...
 const (
 	StatusStable   = "stable"
 	StatusDeleting = "deleting"
@@ -88,9 +87,9 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
 					ID: subnet.ID,
 				}
-			} 
-				vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
-				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
+			}
+			vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
+			volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = (*models.PrimaryIP)(volumeAccessPointRequest.PrimaryIP)
 		}
 
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint

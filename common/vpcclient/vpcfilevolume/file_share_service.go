@@ -26,6 +26,7 @@ import (
 )
 
 // FileShareManager operations
+//
 //go:generate counterfeiter -o fakes/share.go --fake-name FileShareService . FileShareManager
 type FileShareManager interface {
 	// Create the file share with authorisation by passing required information in the share object

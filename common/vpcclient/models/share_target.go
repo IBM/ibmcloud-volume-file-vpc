@@ -50,19 +50,19 @@ type ShareTargetList struct {
 	TotalCount   int            `json:"total_count,omitempty"`
 }
 
-//PrimaryIP ...
+// PrimaryIP ...
 type PrimaryIP struct {
-	ID string `json:"id,omitempty"`
+	ID      string `json:"id,omitempty"`
 	Address string `json:"address,omitempty"`
-	Name string `json:"name,omitempty"`
+	Name    string `json:"name,omitempty"`
 }
 
-//VirtualNetworkInterface
+// VirtualNetworkInterface
 type VirtualNetworkInterface struct {
 	Name           string                    `json:"name,omitempty"`
 	Subnet         *SubnetRef                `json:"subnet,omitempty"`
 	SecurityGroups *[]provider.SecurityGroup `json:"security_groups,omitempty"`
-	PrimaryIP      *PrimaryIP             `json:"primary_ip,omitempty"`
+	PrimaryIP      *PrimaryIP                `json:"primary_ip,omitempty"`
 	ResourceGroup  *provider.ResourceGroup   `json:"resource_group,omitempty"`
 }
 
@@ -80,7 +80,7 @@ func NewShareTarget(volumeAccessPointRequest provider.VolumeAccessPointRequest) 
 	return va
 }
 
-//ToVolumeAccessPointResponse converts ShareTargetResponse to VolumeAccessPointResponse
+// ToVolumeAccessPointResponse converts ShareTargetResponse to VolumeAccessPointResponse
 func (va *ShareTarget) ToVolumeAccessPointResponse() *provider.VolumeAccessPointResponse {
 
 	varp := &provider.VolumeAccessPointResponse{

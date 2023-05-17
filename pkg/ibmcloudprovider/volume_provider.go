@@ -62,10 +62,10 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 		conf.VPC.APIVersion = "2023-01-15" // setting default values
 	}
 
-	var clusterInfo = &utils.ClusterInfo{}
+	var clusterInfo utilsConfig.ClusterConfig
 	logger.Info("Fetching clusterInfo")
 	if conf.IKS != nil && conf.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True" {
-		clusterInfo, err = utils.NewClusterInfo(logger)
+		clusterInfo, err = utilsConfig.GetClusterInfo(*k8sClient, logger)
 		if err != nil {
 			logger.Fatal("Unable to load ClusterInfo", local.ZapError(err))
 			return nil, err

@@ -36,7 +36,7 @@ var maxRetryGap = 60
 // retryGap ...
 var retryGap = 10
 
-//ConstantRetryGap ...
+// ConstantRetryGap ...
 const (
 	ConstantRetryGap  = 10 // seconds
 	SecurityGroupMode = "security_group"
@@ -45,7 +45,7 @@ const (
 
 var volumeIDPartsCount = 5
 
-//TODO need to introduce file share related to error codes
+// TODO need to introduce file share related to error codes
 var skipErrorCodes = map[string]bool{
 	"shares_profile_iops_not_allowed":   true,
 	"shares_profile_capacity_invalid":   true,
