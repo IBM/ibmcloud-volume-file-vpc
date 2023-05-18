@@ -42,9 +42,11 @@ type SubnetRef struct {
 
 // SubnetList ...
 type SubnetList struct {
-	Next    string    `json:"next,omitempty"`
-	Subnets []*Subnet `json:"subnets,omitempty"`
-	Limit   int       `json:"limit,omitempty"`
+	First      *HReference `json:"first,omitempty"`
+	Next       *HReference `json:"next,omitempty"`
+	Subnets    []*Subnet   `json:"subnets,omitempty"`
+	Limit      int         `json:"limit,omitempty"`
+	TotalCount int         `json:"total_count,omitempty"`
 }
 
 // ListSubnetFilters ...

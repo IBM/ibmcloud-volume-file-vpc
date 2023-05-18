@@ -28,17 +28,17 @@ import (
 )
 
 // maxRetryAttempt ...
-var maxRetryAttempt = 0
+var maxRetryAttempt = 10
 
 // maxRetryGap ...
-var maxRetryGap = 0
+var maxRetryGap = 60
 
 // retryGap ...
-var retryGap = 0
+var retryGap = 10
 
 // ConstantRetryGap ...
 const (
-	ConstantRetryGap  = 0 // seconds
+	ConstantRetryGap  = 10 // seconds
 	SecurityGroupMode = "security_group"
 	VPCMode           = "vpc"
 )
