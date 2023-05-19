@@ -54,6 +54,7 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 	var varp *provider.VolumeAccessPointResponse
 
 	var subnet *models.Subnet
+	var subnetID string
 
 	volumeAccessPoint := models.NewShareTarget(volumeAccessPointRequest)
 
@@ -78,20 +79,32 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
 			}
 
+			// If primaryIP.ID is provided subnet is not mandatory for rest of the cases it is mandatory
 			if volumeAccessPointRequest.PrimaryIP == nil || len(volumeAccessPointRequest.PrimaryIP.ID) == 0 {
-				vpcs.Logger.Info("Getting subnet from VPC provider...")
-				subnet, err = vpcs.getSubnet(volumeAccessPointRequest)
-				// Keep retry, until we get the proper volumeAccessPointResult object
-				if err != nil && subnet == nil {
-					return err, skipRetryForObviousErrors(err)
+
+				if len(volumeAccessPointRequest.SubnetID) == 0 {
+					vpcs.Logger.Info("Getting subnet from VPC provider...")
+					subnet, err = vpcs.getSubnet(volumeAccessPointRequest)
+					// Keep retry, until we get the proper volumeAccessPointResult object
+					if err != nil && subnet == nil {
+						return err, skipRetryForObviousErrors(err)
+					}
+					subnetID = subnet.ID
+
+				} else {
+					vpcs.Logger.Info("Using subnet provided by user...", zap.Reflect("subnetID", volumeAccessPointRequest.SubnetID))
+					subnetID = volumeAccessPointRequest.SubnetID
 				}
 
 				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
-					ID: subnet.ID,
+					ID: subnetID,
 				}
 			}
-			vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
-			volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = (*models.PrimaryIP)(volumeAccessPointRequest.PrimaryIP)
+
+			if volumeAccessPointRequest.PrimaryIP != nil {
+				vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
+				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = (*models.PrimaryIP)(volumeAccessPointRequest.PrimaryIP)
+			}
 		}
 
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
@@ -162,7 +175,7 @@ func (vpcs *VPCSession) getSubnetByVPCIDAndZone(volumeAccessPointRequest provide
 
 		if err != nil {
 			// API call is failed
-			userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), err, volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID)
+			userErr := userError.GetUserError("ListSubnetsFailed", err)
 			return nil, userErr
 		}
 
@@ -185,7 +198,7 @@ func (vpcs *VPCSession) getSubnetByVPCIDAndZone(volumeAccessPointRequest provide
 			startUrl, err := url.Parse(subnets.Next.Href)
 			if err != nil {
 				// API call is failed
-				userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), err, volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID)
+				userErr := userError.GetUserError("NextSubnetPageParsingError", err, subnets.Next.Href)
 				return nil, userErr
 			}
 
@@ -193,7 +206,7 @@ func (vpcs *VPCSession) getSubnetByVPCIDAndZone(volumeAccessPointRequest provide
 			start = startUrl.Query().Get("start") //parse query param into map
 			if start == "" {
 				// API call is failed
-				userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), err, volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID)
+				userErr := userError.GetUserError("StartSubnetIDEmpty", err, startUrl)
 				return nil, userErr
 			}
 
@@ -201,7 +214,7 @@ func (vpcs *VPCSession) getSubnetByVPCIDAndZone(volumeAccessPointRequest provide
 	}
 
 	// No volume Subnet found in the  list. So return error
-	userErr := userError.GetUserError(string(userError.AccessPointWithVPCIDFindFailed), errors.New("no subnet found"), volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID)
+	userErr := userError.GetUserError(string("SubnetFindFailedWithZoneAndVPC"), errors.New("no subnet found"), volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID)
 	vpcs.Logger.Error("Subnet not found", zap.Error(err))
 	return nil, userErr
 }
