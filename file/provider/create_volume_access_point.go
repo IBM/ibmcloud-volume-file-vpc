@@ -85,9 +85,9 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 				if len(volumeAccessPointRequest.SubnetID) == 0 {
 					vpcs.Logger.Info("Getting subnet from VPC provider...")
 					subnet, err = vpcs.getSubnet(volumeAccessPointRequest)
-					// Keep retry, until we get the proper volumeAccessPointResult object
+					// Return error if we dont find subnet
 					if err != nil && subnet == nil {
-						return err, skipRetryForObviousErrors(err)
+						return err, true // stop retry
 					}
 					subnetID = subnet.ID
 
@@ -102,7 +102,7 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			}
 
 			if volumeAccessPointRequest.PrimaryIP != nil {
-				vpcs.Logger.Info("Primary IP ID provided using it for virtual network interface...")
+				vpcs.Logger.Info("Primary IP property provided using it for virtual network interface...")
 				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = (*models.PrimaryIP)(volumeAccessPointRequest.PrimaryIP)
 			}
 		}

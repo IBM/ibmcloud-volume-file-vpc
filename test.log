@@ -1,0 +1,747 @@
+go get github.com/pierrre/gotestcover
+golangci-lint run --disable-all --enable=gofmt --fix
+go vet github.com/IBM/ibmcloud-volume-file-vpc/common/auth github.com/IBM/ibmcloud-volume-file-vpc/common/iam github.com/IBM/ibmcloud-volume-file-vpc/common/messages github.com/IBM/ibmcloud-volume-file-vpc/common/registry github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/fakes github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/payload github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/fakes github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/test github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes github.com/IBM/ibmcloud-volume-file-vpc/file/provider github.com/IBM/ibmcloud-volume-file-vpc/file/utils github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider github.com/IBM/ibmcloud-volume-file-vpc/pkg/metadata github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher
+/Users/sam3984/go/bin/gotestcover -v -coverprofile=cover.out github.com/IBM/ibmcloud-volume-file-vpc/common/auth github.com/IBM/ibmcloud-volume-file-vpc/common/iam github.com/IBM/ibmcloud-volume-file-vpc/common/messages github.com/IBM/ibmcloud-volume-file-vpc/common/registry github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/fakes github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/payload github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/fakes github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/test github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes github.com/IBM/ibmcloud-volume-file-vpc/file/provider github.com/IBM/ibmcloud-volume-file-vpc/file/utils github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider github.com/IBM/ibmcloud-volume-file-vpc/pkg/metadata github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher -timeout 90m
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/payload	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/registry	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/fakes	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/messages	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/test	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/fakes	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes	[no test files]
+=== RUN   TestClient
+=== RUN   TestClient/creates_invokable_requests_from_static_operations_(GET)
+=== RUN   TestClient/creates_invokable_requests_from_static_operations_(POST)
+=== RUN   TestClient/encodes_query_parameters
+=== RUN   TestClient/encodes_multipart_form_data
+=== RUN   TestClient/single_error
+=== RUN   TestClient/multiple_errors
+--- PASS: TestClient (0.01s)
+    --- PASS: TestClient/creates_invokable_requests_from_static_operations_(GET) (0.00s)
+    --- PASS: TestClient/creates_invokable_requests_from_static_operations_(POST) (0.00s)
+    --- PASS: TestClient/encodes_query_parameters (0.00s)
+    --- PASS: TestClient/encodes_multipart_form_data (0.00s)
+    --- PASS: TestClient/single_error (0.00s)
+    --- PASS: TestClient/multiple_errors (0.00s)
+=== RUN   TestDebugMode
+=== RUN   TestDebugMode/records_the_request_method_and_resource
+=== RUN   TestDebugMode/records_the_request_body
+=== RUN   TestDebugMode/records_the_response_code
+=== RUN   TestDebugMode/records_the_response_body
+=== RUN   TestDebugMode/redacts_the_Authorizration_header_value
+--- PASS: TestDebugMode (0.01s)
+    --- PASS: TestDebugMode/records_the_request_method_and_resource (0.00s)
+    --- PASS: TestDebugMode/records_the_request_body (0.00s)
+    --- PASS: TestDebugMode/records_the_response_code (0.00s)
+    --- PASS: TestDebugMode/records_the_response_body (0.00s)
+    --- PASS: TestDebugMode/redacts_the_Authorizration_header_value (0.00s)
+=== RUN   TestOperationURLProcessing
+=== RUN   TestOperationURLProcessing/absolute_path
+=== RUN   TestOperationURLProcessing/relative_path_base_does_not_end_with_slash
+=== RUN   TestOperationURLProcessing/relative_path_when_base_ends_with_slash
+=== RUN   TestOperationURLProcessing/relative_path_parent
+=== RUN   TestOperationURLProcessing/relative_path_with_.._beyond_root
+=== RUN   TestOperationURLProcessing/broken_base_URL
+=== RUN   TestOperationURLProcessing/broken_relative_path
+--- PASS: TestOperationURLProcessing (0.00s)
+    --- PASS: TestOperationURLProcessing/absolute_path (0.00s)
+    --- PASS: TestOperationURLProcessing/relative_path_base_does_not_end_with_slash (0.00s)
+    --- PASS: TestOperationURLProcessing/relative_path_when_base_ends_with_slash (0.00s)
+    --- PASS: TestOperationURLProcessing/relative_path_parent (0.00s)
+    --- PASS: TestOperationURLProcessing/relative_path_with_.._beyond_root (0.00s)
+    --- PASS: TestOperationURLProcessing/broken_base_URL (0.00s)
+    --- PASS: TestOperationURLProcessing/broken_relative_path (0.00s)
+=== RUN   TestWithPathParameter
+--- PASS: TestWithPathParameter (0.00s)
+=== RUN   TestWithQueryValue
+--- PASS: TestWithQueryValue (0.00s)
+=== RUN   TestParams
+--- PASS: TestParams (0.00s)
+PASS
+coverage: 80.8% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client	0.445s	coverage: 80.8% of statements
+?   	github.com/IBM/ibmcloud-volume-file-vpc/file/utils	[no test files]
+?   	github.com/IBM/ibmcloud-volume-file-vpc/file/vpcconfig	[no test files]
+=== RUN   TestConfig
+--- PASS: TestConfig (0.00s)
+=== RUN   TestLogin
+--- PASS: TestLogin (0.00s)
+=== RUN   TestNewSession
+--- PASS: TestNewSession (0.00s)
+=== RUN   TestVolumeFileService
+--- PASS: TestVolumeFileService (0.00s)
+PASS
+coverage: 100.0% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas	0.380s	coverage: 100.0% of statements
+=== RUN   TestCreateFileShareTarget
+=== RUN   TestCreateFileShareTarget/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.128+0530","caller":"vpcfilevolume/create_file_share_target_test.go:85","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.129+0530","caller":"vpcfilevolume/create_file_share_target.go:48","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52233/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Payload":{"name":"share target","vpc":{"id":"xvdc"}},"Operation":{"Name":"CreateFileShareTarget","Method":"POST","PathPattern":"/v1/shares/{share-id}/targets"},"PathParameters":"testshare"}
+{"level":"info","ts":"2023-05-17T13:09:05.130+0530","caller":"vpcfilevolume/create_file_share_target.go:56","msg":"Successfully created the file share target"}
+{"level":"info","ts":"2023-05-17T13:09:05.130+0530","caller":"metrics/metrics.go:73","msg":"Time to complete","FileShareService.CreateFileShareTarget":0.001880117}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION FileShareService.CreateFileShareTarget IS 1.911435ms
+{"level":"info","ts":"2023-05-17T13:09:05.131+0530","caller":"vpcfilevolume/create_file_share_target_test.go:90","msg":"Volume target details","shareTarget":{}}
+=== RUN   TestCreateFileShareTarget/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.131+0530","caller":"vpcfilevolume/create_file_share_target_test.go:85","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.131+0530","caller":"vpcfilevolume/create_file_share_target.go:48","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52235/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Payload":{"name":"share target","vpc":{"id":"xvdc"}},"Operation":{"Name":"CreateFileShareTarget","Method":"POST","PathPattern":"/v1/shares/{share-id}/targets"},"PathParameters":"testshare"}
+{"level":"info","ts":"2023-05-17T13:09:05.132+0530","caller":"metrics/metrics.go:73","msg":"Time to complete","FileShareService.CreateFileShareTarget":0.001406603}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION FileShareService.CreateFileShareTarget IS 1.437738ms
+{"level":"info","ts":"2023-05-17T13:09:05.132+0530","caller":"vpcfilevolume/create_file_share_target_test.go:90","msg":"Volume target details","shareTarget":null}
+=== RUN   TestCreateFileShareTarget/Verify_that_the_share_target_creation_is_done_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.133+0530","caller":"vpcfilevolume/create_file_share_target_test.go:85","msg":"Test case being executed","testcase":"Verify that the share target creation is done correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.133+0530","caller":"vpcfilevolume/create_file_share_target.go:48","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52237/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Payload":{"name":"share target","vpc":{"id":"xvdc"}},"Operation":{"Name":"CreateFileShareTarget","Method":"POST","PathPattern":"/v1/shares/{share-id}/targets"},"PathParameters":"testshare"}
+{"level":"info","ts":"2023-05-17T13:09:05.134+0530","caller":"vpcfilevolume/create_file_share_target.go:56","msg":"Successfully created the file share target"}
+{"level":"info","ts":"2023-05-17T13:09:05.134+0530","caller":"metrics/metrics.go:73","msg":"Time to complete","FileShareService.CreateFileShareTarget":0.0013437}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION FileShareService.CreateFileShareTarget IS 1.357744ms
+{"level":"info","ts":"2023-05-17T13:09:05.134+0530","caller":"vpcfilevolume/create_file_share_target_test.go:90","msg":"Volume target details","shareTarget":{"id":"share target id","mount_path":"161.26.114.179:/nxg_s_volle91789b5_54d0_4cd3_87ab_776683355ec0/dd843c3b-7523-4940-aa5b-9c89119f6515","name":"share target","vpc":{"id":"xvdc"}}}
+--- PASS: TestCreateFileShareTarget (0.01s)
+    --- PASS: TestCreateFileShareTarget/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestCreateFileShareTarget/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestCreateFileShareTarget/Verify_that_the_share_target_creation_is_done_correctly (0.00s)
+=== RUN   TestCreateFileShare
+=== RUN   TestCreateFileShare/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.134+0530","caller":"vpcfilevolume/create_file_share_test.go:100","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.134+0530","caller":"vpcfilevolume/create_file_share.go:46","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52239/v1/shares?version=2021-04-20","Payload":{"name":"share-name","size":10,"resource_group":{"id":"rg1"},"zone":{"name":"test-1"}},"Operation":{"Name":"CreateFileShare","Method":"POST","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION CreateFileShare IS 1.272514ms
+{"level":"info","ts":"2023-05-17T13:09:05.136+0530","caller":"vpcfilevolume/create_file_share_test.go:105","msg":"Volume details","share":{}}
+=== RUN   TestCreateFileShare/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.136+0530","caller":"vpcfilevolume/create_file_share_test.go:100","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.136+0530","caller":"vpcfilevolume/create_file_share.go:46","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52241/v1/shares?version=2021-04-20","Payload":{"name":"share-name","size":10,"resource_group":{"id":"rg1"},"zone":{"name":"test-1"}},"Operation":{"Name":"CreateFileShare","Method":"POST","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION CreateFileShare IS 1.297933ms
+{"level":"info","ts":"2023-05-17T13:09:05.137+0530","caller":"vpcfilevolume/create_file_share_test.go:105","msg":"Volume details","share":null}
+=== RUN   TestCreateFileShare/Verify_that_the_share_is_parsed_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.138+0530","caller":"vpcfilevolume/create_file_share_test.go:100","msg":"Test case being executed","testcase":"Verify that the share is parsed correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.138+0530","caller":"vpcfilevolume/create_file_share.go:46","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52243/v1/shares?version=2021-04-20","Payload":{"name":"share-name","size":10,"resource_group":{"id":"rg1"},"zone":{"name":"test-1"}},"Operation":{"Name":"CreateFileShare","Method":"POST","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION CreateFileShare IS 1.160609ms
+{"level":"info","ts":"2023-05-17T13:09:05.139+0530","caller":"vpcfilevolume/create_file_share_test.go:105","msg":"Volume details","share":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::share:vol1","id":"share-id","name":"share-name","size":10,"iops":3000,"zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+=== RUN   TestCreateFileShare/Verify_that_the_share_is_parsed_correctly_with_encryption_key
+{"level":"info","ts":"2023-05-17T13:09:05.139+0530","caller":"vpcfilevolume/create_file_share_test.go:100","msg":"Test case being executed","testcase":"Verify that the share is parsed correctly with encryption key"}
+{"level":"info","ts":"2023-05-17T13:09:05.139+0530","caller":"vpcfilevolume/create_file_share.go:46","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52245/v1/shares?version=2021-04-20","Payload":{"name":"share-name","size":10,"resource_group":{"id":"rg1"},"zone":{"name":"test-1"}},"Operation":{"Name":"CreateFileShare","Method":"POST","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION CreateFileShare IS 1.432395ms
+{"level":"info","ts":"2023-05-17T13:09:05.141+0530","caller":"vpcfilevolume/create_file_share_test.go:105","msg":"Volume details","share":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::share:vol1","id":"share-id","name":"share-name","size":10,"iops":3000,"encryption_key":{"crn":"crn:v1:bluemix:public:kms:us-south:a/abcd32a619db2b564b82a816400bcd12:t36097fd-5051-4582-a641-8f51b5334cfa:key:abc05f428-5fb7-4546-958b-0f4e65266d5c"},"zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+=== RUN   TestCreateFileShare/False_positive:_What_if_the_share_ID_is_not_matched
+{"level":"info","ts":"2023-05-17T13:09:05.141+0530","caller":"vpcfilevolume/create_file_share_test.go:100","msg":"Test case being executed","testcase":"False positive: What if the share ID is not matched"}
+{"level":"info","ts":"2023-05-17T13:09:05.141+0530","caller":"vpcfilevolume/create_file_share.go:46","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52247/v1/shares?version=2021-04-20","Payload":{"name":"share-name","size":10,"resource_group":{"id":"rg1"},"zone":{"name":"test-1"}},"Operation":{"Name":"CreateFileShare","Method":"POST","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION CreateFileShare IS 1.178994ms
+{"level":"info","ts":"2023-05-17T13:09:05.142+0530","caller":"vpcfilevolume/create_file_share_test.go:105","msg":"Volume details","share":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::share:wrong-vol","id":"wrong-vol","name":"wrong-vol","size":10,"iops":3000,"zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+--- PASS: TestCreateFileShare (0.01s)
+    --- PASS: TestCreateFileShare/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestCreateFileShare/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestCreateFileShare/Verify_that_the_share_is_parsed_correctly (0.00s)
+    --- PASS: TestCreateFileShare/Verify_that_the_share_is_parsed_correctly_with_encryption_key (0.00s)
+    --- PASS: TestCreateFileShare/False_positive:_What_if_the_share_ID_is_not_matched (0.00s)
+=== RUN   TestDeleteFileShareTarget
+=== RUN   TestDeleteFileShareTarget/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.143+0530","caller":"vpcfilevolume/delete_file_share_target_test.go:83","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.143+0530","caller":"vpcfilevolume/delete_file_share_target.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52249/v1/shares/%7Bshare-id%7D/targets/%7Btarget-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShareTarget","Method":"DELETE","PathPattern":"/v1/shares/{share-id}/targets/{target-id}"}}
+{"level":"info","ts":"2023-05-17T13:09:05.144+0530","caller":"vpcfilevolume/delete_file_share_target.go:57","msg":"DeleteFileShareTarget successfull"}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteFileShareTarget IS 1.284828ms
+{"level":"info","ts":"2023-05-17T13:09:05.144+0530","caller":"vpcfilevolume/delete_file_share_target_test.go:88","msg":"Share target delete response","deleteTargetResponseError":"json: unsupported type: func() (io.ReadCloser, error)"}
+=== RUN   TestDeleteFileShareTarget/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.145+0530","caller":"vpcfilevolume/delete_file_share_target_test.go:83","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.145+0530","caller":"vpcfilevolume/delete_file_share_target.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52251/v1/shares/%7Bshare-id%7D/targets/%7Btarget-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShareTarget","Method":"DELETE","PathPattern":"/v1/shares/{share-id}/targets/{target-id}"}}
+{"level":"error","ts":"2023-05-17T13:09:05.146+0530","caller":"vpcfilevolume/delete_file_share_target.go:50","msg":"Error occurred while deleting file share target","error":"Trace Code:, testerr Please check "}
+{"level":"info","ts":"2023-05-17T13:09:05.146+0530","caller":"vpcfilevolume/delete_file_share_target.go:53","msg":"Exit DeleteFileShareTarget","resp":404,"error":"Trace Code:, testerr Please check ","error":"Trace Code:, testerr Please check "}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteFileShareTarget IS 1.142967ms
+{"level":"info","ts":"2023-05-17T13:09:05.146+0530","caller":"vpcfilevolume/delete_file_share_target_test.go:88","msg":"Share target delete response","deleteTargetResponseError":"json: unsupported type: func() (io.ReadCloser, error)"}
+=== RUN   TestDeleteFileShareTarget/Verify_that_the_share_target_deletion_is_done_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.146+0530","caller":"vpcfilevolume/delete_file_share_target_test.go:83","msg":"Test case being executed","testcase":"Verify that the share target deletion is done correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.146+0530","caller":"vpcfilevolume/delete_file_share_target.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52253/v1/shares/%7Bshare-id%7D/targets/%7Btarget-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShareTarget","Method":"DELETE","PathPattern":"/v1/shares/{share-id}/targets/{target-id}"}}
+{"level":"info","ts":"2023-05-17T13:09:05.148+0530","caller":"vpcfilevolume/delete_file_share_target.go:57","msg":"DeleteFileShareTarget successfull"}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteFileShareTarget IS 1.16135ms
+{"level":"info","ts":"2023-05-17T13:09:05.148+0530","caller":"vpcfilevolume/delete_file_share_target_test.go:88","msg":"Share target delete response","deleteTargetResponseError":"json: unsupported type: func() (io.ReadCloser, error)"}
+--- PASS: TestDeleteFileShareTarget (0.01s)
+    --- PASS: TestDeleteFileShareTarget/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestDeleteFileShareTarget/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestDeleteFileShareTarget/Verify_that_the_share_target_deletion_is_done_correctly (0.00s)
+=== RUN   TestDeleteFileShare
+=== RUN   TestDeleteFileShare/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.148+0530","caller":"vpcfilevolume/delete_file_share_test.go:73","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.148+0530","caller":"vpcfilevolume/delete_file_share.go:45","msg":"Equivalent curl command","URL":"http://127.0.0.1:52255/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShare","Method":"DELETE","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteVolume IS 1.200576ms
+=== RUN   TestDeleteFileShare/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.149+0530","caller":"vpcfilevolume/delete_file_share_test.go:73","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.149+0530","caller":"vpcfilevolume/delete_file_share.go:45","msg":"Equivalent curl command","URL":"http://127.0.0.1:52257/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShare","Method":"DELETE","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteVolume IS 2.260142ms
+=== RUN   TestDeleteFileShare/Verify_that_the_share_is_parsed_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.152+0530","caller":"vpcfilevolume/delete_file_share_test.go:73","msg":"Test case being executed","testcase":"Verify that the share is parsed correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.152+0530","caller":"vpcfilevolume/delete_file_share.go:45","msg":"Equivalent curl command","URL":"http://127.0.0.1:52259/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShare","Method":"DELETE","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteVolume IS 1.189624ms
+=== RUN   TestDeleteFileShare/False_positive:_What_if_the_share_ID_is_not_matched
+{"level":"info","ts":"2023-05-17T13:09:05.153+0530","caller":"vpcfilevolume/delete_file_share_test.go:73","msg":"Test case being executed","testcase":"False positive: What if the share ID is not matched"}
+{"level":"info","ts":"2023-05-17T13:09:05.153+0530","caller":"vpcfilevolume/delete_file_share.go:45","msg":"Equivalent curl command","URL":"http://127.0.0.1:52261/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"DeleteFileShare","Method":"DELETE","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION DeleteVolume IS 1.039802ms
+--- PASS: TestDeleteFileShare (0.01s)
+    --- PASS: TestDeleteFileShare/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestDeleteFileShare/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestDeleteFileShare/Verify_that_the_share_is_parsed_correctly (0.00s)
+    --- PASS: TestDeleteFileShare/False_positive:_What_if_the_share_ID_is_not_matched (0.00s)
+=== RUN   TestExpandVolume
+=== RUN   TestExpandVolume/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.155+0530","caller":"vpcfilevolume/expand_volume_test.go:90","msg":"tested SetupMuxResponse"}
+{"level":"info","ts":"2023-05-17T13:09:05.155+0530","caller":"vpcfilevolume/expand_volume_test.go:93","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.155+0530","caller":"vpcfilevolume/expand_volume.go:47","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52263/v1/shares/share-id?version=2021-04-20","Payload":{"size":300},"Operation":{"Name":"ExpandVolume","Method":"PATCH","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ExpandVolume IS 1.107892ms
+{"level":"info","ts":"2023-05-17T13:09:05.156+0530","caller":"vpcfilevolume/expand_volume_test.go:98","msg":"Volume details","volume":{}}
+=== RUN   TestExpandVolume/Verify_that_the_volume_expanded_correctly_if_correct_size_is_given
+{"level":"info","ts":"2023-05-17T13:09:05.156+0530","caller":"vpcfilevolume/expand_volume_test.go:90","msg":"tested SetupMuxResponse"}
+{"level":"info","ts":"2023-05-17T13:09:05.156+0530","caller":"vpcfilevolume/expand_volume_test.go:93","msg":"Test case being executed","testcase":"Verify that the volume expanded correctly if correct size is given"}
+{"level":"info","ts":"2023-05-17T13:09:05.156+0530","caller":"vpcfilevolume/expand_volume.go:47","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52265/v1/shares/share-id?version=2021-04-20","Payload":{"size":300},"Operation":{"Name":"ExpandVolume","Method":"PATCH","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ExpandVolume IS 1.137856ms
+{"level":"info","ts":"2023-05-17T13:09:05.158+0530","caller":"vpcfilevolume/expand_volume_test.go:98","msg":"Volume details","volume":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::volume:vol1","id":"share-id","name":"share-name","size":300,"iops":3000,"lifecycle_state":"updating","zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+=== RUN   TestExpandVolume/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.158+0530","caller":"vpcfilevolume/expand_volume_test.go:90","msg":"tested SetupMuxResponse"}
+{"level":"info","ts":"2023-05-17T13:09:05.158+0530","caller":"vpcfilevolume/expand_volume_test.go:93","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.158+0530","caller":"vpcfilevolume/expand_volume.go:47","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52267/v1/shares/share-id?version=2021-04-20","Payload":{"size":300},"Operation":{"Name":"ExpandVolume","Method":"PATCH","PathPattern":"/v1/shares/{share-id}"}}
+{"level":"info","ts":"2023-05-17T13:09:05.159+0530","caller":"vpcfilevolume/expand_volume.go:50","msg":"Exit Backend ExpandVolume due to error.","Error: ":{"errors":[{"message":"testerr"}]}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ExpandVolume IS 1.235877ms
+{"level":"info","ts":"2023-05-17T13:09:05.159+0530","caller":"vpcfilevolume/expand_volume_test.go:98","msg":"Volume details","volume":null}
+=== RUN   TestExpandVolume/False_positive:_What_if_the_volume_ID_is_not_matched
+{"level":"info","ts":"2023-05-17T13:09:05.159+0530","caller":"vpcfilevolume/expand_volume_test.go:90","msg":"tested SetupMuxResponse"}
+{"level":"info","ts":"2023-05-17T13:09:05.159+0530","caller":"vpcfilevolume/expand_volume_test.go:93","msg":"Test case being executed","testcase":"False positive: What if the volume ID is not matched"}
+{"level":"info","ts":"2023-05-17T13:09:05.159+0530","caller":"vpcfilevolume/expand_volume.go:47","msg":"Equivalent curl command and payload details","URL":"http://127.0.0.1:52269/v1/shares/share-id?version=2021-04-20","Payload":{"size":300},"Operation":{"Name":"ExpandVolume","Method":"PATCH","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ExpandVolume IS 1.041726ms
+{"level":"info","ts":"2023-05-17T13:09:05.160+0530","caller":"vpcfilevolume/expand_volume_test.go:98","msg":"Volume details","volume":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::volume:wrong-vol","id":"wrong-vol","name":"wrong-vol","size":10,"iops":3000,"lifecycle_state":"updating","zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+--- PASS: TestExpandVolume (0.01s)
+    --- PASS: TestExpandVolume/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestExpandVolume/Verify_that_the_volume_expanded_correctly_if_correct_size_is_given (0.00s)
+    --- PASS: TestExpandVolume/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestExpandVolume/False_positive:_What_if_the_volume_ID_is_not_matched (0.00s)
+=== RUN   TestGetFileShareTarget
+=== RUN   TestGetFileShareTarget/Verify_that_the_get_share_target_by_target_ID_is_done_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.161+0530","caller":"vpcfilevolume/get_file_share_target_test.go:75","msg":"Test case being executed","testcase":"Verify that the get share target by target ID is done correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.161+0530","caller":"vpcfilevolume/get_file_share_target.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52271/v1/shares/%7Bshare-id%7D/targets/%7Btarget-id%7D?version=2021-04-20","Operation":{"Name":"GetFileShareTarget","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets/{target-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareTarget IS 1.436ms
+{"level":"info","ts":"2023-05-17T13:09:05.162+0530","caller":"vpcfilevolume/get_file_share_target_test.go:79","msg":"Share target details","shareTarget":{"id":"share target id","mount_path":"161.26.114.179:/nxg_s_volle91789b5_54d0_4cd3_87ab_776683355ec0/dd843c3b-7523-4940-aa5b-9c89119f6515","name":"share target","vpc":{"id":"xvdc"}}}
+--- PASS: TestGetFileShareTarget (0.00s)
+    --- PASS: TestGetFileShareTarget/Verify_that_the_get_share_target_by_target_ID_is_done_correctly (0.00s)
+=== RUN   TestGetFileShareTargetByName
+=== RUN   TestGetFileShareTargetByName/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.163+0530","caller":"vpcfilevolume/get_file_share_target_test.go:147","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.163+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52273/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 1.275597ms
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareTargetByName IS 1.288522ms
+{"level":"info","ts":"2023-05-17T13:09:05.164+0530","caller":"vpcfilevolume/get_file_share_target_test.go:151","msg":"Share target details","share":null}
+=== RUN   TestGetFileShareTargetByName/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.164+0530","caller":"vpcfilevolume/get_file_share_target_test.go:147","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.164+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52275/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 1.043382ms
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareTargetByName IS 1.056639ms
+{"level":"info","ts":"2023-05-17T13:09:05.165+0530","caller":"vpcfilevolume/get_file_share_target_test.go:151","msg":"Share target details","share":null}
+=== RUN   TestGetFileShareTargetByName/Verify_that_the_share_name_is_parsed_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.166+0530","caller":"vpcfilevolume/get_file_share_target_test.go:147","msg":"Test case being executed","testcase":"Verify that the share name is parsed correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.166+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52277/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 1.199269ms
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareTargetByName IS 1.212828ms
+{"level":"info","ts":"2023-05-17T13:09:05.167+0530","caller":"vpcfilevolume/get_file_share_target_test.go:151","msg":"Share target details","share":{"id":"voltarget1","name":"vvoltarget1","vpc":{"id":"xvdc"}}}
+=== RUN   TestGetFileShareTargetByName/Verify_that_the_share_target_is_empty_if_the_shares_are_empty
+{"level":"info","ts":"2023-05-17T13:09:05.167+0530","caller":"vpcfilevolume/get_file_share_target_test.go:147","msg":"Test case being executed","testcase":"Verify that the share target is empty if the shares are empty"}
+{"level":"info","ts":"2023-05-17T13:09:05.167+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52279/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 981.583µs
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareTargetByName IS 993.196µs
+{"level":"info","ts":"2023-05-17T13:09:05.168+0530","caller":"vpcfilevolume/get_file_share_target_test.go:151","msg":"Share target details","share":null}
+--- PASS: TestGetFileShareTargetByName (0.01s)
+    --- PASS: TestGetFileShareTargetByName/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestGetFileShareTargetByName/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestGetFileShareTargetByName/Verify_that_the_share_name_is_parsed_correctly (0.00s)
+    --- PASS: TestGetFileShareTargetByName/Verify_that_the_share_target_is_empty_if_the_shares_are_empty (0.00s)
+=== RUN   TestGetFileShare
+=== RUN   TestGetFileShare/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.169+0530","caller":"vpcfilevolume/get_file_share_test.go:105","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.169+0530","caller":"vpcfilevolume/get_file_share.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52281/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"GetFileShare","Method":"GET","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShare IS 933.215µs
+{"level":"info","ts":"2023-05-17T13:09:05.170+0530","caller":"vpcfilevolume/get_file_share_test.go:110","msg":"Share details","share":{}}
+=== RUN   TestGetFileShare/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.170+0530","caller":"vpcfilevolume/get_file_share_test.go:105","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.170+0530","caller":"vpcfilevolume/get_file_share.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52283/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"GetFileShare","Method":"GET","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShare IS 974.837µs
+{"level":"info","ts":"2023-05-17T13:09:05.171+0530","caller":"vpcfilevolume/get_file_share_test.go:110","msg":"Share details","share":null}
+=== RUN   TestGetFileShare/Verify_that_the_share_is_parsed_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.171+0530","caller":"vpcfilevolume/get_file_share_test.go:105","msg":"Test case being executed","testcase":"Verify that the share is parsed correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.171+0530","caller":"vpcfilevolume/get_file_share.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52285/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"GetFileShare","Method":"GET","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShare IS 1.060569ms
+{"level":"info","ts":"2023-05-17T13:09:05.172+0530","caller":"vpcfilevolume/get_file_share_test.go:110","msg":"Share details","share":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::share:vol1","id":"vol1","name":"vol1","size":10,"iops":3000,"zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+=== RUN   TestGetFileShare/False_positive:_What_if_the_share_ID_is_not_matched
+{"level":"info","ts":"2023-05-17T13:09:05.172+0530","caller":"vpcfilevolume/get_file_share_test.go:105","msg":"Test case being executed","testcase":"False positive: What if the share ID is not matched"}
+{"level":"info","ts":"2023-05-17T13:09:05.172+0530","caller":"vpcfilevolume/get_file_share.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52287/v1/shares/%7Bshare-id%7D?version=2021-04-20","Operation":{"Name":"GetFileShare","Method":"GET","PathPattern":"/v1/shares/{share-id}"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShare IS 1.2268ms
+{"level":"info","ts":"2023-05-17T13:09:05.174+0530","caller":"vpcfilevolume/get_file_share_test.go:110","msg":"Share details","share":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::share:wrong-vol","id":"wrong-vol","name":"wrong-vol","size":10,"iops":3000,"zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+--- PASS: TestGetFileShare (0.01s)
+    --- PASS: TestGetFileShare/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestGetFileShare/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestGetFileShare/Verify_that_the_share_is_parsed_correctly (0.00s)
+    --- PASS: TestGetFileShare/False_positive:_What_if_the_share_ID_is_not_matched (0.00s)
+=== RUN   TestGetFileShareByName
+=== RUN   TestGetFileShareByName/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.174+0530","caller":"vpcfilevolume/get_file_share_test.go:176","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.174+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52289/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 960.018µs
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareByName IS 973.206µs
+{"level":"info","ts":"2023-05-17T13:09:05.175+0530","caller":"vpcfilevolume/get_file_share_test.go:180","msg":"Share details","share":null}
+=== RUN   TestGetFileShareByName/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.175+0530","caller":"vpcfilevolume/get_file_share_test.go:176","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.175+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52291/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 946.851µs
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareByName IS 960.836µs
+{"level":"info","ts":"2023-05-17T13:09:05.176+0530","caller":"vpcfilevolume/get_file_share_test.go:180","msg":"Share details","share":null}
+=== RUN   TestGetFileShareByName/Verify_that_the_share_name_is_parsed_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.176+0530","caller":"vpcfilevolume/get_file_share_test.go:176","msg":"Test case being executed","testcase":"Verify that the share name is parsed correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.177+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52293/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 1.654687ms
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareByName IS 1.670888ms
+{"level":"info","ts":"2023-05-17T13:09:05.178+0530","caller":"vpcfilevolume/get_file_share_test.go:180","msg":"Share details","share":{"crn":"crn:v1:bluemix:public:is:test-1:a/rg1::share:vol1","id":"vol1","name":"vol1","size":10,"iops":3000,"zone":{"name":"test-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/test-1"}}}
+=== RUN   TestGetFileShareByName/Verify_that_the_share_is_empty_if_the_shares_are_empty
+{"level":"info","ts":"2023-05-17T13:09:05.178+0530","caller":"vpcfilevolume/get_file_share_test.go:176","msg":"Test case being executed","testcase":"Verify that the share is empty if the shares are empty"}
+{"level":"info","ts":"2023-05-17T13:09:05.179+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52295/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 950.795µs
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION GetFileShareByName IS 962.962µs
+{"level":"info","ts":"2023-05-17T13:09:05.179+0530","caller":"vpcfilevolume/get_file_share_test.go:180","msg":"Share details","share":null}
+--- PASS: TestGetFileShareByName (0.01s)
+    --- PASS: TestGetFileShareByName/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestGetFileShareByName/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestGetFileShareByName/Verify_that_the_share_name_is_parsed_correctly (0.00s)
+    --- PASS: TestGetFileShareByName/Verify_that_the_share_is_empty_if_the_shares_are_empty (0.00s)
+=== RUN   TestListFileShareTargets
+=== RUN   TestListFileShareTargets/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.180+0530","caller":"vpcfilevolume/list_file_share_targets_test.go:83","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.180+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52297/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 1.00606ms
+=== RUN   TestListFileShareTargets/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.181+0530","caller":"vpcfilevolume/list_file_share_targets_test.go:83","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.181+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52299/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 930.996µs
+=== RUN   TestListFileShareTargets/Verify_that_the_share_targets_is_done_correctly
+{"level":"info","ts":"2023-05-17T13:09:05.182+0530","caller":"vpcfilevolume/list_file_share_targets_test.go:83","msg":"Test case being executed","testcase":"Verify that the share targets is done correctly"}
+{"level":"info","ts":"2023-05-17T13:09:05.182+0530","caller":"vpcfilevolume/list_file_share_targets.go:46","msg":"Equivalent curl command","URL":"http://127.0.0.1:52301/v1/shares/%7Bshare-id%7D/targets?version=2021-04-20","Operation":{"Name":"ListFileShareTargets","Method":"GET","PathPattern":"/v1/shares/{share-id}/targets"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShareTargets IS 967.958µs
+--- PASS: TestListFileShareTargets (0.00s)
+    --- PASS: TestListFileShareTargets/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestListFileShareTargets/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestListFileShareTargets/Verify_that_the_share_targets_is_done_correctly (0.00s)
+=== RUN   TestListFileShares
+=== RUN   TestListFileShares/Verify_that_the_correct_endpoint_is_invoked
+{"level":"info","ts":"2023-05-17T13:09:05.183+0530","caller":"vpcfilevolume/list_file_shares_test.go:111","msg":"Test case being executed","testcase":"Verify that the correct endpoint is invoked"}
+{"level":"info","ts":"2023-05-17T13:09:05.183+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52303/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 934.993µs
+{"level":"info","ts":"2023-05-17T13:09:05.184+0530","caller":"vpcfilevolume/list_file_shares_test.go:116","msg":"Shares","shares":{"shares":null}}
+=== RUN   TestListFileShares/Verify_that_a_404_is_returned_to_the_caller
+{"level":"info","ts":"2023-05-17T13:09:05.185+0530","caller":"vpcfilevolume/list_file_shares_test.go:111","msg":"Test case being executed","testcase":"Verify that a 404 is returned to the caller"}
+{"level":"info","ts":"2023-05-17T13:09:05.185+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52305/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 958.072µs
+{"level":"info","ts":"2023-05-17T13:09:05.186+0530","caller":"vpcfilevolume/list_file_shares_test.go:116","msg":"Shares","shares":null}
+=== RUN   TestListFileShares/Verify_that_limit_is_added_to_the_query
+{"level":"info","ts":"2023-05-17T13:09:05.186+0530","caller":"vpcfilevolume/list_file_shares_test.go:111","msg":"Test case being executed","testcase":"Verify that limit is added to the query"}
+{"level":"info","ts":"2023-05-17T13:09:05.186+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52307/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 938.156µs
+{"level":"info","ts":"2023-05-17T13:09:05.187+0530","caller":"vpcfilevolume/list_file_shares_test.go:116","msg":"Shares","shares":{"shares":null}}
+=== RUN   TestListFileShares/Verify_that_start_is_added_to_the_query
+{"level":"info","ts":"2023-05-17T13:09:05.187+0530","caller":"vpcfilevolume/list_file_shares_test.go:111","msg":"Test case being executed","testcase":"Verify that start is added to the query"}
+{"level":"info","ts":"2023-05-17T13:09:05.187+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52309/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 1.009199ms
+{"level":"info","ts":"2023-05-17T13:09:05.188+0530","caller":"vpcfilevolume/list_file_shares_test.go:116","msg":"Shares","shares":{"shares":null}}
+=== RUN   TestListFileShares/Verify_that_resource_group.id_is_added_to_the_query
+{"level":"info","ts":"2023-05-17T13:09:05.188+0530","caller":"vpcfilevolume/list_file_shares_test.go:111","msg":"Test case being executed","testcase":"Verify that resource_group.id is added to the query"}
+{"level":"info","ts":"2023-05-17T13:09:05.188+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52311/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 1.048794ms
+{"level":"info","ts":"2023-05-17T13:09:05.190+0530","caller":"vpcfilevolume/list_file_shares_test.go:116","msg":"Shares","shares":{"shares":null}}
+=== RUN   TestListFileShares/Verify_that_share_name_is_added_to_the_query
+{"level":"info","ts":"2023-05-17T13:09:05.190+0530","caller":"vpcfilevolume/list_file_shares_test.go:111","msg":"Test case being executed","testcase":"Verify that share name is added to the query"}
+{"level":"info","ts":"2023-05-17T13:09:05.190+0530","caller":"vpcfilevolume/list_file_shares.go:47","msg":"Equivalent curl command","URL":"http://127.0.0.1:52313/v1/shares?version=2021-04-20","Operation":{"Name":"ListFileShares","Method":"GET","PathPattern":"/v1/shares"}}
+2023/05/17 13:09:05 TIME TAKEN BY FUNCTION ListFileShares IS 913.768µs
+{"level":"info","ts":"2023-05-17T13:09:05.191+0530","caller":"vpcfilevolume/list_file_shares_test.go:116","msg":"Shares","shares":{"shares":null}}
+--- PASS: TestListFileShares (0.01s)
+    --- PASS: TestListFileShares/Verify_that_the_correct_endpoint_is_invoked (0.00s)
+    --- PASS: TestListFileShares/Verify_that_a_404_is_returned_to_the_caller (0.00s)
+    --- PASS: TestListFileShares/Verify_that_limit_is_added_to_the_query (0.00s)
+    --- PASS: TestListFileShares/Verify_that_start_is_added_to_the_query (0.00s)
+    --- PASS: TestListFileShares/Verify_that_resource_group.id_is_added_to_the_query (0.00s)
+    --- PASS: TestListFileShares/Verify_that_share_name_is_added_to_the_query (0.00s)
+PASS
+coverage: 82.4% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume	0.644s	coverage: 82.4% of statements
+=== RUN   Test_IKSExchangeRefreshTokenForAccessToken_Success
+{"L":"INFO","T":"2023-05-17T13:09:09.118+0530","C":"iam/token_exchange_iks.go:150","M":"In tokenExchangeIKSRequest's sendTokenExchangeRequest()"}
+{"L":"INFO","T":"2023-05-17T13:09:09.118+0530","C":"iam/token_exchange_iks.go:169","M":"Sending IAM token exchange request to container api server"}
+{"L":"DEBUG","T":"2023-05-17T13:09:09.120+0530","C":"iam/token_exchange_iks.go:179","M":"IAM token exchange request successful"}
+{"L":"DEBUG","T":"2023-05-17T13:09:09.120+0530","C":"utils/error_utils.go:157","M":"Retry Function Result","shouldStop":true}
+--- PASS: Test_IKSExchangeRefreshTokenForAccessToken_Success (0.00s)
+=== RUN   Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest
+{"L":"INFO","T":"2023-05-17T13:09:09.120+0530","C":"iam/token_exchange_iks.go:150","M":"In tokenExchangeIKSRequest's sendTokenExchangeRequest()"}
+{"L":"INFO","T":"2023-05-17T13:09:09.120+0530","C":"iam/token_exchange_iks.go:169","M":"Sending IAM token exchange request to container api server"}
+{"L":"DEBUG","T":"2023-05-17T13:09:09.121+0530","C":"utils/error_utils.go:157","M":"Retry Function Result","error":"IAM token exchange request failed: did not work","shouldStop":true}
+--- PASS: Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest (0.00s)
+=== RUN   Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest_no_message
+{"L":"INFO","T":"2023-05-17T13:09:09.121+0530","C":"iam/token_exchange_iks.go:150","M":"In tokenExchangeIKSRequest's sendTokenExchangeRequest()"}
+{"L":"INFO","T":"2023-05-17T13:09:09.121+0530","C":"iam/token_exchange_iks.go:169","M":"Sending IAM token exchange request to container api server"}
+{"L":"DEBUG","T":"2023-05-17T13:09:09.123+0530","C":"utils/error_utils.go:157","M":"Retry Function Result","error":"Unexpected IAM token exchange response","shouldStop":true}
+--- PASS: Test_IKSExchangeRefreshTokenForAccessToken_FailedDuringRequest_no_message (0.00s)
+=== RUN   Test_IKSExchangeRefreshTokenForAccessToken_FailedWrongApiUrl
+{"L":"INFO","T":"2023-05-17T13:09:09.123+0530","C":"iam/token_exchange_iks.go:150","M":"In tokenExchangeIKSRequest's sendTokenExchangeRequest()"}
+{"L":"INFO","T":"2023-05-17T13:09:09.123+0530","C":"iam/token_exchange_iks.go:169","M":"Sending IAM token exchange request to container api server"}
+{"L":"DEBUG","T":"2023-05-17T13:09:09.123+0530","C":"utils/error_utils.go:157","M":"Retry Function Result","error":"IAM token exchange request failed","shouldStop":true}
+--- PASS: Test_IKSExchangeRefreshTokenForAccessToken_FailedWrongApiUrl (0.00s)
+=== RUN   Test_IKSExchangeIAMAPIKeyForAccessToken
+=== RUN   Test_IKSExchangeIAMAPIKeyForAccessToken/Unable_to_fetch_token
+{"L":"INFO","T":"2023-05-17T13:09:09.124+0530","C":"iam/token_exchange_iks.go:96","M":"Fetching using secret provider"}
+--- PASS: Test_IKSExchangeIAMAPIKeyForAccessToken (0.00s)
+    --- PASS: Test_IKSExchangeIAMAPIKeyForAccessToken/Unable_to_fetch_token (0.00s)
+=== RUN   TestNewTokenExchangeIKSService
+{"level":"info","timestamp":"2023-05-17T13:09:09.125+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:09.125+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.125+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:09.125+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.125+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.125+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.125+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+--- PASS: TestNewTokenExchangeIKSService (0.00s)
+=== RUN   TestExchangeAccessTokenForIMSToken
+--- PASS: TestExchangeAccessTokenForIMSToken (0.00s)
+=== RUN   TestExchangeIAMAPIKeyForIMSToken
+--- PASS: TestExchangeIAMAPIKeyForIMSToken (0.00s)
+=== RUN   TestGetIAMAccountIDFromAccessToken
+--- PASS: TestGetIAMAccountIDFromAccessToken (0.00s)
+PASS
+coverage: 92.5% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/common/iam	1.306s	coverage: 92.5% of statements
+=== RUN   TestNewVPCFileContextCredentialsFactory
+{"level":"info","timestamp":"2023-05-17T13:09:09.675+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:09.676+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.676+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:09.676+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.676+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.676+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.676+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.677+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:09.677+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.677+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:09.677+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.677+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.677+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:09.677+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+--- PASS: TestNewVPCFileContextCredentialsFactory (0.00s)
+PASS
+coverage: 80.0% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/common/auth	1.794s	coverage: 80.0% of statements
+=== RUN   TestCreateVolumeAccessPoint
+=== RUN   TestCreateVolumeAccessPoint/VPC_ID_is_nil
+=== RUN   TestCreateVolumeAccessPoint/Volume_ID_is_nil
+=== RUN   TestCreateVolumeAccessPoint/Volume_Access_Point_already_exist_for_the_VPCID_and_VolumeID
+=== RUN   TestCreateVolumeAccessPoint/Volume_creation_failure
+=== RUN   TestCreateVolumeAccessPoint/Success_Case
+--- PASS: TestCreateVolumeAccessPoint (0.00s)
+    --- PASS: TestCreateVolumeAccessPoint/VPC_ID_is_nil (0.00s)
+    --- PASS: TestCreateVolumeAccessPoint/Volume_ID_is_nil (0.00s)
+    --- PASS: TestCreateVolumeAccessPoint/Volume_Access_Point_already_exist_for_the_VPCID_and_VolumeID (0.00s)
+    --- PASS: TestCreateVolumeAccessPoint/Volume_creation_failure (0.00s)
+    --- PASS: TestCreateVolumeAccessPoint/Success_Case (0.00s)
+=== RUN   TestCreateVolume
+=== RUN   TestCreateVolume/Volume_capacity_is_nil
+=== RUN   TestCreateVolume/Volume_capacity_is_zero
+=== RUN   TestCreateVolume/Volume_with_tier-10iops_profile_and_invalid_iops
+=== RUN   TestCreateVolume/Volume_with_no_validation_issues
+=== RUN   TestCreateVolume/Volume_creation_failure
+=== RUN   TestCreateVolume/Volume_creation_with_encryption
+=== RUN   TestCreateVolume/Volume_creation_with_resource_group_ID_and_Name_empty
+=== RUN   TestCreateVolume/Volume_with_test-purpose_profile_and_invalid_iops
+=== RUN   TestCreateVolume/Volume_creation_failure#01
+=== RUN   TestCreateVolume/Volume_name_is_nil
+=== RUN   TestCreateVolume/Volume_name_is_empty
+=== RUN   TestCreateVolume/Volume_in_pending_state
+--- PASS: TestCreateVolume (0.00s)
+    --- PASS: TestCreateVolume/Volume_capacity_is_nil (0.00s)
+    --- PASS: TestCreateVolume/Volume_capacity_is_zero (0.00s)
+    --- PASS: TestCreateVolume/Volume_with_tier-10iops_profile_and_invalid_iops (0.00s)
+    --- PASS: TestCreateVolume/Volume_with_no_validation_issues (0.00s)
+    --- PASS: TestCreateVolume/Volume_creation_failure (0.00s)
+    --- PASS: TestCreateVolume/Volume_creation_with_encryption (0.00s)
+    --- PASS: TestCreateVolume/Volume_creation_with_resource_group_ID_and_Name_empty (0.00s)
+    --- PASS: TestCreateVolume/Volume_with_test-purpose_profile_and_invalid_iops (0.00s)
+    --- PASS: TestCreateVolume/Volume_creation_failure#01 (0.00s)
+    --- PASS: TestCreateVolume/Volume_name_is_nil (0.00s)
+    --- PASS: TestCreateVolume/Volume_name_is_empty (0.00s)
+    --- PASS: TestCreateVolume/Volume_in_pending_state (0.00s)
+=== RUN   TestDeleteVolumeAccessPoint
+=== RUN   TestDeleteVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil
+=== RUN   TestDeleteVolumeAccessPoint/Volume_ID_is_nil
+=== RUN   TestDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID
+=== RUN   TestDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_TargetID
+--- PASS: TestDeleteVolumeAccessPoint (0.00s)
+    --- PASS: TestDeleteVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil (0.00s)
+    --- PASS: TestDeleteVolumeAccessPoint/Volume_ID_is_nil (0.00s)
+    --- PASS: TestDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID (0.00s)
+    --- PASS: TestDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_TargetID (0.00s)
+=== RUN   TestDeleteVolume
+=== RUN   TestDeleteVolume/Success_Case
+=== RUN   TestDeleteVolume/Failure_can't_delete_volume_as_there_exists_volume_access_point
+=== RUN   TestDeleteVolume/False_positive:_No_volume_being_sent
+=== RUN   TestDeleteVolume/Incorrect_volume_ID
+=== RUN   TestDeleteVolume/Incorrect_volume_ID#01
+--- PASS: TestDeleteVolume (0.00s)
+    --- PASS: TestDeleteVolume/Success_Case (0.00s)
+    --- PASS: TestDeleteVolume/Failure_can't_delete_volume_as_there_exists_volume_access_point (0.00s)
+    --- PASS: TestDeleteVolume/False_positive:_No_volume_being_sent (0.00s)
+    --- PASS: TestDeleteVolume/Incorrect_volume_ID (0.00s)
+    --- PASS: TestDeleteVolume/Incorrect_volume_ID#01 (0.00s)
+=== RUN   TestDeleteVolumeTwo
+--- PASS: TestDeleteVolumeTwo (0.00s)
+=== RUN   TestExpandVolume
+=== RUN   TestExpandVolume/New_size_greater_than_current_size_->_success
+Success volumeshareservice
+=== RUN   TestExpandVolume/New_size_same_as_current_size_->_success
+Success volumeshareservice
+=== RUN   TestExpandVolume/volume_not_found
+Success volumeshareservice
+=== RUN   TestExpandVolume/New_size_less_than_current_size
+Success volumeshareservice
+=== RUN   TestExpandVolume/Correct_size_but_stuck_in_pending_state
+Success volumeshareservice
+--- PASS: TestExpandVolume (0.00s)
+    --- PASS: TestExpandVolume/New_size_greater_than_current_size_->_success (0.00s)
+    --- PASS: TestExpandVolume/New_size_same_as_current_size_->_success (0.00s)
+    --- PASS: TestExpandVolume/volume_not_found (0.00s)
+    --- PASS: TestExpandVolume/New_size_less_than_current_size (0.00s)
+    --- PASS: TestExpandVolume/Correct_size_but_stuck_in_pending_state (0.00s)
+=== RUN   TestGetVolumeAccessPoint
+=== RUN   TestGetVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil
+=== RUN   TestGetVolumeAccessPoint/Volume_ID_is_nil
+=== RUN   TestGetVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID
+=== RUN   TestGetVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_VPC_ID
+=== RUN   TestGetVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_TargetID
+=== RUN   TestGetVolumeAccessPoint/Volume_Access_Point_exist_for_the_TargetID
+--- PASS: TestGetVolumeAccessPoint (0.00s)
+    --- PASS: TestGetVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil (0.00s)
+    --- PASS: TestGetVolumeAccessPoint/Volume_ID_is_nil (0.00s)
+    --- PASS: TestGetVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID (0.00s)
+    --- PASS: TestGetVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_VPC_ID (0.00s)
+    --- PASS: TestGetVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_TargetID (0.00s)
+    --- PASS: TestGetVolumeAccessPoint/Volume_Access_Point_exist_for_the_TargetID (0.00s)
+=== RUN   TestGetVolume
+=== RUN   TestGetVolume/OK
+=== RUN   TestGetVolume/Wrong_volume_ID
+=== RUN   TestGetVolume/Volume_without_zone
+--- PASS: TestGetVolume (0.00s)
+    --- PASS: TestGetVolume/OK (0.00s)
+    --- PASS: TestGetVolume/Wrong_volume_ID (0.00s)
+    --- PASS: TestGetVolume/Volume_without_zone (0.00s)
+=== RUN   TestGetVolumeByName
+=== RUN   TestGetVolumeByName/OK
+=== RUN   TestGetVolumeByName/Wrong_volume_ID
+=== RUN   TestGetVolumeByName/Volume_without_zone
+=== RUN   TestGetVolumeByName/Empty_volume_name
+--- PASS: TestGetVolumeByName (0.00s)
+    --- PASS: TestGetVolumeByName/OK (0.00s)
+    --- PASS: TestGetVolumeByName/Wrong_volume_ID (0.00s)
+    --- PASS: TestGetVolumeByName/Volume_without_zone (0.00s)
+    --- PASS: TestGetVolumeByName/Empty_volume_name (0.00s)
+=== RUN   TestListVolumes
+=== RUN   TestListVolumes/Filter_by_name
+=== RUN   TestListVolumes/Filter_by_name:_volume_not_found
+=== RUN   TestListVolumes/Filter_by_resource_group_ID
+=== RUN   TestListVolumes/Filter_by_resource_group_ID:_no_volume_found
+=== RUN   TestListVolumes/List_all_volumes
+=== RUN   TestListVolumes/Unexpected_format_of_'Next'_parameter_in_ListVolumes_response
+=== RUN   TestListVolumes/Invalid_limit_value
+=== RUN   TestListVolumes/Invalid_start_volume_ID
+--- PASS: TestListVolumes (0.00s)
+    --- PASS: TestListVolumes/Filter_by_name (0.00s)
+    --- PASS: TestListVolumes/Filter_by_name:_volume_not_found (0.00s)
+    --- PASS: TestListVolumes/Filter_by_resource_group_ID (0.00s)
+    --- PASS: TestListVolumes/Filter_by_resource_group_ID:_no_volume_found (0.00s)
+    --- PASS: TestListVolumes/List_all_volumes (0.00s)
+    --- PASS: TestListVolumes/Unexpected_format_of_'Next'_parameter_in_ListVolumes_response (0.00s)
+    --- PASS: TestListVolumes/Invalid_limit_value (0.00s)
+    --- PASS: TestListVolumes/Invalid_start_volume_ID (0.00s)
+=== RUN   TestNewProvider
+{"level":"info","timestamp":"2023-05-17T13:09:10.372+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.372+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.372+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.373+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.373+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.373+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.373+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.373+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.374+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.374+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.374+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.374+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.374+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.374+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.374+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.374+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.374+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.375+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.375+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.375+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.375+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.375+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.375+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.375+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.375+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.376+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.376+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.376+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.376+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.377+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.377+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.377+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.377+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.377+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.377+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.377+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.377+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.377+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:10.378+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"error","timestamp":"2023-05-17T13:09:10.378+0530","caller":"config/cluster_config.go:53","msg":"Error fetching cluster info","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"configmaps \"cluster-info\" not found"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:10.378+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+--- PASS: TestNewProvider (0.01s)
+=== RUN   TestGetTestProvider
+--- PASS: TestGetTestProvider (0.00s)
+=== RUN   TestOpenSession
+--- PASS: TestOpenSession (0.00s)
+=== RUN   TestGetTestOpenSession
+--- PASS: TestGetTestOpenSession (0.00s)
+=== RUN   TestGetPrivateEndpoint
+--- PASS: TestGetPrivateEndpoint (0.00s)
+=== RUN   TestGetProviderType
+--- PASS: TestGetProviderType (0.00s)
+=== RUN   TestGetProviderName
+--- PASS: TestGetProviderName (0.00s)
+=== RUN   TestGetProviderDisplayName
+--- PASS: TestGetProviderDisplayName (0.00s)
+=== RUN   TestUpdateVolume
+--- PASS: TestUpdateVolume (0.00s)
+=== RUN   TestTokenGenerator
+--- PASS: TestTokenGenerator (0.00s)
+=== RUN   TestSetRetryParameters
+--- PASS: TestSetRetryParameters (0.00s)
+=== RUN   TestRetry
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util_test.go:65","msg":"Testing retry with successful attempt"}
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util.go:91","msg":"Error while executing the function. Re-attempting execution ..","attempt..":2,"retry-gap":0,"max-retry-Attempts":2,"error":"Trace Code:,  Please check "}
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util_test.go:65","msg":"Testing retry with successful attempt"}
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util_test.go:82","msg":"Testing retry with unsuccessful attempt"}
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util.go:91","msg":"Error while executing the function. Re-attempting execution ..","attempt..":2,"retry-gap":0,"max-retry-Attempts":2,"error":"Trace Code:,  Please check "}
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util_test.go:82","msg":"Testing retry with unsuccessful attempt"}
+--- PASS: TestRetry (0.00s)
+=== RUN   TestSkipRetry
+--- PASS: TestSkipRetry (0.00s)
+=== RUN   TestRetryWithError
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util_test.go:129","msg":"Testing retry with error"}
+{"level":"info","ts":"2023-05-17T13:09:10.379+0530","caller":"provider/util_test.go:129","msg":"Testing retry with error"}
+--- PASS: TestRetryWithError (0.00s)
+=== RUN   TestFromProviderToLibVolume
+--- PASS: TestFromProviderToLibVolume (0.00s)
+=== RUN   TestToInt
+--- PASS: TestToInt (0.00s)
+=== RUN   TestToInt64
+--- PASS: TestToInt64 (0.00s)
+=== RUN   TestIsValidVolumeIDFormat
+--- PASS: TestIsValidVolumeIDFormat (0.00s)
+=== RUN   TestWaitForCreateVolumeAccessPoint
+=== RUN   TestWaitForCreateVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil
+=== RUN   TestWaitForCreateVolumeAccessPoint/Volume_ID_is_nil
+=== RUN   TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID
+=== RUN   TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID_but_timeout_occurs
+=== RUN   TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_TargetID
+=== RUN   TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_exist_for_the_TargetID
+--- PASS: TestWaitForCreateVolumeAccessPoint (0.00s)
+    --- PASS: TestWaitForCreateVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil (0.00s)
+    --- PASS: TestWaitForCreateVolumeAccessPoint/Volume_ID_is_nil (0.00s)
+    --- PASS: TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID (0.00s)
+    --- PASS: TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID_but_timeout_occurs (0.00s)
+    --- PASS: TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_TargetID (0.00s)
+    --- PASS: TestWaitForCreateVolumeAccessPoint/Volume_Access_Point_exist_for_the_TargetID (0.00s)
+=== RUN   TestWaitForDeleteVolumeAccessPoint
+=== RUN   TestWaitForDeleteVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil
+=== RUN   TestWaitForDeleteVolumeAccessPoint/Volume_ID_is_nil
+=== RUN   TestWaitForDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID
+=== RUN   TestWaitForDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID_but_timeout_occurs
+=== RUN   TestWaitForDeleteVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_TargetID
+--- PASS: TestWaitForDeleteVolumeAccessPoint (0.00s)
+    --- PASS: TestWaitForDeleteVolumeAccessPoint/VPC_ID_and_Target_ID_is_nil (0.00s)
+    --- PASS: TestWaitForDeleteVolumeAccessPoint/Volume_ID_is_nil (0.00s)
+    --- PASS: TestWaitForDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID (0.00s)
+    --- PASS: TestWaitForDeleteVolumeAccessPoint/Volume_Access_Point_exist_for_the_VPCID_but_timeout_occurs (0.00s)
+    --- PASS: TestWaitForDeleteVolumeAccessPoint/Volume_Access_Point_does_not_exist_for_the_TargetID (0.00s)
+=== RUN   TestWaitForValidVolumeState
+=== RUN   TestWaitForValidVolumeState/OK
+=== RUN   TestWaitForValidVolumeState/Invalid_volume_state
+=== RUN   TestWaitForValidVolumeState/Volume_without_zone
+--- PASS: TestWaitForValidVolumeState (0.00s)
+    --- PASS: TestWaitForValidVolumeState/OK (0.00s)
+    --- PASS: TestWaitForValidVolumeState/Invalid_volume_state (0.00s)
+    --- PASS: TestWaitForValidVolumeState/Volume_without_zone (0.00s)
+PASS
+coverage: 85.3% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/file/provider	2.083s	coverage: 85.3% of statements
+=== RUN   TestNewNodeMetadata
+--- PASS: TestNewNodeMetadata (0.00s)
+=== RUN   TestGetZone
+--- PASS: TestGetZone (0.00s)
+=== RUN   TestGetRegion
+--- PASS: TestGetRegion (0.00s)
+=== RUN   TestGetWorkerID
+--- PASS: TestGetWorkerID (0.00s)
+PASS
+coverage: 40.6% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/pkg/metadata	2.247s	coverage: 40.6% of statements
+command [go test -v -cover -coverprofile /var/folders/ss/c_5xrprx6pl0fxngsmybjxsw0000gn/T/gotestcover-3384886346 github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider -timeout 90m]: exit status 1
+=== RUN   TestNewIBMCloudStorageProvider
+=== RUN   TestNewIBMCloudStorageProvider/Successful_initialization_of_cloud_storage_provider
+{"level":"info","timestamp":"2023-05-17T13:09:11.470+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:11.470+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"authenticator/authenticator.go:48","msg":"Initializing authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"warn","timestamp":"2023-05-17T13:09:11.471+0530","caller":"authenticator/authenticator.go:86","msg":"Unable to fetch ibm-cloud-credentials","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","error":"secrets \"ibm-cloud-credentials\" not found","key-name":"ibm-credentials.env"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"authenticator/authenticator.go:159","msg":"Successfully initialized authenticator","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider","secret-name":"storage-secret-store","auth-type":"DEFAULT"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"secret_provider/unmanaged_secret_provider.go:270","msg":"Fetched endpoints from storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"secret_provider/unmanaged_secret_provider.go:274","msg":"Framed token exchange URL using storage-secret-store","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+{"level":"info","timestamp":"2023-05-17T13:09:11.471+0530","caller":"secret_provider/unmanaged_secret_provider.go:115","msg":"Initialized unmanaged secret provider","name":"secret-provider","secret-provider-type":"unmanaged-secret-provider"}
+=== RUN   TestNewIBMCloudStorageProvider/Invalid_cluster_config
+FAIL	github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider	2.747s
+FAIL
+=== RUN   TestNew
+--- PASS: TestNew (0.00s)
+=== RUN   TestAddTags
+=== RUN   TestAddTags/User_tags-_success
+{"level":"info","ts":"2023-05-17T13:09:11.900+0530","caller":"watcher/pv_watcher.go:162","msg":"Entry updateVolume()","RequestID":"8e7468d0-2176-4e1a-b3f6-33348bb3eff3","obj":{"metadata":{"name":"test-pv","creationTimestamp":null},"spec":{"capacity":{"storage":"1Gi"},"csi":{"driver":"vpc-csi-driver","volumeHandle":"test-volumeid","volumeAttributes":{"clusterID":"12345","iops":"3000","tags":"mytag1:1,mytag2:2","volumeCRN":"test-volcrn"}},"claimRef":{"namespace":"test-namespace","name":"test-pvc"},"persistentVolumeReclaimPolicy":"Delete","storageClassName":"test-storage-class"},"status":{}}}
+{"level":"info","ts":"2023-05-17T13:09:11.900+0530","caller":"watcher/pv_watcher.go:167","msg":"volume to update ","RequestID":"8e7468d0-2176-4e1a-b3f6-33348bb3eff3","volume":{"volumeID":"test-volumeid","provider":"","volumeType":"","capacity":1,"iops":"3000","tier":null,"creationTime":"0001-01-01T00:00:00Z","attributes":{"clusterid":"12345","status":"created"},"crn":"test-volcrn","volume_tags":["mytag1:1","mytag2:2","clusterID:12345","reclaimpolicy:Delete","storageclass:test-storage-class","namespace:test-namespace","pvc:test-pvc","pv:test-pv","provisioner:ibm-csi-driver"]}}
+=== RUN   TestAddTags/No_user_tags-_success
+{"level":"warn","ts":"2023-05-17T13:09:11.900+0530","caller":"watcher/pv_watcher.go:174","msg":"Volume Metadata saved successfully","RequestID":"8e7468d0-2176-4e1a-b3f6-33348bb3eff3"}
+{"level":"info","ts":"2023-05-17T13:09:11.900+0530","caller":"watcher/pv_watcher.go:177","msg":"Exit updateVolume()","RequestID":"8e7468d0-2176-4e1a-b3f6-33348bb3eff3"}
+--- PASS: TestAddTags (0.00s)
+    --- PASS: TestAddTags/User_tags-_success (0.00s)
+    --- PASS: TestAddTags/No_user_tags-_success (0.00s)
+PASS
+{"level":"info","ts":"2023-05-17T13:09:11.901+0530","caller":"watcher/pv_watcher.go:162","msg":"Entry updateVolume()","RequestID":"282abc06-38d1-4736-86fe-bf86a767554d","obj":{"metadata":{"name":"test-pv","creationTimestamp":null},"spec":{"capacity":{"storage":"1Gi"},"csi":{"driver":"vpc-csi-driver","volumeHandle":"test-volumeid","volumeAttributes":{"clusterID":"12345","iops":"3000","tags":"","volumeCRN":"test-volcrn"}},"claimRef":{"namespace":"test-namespace","name":"test-pvc"},"persistentVolumeReclaimPolicy":"Delete","storageClassName":"test-storage-class"},"status":{}}}
+{"level":"info","ts":"2023-05-17T13:09:11.901+0530","caller":"watcher/pv_watcher.go:167","msg":"volume to update ","RequestID":"282abc06-38d1-4736-86fe-bf86a767554d","volume":{"volumeID":"test-volumeid","provider":"","volumeType":"","capacity":1,"iops":"3000","tier":null,"creationTime":"0001-01-01T00:00:00Z","attributes":{"clusterid":"12345","status":"created"},"crn":"test-volcrn","volume_tags":["clusterID:12345","reclaimpolicy:Delete","storageclass:test-storage-class","namespace:test-namespace","pvc:test-pvc","pv:test-pv","provisioner:ibm-csi-driver"]}}
+{"level":"warn","ts":"2023-05-17T13:09:11.901+0530","caller":"watcher/pv_watcher.go:174","msg":"Volume Metadata saved successfully","RequestID":"282abc06-38d1-4736-86fe-bf86a767554d"}
+{"level":"info","ts":"2023-05-17T13:09:11.901+0530","caller":"watcher/pv_watcher.go:177","msg":"Exit updateVolume()","RequestID":"282abc06-38d1-4736-86fe-bf86a767554d"}
+coverage: 57.5% of statements
+ok  	github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher	3.156s	coverage: 57.5% of statements
+test failed
