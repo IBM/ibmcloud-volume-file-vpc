@@ -40,6 +40,7 @@ var retryGap = 10
 const (
 	ConstantRetryGap = 10 // seconds
 	SecurityGroup    = "security_group"
+	pageSize         = 10
 )
 
 var volumeIDPartsCount = 5

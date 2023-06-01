@@ -64,6 +64,14 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return nil, true // stop retry volume accessPoint already created
 		}
 
+		/*
+			isENIEnabled : false/true (optional) Default value is false i.e VPC mode(Non ENI/VNI). If set to true then mode is security_group (ENI/VNI).
+			securityGroupIDs (optional) : list of security groups the ENI/VNI will be attached to. If not provided default security group of VPC is considered
+			subnetID (optional): If provided the ENI/VNI will use the provided subnetID.If not provided CSI driver will use the subnet-id available in the VPC zone part which is part of the cluster.
+			primaryIPID (optional): Existing ID of reserved IP from the same subnet as the file share zone. subnet-id is not required in this.
+			primaryIPAddress (optional): IPAddress user want to create and reserve as part of the ENI/VNI creation. subnetID will be required either has input from user or CSI driver will fetch it. Example: 10.0.1.13
+		*/
+
 		// If ENI/VNI is enabled
 		if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
 			volumeAccessPoint.VPC = nil // We can either pass VPC or VNI
