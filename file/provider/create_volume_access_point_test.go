@@ -80,7 +80,6 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 			providerVolumeAccessPointRequest: provider.VolumeAccessPointRequest{
 				VolumeID:      "volume-id1",
 				VPCID:         "VPC-id1",
-				Zone:          "test-zone",
 				ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 			},
 
@@ -121,7 +120,6 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 			providerVolumeAccessPointRequest: provider.VolumeAccessPointRequest{
 				VolumeID:      "volume-id1",
 				VPCID:         "VPC-id1",
-				Zone:          "test-zone",
 				ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 			},
 
@@ -141,7 +139,6 @@ func TestCreateVolumeAccessPoint(t *testing.T) {
 			providerVolumeAccessPointRequest: provider.VolumeAccessPointRequest{
 				VolumeID:      "volume-id1",
 				VPCID:         "VPC-id1",
-				Zone:          "test-zone",
 				ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 			},
 

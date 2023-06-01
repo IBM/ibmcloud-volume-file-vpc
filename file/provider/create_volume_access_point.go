@@ -18,9 +18,6 @@
 package provider
 
 import (
-	"errors"
-	"net/url"
-	"strings"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -53,9 +50,6 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 	var volumeAccessPointResult *models.ShareTarget
 	var varp *provider.VolumeAccessPointResponse
 
-	var subnet *models.Subnet
-	var subnetID string
-
 	volumeAccessPoint := models.NewShareTarget(volumeAccessPointRequest)
 
 	err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) {
@@ -70,34 +64,18 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return nil, true // stop retry volume accessPoint already created
 		}
 
-		// If ENI is enabled
-		if volumeAccessPointRequest.AccessControlMode == SecurityGroupMode {
-			volumeAccessPoint.VPC = nil
-			volumeAccessPoint.EncryptionInTransit = volumeAccessPointRequest.EncryptionInTransit
+		// If ENI/VNI is enabled
+		if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
+			volumeAccessPoint.VPC = nil // We can either pass VPC or VNI
 			volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
 				SecurityGroups: volumeAccessPointRequest.SecurityGroups,
 				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
 			}
 
-			// If primaryIP.ID is provided subnet is not mandatory for rest of the cases it is mandatory
-			if volumeAccessPointRequest.PrimaryIP == nil || len(volumeAccessPointRequest.PrimaryIP.ID) == 0 {
-
-				if len(volumeAccessPointRequest.SubnetID) == 0 {
-					vpcs.Logger.Info("Getting subnet from VPC provider...")
-					subnet, err = vpcs.getSubnet(volumeAccessPointRequest)
-					// Return error if we dont find subnet
-					if err != nil && subnet == nil {
-						return err, true // stop retry
-					}
-					subnetID = subnet.ID
-
-				} else {
-					vpcs.Logger.Info("Using subnet provided by user...", zap.Reflect("subnetID", volumeAccessPointRequest.SubnetID))
-					subnetID = volumeAccessPointRequest.SubnetID
-				}
-
+			if len(volumeAccessPointRequest.SubnetID) != 0 {
+				vpcs.Logger.Info("Using subnet...", zap.Reflect("subnetID", volumeAccessPointRequest.SubnetID))
 				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
-					ID: subnetID,
+					ID: volumeAccessPointRequest.SubnetID,
 				}
 			}
 
@@ -138,83 +116,12 @@ func (vpcs *VPCSession) validateVolumeAccessPointRequest(volumeAccessPointReques
 		return err
 	}
 
-	// Check for VPC ID - required validation
+	// Check for VPC ID, SubnetID or AccessPointID  - required validation
 	if len(volumeAccessPointRequest.VPCID) == 0 && len(volumeAccessPointRequest.SubnetID) == 0 && len(volumeAccessPointRequest.AccessPointID) == 0 {
-		err = userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID")
+		err = userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID or SubnetID or AccessPointID")
 		vpcs.Logger.Error("One of volumeAccessPointRequest.VPCID, volumeAccessPointRequest.SubnetID and volumeAccessPointRequest.AccessPoint is required", zap.Error(err))
 		return err
 	}
+
 	return nil
-}
-
-// GetSubnet  get the subnet based on the request
-func (vpcs *VPCSession) getSubnet(volumeAccessPointRequest provider.VolumeAccessPointRequest) (*models.Subnet, error) {
-	vpcs.Logger.Debug("Entry of GetSubnet method...", zap.Reflect("volumeAccessPointRequest", volumeAccessPointRequest))
-	defer vpcs.Logger.Debug("Exit from GetSubnet method...")
-	var err error
-
-	// Get Subnet by VPC ID and zone. This is inefficient operation which requires iteration over subnet list
-	subnet, err := vpcs.getSubnetByVPCIDAndZone(volumeAccessPointRequest)
-	vpcs.Logger.Info("getSubnetByVPCIDAndZone response", zap.Reflect("subnet", subnet), zap.Error(err))
-	return subnet, err
-}
-
-func (vpcs *VPCSession) getSubnetByVPCIDAndZone(volumeAccessPointRequest provider.VolumeAccessPointRequest) (*models.Subnet, error) {
-	vpcs.Logger.Debug("Entry of getSubnetByVPCIDAndZone()")
-	defer vpcs.Logger.Debug("Exit from getSubnetByVPCIDAndZone()")
-	vpcs.Logger.Info("Getting getSubnetByVPCIDAndZone from VPC provider...")
-	var err error
-	var subnets *models.SubnetList
-	var start = ""
-
-	filters := &models.ListSubnetFilters{ResourceGroupID: volumeAccessPointRequest.ResourceGroup.ID}
-
-	for {
-
-		subnets, err = vpcs.Apiclient.FileShareService().ListSubnets(10, start, filters, vpcs.Logger)
-
-		if err != nil {
-			// API call is failed
-			userErr := userError.GetUserError("ListSubnetsFailed", err)
-			return nil, userErr
-		}
-
-		// Iterate over the subnet list for given volume
-		if subnets != nil {
-			subnetList := subnets.Subnets
-			for _, subnetItem := range subnetList {
-				// Check if VPC ID and zone name is matching with requested input
-				if subnetItem.VPC != nil && subnetItem.VPC.ID == volumeAccessPointRequest.VPCID && subnetItem.Zone != nil && subnetItem.Zone.Name == volumeAccessPointRequest.Zone && strings.Contains(volumeAccessPointRequest.SubnetIDList, subnetItem.ID) {
-					vpcs.Logger.Info("Successfully found subnet", zap.Reflect("subnetItem", subnetItem))
-					return subnetItem, nil
-				}
-			}
-
-			if subnets.Next == nil {
-				break // No more pages, exit the loop
-			}
-
-			// Fetch the start of next page
-			startUrl, err := url.Parse(subnets.Next.Href)
-			if err != nil {
-				// API call is failed
-				userErr := userError.GetUserError("NextSubnetPageParsingError", err, subnets.Next.Href)
-				return nil, userErr
-			}
-
-			vpcs.Logger.Info("startUrl", zap.Reflect("startUrl", startUrl))
-			start = startUrl.Query().Get("start") //parse query param into map
-			if start == "" {
-				// API call is failed
-				userErr := userError.GetUserError("StartSubnetIDEmpty", err, startUrl)
-				return nil, userErr
-			}
-
-		}
-	}
-
-	// No volume Subnet found in the  list. So return error
-	userErr := userError.GetUserError(string("SubnetFindFailedWithZoneAndVPC"), errors.New("no subnet found"), volumeAccessPointRequest.Zone, volumeAccessPointRequest.VPCID)
-	vpcs.Logger.Error("Subnet not found", zap.Error(err))
-	return nil, userErr
 }

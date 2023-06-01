@@ -38,9 +38,8 @@ var retryGap = 10
 
 // ConstantRetryGap ...
 const (
-	ConstantRetryGap  = 10 // seconds
-	SecurityGroupMode = "security_group"
-	VPCMode           = "vpc"
+	ConstantRetryGap = 10 // seconds
+	SecurityGroup    = "security_group"
 )
 
 var volumeIDPartsCount = 5
@@ -61,6 +60,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_subnet_zone_mismatch":              true,
 	"targets_primary_ip_id_required":           true,
 	"targets_primary_ip_not_related_to_subnet": true,
+	"shares_target_vpc_and_network_interface":  true,
 	"InvalidArgument":                          true,
 	"shares_status_pending":                    false,
 	"internal_error":                           false,
