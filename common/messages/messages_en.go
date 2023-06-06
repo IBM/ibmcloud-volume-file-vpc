@@ -193,10 +193,10 @@ var messagesEn = map[string]util.Message{
 	},
 	"SubnetFindFailedWithZoneAndSubnetID": {
 		Code:        "SubnetFindFailedWithZoneAndSubnetID",
-		Description: "A subnet with the specified zone '%s' and availble cluster subnet list '%s' could not be found.",
+		Description: "A subnet with the specified zone '%s' and available cluster subnet list '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Verify that the subnet exists. Run 'ibmcloud is subnets' to list available subnets in your account. If there exist subnet in the respective zone, then please verify if the subnet exists in the configmap using `kubectl get cm ibm-cloud-provider-data -n kube-system -o yaml`.",
+		Action:      "Verify that the subnet exists. Run 'ibmcloud is subnets' to list available subnets in your account.",
 	},
 	"ListVolumesFailed": {
 		Code:        "ListVolumesFailed",

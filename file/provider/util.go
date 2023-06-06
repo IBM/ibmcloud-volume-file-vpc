@@ -60,6 +60,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_name_duplicate":                    true,
 	"shares_subnet_zone_mismatch":              true,
 	"targets_primary_ip_id_required":           true,
+	"targets_subnet_and_primary_ip_missing":    true,
 	"targets_primary_ip_not_related_to_subnet": true,
 	"shares_target_vpc_and_network_interface":  true,
 	"InvalidArgument":                          true,

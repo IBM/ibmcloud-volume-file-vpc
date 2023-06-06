@@ -15,13 +15,6 @@ import (
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 )
 
-// VPC ...
-type VPC struct {
-	Href string `json:"href,omitempty"`
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-
 // Subnet ...
 type Subnet struct {
 	Href string `json:"href,omitempty"`
