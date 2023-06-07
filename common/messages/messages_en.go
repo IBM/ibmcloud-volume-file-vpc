@@ -174,21 +174,21 @@ var messagesEn = map[string]util.Message{
 		Code:        "ListSubnetsFailed",
 		Description: "Unable to fetch list of subnets.",
 		Type:        util.RetrivalFailed,
-		RC:          404,
+		RC:          500,
 		Action:      "Unable to list subnets. Run 'ibmcloud is subnets' to list available subnets in your account.",
 	},
 	"NextSubnetPageParsingError": {
 		Code:        "NextSubnetPageParsingError",
 		Description: "The next field '%s' specified in the next parameter of the list subnet call could not be parsed.",
 		Type:        util.RetrivalFailed,
-		RC:          404,
+		RC:          500,
 		Action:      "Please verify that the next field is correct.",
 	},
 	"StartSubnetIDEmpty": {
 		Code:        "StartSubnetIDEmpty",
 		Description: "The start '%s' specified in the next parameter of the list subnet call is empty.",
 		Type:        util.RetrivalFailed,
-		RC:          404,
+		RC:          500,
 		Action:      "Please verify that the start field is correct.",
 	},
 	"SubnetFindFailedWithZoneAndSubnetID": {
@@ -196,7 +196,7 @@ var messagesEn = map[string]util.Message{
 		Description: "A subnet with the specified zone '%s' and available cluster subnet list '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Verify that the subnet exists. Run 'ibmcloud is subnets' to list available subnets in your account.",
+		Action:      "Verify that the subnet from the cluster subnet list exists. Run 'ibmcloud is subnets' to list available subnets in your account.",
 	},
 	"ListVolumesFailed": {
 		Code:        "ListVolumesFailed",
