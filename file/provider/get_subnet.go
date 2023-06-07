@@ -62,7 +62,7 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 		if subnets != nil {
 			subnetList := subnets.Subnets
 			for _, subnetItem := range subnetList {
-				// Check if VPC ID and zone name is matching with requested input
+				// Check if zone and subnet is matching with requested input
 				if subnetItem.Zone != nil && subnetItem.Zone.Name == subnetRequest.Zone && strings.Contains(subnetRequest.SubnetIDList, subnetItem.ID) {
 					vpcs.Logger.Info("Successfully found subnet", zap.Reflect("subnetItem", subnetItem))
 					return subnetItem.ID, nil
