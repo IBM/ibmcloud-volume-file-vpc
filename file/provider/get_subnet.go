@@ -29,8 +29,8 @@ import (
 
 // / GetSubnet  get the subnet based on the request
 func (vpcs *VPCSession) GetSubnetForVolumeAccessPoint(subnetRequest provider.SubnetRequest) (string, error) {
-	vpcs.Logger.Debug("Entry of GetSubnetForVolumeAccessPoint method...", zap.Reflect("subnetRequest", subnetRequest))
-	defer vpcs.Logger.Debug("Exit from GetSubnetForVolumeAccessPoint method...")
+	vpcs.Logger.Info("Entry of GetSubnetForVolumeAccessPoint method...", zap.Reflect("subnetRequest", subnetRequest))
+	defer vpcs.Logger.Info("Exit from GetSubnetForVolumeAccessPoint method...")
 	var err error
 
 	// Get Subnet by zone and cluster subnet list. This is inefficient operation which requires iteration over subnet list

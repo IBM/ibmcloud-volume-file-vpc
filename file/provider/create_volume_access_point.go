@@ -64,10 +64,6 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return nil, true // stop retry volume accessPoint already created
 		}
 
-		/*
-		   Use case 1 : If user wants to
-		*/
-
 		// If ENI/VNI is enabled
 		if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
 			volumeAccessPoint.VPC = nil // We can either pass VPC or VNI
