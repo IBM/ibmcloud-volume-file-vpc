@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
 	github.com/IBM/ibm-csi-common v1.1.6
-	github.com/IBM/ibmcloud-volume-interface v1.1.5-0.20230608125823-053a38919bfe
+	github.com/IBM/ibmcloud-volume-interface v1.1.5-0.20230608131157-06c798a3597f
 	github.com/IBM/secret-common-lib v1.1.4
 	github.com/IBM/secret-utils-lib v1.1.4
 	github.com/fatih/structs v1.1.0

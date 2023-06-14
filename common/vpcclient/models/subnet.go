@@ -17,29 +17,27 @@ import (
 
 // Subnet ...
 type Subnet struct {
-	Href string `json:"href,omitempty"`
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-
 	CRN           string         `json:"crn,omitempty"`
+	Href          string         `json:"href,omitempty"`
+	ID            string         `json:"id,omitempty"`
+	Name          string         `json:"name,omitempty"`
 	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
-	Tags          []string       `json:"tags,omitempty"`
 	VPC           *provider.VPC  `json:"vpc,omitempty"`
 	Zone          *Zone          `json:"zone,omitempty"`
 }
 
 // SubnetRef ...
 type SubnetRef struct {
+	CRN  string `json:"crn,omitempty"`
 	ID   string `json:"id,omitempty"`
 	Href string `json:"href,omitempty"`
-	CRN  string `json:"crn,omitempty"`
 }
 
 // SubnetList ...
 type SubnetList struct {
 	First      *HReference `json:"first,omitempty"`
 	Next       *HReference `json:"next,omitempty"`
-	Subnets    []*Subnet   `json:"subnets,omitempty"`
+	Subnets    []Subnet    `json:"subnets,omitempty"`
 	Limit      int         `json:"limit,omitempty"`
 	TotalCount int         `json:"total_count,omitempty"`
 }
