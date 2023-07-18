@@ -166,6 +166,7 @@ func (vpcp *VPCFileProvider) OpenSession(ctx context.Context, contextCredentials
 		vpcp.APIConfig.ContextID = fmt.Sprintf("%v", ctx.Value(provider.RequestID))
 		ctxLogger.Info("", zap.Reflect("apiConfig.ContextID", vpcp.APIConfig.ContextID))
 	}
+	ctxLogger.Info("", zap.Reflect("apiConfig.APIVersion", vpcp.APIConfig.APIVersion))
 	client, err := vpcp.ClientProvider.New(vpcp.APIConfig)
 	if err != nil {
 		return nil, err

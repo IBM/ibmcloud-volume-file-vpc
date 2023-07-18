@@ -19,7 +19,7 @@ package models
 
 const (
 	// APIVersion is the target RIaaS API spec version
-	APIVersion = "2021-04-20"
+	APIVersion = "2023-05-30"
 
 	// APIGeneration ...
 	APIGeneration = 1
