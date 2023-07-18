@@ -61,7 +61,7 @@ func NewShareTarget(volumeAccessPointRequest provider.VolumeAccessPointRequest) 
 	return va
 }
 
-//ToVolumeAccessPointResponse converts ShareTargetResponse to VolumeAccessPointResponse
+// ToVolumeAccessPointResponse converts ShareTargetResponse to VolumeAccessPointResponse
 func (va *ShareTarget) ToVolumeAccessPointResponse() *provider.VolumeAccessPointResponse {
 
 	varp := &provider.VolumeAccessPointResponse{

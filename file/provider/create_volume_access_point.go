@@ -29,7 +29,7 @@ import (
 	"go.uber.org/zap"
 )
 
-//VpcVolumeAccessPoint ...
+// VpcVolumeAccessPoint ...
 const (
 	StatusStable   = "stable"
 	StatusDeleting = "deleting"

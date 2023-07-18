@@ -29,6 +29,7 @@ import (
 
 // RegionalAPI is the main interface for the RIAAS API client. From here, service
 // objects for the individual parts of the API can be obtained
+//
 //go:generate counterfeiter -o fakes/regional_api.go --fake-name RegionalAPI . RegionalAPI
 type RegionalAPI interface {
 	Login(token string) error
@@ -68,6 +69,7 @@ func New(config Config) (*Session, error) {
 	queryValues := url.Values{
 		"version":    []string{backendAPIVersion},
 		"generation": []string{strconv.Itoa(apiGen)},
+		"maturity":   []string{models.MaturityBeta},
 	}
 
 	riaasClient := client.New(ctx, config.baseURL(), queryValues, config.httpClient(), config.ContextID, config.ResourceGroup)
@@ -95,6 +97,7 @@ func (s *Session) FileShareService() vpcfilevolume.FileShareManager {
 
 // RegionalAPIClientProvider declares an interface for a provider that can supply a new
 // RegionalAPI client session
+//
 //go:generate counterfeiter -o fakes/client_provider.go --fake-name RegionalAPIClientProvider . RegionalAPIClientProvider
 type RegionalAPIClientProvider interface {
 	New(config Config) (RegionalAPI, error)
