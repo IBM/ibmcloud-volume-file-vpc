@@ -134,7 +134,7 @@ func TestGetFileShareTargetByName(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			mux, client, teardown := test.SetupServer(t)
 			emptyString := ""
-			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/shareID/targets", http.MethodGet, &emptyString, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/shareID/mount_targets", http.MethodGet, &emptyString, testcase.status, testcase.content, nil)
 
 			defer teardown()
 

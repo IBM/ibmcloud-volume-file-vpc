@@ -78,7 +78,7 @@ func TestCreateFileShareTarget(t *testing.T) {
 			}
 
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, "/v1/shares/testshare/targets", http.MethodPost, nil, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, "/v1/shares/testshare/mount_targets", http.MethodPost, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
 

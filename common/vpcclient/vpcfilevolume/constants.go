@@ -23,7 +23,7 @@ const (
 	sharesPath         = Version + "/shares"
 	shareIDParam       = "share-id"
 	shareIDPath        = sharesPath + "/{" + shareIDParam + "}"
-	shareTargetsPath   = "/targets"
+	shareTargetsPath   = "/mount_targets"
 	shareTargetIDParam = "target-id"
 	shareTargetIDPath  = shareTargetsPath + "/{" + shareTargetIDParam + "}"
 )
