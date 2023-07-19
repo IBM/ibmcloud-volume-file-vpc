@@ -58,7 +58,7 @@ func TestListFileShareTargets(t *testing.T) {
 		}, {
 			name:    "Verify that the share targets is done correctly",
 			status:  http.StatusOK,
-			content: "{\"targets\":[{\"id\":\"sharetargetid1\", \"name\":\"share target\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
+			content: "{\"mount_targets\":[{\"id\":\"sharetargetid1\", \"name\":\"share target\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
 			verify: func(t *testing.T, shareTargetList *models.ShareTargetList, err error) {
 				assert.NotNil(t, shareTargetList)
 				assert.Equal(t, len(shareTargetList.ShareTargets), 1)

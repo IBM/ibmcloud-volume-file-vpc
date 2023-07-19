@@ -117,7 +117,7 @@ func TestGetFileShareTargetByName(t *testing.T) {
 		}, {
 			name:    "Verify that the share name is parsed correctly",
 			status:  http.StatusOK,
-			content: "{\"targets\":[{\"id\":\"voltarget1\", \"name\":\"vvoltarget1\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
+			content: "{\"mount_targets\":[{\"id\":\"voltarget1\", \"name\":\"vvoltarget1\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
 			verify: func(t *testing.T, shareTarget *models.ShareTarget, err error) {
 				if assert.NotNil(t, shareTarget) {
 					assert.Equal(t, "voltarget1", shareTarget.ID)

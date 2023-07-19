@@ -42,7 +42,7 @@ type ShareTarget struct {
 type ShareTargetList struct {
 	First        *HReference    `json:"first,omitempty"`
 	Next         *HReference    `json:"next,omitempty"`
-	ShareTargets []*ShareTarget `json:"targets,omitempty"`
+	ShareTargets []*ShareTarget `json:"mount_targets,omitempty"`
 	Limit        int            `json:"limit,omitempty"`
 	TotalCount   int            `json:"total_count,omitempty"`
 }

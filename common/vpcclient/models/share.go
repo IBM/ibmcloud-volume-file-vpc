@@ -36,7 +36,7 @@ type Share struct {
 	CreatedAt     *time.Time     `json:"created_at,omitempty"`
 	// Status of share named - deleted, deleting, failed, pending, stable, updating, waiting, suspended
 	Status       StatusType     `json:"lifecycle_state,omitempty"`
-	ShareTargets *[]ShareTarget `json:"targets,omitempty"`
+	ShareTargets *[]ShareTarget `json:"mount_targets,omitempty"`
 	Zone         *Zone          `json:"zone,omitempty"`
 }
 
