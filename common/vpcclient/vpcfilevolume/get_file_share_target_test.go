@@ -68,7 +68,7 @@ func TestGetFileShareTarget(t *testing.T) {
 				ShareID: shareID,
 			}
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/targets/sharetargetid", http.MethodGet, nil, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/mount_targets/sharetargetid", http.MethodGet, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
 

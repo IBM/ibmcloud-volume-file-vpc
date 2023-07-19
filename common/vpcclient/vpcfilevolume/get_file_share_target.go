@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetFileShareTarget GETs to /shares/{share-id}/targets/{target-id}
+// GetFileShareTarget GETs to /shares/{share-id}/mount_targets/{target-id}
 func (vs *FileShareService) GetFileShareTarget(shareID string, targetID string, ctxLogger *zap.Logger) (*models.ShareTarget, error) {
 	ctxLogger.Debug("Entry Backend GetFileShareTarget")
 	defer ctxLogger.Debug("Exit Backend GetFileShareTarget")
@@ -55,7 +55,7 @@ func (vs *FileShareService) GetFileShareTarget(shareID string, targetID string, 
 	return &shareTarget, nil
 }
 
-// GetFileShareTargetByName GETs /shares/{share-id}/targets by target name
+// GetFileShareTargetByName GETs /shares/{share-id}/mount_targets by target name
 func (vs *FileShareService) GetFileShareTargetByName(shareID string, targetName string, ctxLogger *zap.Logger) (*models.ShareTarget, error) {
 	ctxLogger.Debug("Entry Backend GetFileShareTargetByName")
 	defer ctxLogger.Debug("Exit Backend GetFileShareTargetByName")
