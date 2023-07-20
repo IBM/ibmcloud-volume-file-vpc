@@ -68,7 +68,7 @@ func TestGetFileShareTarget(t *testing.T) {
 				ShareID: shareID,
 			}
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/targets/sharetargetid", http.MethodGet, nil, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/mount_targets/sharetargetid", http.MethodGet, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
 
@@ -117,7 +117,7 @@ func TestGetFileShareTargetByName(t *testing.T) {
 		}, {
 			name:    "Verify that the share name is parsed correctly",
 			status:  http.StatusOK,
-			content: "{\"targets\":[{\"id\":\"voltarget1\", \"name\":\"vvoltarget1\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
+			content: "{\"mount_targets\":[{\"id\":\"voltarget1\", \"name\":\"vvoltarget1\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
 			verify: func(t *testing.T, shareTarget *models.ShareTarget, err error) {
 				if assert.NotNil(t, shareTarget) {
 					assert.Equal(t, "voltarget1", shareTarget.ID)
@@ -134,7 +134,7 @@ func TestGetFileShareTargetByName(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			mux, client, teardown := test.SetupServer(t)
 			emptyString := ""
-			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/shareID/targets", http.MethodGet, &emptyString, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/shareID/mount_targets", http.MethodGet, &emptyString, testcase.status, testcase.content, nil)
 
 			defer teardown()
 

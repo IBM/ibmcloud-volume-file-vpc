@@ -2,7 +2,7 @@
 GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /samples)
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 ARCH = $(shell uname -m)
-LINT_VERSION="1.46.2"
+LINT_VERSION="1.52.2"
 
 .PHONY: all
 all: deps dofmt vet test

@@ -76,7 +76,7 @@ func TestDeleteFileShareTarget(t *testing.T) {
 			}
 
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/targets/shareTargetID", http.MethodDelete, nil, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/mount_targets/shareTargetID", http.MethodDelete, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
 

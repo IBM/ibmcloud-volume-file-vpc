@@ -42,7 +42,7 @@ type ShareTarget struct {
 type ShareTargetList struct {
 	First        *HReference    `json:"first,omitempty"`
 	Next         *HReference    `json:"next,omitempty"`
-	ShareTargets []*ShareTarget `json:"targets,omitempty"`
+	ShareTargets []*ShareTarget `json:"mount_targets,omitempty"`
 	Limit        int            `json:"limit,omitempty"`
 	TotalCount   int            `json:"total_count,omitempty"`
 }
@@ -61,7 +61,7 @@ func NewShareTarget(volumeAccessPointRequest provider.VolumeAccessPointRequest) 
 	return va
 }
 
-//ToVolumeAccessPointResponse converts ShareTargetResponse to VolumeAccessPointResponse
+// ToVolumeAccessPointResponse converts ShareTargetResponse to VolumeAccessPointResponse
 func (va *ShareTarget) ToVolumeAccessPointResponse() *provider.VolumeAccessPointResponse {
 
 	varp := &provider.VolumeAccessPointResponse{

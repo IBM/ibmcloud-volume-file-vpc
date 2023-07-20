@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// ListFileShareTargets GETs /shares/{share-id}/targets
+// ListFileShareTargets GETs /shares/{share-id}/mount_targets
 func (vs *FileShareService) ListFileShareTargets(shareID string, filters *models.ListShareTargetFilters, ctxLogger *zap.Logger) (*models.ShareTargetList, error) {
 	ctxLogger.Debug("Entry Backend ListFileShareTargets")
 	defer ctxLogger.Debug("Exit Backend ListFileShareTargets")

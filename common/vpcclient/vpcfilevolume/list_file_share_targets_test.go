@@ -58,7 +58,7 @@ func TestListFileShareTargets(t *testing.T) {
 		}, {
 			name:    "Verify that the share targets is done correctly",
 			status:  http.StatusOK,
-			content: "{\"targets\":[{\"id\":\"sharetargetid1\", \"name\":\"share target\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
+			content: "{\"mount_targets\":[{\"id\":\"sharetargetid1\", \"name\":\"share target\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
 			verify: func(t *testing.T, shareTargetList *models.ShareTargetList, err error) {
 				assert.NotNil(t, shareTargetList)
 				assert.Equal(t, len(shareTargetList.ShareTargets), 1)
@@ -69,7 +69,7 @@ func TestListFileShareTargets(t *testing.T) {
 	for _, testcase := range testCases {
 		t.Run(testcase.name, func(t *testing.T) {
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/targets", http.MethodGet, nil, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, "/v1/shares/testShare/mount_targets", http.MethodGet, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
 

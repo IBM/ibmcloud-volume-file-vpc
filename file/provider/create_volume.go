@@ -31,6 +31,7 @@ const (
 	minSize       = 10    //10 GB
 	maxSize       = 16000 //16 TB
 	customProfile = "custom-iops"
+	dp2Profile    = "dp2"
 )
 
 // CreateVolume creates file share
@@ -129,7 +130,7 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	if volumeRequest.VPCVolume.Profile == nil {
 		return resourceGroup, iops, userError.GetUserError("VolumeProfileEmpty", nil)
 	}
-	if volumeRequest.VPCVolume.Profile.Name != customProfile && iops > 0 {
+	if volumeRequest.VPCVolume.Profile.Name != customProfile && volumeRequest.VPCVolume.Profile.Name != dp2Profile && iops > 0 {
 		return resourceGroup, iops, userError.GetUserError("VolumeProfileIopsInvalid", nil)
 	}
 

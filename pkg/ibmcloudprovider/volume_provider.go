@@ -58,7 +58,7 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 		conf.VPC.APIVersion = fmt.Sprintf("%d-%02d-%02d", dateTime.Year(), dateTime.Month(), dateTime.Day())
 	} else {
 		logger.Warn("Failed to parse VPC_API_VERSION, setting default value")
-		conf.VPC.APIVersion = "2021-04-20" // setting default values
+		conf.VPC.APIVersion = "2023-05-30" // setting default values
 	}
 
 	var clusterInfo utilsConfig.ClusterConfig
