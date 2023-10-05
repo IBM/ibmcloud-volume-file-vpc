@@ -172,10 +172,10 @@ var messagesEn = map[string]util.Message{
 	},
 	"ListSubnetsFailed": {
 		Code:        "ListSubnetsFailed",
-		Description: "Unable to fetch list of subnets.",
+		Description: "Unable to fetch list of subnet.",
 		Type:        util.RetrivalFailed,
 		RC:          500,
-		Action:      "Unable to list subnets. Run 'ibmcloud is subnets' to list available subnets in your account.",
+		Action:      "Unable to list subnet. Run 'ibmcloud is subnets' to list available subnets in your account.",
 	},
 	"NextSubnetPageParsingError": {
 		Code:        "NextSubnetPageParsingError",
@@ -200,10 +200,10 @@ var messagesEn = map[string]util.Message{
 	},
 	"ListSecurityGroupsFailed": {
 		Code:        "ListSecurityGroupsFailed",
-		Description: "Unable to fetch list of securityGroups.",
+		Description: "Unable to fetch list of securityGroup.",
 		Type:        util.RetrivalFailed,
 		RC:          500,
-		Action:      "Unable to list securityGroups. Run 'ibmcloud is securityGroups' to list available securityGroups in your account.",
+		Action:      "Unable to list securityGroup. Run 'ibmcloud is securityGroups' to list available securityGroups in your account.",
 	},
 	"NextSecurityGroupPageParsingError": {
 		Code:        "NextSecurityGroupPageParsingError",
