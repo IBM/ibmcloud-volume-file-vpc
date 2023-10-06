@@ -86,11 +86,11 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 			start = startUrl.Query().Get("start") //parse query param into map
 			if start == "" {
 				// API call is failed
-<<<<<<< HEAD
 				vpcs.Logger.Warn("The start specified in the next parameter of the subnet list is empty.", zap.Reflect("start", startUrl))
-=======
-				vpcs.Logger.Error("The start specified in the next parameter of the subnet list is empty.", zap.Reflect("start", startUrl))
 				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
+			}
+		} else {
+			return "", userError.GetUserError(string("ListSubnetsFailed"), errors.New("Subnet list is empty"))
 		}
 	}
 
