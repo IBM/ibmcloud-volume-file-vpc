@@ -177,20 +177,6 @@ var messagesEn = map[string]util.Message{
 		RC:          500,
 		Action:      "Unable to list subnet. Run 'ibmcloud is subnets' to list available subnets in your account.",
 	},
-	"NextSubnetPageParsingError": {
-		Code:        "NextSubnetPageParsingError",
-		Description: "The next field '%s' specified in the next parameter of the list subnet call could not be parsed.",
-		Type:        util.RetrivalFailed,
-		RC:          500,
-		Action:      "Please verify that the next field is correct.",
-	},
-	"StartSubnetIDEmpty": {
-		Code:        "StartSubnetIDEmpty",
-		Description: "The start '%s' specified in the next parameter of the list subnet call is empty.",
-		Type:        util.RetrivalFailed,
-		RC:          500,
-		Action:      "Please verify that the start field is correct.",
-	},
 	"SubnetFindFailedWithZoneAndSubnetID": {
 		Code:        "SubnetFindFailedWithZoneAndSubnetID",
 		Description: "A subnet with the specified zone '%s' and available cluster subnet list '%s' could not be found.",
@@ -204,20 +190,6 @@ var messagesEn = map[string]util.Message{
 		Type:        util.RetrivalFailed,
 		RC:          500,
 		Action:      "Unable to list securityGroup. Run 'ibmcloud is securityGroups' to list available securityGroups in your account.",
-	},
-	"NextSecurityGroupPageParsingError": {
-		Code:        "NextSecurityGroupPageParsingError",
-		Description: "The next field '%s' specified in the next parameter of the list securityGroup call could not be parsed.",
-		Type:        util.RetrivalFailed,
-		RC:          500,
-		Action:      "Please verify that the next field is correct.",
-	},
-	"StartSecurityGroupIDEmpty": {
-		Code:        "StartSecurityGroupIDEmpty",
-		Description: "The start '%s' specified in the next parameter of the list securityGroup call is empty.",
-		Type:        util.RetrivalFailed,
-		RC:          500,
-		Action:      "Please verify that the start field is correct.",
 	},
 	"SecurityGroupFindFailedWithVPCAndSecurityGroupName": {
 		Code:        "SecurityGroupFindFailedWithVPCAndSecurityGroupName",

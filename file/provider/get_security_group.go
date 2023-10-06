@@ -31,7 +31,6 @@ import (
 func (vpcs *VPCSession) GetSecurityGroupForVolumeAccessPoint(securityGroupRequest provider.SecurityGroupRequest) (string, error) {
 	vpcs.Logger.Info("Entry of GetSecurityGroupForVolumeAccessPoint method...", zap.Reflect("securityGroupRequest", securityGroupRequest))
 	defer vpcs.Logger.Info("Exit from GetSecurityGroupForVolumeAccessPoint method...")
-	var err error
 
 	// Get SecurityGroup by VPC and name. This is inefficient operation which requires iteration over SecurityGroup list
 	securityGroup, err := vpcs.getSecurityGroupByVPCAndSecurityGroupName(securityGroupRequest)
@@ -57,14 +56,12 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 
 		if err != nil {
 			// API call is failed
-			userErr := userError.GetUserError("ListSecurityGroupsFailed", err)
-			return "", userErr
+			return "", userError.GetUserError("ListSecurityGroupsFailed", err)
 		}
 
 		// Iterate over the SecurityGroup list for given volume
 		if securityGroups != nil {
-			securityGroupList := securityGroups.SecurityGroups
-			for _, securityGroupItem := range securityGroupList {
+			for _, securityGroupItem := range securityGroups.SecurityGroups {
 				// Check if securityGroup is matching with requested input securityGroup name
 				if strings.EqualFold(securityGroupRequest.Name, securityGroupItem.Name) {
 					vpcs.Logger.Info("Successfully found securityGroup", zap.Reflect("securityGroupItem", securityGroupItem))
@@ -80,23 +77,22 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 			startUrl, err := url.Parse(securityGroups.Next.Href)
 			if err != nil {
 				// API call is failed
-				userErr := userError.GetUserError("NextSecurityGroupPageParsingError", err, securityGroups.Next.Href)
-				return "", userErr
+				vpcs.Logger.Error("The next parameter of the securityGroup list could not be parsed.", zap.Reflect("Next", securityGroups.Next.Href), zap.Error(err))
+				return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), err, securityGroupRequest.Name)
 			}
 
 			vpcs.Logger.Info("startUrl", zap.Reflect("startUrl", startUrl))
 			start = startUrl.Query().Get("start") //parse query param into map
 			if start == "" {
 				// API call is failed
-				userErr := userError.GetUserError("StartSecurityGroupIDEmpty", err, startUrl)
-				return "", userErr
+				vpcs.Logger.Error("The start specified in the next parameter of the securityGroup list is empty.", zap.Reflect("startUrl", startUrl))
+				return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), errors.New("no securityGroup found"), securityGroupRequest.Name)
 			}
 
 		}
 	}
 
 	// No volume SecurityGroup found in the  list. So return error
-	userErr := userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), errors.New("no securityGroup found"), securityGroupRequest.Name)
 	vpcs.Logger.Error("SecurityGroup not found", zap.Error(err))
-	return "", userErr
+	return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), errors.New("no securityGroup found"), securityGroupRequest.Name)
 }

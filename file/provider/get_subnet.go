@@ -31,7 +31,6 @@ import (
 func (vpcs *VPCSession) GetSubnetForVolumeAccessPoint(subnetRequest provider.SubnetRequest) (string, error) {
 	vpcs.Logger.Info("Entry of GetSubnetForVolumeAccessPoint method...", zap.Reflect("subnetRequest", subnetRequest))
 	defer vpcs.Logger.Info("Exit from GetSubnetForVolumeAccessPoint method...")
-	var err error
 
 	// Get Subnet by zone and cluster subnet list. This is inefficient operation which requires iteration over subnet list
 	subnet, err := vpcs.getSubnetByZoneAndSubnetID(subnetRequest)
@@ -58,14 +57,12 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 
 		if err != nil {
 			// API call is failed
-			userErr := userError.GetUserError("ListSubnetsFailed", err)
-			return "", userErr
+			return "", userError.GetUserError("ListSubnetsFailed", err)
 		}
 
 		// Iterate over the subnet list for given volume
 		if subnets != nil {
-			subnetList := subnets.Subnets
-			for _, subnetItem := range subnetList {
+			for _, subnetItem := range subnets.Subnets {
 				// Check if subnet is matching with requested input subnet-list
 				if strings.Contains(subnetRequest.SubnetIDList, subnetItem.ID) {
 					vpcs.Logger.Info("Successfully found subnet", zap.Reflect("subnetItem", subnetItem))
@@ -81,23 +78,22 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 			startUrl, err := url.Parse(subnets.Next.Href)
 			if err != nil {
 				// API call is failed
-				userErr := userError.GetUserError("NextSubnetPageParsingError", err, subnets.Next.Href)
-				return "", userErr
+				vpcs.Logger.Error("The next parameter of the subnet list could not be parsed.", zap.Reflect("Next", subnets.Next.Href), zap.Error(err))
+				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), err, subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 			}
 
 			vpcs.Logger.Info("startUrl", zap.Reflect("startUrl", startUrl))
 			start = startUrl.Query().Get("start") //parse query param into map
 			if start == "" {
 				// API call is failed
-				userErr := userError.GetUserError("StartSubnetIDEmpty", err, startUrl)
-				return "", userErr
+				vpcs.Logger.Error("The start specified in the next parameter of the subnet list is empty.", zap.Reflect("start", startUrl))
+				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 			}
 
 		}
 	}
 
 	// No volume Subnet found in the  list. So return error
-	userErr := userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 	vpcs.Logger.Error("Subnet not found", zap.Error(err))
-	return "", userErr
+	return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 }

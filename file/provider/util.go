@@ -70,7 +70,7 @@ var skipErrorCodes = map[string]bool{
 	"InvalidArgument":                           true,
 	"shares_status_pending":                     false,
 	"internal_error":                            false,
-	"invalid_route":                             false,
+	"invalid_route":                             true,
 	"service_error":                             false,
 }
 
