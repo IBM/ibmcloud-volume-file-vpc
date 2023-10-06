@@ -77,7 +77,7 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 			startUrl, err := url.Parse(securityGroups.Next.Href)
 			if err != nil {
 				// API call is failed
-				vpcs.Logger.Error("The next parameter of the securityGroup list could not be parsed.", zap.Reflect("Next", securityGroups.Next.Href), zap.Error(err))
+				vpcs.Logger.Warn("The next parameter of the securityGroup list could not be parsed.", zap.Reflect("Next", securityGroups.Next.Href), zap.Error(err))
 				return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), err, securityGroupRequest.Name)
 			}
 
@@ -85,10 +85,11 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 			start = startUrl.Query().Get("start") //parse query param into map
 			if start == "" {
 				// API call is failed
-				vpcs.Logger.Error("The start specified in the next parameter of the securityGroup list is empty.", zap.Reflect("startUrl", startUrl))
+				vpcs.Logger.Warn("The start specified in the next parameter of the securityGroup list is empty.", zap.Reflect("startUrl", startUrl))
 				return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), errors.New("no securityGroup found"), securityGroupRequest.Name)
 			}
-
+		} else {
+			return "", userError.GetUserError(string("ListSecurityGroupsFailed"), errors.New("SecurityGroup list is empty"))
 		}
 	}
 

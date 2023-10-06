@@ -78,7 +78,7 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 			startUrl, err := url.Parse(subnets.Next.Href)
 			if err != nil {
 				// API call is failed
-				vpcs.Logger.Error("The next parameter of the subnet list could not be parsed.", zap.Reflect("Next", subnets.Next.Href), zap.Error(err))
+				vpcs.Logger.Warn("The next parameter of the subnet list could not be parsed.", zap.Reflect("Next", subnets.Next.Href), zap.Error(err))
 				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), err, subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 			}
 
@@ -86,10 +86,11 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 			start = startUrl.Query().Get("start") //parse query param into map
 			if start == "" {
 				// API call is failed
-				vpcs.Logger.Error("The start specified in the next parameter of the subnet list is empty.", zap.Reflect("start", startUrl))
+				vpcs.Logger.Warn("The start specified in the next parameter of the subnet list is empty.", zap.Reflect("start", startUrl))
 				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 			}
-
+		} else {
+			return "", userError.GetUserError(string("ListSubnetsFailed"), errors.New("Subnet list is empty"))
 		}
 	}
 
