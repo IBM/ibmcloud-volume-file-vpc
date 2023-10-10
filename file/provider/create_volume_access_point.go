@@ -73,14 +73,12 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			}
 
 			if len(volumeAccessPointRequest.SubnetID) != 0 {
-				vpcs.Logger.Info("Using subnet...", zap.Reflect("subnetID", volumeAccessPointRequest.SubnetID))
 				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
 					ID: volumeAccessPointRequest.SubnetID,
 				}
 			}
 
 			if volumeAccessPointRequest.PrimaryIP != nil {
-				vpcs.Logger.Info("Primary IP property provided using it for virtual network interface...")
 				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
 			}
 		}

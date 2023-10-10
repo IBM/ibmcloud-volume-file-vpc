@@ -44,8 +44,7 @@ func (vs *FileShareService) ListSubnets(limit int, start string, filters *models
 	var apiErr models.Error
 
 	request := vs.client.NewRequest(operation)
-	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
-
+	
 	req := request.JSONSuccess(&subnets).JSONError(&apiErr)
 
 	if limit > 0 {

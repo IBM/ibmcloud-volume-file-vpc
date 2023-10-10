@@ -27,7 +27,7 @@ import (
 	"strings"
 )
 
-// / GetSecurityGroup  get the SecurityGroup based on the request
+// GetSecurityGroupForVolumeAccessPoint  get the SecurityGroup based on the request
 func (vpcs *VPCSession) GetSecurityGroupForVolumeAccessPoint(securityGroupRequest provider.SecurityGroupRequest) (string, error) {
 	vpcs.Logger.Info("Entry of GetSecurityGroupForVolumeAccessPoint method...", zap.Reflect("securityGroupRequest", securityGroupRequest))
 	defer vpcs.Logger.Info("Exit from GetSecurityGroupForVolumeAccessPoint method...")
