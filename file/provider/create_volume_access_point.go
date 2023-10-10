@@ -64,24 +64,7 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return nil, true // stop retry volume accessPoint already created
 		}
 
-		// If ENI/VNI is enabled
-		if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
-			volumeAccessPoint.VPC = nil // We can either pass VPC or VNI
-			volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-				SecurityGroups: volumeAccessPointRequest.SecurityGroups,
-				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
-			}
-
-			if len(volumeAccessPointRequest.SubnetID) != 0 {
-				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
-					ID: volumeAccessPointRequest.SubnetID,
-				}
-			}
-
-			if volumeAccessPointRequest.PrimaryIP != nil {
-				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
-			}
-		}
+		setENIParameters(volumeAccessPoint, volumeAccessPointRequest)
 
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
 		vpcs.Logger.Info("Creating volume accessPoint from VPC provider...")

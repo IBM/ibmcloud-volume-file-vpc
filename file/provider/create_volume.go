@@ -47,6 +47,13 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	}
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
 
+	//Create File Share target from VolumeAccessPointRequest
+	volumeAccessPoint := models.NewShareTarget(volumeRequest.VolumeAccessPointRequest)
+	volumeAccessPointList := make([]models.ShareTarget, 1)
+	volumeAccessPointList[0] = volumeAccessPoint
+
+	setENIParameters(volumeAccessPoint, volumeRequest.VolumeAccessPointRequest)
+
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
 		Name:              *volumeRequest.Name,
@@ -61,6 +68,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		Zone: &models.Zone{
 			Name: volumeRequest.Az,
 		},
+		ShareTargets: &volumeAccessPointList,
 	}
 
 	var encryptionKeyCRN string
@@ -152,5 +160,27 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 		// get the resource group ID from resource group name as Name is not supported by RIaaS
 		resourceGroup.Name = volumeRequest.VPCVolume.ResourceGroup.Name
 	}
+
 	return resourceGroup, iops, nil
+}
+
+func setENIParameters(shareTarget models.ShareTarget, volumeAccessPointRequest provider.VolumeAccessPointRequest) {
+	// If ENI/VNI is enabled
+	if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
+		shareTarget.VPC = nil // We can either pass VPC or VNI
+		shareTarget.VirtualNetworkInterface = &models.VirtualNetworkInterface{
+			SecurityGroups: volumeAccessPointRequest.SecurityGroups,
+			ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
+		}
+
+		if len(volumeAccessPointRequest.SubnetID) != 0 {
+			shareTarget.VirtualNetworkInterface.Subnet = &models.SubnetRef{
+				ID: volumeAccessPointRequest.SubnetID,
+			}
+		}
+
+		if volumeAccessPointRequest.PrimaryIP != nil {
+			shareTarget.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
+		}
+	}
 }
