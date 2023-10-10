@@ -44,7 +44,6 @@ func (vs *FileShareService) ListSubnets(limit int, start string, filters *models
 	var apiErr models.Error
 
 	request := vs.client.NewRequest(operation)
-
 	req := request.JSONSuccess(&subnets).JSONError(&apiErr)
 
 	if limit > 0 {
