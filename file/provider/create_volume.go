@@ -47,12 +47,12 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	}
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
 
-	//Create File Share target from VolumeAccessPointRequest
+	//Populate File Share target parameters
 	volumeAccessPoint := models.NewShareTarget(volumeRequest.VolumeAccessPointRequest)
 	volumeAccessPointList := make([]models.ShareTarget, 1)
 	volumeAccessPointList[0] = volumeAccessPoint
 
-	setENIParameters(volumeAccessPoint, volumeRequest.VolumeAccessPointRequest)
+	setENIParameters(volumeAccessPoint, volumeRequest)
 
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
@@ -164,23 +164,23 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	return resourceGroup, iops, nil
 }
 
-func setENIParameters(shareTarget models.ShareTarget, volumeAccessPointRequest provider.VolumeAccessPointRequest) {
+func setENIParameters(shareTarget models.ShareTarget, volumeRequest provider.Volume) {
 	// If ENI/VNI is enabled
-	if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
+	if volumeRequest.AccessControlMode == SecurityGroup {
 		shareTarget.VPC = nil // We can either pass VPC or VNI
 		shareTarget.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-			SecurityGroups: volumeAccessPointRequest.SecurityGroups,
-			ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
+			SecurityGroups: volumeRequest.SecurityGroups,
+			ResourceGroup:  volumeRequest.ResourceGroup,
 		}
 
-		if len(volumeAccessPointRequest.SubnetID) != 0 {
+		if len(volumeRequest.SubnetID) != 0 {
 			shareTarget.VirtualNetworkInterface.Subnet = &models.SubnetRef{
-				ID: volumeAccessPointRequest.SubnetID,
+				ID: volumeRequest.SubnetID,
 			}
 		}
 
-		if volumeAccessPointRequest.PrimaryIP != nil {
-			shareTarget.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
+		if volumeRequest.PrimaryIP != nil {
+			shareTarget.VirtualNetworkInterface.PrimaryIP = volumeRequest.PrimaryIP
 		}
 	}
 }
