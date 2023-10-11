@@ -175,7 +175,7 @@ var messagesEn = map[string]util.Message{
 		Description: "Unable to fetch list of subnet.",
 		Type:        util.RetrivalFailed,
 		RC:          500,
-		Action:      "Unable to list subnet. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is subnets' is returning the subnets. If it is not returning then raise ticket for VPC team else raise ticket for IKS team.",
+		Action:      "Unable to list subnets. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is subnets' is returning the subnets. If it is not returning then raise ticket for VPC team else raise ticket for IKS team.",
 	},
 	"SubnetFindFailedWithZoneAndSubnetID": {
 		Code:        "SubnetFindFailedWithZoneAndSubnetID",
