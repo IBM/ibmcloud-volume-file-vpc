@@ -52,7 +52,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		Name: *volumeRequest.Name,
 	}
 
-	setENIParameters(shareTargetTemplate, volumeRequest)
+	setENIParameters(&shareTargetTemplate, volumeRequest)
 	volumeAccessPointList := make([]models.ShareTarget, 1)
 	volumeAccessPointList[0] = shareTargetTemplate
 
@@ -166,7 +166,7 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	return resourceGroup, iops, nil
 }
 
-func setENIParameters(shareTarget models.ShareTarget, volumeRequest provider.Volume) {
+func setENIParameters(shareTarget *models.ShareTarget, volumeRequest provider.Volume) {
 	// If ENI/VNI is enabled
 	if volumeRequest.AccessControlMode == SecurityGroup {
 		shareTarget.VirtualNetworkInterface = &models.VirtualNetworkInterface{
