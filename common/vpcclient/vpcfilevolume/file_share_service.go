@@ -59,8 +59,14 @@ type FileShareManager interface {
 	// DeleteFileShareTarget delete the share target by share ID and target ID/VPC ID/Subnet ID
 	DeleteFileShareTarget(shareTargetDeleteRequest *models.ShareTarget, ctxLogger *zap.Logger) (*http.Response, error)
 
-	//ExpandVolume expand the share by share ID and target
+	// ExpandVolume expand the share by share ID and target
 	ExpandVolume(shareID string, shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
+
+	// Get all subnets by using filter options
+	ListSubnets(limit int, start string, filters *models.ListSubnetFilters, ctxLogger *zap.Logger) (*models.SubnetList, error)
+
+	// Get all securityGroups by using filter options
+	ListSecurityGroups(limit int, start string, filters *models.ListSecurityGroupFilters, ctxLogger *zap.Logger) (*models.SecurityGroupList, error)
 }
 
 // FileShareService ...

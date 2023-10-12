@@ -64,6 +64,25 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			return nil, true // stop retry volume accessPoint already created
 		}
 
+		// If ENI/VNI is enabled
+		if volumeAccessPointRequest.AccessControlMode == SecurityGroup {
+			volumeAccessPoint.VPC = nil // We can either pass VPC or VNI
+			volumeAccessPoint.VirtualNetworkInterface = &models.VirtualNetworkInterface{
+				SecurityGroups: volumeAccessPointRequest.SecurityGroups,
+				ResourceGroup:  volumeAccessPointRequest.ResourceGroup,
+			}
+
+			if len(volumeAccessPointRequest.SubnetID) != 0 {
+				volumeAccessPoint.VirtualNetworkInterface.Subnet = &models.SubnetRef{
+					ID: volumeAccessPointRequest.SubnetID,
+				}
+			}
+
+			if volumeAccessPointRequest.PrimaryIP != nil {
+				volumeAccessPoint.VirtualNetworkInterface.PrimaryIP = volumeAccessPointRequest.PrimaryIP
+			}
+		}
+
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
 		vpcs.Logger.Info("Creating volume accessPoint from VPC provider...")
 		volumeAccessPointResult, err = vpcs.Apiclient.FileShareService().CreateFileShareTarget(&volumeAccessPoint, vpcs.Logger)
@@ -94,11 +113,13 @@ func (vpcs *VPCSession) validateVolumeAccessPointRequest(volumeAccessPointReques
 		vpcs.Logger.Error("volumeAccessPointRequest.VolumeID is required", zap.Error(err))
 		return err
 	}
-	// Check for VPC ID - required validation
+
+	// Check for VPC ID, SubnetID or AccessPointID  - required validation
 	if len(volumeAccessPointRequest.VPCID) == 0 && len(volumeAccessPointRequest.SubnetID) == 0 && len(volumeAccessPointRequest.AccessPointID) == 0 {
-		err = userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID")
+		err = userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID or SubnetID or AccessPointID")
 		vpcs.Logger.Error("One of volumeAccessPointRequest.VPCID, volumeAccessPointRequest.SubnetID and volumeAccessPointRequest.AccessPoint is required", zap.Error(err))
 		return err
 	}
+
 	return nil
 }
