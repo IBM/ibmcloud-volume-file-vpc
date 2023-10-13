@@ -64,6 +64,8 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	}
 
 	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint/FileShareTarget creation
+	// If AccessControlMode is vpc then VPCID is mandatory
+	// If AccessControlMode is security_group then subnetID or primaryIPID is mandatory
 	if len(volumeRequest.VPCID) != 0 || len(volumeRequest.SubnetID) != 0 || (volumeRequest.PrimaryIP != nil && len(volumeRequest.PrimaryIP.ID) != 0) {
 
 		//Build File Share target template to send to backend
