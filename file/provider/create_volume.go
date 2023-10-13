@@ -24,7 +24,6 @@ import (
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"go.uber.org/zap"
 )
 
