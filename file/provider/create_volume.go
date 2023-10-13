@@ -48,15 +48,6 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	}
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
 
-	//Build File Share target template to send to backend
-	shareTargetTemplate := models.ShareTarget{
-		Name: *volumeRequest.Name,
-	}
-
-	setENIParameters(&shareTargetTemplate, volumeRequest)
-	volumeAccessPointList := make([]models.ShareTarget, 1)
-	volumeAccessPointList[0] = shareTargetTemplate
-
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
 		Name:              *volumeRequest.Name,
@@ -71,7 +62,21 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		Zone: &models.Zone{
 			Name: volumeRequest.Az,
 		},
-		ShareTargets: &volumeAccessPointList,
+	}
+
+	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint/FileShareTarget creation
+	if len(volumeRequest.VPCID) != 0 || len(volumeRequest.SubnetID) != 0 || (volumeRequest.PrimaryIP != nil && len(volumeRequest.PrimaryIP.ID) != 0) {
+
+		//Build File Share target template to send to backend
+		shareTargetTemplate := models.ShareTarget{
+			Name: *volumeRequest.Name,
+		}
+
+		setENIParameters(&shareTargetTemplate, volumeRequest)
+		volumeAccessPointList := make([]models.ShareTarget, 1)
+		volumeAccessPointList[0] = shareTargetTemplate
+
+		shareTemplate.ShareTargets = &volumeAccessPointList
 	}
 
 	var encryptionKeyCRN string
@@ -120,11 +125,6 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	resourceGroup := models.ResourceGroup{}
 	var iops int64
 	iops = 0
-
-	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint creation
-	if len(volumeRequest.VPCID) == 0 && len(volumeRequest.SubnetID) == 0 && (volumeRequest.PrimaryIP != nil && len(volumeRequest.PrimaryIP.ID) == 0) {
-		return resourceGroup, iops, userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID or SubnetID or PrimaryIPID")
-	}
 
 	// Volume name should not be empty
 	if volumeRequest.Name == nil {
