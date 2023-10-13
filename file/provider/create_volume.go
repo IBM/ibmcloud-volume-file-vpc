@@ -24,6 +24,7 @@ import (
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
+	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"go.uber.org/zap"
 )
 
@@ -119,6 +120,11 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	resourceGroup := models.ResourceGroup{}
 	var iops int64
 	iops = 0
+
+	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint creation
+	if len(volumeRequest.VPCID) == 0 && len(volumeRequest.SubnetID) == 0 && (volumeRequest.PrimaryIP != nil && len(volumeRequest.PrimaryIP.ID) == 0) {
+		return resourceGroup, iops, userError.GetUserError(string(reasoncode.ErrorRequiredFieldMissing), nil, "VPCID or SubnetID or PrimaryIPID")
+	}
 
 	// Volume name should not be empty
 	if volumeRequest.Name == nil {
