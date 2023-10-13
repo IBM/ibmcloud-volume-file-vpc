@@ -44,6 +44,10 @@ func (vs *FileShareService) ListSubnets(limit int, start string, filters *models
 	var apiErr models.Error
 
 	request := vs.client.NewRequest(operation)
+<<<<<<< HEAD
+=======
+	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
+>>>>>>> adfefb0 (ENI support)
 
 	req := request.JSONSuccess(&subnets).JSONError(&apiErr)
 
