@@ -63,6 +63,23 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		},
 	}
 
+	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint/FileShareTarget creation
+	// If AccessControlMode is vpc then VPCID is mandatory
+	// If AccessControlMode is security_group either subnetID or primaryIPID is mandatory
+	if len(volumeRequest.VPCID) != 0 || len(volumeRequest.SubnetID) != 0 || (volumeRequest.PrimaryIP != nil && len(volumeRequest.PrimaryIP.ID) != 0) {
+
+		//Build File Share target template to send to backend
+		shareTargetTemplate := models.ShareTarget{
+			Name: *volumeRequest.Name,
+		}
+
+		setENIParameters(&shareTargetTemplate, volumeRequest)
+		volumeAccessPointList := make([]models.ShareTarget, 1)
+		volumeAccessPointList[0] = shareTargetTemplate
+
+		shareTemplate.ShareTargets = &volumeAccessPointList
+	}
+
 	var encryptionKeyCRN string
 	if volumeRequest.VPCVolume.VolumeEncryptionKey != nil && len(volumeRequest.VPCVolume.VolumeEncryptionKey.CRN) > 0 {
 		encryptionKeyCRN = volumeRequest.VPCVolume.VolumeEncryptionKey.CRN
@@ -152,5 +169,31 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 		// get the resource group ID from resource group name as Name is not supported by RIaaS
 		resourceGroup.Name = volumeRequest.VPCVolume.ResourceGroup.Name
 	}
+
 	return resourceGroup, iops, nil
+}
+
+func setENIParameters(shareTarget *models.ShareTarget, volumeRequest provider.Volume) {
+	// If ENI/VNI is enabled
+	if volumeRequest.AccessControlMode == SecurityGroup {
+		shareTarget.VirtualNetworkInterface = &models.VirtualNetworkInterface{
+			SecurityGroups: volumeRequest.SecurityGroups,
+			ResourceGroup:  volumeRequest.ResourceGroup,
+		}
+
+		if len(volumeRequest.SubnetID) != 0 {
+			shareTarget.VirtualNetworkInterface.Subnet = &models.SubnetRef{
+				ID: volumeRequest.SubnetID,
+			}
+		}
+
+		if volumeRequest.PrimaryIP != nil {
+			shareTarget.VirtualNetworkInterface.PrimaryIP = volumeRequest.PrimaryIP
+		}
+
+	} else { // If VPC Mode is enabled.
+		shareTarget.VPC = &provider.VPC{
+			ID: volumeRequest.VPCID,
+		}
+	}
 }

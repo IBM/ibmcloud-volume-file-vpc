@@ -57,7 +57,7 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 
 		if err != nil {
 			// API call is failed
-			return "", userError.GetUserError("ListSubnetsFailed", err)
+			return "", userError.GetUserError("SubnetsListFailed", err)
 		}
 
 		// Iterate over the subnet list for given volume
@@ -79,7 +79,7 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 			if err != nil {
 				// API call is failed
 				vpcs.Logger.Warn("The next parameter of the subnet list could not be parsed.", zap.Reflect("Next", subnets.Next.Href), zap.Error(err))
-				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), err, subnetRequest.ZoneName, subnetRequest.SubnetIDList)
+				return "", userError.GetUserError(string("SubnetFindFailed"), err, subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 			}
 
 			vpcs.Logger.Info("startUrl", zap.Reflect("startUrl", startUrl))
@@ -87,14 +87,14 @@ func (vpcs *VPCSession) getSubnetByZoneAndSubnetID(subnetRequest provider.Subnet
 			if start == "" {
 				// API call is failed
 				vpcs.Logger.Warn("The start specified in the next parameter of the subnet list is empty.", zap.Reflect("start", startUrl))
-				return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
+				return "", userError.GetUserError(string("SubnetFindFailed"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 			}
 		} else {
-			return "", userError.GetUserError(string("ListSubnetsFailed"), errors.New("Subnet list is empty"))
+			return "", userError.GetUserError(string("SubnetsListFailed"), errors.New("Subnet list is empty"))
 		}
 	}
 
 	// No volume Subnet found in the  list. So return error
 	vpcs.Logger.Error("Subnet not found", zap.Error(err))
-	return "", userError.GetUserError(string("SubnetFindFailedWithZoneAndSubnetID"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
+	return "", userError.GetUserError(string("SubnetFindFailed"), errors.New("no subnet found"), subnetRequest.ZoneName, subnetRequest.SubnetIDList)
 }

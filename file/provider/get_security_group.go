@@ -56,7 +56,7 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 
 		if err != nil {
 			// API call is failed
-			return "", userError.GetUserError("ListSecurityGroupsFailed", err)
+			return "", userError.GetUserError("SecurityGroupsListFailed", err)
 		}
 
 		// Iterate over the SecurityGroup list for given volume
@@ -78,7 +78,7 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 			if err != nil {
 				// API call is failed
 				vpcs.Logger.Warn("The next parameter of the securityGroup list could not be parsed.", zap.Reflect("Next", securityGroups.Next.Href), zap.Error(err))
-				return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), err, securityGroupRequest.Name)
+				return "", userError.GetUserError(string("SecurityGroupFindFailed"), err, securityGroupRequest.Name)
 			}
 
 			vpcs.Logger.Info("startUrl", zap.Reflect("startUrl", startUrl))
@@ -86,14 +86,14 @@ func (vpcs *VPCSession) getSecurityGroupByVPCAndSecurityGroupName(securityGroupR
 			if start == "" {
 				// API call is failed
 				vpcs.Logger.Warn("The start specified in the next parameter of the securityGroup list is empty.", zap.Reflect("startUrl", startUrl))
-				return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), errors.New("no securityGroup found"), securityGroupRequest.Name)
+				return "", userError.GetUserError(string("SecurityGroupFindFailed"), errors.New("no securityGroup found"), securityGroupRequest.Name)
 			}
 		} else {
-			return "", userError.GetUserError(string("ListSecurityGroupsFailed"), errors.New("SecurityGroup list is empty"))
+			return "", userError.GetUserError(string("SecurityGroupsListFailed"), errors.New("SecurityGroup list is empty"))
 		}
 	}
 
 	// No volume SecurityGroup found in the  list. So return error
 	vpcs.Logger.Error("SecurityGroup not found", zap.Error(err))
-	return "", userError.GetUserError(string("SecurityGroupFindFailedWithVPCAndSecurityGroupName"), errors.New("no securityGroup found"), securityGroupRequest.Name)
+	return "", userError.GetUserError(string("SecurityGroupFindFailed"), errors.New("no securityGroup found"), securityGroupRequest.Name)
 }

@@ -170,30 +170,30 @@ var messagesEn = map[string]util.Message{
 		RC:          500,
 		Action:      "Wait for file share deletion",
 	},
-	"ListSubnetsFailed": {
-		Code:        "ListSubnetsFailed",
+	"SubnetsListFailed": {
+		Code:        "SubnetsListFailed",
 		Description: "Unable to fetch list of subnet.",
 		Type:        util.RetrivalFailed,
 		RC:          500,
 		Action:      "Unable to list subnet. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is subnets' is returning the subnets. If it is not returning then raise ticket for VPC team else raise ticket for IKS team.",
 	},
-	"SubnetFindFailedWithZoneAndSubnetID": {
-		Code:        "SubnetFindFailedWithZoneAndSubnetID",
+	"SubnetFindFailed": {
+		Code:        "SubnetFindFailed",
 		Description: "A subnet with the specified zone '%s' and available cluster subnet list '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
 		Action:      "Verify that the subnet from the cluster subnet list exists. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is subnets' is returning the subnets. If it is not returning the matching subnet from the cluster subnet list then raise ticket for VPC team else raise ticket for IKS team.",
 	},
-	"ListSecurityGroupsFailed": {
-		Code:        "ListSecurityGroupsFailed",
+	"SecurityGroupsListFailed": {
+		Code:        "SecurityGroupsListFailed",
 		Description: "Unable to fetch list of securityGroup.",
 		Type:        util.RetrivalFailed,
 		RC:          500,
 		Action:      "Unable to list securityGroup. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is securityGroups' is returning the securityGroups. If it is not returning then raise ticket for VPC team else raise ticket for IKS team.",
 	},
-	"SecurityGroupFindFailedWithVPCAndSecurityGroupName": {
-		Code:        "SecurityGroupFindFailedWithVPCAndSecurityGroupName",
-		Description: "A securityGroup with the specified cluster securityGroup name '%s' could not be found.",
+	"SecurityGroupFindFailed": {
+		Code:        "SecurityGroupFindFailed",
+		Description: "A securityGroup with the specified securityGroup name '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
 		Action:      "Verify that the cluster securityGroup exists. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is securityGroups' is returning the securityGroups. Please provide the output and raise ticket for IKS team.",
