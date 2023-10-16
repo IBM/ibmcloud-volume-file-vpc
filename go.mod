@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
 	github.com/IBM/ibm-csi-common v1.1.6
-	github.com/IBM/ibmcloud-volume-interface v1.2.1-0.20231011061540-69f2d3641559
+	github.com/IBM/ibmcloud-volume-interface v1.2.0
 	github.com/IBM/secret-common-lib v1.1.4
 	github.com/IBM/secret-utils-lib v1.1.4
 	github.com/fatih/structs v1.1.0
@@ -62,7 +62,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/pierrre/gotestcover v0.0.0-20160517101806-924dca7d15f0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect
