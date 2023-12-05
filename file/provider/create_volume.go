@@ -74,6 +74,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 
 		setENIParameters(&shareTargetTemplate, volumeRequest)
+		setEITParameter(&shareTargetTemplate, volumeRequest)
 		volumeAccessPointList := make([]models.ShareTarget, 1)
 		volumeAccessPointList[0] = shareTargetTemplate
 
@@ -195,5 +196,12 @@ func setENIParameters(shareTarget *models.ShareTarget, volumeRequest provider.Vo
 		shareTarget.VPC = &provider.VPC{
 			ID: volumeRequest.VPCID,
 		}
+	}
+}
+
+func setEITParameter(shareTarget *models.ShareTarget, volumeRequest provider.Volume) {
+	// Check if EIT parameter is enabled
+	if volumeRequest.EncryptionInTransit == EncryptionTrasitMode {
+		shareTarget.EncryptionInTransit = volumeRequest.EncryptionInTransit
 	}
 }
