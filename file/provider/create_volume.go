@@ -73,7 +73,20 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 			Name: *volumeRequest.Name,
 		}
 
-		setENIParameters(&shareTargetTemplate, volumeRequest)
+		// if VNI enabled
+		if volumeRequest.AccessControlMode == SecurityGroup {
+			setENIParameters(&shareTargetTemplate, volumeRequest)
+		} else { // If VPC Mode is enabled.
+			shareTargetTemplate.VPC = &provider.VPC{
+				ID: volumeRequest.VPCID,
+			}
+		}
+
+		// if EIT enabled
+		if volumeRequest.TransitEncryption == EncryptionTrasitMode {
+			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
+		}
+
 		volumeAccessPointList := make([]models.ShareTarget, 1)
 		volumeAccessPointList[0] = shareTargetTemplate
 
@@ -174,26 +187,18 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 }
 
 func setENIParameters(shareTarget *models.ShareTarget, volumeRequest provider.Volume) {
-	// If ENI/VNI is enabled
-	if volumeRequest.AccessControlMode == SecurityGroup {
-		shareTarget.VirtualNetworkInterface = &models.VirtualNetworkInterface{
-			SecurityGroups: volumeRequest.SecurityGroups,
-			ResourceGroup:  volumeRequest.ResourceGroup,
-		}
+	shareTarget.VirtualNetworkInterface = &models.VirtualNetworkInterface{
+		SecurityGroups: volumeRequest.SecurityGroups,
+		ResourceGroup:  volumeRequest.ResourceGroup,
+	}
 
-		if len(volumeRequest.SubnetID) != 0 {
-			shareTarget.VirtualNetworkInterface.Subnet = &models.SubnetRef{
-				ID: volumeRequest.SubnetID,
-			}
+	if len(volumeRequest.SubnetID) != 0 {
+		shareTarget.VirtualNetworkInterface.Subnet = &models.SubnetRef{
+			ID: volumeRequest.SubnetID,
 		}
+	}
 
-		if volumeRequest.PrimaryIP != nil {
-			shareTarget.VirtualNetworkInterface.PrimaryIP = volumeRequest.PrimaryIP
-		}
-
-	} else { // If VPC Mode is enabled.
-		shareTarget.VPC = &provider.VPC{
-			ID: volumeRequest.VPCID,
-		}
+	if volumeRequest.PrimaryIP != nil {
+		shareTarget.VirtualNetworkInterface.PrimaryIP = volumeRequest.PrimaryIP
 	}
 }

@@ -38,9 +38,10 @@ var retryGap = 10
 
 // ConstantRetryGap ...
 const (
-	ConstantRetryGap = 10 // seconds
-	SecurityGroup    = "security_group"
-	pageSize         = 50
+	ConstantRetryGap     = 10 // seconds
+	SecurityGroup        = "security_group"
+	EncryptionTrasitMode = "user_managed"
+	pageSize             = 50
 )
 
 var volumeIDPartsCount = 5
