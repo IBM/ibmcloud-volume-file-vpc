@@ -33,7 +33,7 @@ type ShareTarget struct {
 	Status string        `json:"lifecycle_state,omitempty"`
 	VPC    *provider.VPC `json:"vpc,omitempty"`
 	//EncryptionInTransit
-	EncryptionInTransit     string                   `json:"transit_encryption,omitempty"`
+	TransitEncryption       string                   `json:"transit_encryption,omitempty"`
 	VirtualNetworkInterface *VirtualNetworkInterface `json:"virtual_network_interface,omitempty"`
 	//Share ID this target is associated to
 	ShareID   string     `json:"-"`

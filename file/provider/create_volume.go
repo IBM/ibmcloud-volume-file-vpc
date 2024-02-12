@@ -201,7 +201,7 @@ func setENIParameters(shareTarget *models.ShareTarget, volumeRequest provider.Vo
 
 func setEITParameter(shareTarget *models.ShareTarget, volumeRequest provider.Volume) {
 	// Check if EIT parameter is enabled
-	if volumeRequest.EncryptionInTransit == EncryptionTrasitMode {
-		shareTarget.EncryptionInTransit = volumeRequest.EncryptionInTransit
+	if volumeRequest.TransitEncryption == EncryptionTrasitMode {
+		shareTarget.TransitEncryption = volumeRequest.TransitEncryption
 	}
 }
