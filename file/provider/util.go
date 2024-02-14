@@ -335,3 +335,8 @@ func SetRetryParameters(maxAttempts int, maxGap int) {
 func roundUpSize(volumeSizeBytes int64, allocationUnitBytes int64) int64 {
 	return (volumeSizeBytes + allocationUnitBytes - 1) / allocationUnitBytes
 }
+
+// BytesToGB converts bytes to GB
+func BytesToGB(volumeSizeBytes int64) int64 {
+	return int64(volumeSizeBytes / GB)
+}

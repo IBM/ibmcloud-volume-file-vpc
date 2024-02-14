@@ -27,9 +27,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// GiB ...
+// GB ...
 const (
-	GiB = 1024 * 1024 * 1024
+	GB = 1000 * 1000 * 1000
 )
 
 func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRequest) (size int64, err error) {
@@ -49,7 +49,7 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 	}
 	vpcs.Logger.Info("Successfully validated inputs for ExpandVolume request... ")
 
-	newSize := roundUpSize(expandVolumeRequest.Capacity, GiB)
+	newSize := BytesToGB(expandVolumeRequest.Capacity)
 
 	// Build the template to send to backend
 	shareTemplate := &models.Share{
