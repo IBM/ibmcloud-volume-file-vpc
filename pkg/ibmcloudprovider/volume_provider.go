@@ -19,6 +19,7 @@ package ibmcloudprovider
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/registry"
@@ -63,15 +64,18 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 
 	var clusterInfo utilsConfig.ClusterConfig
 	logger.Info("Fetching clusterInfo")
-	clusterInfo, err = utilsConfig.GetClusterInfo(*k8sClient, logger)
-	if err != nil {
-		logger.Error("Unable to load ClusterInfo", local.ZapError(err))
-		return nil, err
+	if conf.IKS != nil && conf.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True" {
+		clusterInfo, err = utilsConfig.GetClusterInfo(*k8sClient, logger)
+		if err != nil {
+			logger.Error("Unable to load ClusterInfo", local.ZapError(err))
+			return nil, err
+		}
+		logger.Info("Fetched clusterInfo..")
 	}
-	logger.Info("Fetched clusterInfo..")
 
 	vpcFileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    conf.VPC,
+		IKSConfig:    conf.IKS,
 		ServerConfig: conf.Server,
 	}
 
@@ -82,8 +86,12 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 		return nil, err
 	}
 
-	providerName := conf.VPC.VPCVolumeType
-
+	var providerName string
+	if isRunningInIKS() && conf.IKS.Enabled {
+		providerName = conf.VPC.VPCVolumeType
+	} else if conf.VPC.Enabled {
+		providerName = conf.VPC.VPCBlockProviderName
+	}
 	cloudProvider := &IBMCloudStorageProvider{
 		ProviderName:   providerName,
 		ProviderConfig: conf,
@@ -92,6 +100,9 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 	}
 	logger.Info("Successfully read provider configuration")
 	return cloudProvider, nil
+}
+func isRunningInIKS() bool {
+	return true //TODO Check the master KUBE version
 }
 
 // GetProviderSession ...
@@ -107,6 +118,7 @@ func (icp *IBMCloudStorageProvider) GetProviderSession(ctx context.Context, logg
 	// Populating vpcfileConfig which is used to open session
 	vpcfileConfig := &vpcconfig.VPCFileConfig{
 		VPCConfig:    icp.ProviderConfig.VPC,
+		IKSConfig:    icp.ProviderConfig.IKS,
 		ServerConfig: icp.ProviderConfig.Server,
 	}
 
