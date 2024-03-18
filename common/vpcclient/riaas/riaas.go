@@ -122,7 +122,7 @@ type IKSSession struct {
 var _ RegionalAPI = &IKSSession{}
 
 // VolumeService returns the Volume service for managing volumes
-func (s *IKSSession) VolumeService() vpcfilevolume.FileShareManager {
+func (s *IKSSession) FileShareService() vpcfilevolume.FileShareManager {
 	return vpcfilevolume.NewIKSVolumeService(s.client)
 }
 
