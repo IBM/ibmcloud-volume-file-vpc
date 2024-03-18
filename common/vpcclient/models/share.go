@@ -18,8 +18,35 @@
 package models
 
 import (
+	"strconv"
 	"time"
+
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 )
+
+const (
+	//ClusterIDTagName ...
+	ClusterIDTagName = "clusterid"
+	//VolumeStatus ...
+	VolumeStatus = "status"
+)
+
+// Volume ...
+type Volume struct {
+	Href          string         `json:"href,omitempty"`
+	ID            string         `json:"id,omitempty"`
+	Name          string         `json:"name,omitempty"`
+	Capacity      int64          `json:"capacity,omitempty"`
+	Iops          int64          `json:"iops,omitempty"`
+	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
+	Tags          []string       `json:"tags,omitempty"` //We need to validate and remove this if not required.
+
+	CRN        string     `json:"crn,omitempty"`
+	Cluster    string     `json:"cluster,omitempty"`
+	Provider   string     `json:"provider,omitempty"`
+	Status     StatusType `json:"status,omitempty"`
+	VolumeType string     `json:"volume_type,omitempty"`
+}
 
 // Share ...
 type Share struct {
@@ -64,4 +91,43 @@ type ShareList struct {
 // HReference ...
 type HReference struct {
 	Href string `json:"href,omitempty"`
+}
+
+// NewVolume created model volume from provider volume
+func NewVolume(volumeRequest provider.Volume) Volume {
+	// Build the template to send to backend
+
+	volume := Volume{
+		ID:         volumeRequest.VolumeID,
+		CRN:        volumeRequest.CRN,
+		Tags:       volumeRequest.VPCVolume.Tags,
+		Provider:   string(volumeRequest.Provider),
+		VolumeType: string(volumeRequest.VolumeType),
+	}
+	if volumeRequest.Name != nil {
+		volume.Name = *volumeRequest.Name
+	}
+	if volumeRequest.Capacity != nil {
+		volume.Capacity = int64(*volumeRequest.Capacity)
+	}
+
+	if volumeRequest.VPCVolume.ResourceGroup != nil {
+		volume.ResourceGroup = &ResourceGroup{
+			ID:   volumeRequest.VPCVolume.ResourceGroup.ID,
+			Name: volumeRequest.VPCVolume.ResourceGroup.Name,
+		}
+	}
+
+	if volumeRequest.Iops != nil {
+		value, err := strconv.ParseInt(*volumeRequest.Iops, 10, 64)
+		if err != nil {
+			volume.Iops = 0
+		}
+		volume.Iops = value
+	}
+
+	volume.Cluster = volumeRequest.Attributes[ClusterIDTagName]
+	volume.Status = StatusType(volumeRequest.Attributes[VolumeStatus])
+
+	return volume
 }

@@ -335,3 +335,15 @@ func SetRetryParameters(maxAttempts int, maxGap int) {
 func roundUpSize(volumeSizeBytes int64, allocationUnitBytes int64) int64 {
 	return (volumeSizeBytes + allocationUnitBytes - 1) / allocationUnitBytes
 }
+
+// SkipRetryForIKS skip retry as per listed error codes
+func SkipRetryForIKS(err error) bool {
+	iksError, iksok := err.(*models.IksError)
+	if iksok {
+		skipStatus, ok := skipErrorCodes[iksError.Code]
+		if ok {
+			return skipStatus
+		}
+	}
+	return false
+}
