@@ -31,6 +31,7 @@ const (
 	VolumeStatus = "status"
 )
 
+// Only used for v2/storage/updateVolume
 // Volume ...
 type Volume struct {
 	Href          string         `json:"href,omitempty"`
@@ -93,6 +94,7 @@ type HReference struct {
 	Href string `json:"href,omitempty"`
 }
 
+// Only for v2/storage/updateVolume
 // NewVolume created model volume from provider volume
 func NewVolume(volumeRequest provider.Volume) Volume {
 	// Build the template to send to backend
