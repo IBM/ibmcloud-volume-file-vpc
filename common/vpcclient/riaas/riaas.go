@@ -121,7 +121,7 @@ type IKSSession struct {
 
 var _ RegionalAPI = &IKSSession{}
 
-// VolumeService returns the Volume service for managing volumes
+// FileShareService returns the FileShare service for managing shares
 func (s *IKSSession) FileShareService() vpcfilevolume.FileShareManager {
 	return vpcfilevolume.NewIKSVolumeService(s.client)
 }
