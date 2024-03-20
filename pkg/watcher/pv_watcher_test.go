@@ -41,32 +41,6 @@ import (
 	"k8s.io/client-go/tools/record"
 )
 
-func TestNew(t *testing.T) {
-	// Creating test logger
-	_, teardown := utils.GetTestLogger(t)
-	defer teardown()
-
-	/*pwd, err := os.Getwd()
-	if err != nil {
-		t.Errorf("Failed to get current working directory, some unit tests will fail")
-	}
-
-	// As its required by NewIBMCloudStorageProvider
-	secretConfigPath := filepath.Join(pwd, "..", "..", "test-fixtures")
-	err = os.Setenv("SECRET_CONFIG_PATH", secretConfigPath)
-	defer os.Unsetenv("SECRET_CONFIG_PATH")
-	if err != nil {
-		t.Errorf("This test will fail because of %v", err)
-	}
-
-	configPath := filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig.toml")
-	ibmCloudProvider, err := ibmcloudprovider.NewIBMCloudStorageProvider(configPath, logger)
-	assert.Nil(t, err)
-
-	watcher := New(logger, "ibm-csi-driver", ibmCloudProvider)
-	assert.NotNil(t, watcher)*/
-}
-
 func TestAddTags(t *testing.T) {
 	var server *ghttp.Server
 	conf := &config.Config{
