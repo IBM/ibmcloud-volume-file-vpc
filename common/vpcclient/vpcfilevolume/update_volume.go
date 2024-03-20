@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2020 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-// Package vpcfilevolume ...
+// Package vpcvolume ...
 package vpcfilevolume
 
-const (
-	// Version of the VPC backend service
-	Version            = "/v1"
-	sharesPath         = Version + "/shares"
-	shareIDParam       = "share-id"
-	shareIDPath        = sharesPath + "/{" + shareIDParam + "}"
-	shareTargetsPath   = "/mount_targets"
-	shareTargetIDParam = "target-id"
-	shareTargetIDPath  = shareTargetsPath + "/{" + shareTargetIDParam + "}"
-	subnets            = Version + "/subnets"
-	securityGroups     = Version + "/security_groups"
-	updateVolume       = "updateVolume"
+import (
+	"errors"
+
+	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+	"go.uber.org/zap"
 )
+
+// UpdateVolume POSTs to /volumes. Riaas/VPC does have volume update support yet
+func (vs *FileShareService) UpdateVolume(volumeTemplate *models.Volume, ctxLogger *zap.Logger) error {
+	return errors.New("unsupported Operation")
+}
