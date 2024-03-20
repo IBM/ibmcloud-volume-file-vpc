@@ -48,7 +48,7 @@ func TestAddTags(t *testing.T) {
 			IamAPIKey: "test",
 		},
 		VPC: &config.VPCProviderConfig{
-			VPCBlockProviderName: "vpc-classic",
+			VPCVolumeType: "vpc-share",
 		},
 	}
 	logger, _ := GetTestLogger(t)
