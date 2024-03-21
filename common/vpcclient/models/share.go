@@ -39,7 +39,7 @@ type UpdateShare struct {
 	Capacity      int64          `json:"capacity,omitempty"`
 	Iops          int64          `json:"iops,omitempty"`
 	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
-	Tags          []string       `json:"tags,omitempty"` //We need to validate and remove this if not required.
+	Tags          []string       `json:"tags,omitempty"`
 
 	CRN        string     `json:"crn,omitempty"`
 	Cluster    string     `json:"cluster,omitempty"`
