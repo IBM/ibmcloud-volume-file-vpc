@@ -58,7 +58,7 @@ func InitProviders(conf *vpcfileconfig.VPCFileConfig, k8sClient *k8s_utils.Kuber
 			logger.Info("VPC file provider error!")
 			return nil, err
 		}
-		providerRegistry.Register(conf.IKSConfig.IKSBlockProviderName, prov)
+		providerRegistry.Register(conf.IKSConfig.IKSFileProviderName, prov)
 		haveProviders = true
 	}
 
@@ -110,7 +110,7 @@ func GenerateContextCredentials(conf *vpcfileconfig.VPCFileConfig, providerID st
 		ctxLogger.Info("Calling provider/init_provider.go ForIAMAccessToken")
 		return contextCredentialsFactory.ForIAMAccessToken(conf.VPCConfig.G2APIKey, ctxLogger)
 
-	case (conf.IKSConfig != nil && providerID == conf.IKSConfig.IKSBlockProviderName):
+	case (conf.IKSConfig != nil && providerID == conf.IKSConfig.IKSFileProviderName):
 		return provider.ContextCredentials{}, nil // Get credentials  in OpenSession method
 
 	default:

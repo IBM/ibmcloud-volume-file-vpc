@@ -34,8 +34,8 @@ func TestUpdateVolume(t *testing.T) {
 
 	volumeTemplate := models.UpdateShare{
 		ID:         "volume-id",
-		VolumeType: "block",
-		Provider:   "vpc-classic",
+		VolumeType: "vpc-share",
+		Provider:   "g2_file",
 		Cluster:    "cluster-id",
 		CRN:        "crn:v1:staging:public:is:us-south-1:a/account-id::volume:volume-id",
 		Tags:       []string{"tag1:val1", "tag2:val2"},

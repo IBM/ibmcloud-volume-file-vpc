@@ -88,7 +88,7 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 
 	var providerName string
 	if isRunningInIKS() && conf.IKS.Enabled {
-		providerName = conf.IKS.IKSBlockProviderName
+		providerName = conf.IKS.IKSFileProviderName
 	} else if conf.VPC.Enabled {
 		providerName = conf.VPC.VPCVolumeType
 	}
