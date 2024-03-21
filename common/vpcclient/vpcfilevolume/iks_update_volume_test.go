@@ -32,7 +32,7 @@ func TestUpdateVolume(t *testing.T) {
 	logger, _ := GetTestContextLogger()
 	defer logger.Sync()
 
-	volumeTemplate := models.Volume{
+	volumeTemplate := models.UpdateShare{
 		ID:         "volume-id",
 		VolumeType: "block",
 		Provider:   "vpc-classic",
@@ -48,11 +48,11 @@ func TestUpdateVolume(t *testing.T) {
 
 		// Response
 		status        int
-		volumeRequest models.Volume
+		volumeRequest models.UpdateShare
 
 		// Expected return
 		expectErr string
-		verify    func(*testing.T, *models.Volume, error)
+		verify    func(*testing.T, *models.UpdateShare, error)
 	}{
 		{
 			name:   "Verify that the correct endpoint is invoked",

@@ -31,9 +31,8 @@ const (
 	VolumeStatus = "status"
 )
 
-// Only used for v2/storage/updateVolume
-// Volume ...
-type Volume struct {
+// UpdateShare ...
+type UpdateShare struct {
 	Href          string         `json:"href,omitempty"`
 	ID            string         `json:"id,omitempty"`
 	Name          string         `json:"name,omitempty"`
@@ -95,11 +94,11 @@ type HReference struct {
 }
 
 // Only for v2/storage/updateVolume
-// NewVolume created model volume from provider volume
-func NewVolume(volumeRequest provider.Volume) Volume {
+// NewShare created model UpdateShare from provider volume
+func NewUpdateShare(volumeRequest provider.Volume) UpdateShare {
 	// Build the template to send to backend
 
-	volume := Volume{
+	share := UpdateShare{
 		ID:         volumeRequest.VolumeID,
 		CRN:        volumeRequest.CRN,
 		Tags:       volumeRequest.VPCVolume.Tags,
@@ -107,14 +106,14 @@ func NewVolume(volumeRequest provider.Volume) Volume {
 		VolumeType: string(volumeRequest.VolumeType),
 	}
 	if volumeRequest.Name != nil {
-		volume.Name = *volumeRequest.Name
+		share.Name = *volumeRequest.Name
 	}
 	if volumeRequest.Capacity != nil {
-		volume.Capacity = int64(*volumeRequest.Capacity)
+		share.Capacity = int64(*volumeRequest.Capacity)
 	}
 
 	if volumeRequest.VPCVolume.ResourceGroup != nil {
-		volume.ResourceGroup = &ResourceGroup{
+		share.ResourceGroup = &ResourceGroup{
 			ID:   volumeRequest.VPCVolume.ResourceGroup.ID,
 			Name: volumeRequest.VPCVolume.ResourceGroup.Name,
 		}
@@ -123,13 +122,13 @@ func NewVolume(volumeRequest provider.Volume) Volume {
 	if volumeRequest.Iops != nil {
 		value, err := strconv.ParseInt(*volumeRequest.Iops, 10, 64)
 		if err != nil {
-			volume.Iops = 0
+			share.Iops = 0
 		}
-		volume.Iops = value
+		share.Iops = value
 	}
 
-	volume.Cluster = volumeRequest.Attributes[ClusterIDTagName]
-	volume.Status = StatusType(volumeRequest.Attributes[VolumeStatus])
+	share.Cluster = volumeRequest.Attributes[ClusterIDTagName]
+	share.Status = StatusType(volumeRequest.Attributes[VolumeStatus])
 
-	return volume
+	return share
 }

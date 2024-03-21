@@ -27,7 +27,7 @@ import (
 )
 
 // UpdateVolume POSTs to /volumes
-func (vs *IKSVolumeService) UpdateVolume(volumeTemplate *models.Volume, ctxLogger *zap.Logger) error {
+func (vs *IKSVolumeService) UpdateVolume(shareTemplate *models.UpdateShare, ctxLogger *zap.Logger) error {
 	ctxLogger.Debug("Entry Backend IKSVolumeService.UpdateVolume")
 	defer ctxLogger.Debug("Exit Backend IKSVolumeService.UpdateVolume")
 
@@ -40,9 +40,9 @@ func (vs *IKSVolumeService) UpdateVolume(volumeTemplate *models.Volume, ctxLogge
 	}
 	apiErr := vs.receiverError
 	request := vs.client.NewRequest(operation)
-	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation), zap.Reflect("volumeTemplate", volumeTemplate))
+	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation), zap.Reflect("volumeTemplate", shareTemplate))
 
-	_, err := request.JSONBody(volumeTemplate).JSONError(apiErr).Invoke()
+	_, err := request.JSONBody(shareTemplate).JSONError(apiErr).Invoke()
 	if err != nil {
 		ctxLogger.Error("Update volume failed with error", zap.Error(err), zap.Error(apiErr))
 	}

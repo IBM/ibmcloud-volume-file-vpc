@@ -33,7 +33,7 @@ type FileShareManager interface {
 	CreateFileShare(volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
 
 	// UpdateVolume updates the volume with authorisation by passing required information in the volume object
-	UpdateVolume(volumeTemplate *models.Volume, ctxLogger *zap.Logger) error
+	UpdateVolume(volumeTemplate *models.UpdateShare, ctxLogger *zap.Logger) error
 
 	// Get all file shares lists by using filter options
 	ListFileShares(limit int, start string, filters *models.ListShareFilters, ctxLogger *zap.Logger) (*models.ShareList, error)

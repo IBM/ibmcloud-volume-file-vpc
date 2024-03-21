@@ -25,6 +25,6 @@ import (
 )
 
 // UpdateVolume POSTs to /volumes. Riaas/VPC does have volume update support yet
-func (vs *FileShareService) UpdateVolume(volumeTemplate *models.Volume, ctxLogger *zap.Logger) error {
+func (vs *FileShareService) UpdateVolume(volumeTemplate *models.UpdateShare, ctxLogger *zap.Logger) error {
 	return errors.New("unsupported Operation")
 }

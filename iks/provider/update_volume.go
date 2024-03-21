@@ -37,7 +37,7 @@ func (vpcIks *IksVpcSession) UpdateVolume(volumeRequest provider.Volume) (err er
 	vpcIks.Logger.Info("Basic validation for UpdateVolume request... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
 
 	// Build the template to send to backend
-	volumeTemplate := models.NewVolume(volumeRequest)
+	volumeTemplate := models.NewUpdateShare(volumeRequest)
 	err = validateVolumeRequest(volumeRequest)
 	if err != nil {
 		return err
