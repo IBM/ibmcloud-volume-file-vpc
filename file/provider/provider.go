@@ -130,9 +130,6 @@ func NewProvider(conf *vpcconfig.VPCFileConfig, k8sClient *k8s_utils.KubernetesC
 		},
 	}
 
-	// Update VPC config for IKS deployment
-	provider.Config.VPCConfig.IsIKS = conf.IKSConfig != nil && conf.IKSConfig.Enabled
-
 	userError.MessagesEn = userError.InitMessages()
 	return provider, nil
 }
