@@ -49,7 +49,7 @@ func TestUpdateVolume(t *testing.T) {
 		// Response
 		status        int
 		volumeRequest models.UpdateShare
-
+		content       string
 		// Expected return
 		expectErr string
 		verify    func(*testing.T, *models.UpdateShare, error)
@@ -61,13 +61,18 @@ func TestUpdateVolume(t *testing.T) {
 			name:          "Verify that the volume is updated successfully",
 			status:        http.StatusOK,
 			volumeRequest: volumeTemplate,
+		}, {
+			name:      "Incorrect endpoint is invoked",
+			status:    http.StatusNotFound,
+			content:   "{\"code\":\"404\"}",
+			expectErr: "404: ",
 		},
 	}
 
 	for _, testcase := range testCases {
 		t.Run(testcase.name, func(t *testing.T) {
 			mux, client, teardown := test.SetupServer(t)
-			test.SetupMuxResponse(t, mux, "/v2/storage/updateVolume", http.MethodPost, nil, http.StatusOK, "", nil)
+			test.SetupMuxResponse(t, mux, "/v2/storage/updateVolume", http.MethodPost, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
 
