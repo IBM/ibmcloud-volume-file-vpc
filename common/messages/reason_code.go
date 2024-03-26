@@ -18,8 +18,12 @@
 package messages
 
 const (
+	//Timeout indicates IAM_TOKEN exchange request failed due to timeout
+	Timeout = "Timeout"
 	//AuthenticationFailed indicate authentication to IAM endpoint failed. e,g IAM_TOKEN refresh
 	AuthenticationFailed = "AuthenticationFailed"
+	//EndpointNotReachable indicates IAM_TOKEN exchange request failed due to incorrect endpoint
+	EndpointNotReachable = "EndpointNotReachable"
 	//CreateVolumeAccessPointFailed indicates if create volume access point failed
 	CreateVolumeAccessPointFailed = "CreateVolumeAccessPointFailed"
 	//DeleteVolumeAccessPointFailed indicates if delete volume access point from instance is failed

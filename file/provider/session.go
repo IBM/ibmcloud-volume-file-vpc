@@ -37,6 +37,7 @@ type VPCSession struct {
 	APIVersion         string
 	Logger             *zap.Logger
 	APIRetry           FlexyRetry
+	SessionError       error
 }
 
 const (
