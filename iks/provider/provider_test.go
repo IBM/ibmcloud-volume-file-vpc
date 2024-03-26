@@ -88,13 +88,19 @@ func TestNewProvider(t *testing.T) {
 			DebugTrace: true,
 		},
 		VPCConfig: &config.VPCProviderConfig{
-			Enabled:         false,
-			EndpointURL:     TestEndpointURL,
-			VPCTimeout:      "30s",
-			IamClientID:     IamClientID,
-			IamClientSecret: IamClientSecret,
+			Enabled:                    false,
+			EndpointURL:                TestEndpointURL,
+			VPCTimeout:                 "30s",
+			IamClientID:                IamClientID,
+			IamClientSecret:            IamClientSecret,
+			IKSTokenExchangePrivateURL: "token-exchange-private-URL",
+		},
+		IKSConfig: &config.IKSConfig{
+			Enabled:             true,
+			IKSFileProviderName: "vpc-file-share",
 		},
 	}
+
 	logger, teardown := GetTestLogger(t)
 	defer teardown()
 

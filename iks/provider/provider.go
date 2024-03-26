@@ -76,7 +76,7 @@ func NewProvider(conf *vpcconfig.VPCFileConfig, k8sClient *k8s_utils.KubernetesC
 		logger.Error("Error initializing context credentials factory", zap.Error(err))
 		return nil, err
 	}
-	//vpcFileProvider.ApiConfig.BaseURL = conf.VPC.IKSTokenExchangePrivateURL
+
 	return iksVpcFileProvider, nil
 }
 
