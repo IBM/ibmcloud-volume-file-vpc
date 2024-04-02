@@ -18,14 +18,21 @@
 package provider
 
 import (
+	"strconv"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	vpc_provider "github.com/IBM/ibmcloud-volume-file-vpc/file/provider"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
+)
+
+const (
+	//ClusterIDTagName ...
+	ClusterIDTagName = "clusterid"
+	//VolumeStatus ...
+	VolumeStatus = "status"
 )
 
 // UpdateVolume updates the volume with given information
@@ -37,7 +44,7 @@ func (vpcIks *IksVpcSession) UpdateVolume(volumeRequest provider.Volume) (err er
 	vpcIks.Logger.Info("Basic validation for UpdateVolume request... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
 
 	// Build the template to send to backend
-	volumeTemplate := models.NewUpdateShare(volumeRequest)
+	pvcTemplate := NewUpdatePVC(volumeRequest)
 	err = validateVolumeRequest(volumeRequest)
 	if err != nil {
 		return err
@@ -46,7 +53,7 @@ func (vpcIks *IksVpcSession) UpdateVolume(volumeRequest provider.Volume) (err er
 
 	vpcIks.Logger.Info("Calling  provider for volume update...")
 	err = vpcIks.APIRetry.FlexyRetry(vpcIks.Logger, func() (error, bool) {
-		err = vpcIks.IksSession.Apiclient.FileShareService().UpdateVolume(&volumeTemplate, vpcIks.Logger)
+		err = vpcIks.IksSession.Apiclient.FileShareService().UpdateVolume(&pvcTemplate, vpcIks.Logger)
 		return err, err == nil || vpc_provider.SkipRetryForIKS(err)
 	})
 
@@ -74,4 +81,37 @@ func validateVolumeRequest(volumeRequest provider.Volume) error {
 	}
 
 	return nil
+}
+
+// Only for v2/storage/updateVolume
+// NewUpdatePVC creates model UpdatePVC from provider volume
+func NewUpdatePVC(volumeRequest provider.Volume) provider.UpdatePVC {
+	// Build the template to send to backend
+
+	pvc := provider.UpdatePVC{
+		ID:         volumeRequest.VolumeID,
+		CRN:        volumeRequest.CRN,
+		Tags:       volumeRequest.VPCVolume.Tags,
+		Provider:   string(volumeRequest.Provider),
+		VolumeType: string(volumeRequest.VolumeType),
+	}
+	if volumeRequest.Name != nil {
+		pvc.Name = *volumeRequest.Name
+	}
+	if volumeRequest.Capacity != nil {
+		pvc.Capacity = int64(*volumeRequest.Capacity)
+	}
+
+	if volumeRequest.Iops != nil {
+		value, err := strconv.ParseInt(*volumeRequest.Iops, 10, 64)
+		if err != nil {
+			pvc.Iops = 0
+		}
+		pvc.Iops = value
+	}
+
+	pvc.Cluster = volumeRequest.Attributes[ClusterIDTagName]
+	pvc.Status = volumeRequest.Attributes[VolumeStatus]
+
+	return pvc
 }

@@ -18,35 +18,8 @@
 package models
 
 import (
-	"strconv"
 	"time"
-
-	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 )
-
-const (
-	//ClusterIDTagName ...
-	ClusterIDTagName = "clusterid"
-	//VolumeStatus ...
-	VolumeStatus = "status"
-)
-
-// UpdateShare ...
-type UpdateShare struct {
-	Href          string         `json:"href,omitempty"`
-	ID            string         `json:"id,omitempty"`
-	Name          string         `json:"name,omitempty"`
-	Capacity      int64          `json:"capacity,omitempty"`
-	Iops          int64          `json:"iops,omitempty"`
-	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
-	Tags          []string       `json:"tags,omitempty"`
-
-	CRN        string     `json:"crn,omitempty"`
-	Cluster    string     `json:"cluster,omitempty"`
-	Provider   string     `json:"provider,omitempty"`
-	Status     StatusType `json:"status,omitempty"`
-	VolumeType string     `json:"volume_type,omitempty"`
-}
 
 // Share ...
 type Share struct {
@@ -91,44 +64,4 @@ type ShareList struct {
 // HReference ...
 type HReference struct {
 	Href string `json:"href,omitempty"`
-}
-
-// Only for v2/storage/updateVolume
-// NewShare created model UpdateShare from provider volume
-func NewUpdateShare(volumeRequest provider.Volume) UpdateShare {
-	// Build the template to send to backend
-
-	share := UpdateShare{
-		ID:         volumeRequest.VolumeID,
-		CRN:        volumeRequest.CRN,
-		Tags:       volumeRequest.VPCVolume.Tags,
-		Provider:   string(volumeRequest.Provider),
-		VolumeType: string(volumeRequest.VolumeType),
-	}
-	if volumeRequest.Name != nil {
-		share.Name = *volumeRequest.Name
-	}
-	if volumeRequest.Capacity != nil {
-		share.Capacity = int64(*volumeRequest.Capacity)
-	}
-
-	if volumeRequest.VPCVolume.ResourceGroup != nil {
-		share.ResourceGroup = &ResourceGroup{
-			ID:   volumeRequest.VPCVolume.ResourceGroup.ID,
-			Name: volumeRequest.VPCVolume.ResourceGroup.Name,
-		}
-	}
-
-	if volumeRequest.Iops != nil {
-		value, err := strconv.ParseInt(*volumeRequest.Iops, 10, 64)
-		if err != nil {
-			share.Iops = 0
-		}
-		share.Iops = value
-	}
-
-	share.Cluster = volumeRequest.Attributes[ClusterIDTagName]
-	share.Status = StatusType(volumeRequest.Attributes[VolumeStatus])
-
-	return share
 }

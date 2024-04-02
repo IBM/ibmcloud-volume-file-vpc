@@ -7,6 +7,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
@@ -201,10 +202,10 @@ type FileShareService struct {
 		result1 *models.SubnetList
 		result2 error
 	}
-	UpdateVolumeStub        func(*models.UpdateShare, *zap.Logger) error
+	UpdateVolumeStub        func(*provider.UpdatePVC, *zap.Logger) error
 	updateVolumeMutex       sync.RWMutex
 	updateVolumeArgsForCall []struct {
-		arg1 *models.UpdateShare
+		arg1 *provider.UpdatePVC
 		arg2 *zap.Logger
 	}
 	updateVolumeReturns struct {
@@ -1069,11 +1070,11 @@ func (fake *FileShareService) ListSubnetsReturnsOnCall(i int, result1 *models.Su
 	}{result1, result2}
 }
 
-func (fake *FileShareService) UpdateVolume(arg1 *models.UpdateShare, arg2 *zap.Logger) error {
+func (fake *FileShareService) UpdateVolume(arg1 *provider.UpdatePVC, arg2 *zap.Logger) error {
 	fake.updateVolumeMutex.Lock()
 	ret, specificReturn := fake.updateVolumeReturnsOnCall[len(fake.updateVolumeArgsForCall)]
 	fake.updateVolumeArgsForCall = append(fake.updateVolumeArgsForCall, struct {
-		arg1 *models.UpdateShare
+		arg1 *provider.UpdatePVC
 		arg2 *zap.Logger
 	}{arg1, arg2})
 	stub := fake.UpdateVolumeStub
@@ -1095,13 +1096,13 @@ func (fake *FileShareService) UpdateVolumeCallCount() int {
 	return len(fake.updateVolumeArgsForCall)
 }
 
-func (fake *FileShareService) UpdateVolumeCalls(stub func(*models.UpdateShare, *zap.Logger) error) {
+func (fake *FileShareService) UpdateVolumeCalls(stub func(*provider.UpdatePVC, *zap.Logger) error) {
 	fake.updateVolumeMutex.Lock()
 	defer fake.updateVolumeMutex.Unlock()
 	fake.UpdateVolumeStub = stub
 }
 
-func (fake *FileShareService) UpdateVolumeArgsForCall(i int) (*models.UpdateShare, *zap.Logger) {
+func (fake *FileShareService) UpdateVolumeArgsForCall(i int) (*provider.UpdatePVC, *zap.Logger) {
 	fake.updateVolumeMutex.RLock()
 	defer fake.updateVolumeMutex.RUnlock()
 	argsForCall := fake.updateVolumeArgsForCall[i]

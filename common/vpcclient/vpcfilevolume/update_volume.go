@@ -20,11 +20,11 @@ package vpcfilevolume
 import (
 	"errors"
 
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
 // UpdateVolume POSTs to /volumes. Riaas/VPC does have volume update support yet
-func (vs *FileShareService) UpdateVolume(volumeTemplate *models.UpdateShare, ctxLogger *zap.Logger) error {
+func (vs *FileShareService) UpdateVolume(pvcTemplate *provider.UpdatePVC, ctxLogger *zap.Logger) error {
 	return errors.New("unsupported Operation")
 }

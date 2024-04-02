@@ -21,13 +21,13 @@ import (
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"go.uber.org/zap"
 )
 
 // UpdateVolume POSTs to /volumes
-func (vs *IKSVolumeService) UpdateVolume(shareTemplate *models.UpdateShare, ctxLogger *zap.Logger) error {
+func (vs *IKSVolumeService) UpdateVolume(pvcTemplate *provider.UpdatePVC, ctxLogger *zap.Logger) error {
 	ctxLogger.Debug("Entry Backend IKSVolumeService.UpdateVolume")
 	defer ctxLogger.Debug("Exit Backend IKSVolumeService.UpdateVolume")
 
@@ -40,9 +40,9 @@ func (vs *IKSVolumeService) UpdateVolume(shareTemplate *models.UpdateShare, ctxL
 	}
 	apiErr := vs.receiverError
 	request := vs.client.NewRequest(operation)
-	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation), zap.Reflect("volumeTemplate", shareTemplate))
+	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation), zap.Reflect("pvcTemplate", pvcTemplate))
 
-	_, err := request.JSONBody(shareTemplate).JSONError(apiErr).Invoke()
+	_, err := request.JSONBody(pvcTemplate).JSONError(apiErr).Invoke()
 	if err != nil {
 		ctxLogger.Error("Update volume failed with error", zap.Error(err), zap.Error(apiErr))
 	}

@@ -20,9 +20,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/test"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -32,7 +32,7 @@ func TestUpdateVolume(t *testing.T) {
 	logger, _ := GetTestContextLogger()
 	defer logger.Sync()
 
-	volumeTemplate := models.UpdateShare{
+	pvcTemplate := provider.UpdatePVC{
 		ID:         "volume-id",
 		VolumeType: "vpc-share",
 		Provider:   "g2_file",
@@ -47,20 +47,20 @@ func TestUpdateVolume(t *testing.T) {
 		name string
 
 		// Response
-		status        int
-		volumeRequest models.UpdateShare
-		content       string
+		status           int
+		updatePVCRequest provider.UpdatePVC
+		content          string
 		// Expected return
 		expectErr string
-		verify    func(*testing.T, *models.UpdateShare, error)
+		verify    func(*testing.T, *provider.UpdatePVC, error)
 	}{
 		{
 			name:   "Verify that the correct endpoint is invoked",
 			status: http.StatusNoContent,
 		}, {
-			name:          "Verify that the volume is updated successfully",
-			status:        http.StatusOK,
-			volumeRequest: volumeTemplate,
+			name:             "Verify that the volume is updated successfully",
+			status:           http.StatusOK,
+			updatePVCRequest: pvcTemplate,
 		}, {
 			name:      "Incorrect endpoint is invoked",
 			status:    http.StatusNotFound,
@@ -80,7 +80,7 @@ func TestUpdateVolume(t *testing.T) {
 
 			volumeService := vpcfilevolume.NewIKSVolumeService(client)
 
-			err := volumeService.UpdateVolume(&testcase.volumeRequest, logger)
+			err := volumeService.UpdateVolume(&testcase.updatePVCRequest, logger)
 
 			if testcase.expectErr != "" && assert.Error(t, err) {
 				assert.Equal(t, testcase.expectErr, err.Error())
