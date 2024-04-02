@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// UpdateVolume POSTs to /volumes
+// UpdateVolume POSTs to /v2/storage/updateVolume
 func (vs *IKSVolumeService) UpdateVolume(pvcTemplate *provider.UpdatePVC, ctxLogger *zap.Logger) error {
 	ctxLogger.Debug("Entry Backend IKSVolumeService.UpdateVolume")
 	defer ctxLogger.Debug("Exit Backend IKSVolumeService.UpdateVolume")

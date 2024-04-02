@@ -129,7 +129,6 @@ func NewProvider(conf *vpcconfig.VPCFileConfig, k8sClient *k8s_utils.KubernetesC
 			ResourceGroup: conf.VPCConfig.G2ResourceGroupID,
 		},
 	}
-
 	userError.MessagesEn = userError.InitMessages()
 	return provider, nil
 }

@@ -55,7 +55,7 @@ func InitProviders(conf *vpcfileconfig.VPCFileConfig, k8sClient *k8s_utils.Kuber
 		logger.Info("Configuring IKS-VPC FILE Provider")
 		prov, err := iks_vpc_provider.NewProvider(conf, k8sClient, logger)
 		if err != nil {
-			logger.Info("VPC file provider error!")
+			logger.Error("VPC file provider error!")
 			return nil, err
 		}
 		providerRegistry.Register(conf.IKSConfig.IKSFileProviderName, prov)

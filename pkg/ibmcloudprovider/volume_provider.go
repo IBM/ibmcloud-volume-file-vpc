@@ -63,8 +63,8 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 	}
 
 	var clusterInfo utilsConfig.ClusterConfig
-	logger.Info("Fetching clusterInfo")
 	if conf.IKS != nil && conf.IKS.Enabled || os.Getenv("IKS_ENABLED") == "True" {
+		logger.Info("Fetching clusterInfo")
 		clusterInfo, err = utilsConfig.GetClusterInfo(*k8sClient, logger)
 		if err != nil {
 			logger.Error("Unable to load ClusterInfo", local.ZapError(err))
@@ -87,7 +87,7 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 	}
 
 	var providerName string
-	if isRunningInIKS() && conf.IKS.Enabled {
+	if conf.IKS.Enabled {
 		providerName = conf.IKS.IKSFileProviderName
 	} else if conf.VPC.Enabled {
 		providerName = conf.VPC.VPCVolumeType
@@ -100,9 +100,6 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 	}
 	logger.Info("Successfully read provider configuration")
 	return cloudProvider, nil
-}
-func isRunningInIKS() bool {
-	return true //TODO Check the master KUBE version
 }
 
 // GetProviderSession ...
