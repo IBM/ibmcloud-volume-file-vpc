@@ -49,6 +49,8 @@ var volumeIDPartsCount = 5
 var skipErrorCodes = map[string]bool{
 	"shares_profile_iops_not_allowed":           true,
 	"shares_profile_capacity_invalid":           true,
+	"shares_profile_capacity_iops_invalid":      true,
+	"shares_encryption_key_crn_invalid":         true,
 	"shares_zone_not_found":                     true,
 	"shares_bad_request":                        true,
 	"shares_resource_group_bad_request":         true,
