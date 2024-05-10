@@ -7,6 +7,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
@@ -200,6 +201,18 @@ type FileShareService struct {
 	listSubnetsReturnsOnCall map[int]struct {
 		result1 *models.SubnetList
 		result2 error
+	}
+	UpdateVolumeStub        func(*provider.UpdatePVC, *zap.Logger) error
+	updateVolumeMutex       sync.RWMutex
+	updateVolumeArgsForCall []struct {
+		arg1 *provider.UpdatePVC
+		arg2 *zap.Logger
+	}
+	updateVolumeReturns struct {
+		result1 error
+	}
+	updateVolumeReturnsOnCall map[int]struct {
+		result1 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -1057,6 +1070,68 @@ func (fake *FileShareService) ListSubnetsReturnsOnCall(i int, result1 *models.Su
 	}{result1, result2}
 }
 
+func (fake *FileShareService) UpdateVolume(arg1 *provider.UpdatePVC, arg2 *zap.Logger) error {
+	fake.updateVolumeMutex.Lock()
+	ret, specificReturn := fake.updateVolumeReturnsOnCall[len(fake.updateVolumeArgsForCall)]
+	fake.updateVolumeArgsForCall = append(fake.updateVolumeArgsForCall, struct {
+		arg1 *provider.UpdatePVC
+		arg2 *zap.Logger
+	}{arg1, arg2})
+	stub := fake.UpdateVolumeStub
+	fakeReturns := fake.updateVolumeReturns
+	fake.recordInvocation("UpdateVolume", []interface{}{arg1, arg2})
+	fake.updateVolumeMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FileShareService) UpdateVolumeCallCount() int {
+	fake.updateVolumeMutex.RLock()
+	defer fake.updateVolumeMutex.RUnlock()
+	return len(fake.updateVolumeArgsForCall)
+}
+
+func (fake *FileShareService) UpdateVolumeCalls(stub func(*provider.UpdatePVC, *zap.Logger) error) {
+	fake.updateVolumeMutex.Lock()
+	defer fake.updateVolumeMutex.Unlock()
+	fake.UpdateVolumeStub = stub
+}
+
+func (fake *FileShareService) UpdateVolumeArgsForCall(i int) (*provider.UpdatePVC, *zap.Logger) {
+	fake.updateVolumeMutex.RLock()
+	defer fake.updateVolumeMutex.RUnlock()
+	argsForCall := fake.updateVolumeArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FileShareService) UpdateVolumeReturns(result1 error) {
+	fake.updateVolumeMutex.Lock()
+	defer fake.updateVolumeMutex.Unlock()
+	fake.UpdateVolumeStub = nil
+	fake.updateVolumeReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FileShareService) UpdateVolumeReturnsOnCall(i int, result1 error) {
+	fake.updateVolumeMutex.Lock()
+	defer fake.updateVolumeMutex.Unlock()
+	fake.UpdateVolumeStub = nil
+	if fake.updateVolumeReturnsOnCall == nil {
+		fake.updateVolumeReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.updateVolumeReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -1086,6 +1161,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.listSecurityGroupsMutex.RUnlock()
 	fake.listSubnetsMutex.RLock()
 	defer fake.listSubnetsMutex.RUnlock()
+	fake.updateVolumeMutex.RLock()
+	defer fake.updateVolumeMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

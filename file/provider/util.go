@@ -49,6 +49,8 @@ var volumeIDPartsCount = 5
 var skipErrorCodes = map[string]bool{
 	"shares_profile_iops_not_allowed":           true,
 	"shares_profile_capacity_invalid":           true,
+	"shares_profile_capacity_iops_invalid":      true,
+	"shares_encryption_key_crn_invalid":         true,
 	"shares_zone_not_found":                     true,
 	"shares_bad_request":                        true,
 	"shares_resource_group_bad_request":         true,
@@ -334,4 +336,16 @@ func SetRetryParameters(maxAttempts int, maxGap int) {
 
 func roundUpSize(volumeSizeBytes int64, allocationUnitBytes int64) int64 {
 	return (volumeSizeBytes + allocationUnitBytes - 1) / allocationUnitBytes
+}
+
+// SkipRetryForIKS skip retry as per listed error codes
+func SkipRetryForIKS(err error) bool {
+	iksError, iksok := err.(*models.IksError)
+	if iksok {
+		skipStatus, ok := skipErrorCodes[iksError.Code]
+		if ok {
+			return skipStatus
+		}
+	}
+	return false
 }

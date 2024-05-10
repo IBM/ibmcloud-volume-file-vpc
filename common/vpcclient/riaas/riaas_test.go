@@ -68,6 +68,11 @@ func TestNewSession(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, regionalAPI)
 
+	reg := IKSRegionalAPIClientProvider{}
+	regAPICli, err := reg.New(cfg)
+	assert.Nil(t, err)
+	assert.NotNil(t, regAPICli)
+
 	noAPIVerAndGen := Config{
 		BaseURL:       "http://gc",
 		AccountID:     "test account ID",
@@ -86,5 +91,10 @@ func TestNewSession(t *testing.T) {
 
 func TestVolumeFileService(t *testing.T) {
 	volumeManager := (&Session{}).FileShareService()
+	assert.NotNil(t, volumeManager)
+}
+
+func TestVolumeFileServicewithIKSSession(t *testing.T) {
+	volumeManager := (&IKSSession{}).FileShareService()
 	assert.NotNil(t, volumeManager)
 }

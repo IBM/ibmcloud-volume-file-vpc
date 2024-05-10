@@ -22,6 +22,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +32,9 @@ import (
 type FileShareManager interface {
 	// Create the file share with authorisation by passing required information in the share object
 	CreateFileShare(volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
+
+	// UpdateVolume updates the volume with authorisation by passing required information in the volume object
+	UpdateVolume(pvcTemplate *provider.UpdatePVC, ctxLogger *zap.Logger) error
 
 	// Get all file shares lists by using filter options
 	ListFileShares(limit int, start string, filters *models.ListShareFilters, ctxLogger *zap.Logger) (*models.ShareList, error)
