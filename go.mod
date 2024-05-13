@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibm-csi-common v1.1.11
+	github.com/IBM/ibm-csi-common v1.1.12
 	github.com/IBM/ibmcloud-volume-interface v1.2.4
 	github.com/IBM/secret-common-lib v1.1.8
 	github.com/IBM/secret-utils-lib v1.1.8
