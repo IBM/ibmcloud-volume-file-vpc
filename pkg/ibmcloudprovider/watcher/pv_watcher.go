@@ -159,7 +159,7 @@ func (pvw *PVWatcher) updateVolume(oldobj, obj interface{}) {
 			}
 		}()
 
-		ctxLogger.Info("Entry updateVolume()", zap.Reflect("obj", obj))
+		ctxLogger.Info("Entry updateVolume() for VPC FILE Share", zap.Reflect("obj", obj))
 		pv, _ := obj.(*v1.PersistentVolume)
 		session, err := pvw.cloudProvider.GetProviderSession(context.Background(), ctxLogger)
 		if session != nil {
