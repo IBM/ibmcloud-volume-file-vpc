@@ -253,7 +253,7 @@ func (volume *VolumeDetails) SetupDynamicPersistentVolumeClaim(client clientset.
 	cleanupFuncs = append(cleanupFuncs, tpvc.Cleanup)
 	// PV will not be ready until PVC is used in a pod when volumeBindingMode: WaitForFirstConsumer
 	if volume.VolumeBindingMode == nil || *volume.VolumeBindingMode == storagev1.VolumeBindingImmediate {
-		if pvcErrExpected == true {
+		if pvcErrExpected {
 			By("PVC Creation should go to Pending state as volume size is less than source volume")
 			tpvc.WaitForPending()
 		} else {
