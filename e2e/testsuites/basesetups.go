@@ -134,10 +134,10 @@ func InitializeVPCClient() {
 		log.Fatal("Error creating VPC Beta Service.")
 	}
 
-	By(fmt.Sprintf("testEnv", testEnv))
-	By(fmt.Sprintf("region", region))
-	By(fmt.Sprintf("serviceURL", serviceURL))
-	By(fmt.Sprintf("url", url))
+	By(fmt.Sprintf("testEnv: %s", testEnv))
+	By(fmt.Sprintf("region: %s", region))
+	By(fmt.Sprintf("serviceURL: %s", serviceURL))
+	By(fmt.Sprintf("url: %s", url))
 	Expect(VPCService).ToNot(BeNil())
 	VPCService.SetServiceURL(serviceURL)
 	// end-common
@@ -245,7 +245,7 @@ func (volume *VolumeDetails) SetupDynamicPersistentVolumeClaim(client clientset.
 			APIGroup: &SnapshotAPIGroup,
 		}
 		tpvc = NewTestPersistentVolumeClaimWithDataSource(client, volume.PVCName, namespace, volume.ClaimSize, volume.VolumeMode, &storageClass, dataSource)
-		By(fmt.Sprintf("%q", tpvc))
+		By(fmt.Sprintf("%q", tpvc.name))
 	} else {
 		tpvc = NewTestPersistentVolumeClaim(client, volume.PVCName, namespace, volume.ClaimSize, volume.AccessMode, volume.VolumeMode, &storageClass)
 	}

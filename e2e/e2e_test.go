@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package e2efile
+package e2e
 
 import (
 	"flag"

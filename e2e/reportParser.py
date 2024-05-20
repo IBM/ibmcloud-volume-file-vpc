@@ -5,7 +5,7 @@ import os
 
 repoHome=os.environ['GOPATH']+ "/src/github.com/IBM/ibmcloud-volume-file-vpc"
 finalResultFile=repoHome + "/file-vpc-csi-driver-e2e.out"
-confFile=repoHome +"/tests/e2efile/conf/testcases.json"
+confFile=repoHome +"/e2e/conf/testcases.json"
 
 resultFile=open(finalResultFile, "w+")
 with open(confFile) as f:
