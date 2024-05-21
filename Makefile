@@ -38,7 +38,7 @@ build:
 
 .PHONY: test
 test:
-	$(GOPATH)/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES} -timeout 90m
+	go test -v -timeout 3000s -coverprofile=cover.out ${GOPACKAGES}
 
 .PHONY: coverage
 coverage:
