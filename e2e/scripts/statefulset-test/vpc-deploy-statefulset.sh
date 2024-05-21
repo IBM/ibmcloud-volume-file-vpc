@@ -34,8 +34,11 @@ function doCleanup {
 	retcode=0
 
 	if [[ "$CLEANUP_ON_FAILURE" == "no" && $exit_code -ne 0 ]]; then
-		kubectl logs -n kube-system -c iks-vpc-file-driver ibm-vpc-file-csi-controller-0 > ./blk-controller.log
-		kubectl logs -n kube-system -c csi-attacher ibm-vpc-file-csi-controller-0 > ./blk-attacher.log
+		controller_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-controller'  | awk '{ print $1 }')
+		for controllerSrvr in $controller_servers; do
+			kubectl logs -n kube-system -c iks-vpc-file-driver $controllerSrvr > ./blk-controller-${controllerSrvr}.log
+			kubectl logs -n kube-system -c csi-attacher $controllerSrvr > ./blk-attacher-${controllerSrvr}.log
+		done
 		node_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-node'  | awk '{ print $1 }')
 		for nodeSrvr in $node_servers; do
 			kubectl logs -n kube-system -c iks-vpc-file-node-driver $nodeSrvr > ./blk-node-${nodeSrvr}.log
@@ -144,8 +147,11 @@ function doCleanup {
 	kubectl delete namespace $NAMESPACE
 	echo "[`date`] Deleted Namespace [$NAMESPACE]"
 
-	kubectl logs -n kube-system -c iks-vpc-file-driver ibm-vpc-file-csi-controller-0 > ./blk-controller.log
-	kubectl logs -n kube-system -c csi-attacher ibm-vpc-file-csi-controller-0 > ./blk-attacher.log
+	controller_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-controller'  | awk '{ print $1 }')
+	for controllerSrvr in $controller_servers; do
+		kubectl logs -n kube-system -c iks-vpc-file-driver $controllerSrvr > ./blk-controller-${controllerSrvr}.log
+		kubectl logs -n kube-system -c csi-attacher $controllerSrvr > ./blk-attacher-${controllerSrvr}.log
+	done
 	node_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-node'  | awk '{ print $1 }')
 	for nodeSrvr in $node_servers; do
 		kubectl logs -n kube-system -c iks-vpc-file-node-driver $nodeSrvr > ./blk-node-${nodeSrvr}.log
@@ -247,8 +253,11 @@ if [[ $EXIT_CODE -ne 0 ]]; then
 	kubectl delete namespace $NAMESPACE
 	echo "[`date`] Deleted Namespace [$NAMESPACE]"
 
-        kubectl logs -n kube-system -c iks-vpc-file-driver ibm-vpc-file-csi-controller-0 > ./blk-controller.log
-	kubectl logs -n kube-system -c csi-attacher ibm-vpc-file-csi-controller-0 > ./blk-attacher.log
+    controller_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-controller'  | awk '{ print $1 }')
+	for controllerSrvr in $controller_servers; do
+		kubectl logs -n kube-system -c iks-vpc-file-driver $controllerSrvr > ./blk-controller-${controllerSrvr}.log
+		kubectl logs -n kube-system -c csi-attacher $controllerSrvr > ./blk-attacher-${controllerSrvr}.log
+	done
 	node_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-node'  | awk '{ print $1 }')
 	for nodeSrvr in $node_servers; do
 		kubectl logs -n kube-system -c iks-vpc-file-node-driver $nodeSrvr > ./blk-node-${nodeSrvr}.log
@@ -324,8 +333,11 @@ fi
 doCleanup $EXIT_CODE; EXIT_CODE=$?
 if [[ $EXIT_CODE -ne 0 ]]; then
 	echo "VPC-FILE-CSI-TEST: Statefulset Cleanup: FAILED"
-	kubectl logs -n kube-system -c iks-vpc-file-driver ibm-vpc-file-csi-controller-0 > ./blk-controller.log
-	kubectl logs -n kube-system -c csi-attacher ibm-vpc-file-csi-controller-0 > ./blk-attacher.log
+	controller_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-controller'  | awk '{ print $1 }')
+	for controllerSrvr in $controller_servers; do
+		kubectl logs -n kube-system -c iks-vpc-file-driver $controllerSrvr > ./blk-controller-${controllerSrvr}.log
+		kubectl logs -n kube-system -c csi-attacher $controllerSrvr > ./blk-attacher-${controllerSrvr}.log
+	done
 	node_servers=$(kubectl get pods -n kube-system -l "app=ibm-vpc-file-csi-driver" | grep 'csi-node'  | awk '{ print $1 }')
 	for nodeSrvr in $node_servers; do
 		kubectl logs -n kube-system -c iks-vpc-file-node-driver $nodeSrvr > ./blk-node-${nodeSrvr}.log
