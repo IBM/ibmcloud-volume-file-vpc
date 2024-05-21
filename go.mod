@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibm-csi-common v1.1.13
+	github.com/IBM/ibm-csi-common v0.0.0-00010101000000-000000000000
 	github.com/IBM/ibmcloud-volume-interface v1.2.4
 	github.com/IBM/secret-common-lib v1.1.8
 	github.com/IBM/secret-utils-lib v1.1.9
@@ -151,4 +151,9 @@ require (
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
+)
+
+replace (
+	github.com/IBM/ibm-csi-common => github.com/IBM/ibm-csi-common v1.1.13
+	k8s.io/kubernetes => k8s.io/kubernetes v1.28.6
 )
