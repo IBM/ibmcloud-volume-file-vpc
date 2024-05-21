@@ -25,7 +25,6 @@ before_install:
 
 before_script:
 - make deps
-- go get github.com/pierrre/gotestcover
 
 script:
 - mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
