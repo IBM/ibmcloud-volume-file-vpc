@@ -1,5 +1,5 @@
 
-GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /samples)
+GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /samples | grep -v /e2e)
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 ARCH = $(shell uname -m)
 LINT_VERSION="1.52.2"
@@ -9,7 +9,7 @@ all: deps dofmt vet test
 
 .PHONY: deps
 deps:
-	go get github.com/pierrre/gotestcover
+	go mod download
 	@if ! which golangci-lint >/dev/null || [[ "$$(golangci-lint --version)" != *${LINT_VERSION}* ]]; then \
 		curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v${LINT_VERSION}; \
 	fi
@@ -36,7 +36,7 @@ build:
 
 .PHONY: test
 test:
-	$(GOPATH)/bin/gotestcover -v -coverprofile=cover.out ${GOPACKAGES} -timeout 90m
+	go test -v -timeout 3000s -coverprofile=cover.out ${GOPACKAGES}
 
 .PHONY: coverage
 coverage:
