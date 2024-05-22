@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2024 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package e2e
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
@@ -490,6 +492,445 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING PVC EXPANSION BY USING DEPLOYMENT: PASS\n"); err != nil {
 			panic(err)
 		}
+	})
+})
+
+// **EIT test cases**
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-dp2 SC with DaemonSet", func() {
+	f := framework.NewDefaultFramework("ics-e2e-daemonsets")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
+		secondary_wp := os.Getenv("cluster_worker_pool")
+		wp_list := "default"
+		if secondary_wp != "" {
+			wp_list = wp_list + "," + secondary_wp
+		}
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT":               "true",
+				"EIT_ENABLED_WORKER_POOLS": wp_list,
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be installed on the system
+		time.Sleep(1 * time.Minute)
+	})
+	It("With eit-dp2 SC: should create pv, pvc, daemonSet resources. Write and read to volume.", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		headlessService := testsuites.NewHeadlessService(cs, "ics-e2e-service-", ns.Name, "test")
+		service := headlessService.Create()
+		defer headlessService.Cleanup()
+
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		pod := testsuites.PodDetails{
+			Cmd: "echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-dp2-",
+					VolumeType:    "ibmc-vpc-file-eit-dp2",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DaemonsetWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+			},
+			Labels:      service.Labels,
+			ServiceName: service.Name,
+		}
+		test.Run(cs, ns, false)
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
+			panic(err)
+		}
+	})
+	AfterEach(func() {
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT": "false",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be uninstalled from the system
+		time.Sleep(1 * time.Minute)
+	})
+})
+
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-retain-dp2 SC with Deployment in default wp", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs        clientset.Interface
+		ns        *v1.Namespace
+		secretKey string
+	)
+
+	secretKey = os.Getenv("E2E_SECRET_ENCRYPTION_KEY")
+	if secretKey == "" {
+		secretKey = defaultSecret
+	}
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT":               "true",
+				"EIT_ENABLED_WORKER_POOLS": "default",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be installed on the system
+		time.Sleep(2 * time.Minute)
+	})
+
+	It("with eit-retain-dp2 sc: should create pv, pvc, deployment resources. Write and read to volume; delete the pod; write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		reclaimPolicy := v1.PersistentVolumeReclaimRetain
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(3)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-dp2-",
+					VolumeType:    "ibmc-vpc-file-eit-retain-dp2",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+			NodeSelector: map[string]string{
+				"ibm-cloud.kubernetes.io/worker-pool-name": "default",
+			},
+		}
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-eit-retain-dp2 STORAGE CLASS RESTRICTED TO DEFAULT WP : PASS\n"); err != nil {
+			panic(err)
+		}
+	})
+	AfterEach(func() {
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT": "false",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be uninstalled from the system
+		time.Sleep(2 * time.Minute)
+	})
+})
+
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE PVC", func() {
+	f := framework.NewDefaultFramework("ics-e2e-pods")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs        clientset.Interface
+		ns        *v1.Namespace
+		secretKey string
+	)
+
+	secretKey = os.Getenv("E2E_SECRET_ENCRYPTION_KEY")
+	if secretKey == "" {
+		secretKey = defaultSecret
+	}
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT":               "true",
+				"EIT_ENABLED_WORKER_POOLS": "default",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be installed on the system
+		time.Sleep(1 * time.Minute)
+	})
+
+	It("with eit-dp2 sc: should create pv, pvc and pod resources, and resize the volume", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+		pods := []testsuites.PodDetails{
+			{
+				Cmd:      "echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done",
+				CmdExits: false,
+				Volumes: []testsuites.VolumeDetails{
+					{
+						PVCName:       "ics-vol-dp2-",
+						VolumeType:    "ibmc-vpc-file-eit-dp2",
+						ClaimSize:     "10Gi",
+						ReclaimPolicy: &reclaimPolicy,
+						MountOptions:  []string{"rw"},
+						VolumeMount: testsuites.VolumeMountDetails{
+							NameGenerate:      "test-volume-",
+							MountPathGenerate: "/mnt/test-",
+						},
+					},
+				},
+				NodeSelector: map[string]string{
+					"ibm-cloud.kubernetes.io/worker-pool-name": "default",
+				},
+			},
+		}
+		test := testsuites.DynamicallyProvisionedResizeVolumeTest{
+			Pods: pods,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+			},
+			// ExpandVolSize is in Gi i.e, 40Gi
+			ExpandVolSizeG: 40,
+			ExpandedSize:   40,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING PVC EXPANSION USING DEPLOYMENT: PASS\n"); err != nil {
+			panic(err)
+		}
+	})
+	AfterEach(func() {
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT": "false",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be uninstalled from the system
+		time.Sleep(1 * time.Minute)
+	})
+})
+
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT is not enabled -- Expected for pod to be stuck in containerCreating state", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs        clientset.Interface
+		ns        *v1.Namespace
+		secretKey string
+	)
+
+	secretKey = os.Getenv("E2E_SECRET_ENCRYPTION_KEY")
+	if secretKey == "" {
+		secretKey = defaultSecret
+	}
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT":               "true",
+				"EIT_ENABLED_WORKER_POOLS": "default",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be installed on the system
+		time.Sleep(2 * time.Minute)
+	})
+
+	It("with eit-dp2 sc: should create pv, pvc, deployment resources. Pod should be stuck in 'ContainerCreating' state", func() {
+		// Skip this if Multi-zone is disabled
+		secondary_wp := os.Getenv("cluster_worker_pool")
+		if secondary_wp == "" {
+			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
+				panic(err)
+			}
+		} else {
+			payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+			_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+			if labelerr != nil {
+				panic(labelerr)
+			}
+			reclaimPolicy := v1.PersistentVolumeReclaimRetain
+			fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				panic(err)
+			}
+			defer fpointer.Close()
+
+			var replicaCount = int32(3)
+			pod := testsuites.PodDetails{
+				Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+				CmdExits: false,
+				Volumes: []testsuites.VolumeDetails{
+					{
+						PVCName:       "ics-vol-dp2-",
+						VolumeType:    "ibmc-vpc-file-eit-retain-dp2",
+						FSType:        "ibmshare",
+						ClaimSize:     "10Gi",
+						ReclaimPolicy: &reclaimPolicy,
+						MountOptions:  []string{"rw"},
+						VolumeMount: testsuites.VolumeMountDetails{
+							NameGenerate:      "test-volume-",
+							MountPathGenerate: "/mnt/test-",
+						},
+					},
+				},
+				NodeSelector: map[string]string{
+					"ibm-cloud.kubernetes.io/worker-pool-name": "default",
+				},
+			}
+			test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+				Pod: pod,
+				PodCheck: &testsuites.PodExecCheck{
+					Cmd:              []string{"cat", "/mnt/test-1/data"},
+					ExpectedString01: "hello world\n",
+					ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+				},
+				ReplicaCount: replicaCount,
+			}
+			test.Run(cs, ns)
+			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n"); err != nil {
+				panic(err)
+			}
+		}
+	})
+	AfterEach(func() {
+		cmData := map[string]interface{}{
+			"data": map[string]string{
+				"ENABLE_EIT": "false",
+			},
+		}
+		cmDataBytes, err := json.Marshal(cmData)
+		if err != nil {
+			panic(err)
+		}
+
+		_, err = cs.CoreV1().ConfigMaps("kube-system").Patch(context.TODO(), "addon-vpc-file-csi-driver-configmap", types.MergePatchType, cmDataBytes, metav1.PatchOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		// Add 1 min wait for packages to be uninstalled from the system
+		time.Sleep(2 * time.Minute)
 	})
 })
 

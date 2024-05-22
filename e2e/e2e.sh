@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #/******************************************************************************
-# Copyright 2021 IBM Corp.
+# Copyright 2024 IBM Corp.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -41,8 +41,13 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
-    		-r|--region)
+		-r|--region)
 		REGION="$2"
+		shift
+		shift
+		;;
+		--addon-version)
+		e2e_addon_version="$2"
 		shift
 		shift
 		;;
@@ -135,22 +140,39 @@ go clean -modcache
 export GO111MODULE=on
 go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
 set +e
+
+# Non EIT based tests
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
 
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
-rc3=$?
-echo "Exit status for resize volume test: $rc3"
+rc2=$?
+echo "Exit status for resize volume test: $rc2"
 
-if [[ $rc1 -eq 0 && $rc2 -eq 0 && $rc3 -eq 0 ]]; then
+if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
 else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
-grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; rc=$?
-if [[ $rc -eq 0 ]]; then
+# EIT based tests (To be run only for addon version >=2.0)
+if [[ $(echo "$e2e_addon_version < 2.0" | bc -l) -eq 0 ]]; then
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
+	rc3=$?
+	echo "Exit status for EIT volume test: $rc3"
+fi
+
+if [[ $rc3 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
+
+grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex1=$?
+grep  'VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
+
+if [[ $ex1 -eq 0 || $ex2 -eq 0 ]]; then
 	exit 1
 else
 	exit 0

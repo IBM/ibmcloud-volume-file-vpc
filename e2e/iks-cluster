@@ -1,7 +1,7 @@
 #!/bin/bash
 # Licensed Materials - Property of IBM
 #
-# (C) Copyright IBM Corp. 2021 All Rights Reserved
+# (C) Copyright IBM Corp. 2024 All Rights Reserved
 #
 # US Government Users Restricted Rights - Use, duplicate or
 # disclosure restricted by GSA ADP Schedule Contract with
@@ -397,7 +397,7 @@ function cluster_create_vpc {
 
     if [[ $E2ETEST_MZ == "true" ]]; then
 	random_string=${cluster_name%%-*}
-        cluster_worker_pool="e2etest-${random_string}"
+        export cluster_worker_pool="e2etest-${random_string}"
         ibmcloud ks worker-pool create $IC_PROVIDER --name ${cluster_worker_pool} --cluster $cluster_name \
           --flavor $WORKER_NODE_FLAVOR --vpc-id $VPC_ID --size-per-zone $WORKER_NODE_COUNT_PERZONE; rc=$?
         if [[ $rc -ne 0 ]]; then set +x;  return 1; fi
@@ -533,6 +533,31 @@ function check_worker_state {
     return 0
 }
 
+function check_storage_operator_addon {
+    if [[ $# -ne 2 ]]; then
+        echo "${FUNCNAME[0]}: Invalid parameters. Provide cluster name and addon version"
+        return 1
+    fi
+
+    cluster_name="$1"
+    addon_version="$2"
+
+    # Operator should only be enabled for vpc file addon versions >=2.0
+    if [[ $(echo "$addon_version < 2.0" | bc -l) -eq 1 ]]; then
+        echo "Addon version $addon_version does not require storage operator"
+        return 0
+    fi
+
+    addon_present=$(ibmcloud ks cluster addon ls -c $cluster_name | grep ibm-storage-operator)
+    if [[ addon_present != "" ]]; then
+        echo "Storage operator enabled in the cluster"
+        return 0
+    fi
+
+    # If not present enable ibm-storage-operator
+    ibmcloud ks cluster addon enable ibm-storage-operator -c $cluster_name
+    sleep 30
+}
 
 function delete_cluster {
     if [[ $# -ne 1 ]]; then
@@ -1060,6 +1085,10 @@ exportKubeConfig $cluster_name; rc=$?
 # From Jenkins there is option to mention addon version and by default FILE CSI driver is not enabled
 # Enable user specified version
 
+# Check if storage operator needs to be enabled
+check_storage_operator_addon $cluster_name $e2e_addon_version
+
+# Enable file csi driver
 ibmcloud ks cluster addon enable vpc-file-csi-driver --cluster $cluster_name --version $e2e_addon_version
 sleep 30
 check_addon_pod_status ibm-vpc-file-csi-controller

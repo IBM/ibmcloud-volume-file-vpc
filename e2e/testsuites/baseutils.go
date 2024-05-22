@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2024 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -840,7 +840,7 @@ type TestDeployment struct {
 	podName    string
 }
 
-func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32) *TestDeployment {
+func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32, nodeSelector map[string]string) *TestDeployment {
 	generateName := "ics-e2e-tester-"
 	selectorValue := fmt.Sprintf("%s%d", generateName, rand.Int())
 	return &TestDeployment{
@@ -860,6 +860,7 @@ func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, 
 						Labels: map[string]string{"app": selectorValue},
 					},
 					Spec: v1.PodSpec{
+						NodeSelector: nodeSelector,
 						Containers: []v1.Container{
 							{
 								Name:    "ics-e2e-tester",

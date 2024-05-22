@@ -27,3 +27,7 @@
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e
    ```
+7. Test EIT enabled volume test cases
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e
+   ```
