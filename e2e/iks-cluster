@@ -554,7 +554,7 @@ function check_storage_operator_addon {
         return 0
     fi
 
-    # If not present enable ibm-storage-operator
+    # If not present enable ibm-storage-operator. This command will fail if kube version is <IKS1.30 or <ROKS4.15
     ibmcloud ks cluster addon enable ibm-storage-operator -c $cluster_name
     sleep 30
 }
