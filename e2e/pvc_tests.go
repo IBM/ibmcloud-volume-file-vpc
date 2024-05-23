@@ -529,7 +529,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-dp2
 		}
 
 		// Add 1 min wait for packages to be installed on the system
-		time.Sleep(1 * time.Minute)
+		time.Sleep(2 * time.Minute)
 	})
 	It("With eit-dp2 SC: should create pv, pvc, daemonSet resources. Write and read to volume.", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
@@ -597,7 +597,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-dp2
 		}
 
 		// Add 1 min wait for packages to be uninstalled from the system
-		time.Sleep(1 * time.Minute)
+		time.Sleep(2 * time.Minute)
 	})
 })
 
@@ -744,7 +744,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 		}
 
 		// Add 1 min wait for packages to be installed on the system
-		time.Sleep(1 * time.Minute)
+		time.Sleep(2 * time.Minute)
 	})
 
 	It("with eit-dp2 sc: should create pv, pvc and pod resources, and resize the volume", func() {
@@ -814,7 +814,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 		}
 
 		// Add 1 min wait for packages to be uninstalled from the system
-		time.Sleep(1 * time.Minute)
+		time.Sleep(2 * time.Minute)
 	})
 })
 
