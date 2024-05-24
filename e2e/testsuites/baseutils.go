@@ -673,7 +673,7 @@ func generatePVC(name, namespace,
 
 func (t *TestPersistentVolumeClaim) Cleanup() {
 
-	volumeHandle := strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, ":")
+	volumeHandle := strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, "#")
 	getShareMountTargetOptions := &vpcbetav1.GetShareMountTargetOptions{
 		ShareID: &volumeHandle[0],
 		ID:      &volumeHandle[1],

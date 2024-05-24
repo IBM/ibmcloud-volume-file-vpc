@@ -12,7 +12,7 @@
    export E2E_TEST_RESULT=<absolute-path to a file where the results should be redirected>
    export TEST_ENV=<stage/prod>
    export IC_REGION=<us-south>
-   export IC_API_KEY_PROD=<stage/prod API key>
+   export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
 
    # Optional
    export E2E_POD_COUNT="1"

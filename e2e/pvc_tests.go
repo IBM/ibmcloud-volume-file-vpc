@@ -496,7 +496,7 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 })
 
 // **EIT test cases**
-var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-dp2 SC with DaemonSet", func() {
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet", func() {
 	f := framework.NewDefaultFramework("ics-e2e-daemonsets")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -553,7 +553,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-dp2
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-eit-dp2",
+					VolumeType:    "ibmc-vpc-file-eit",
 					FSType:        "ibmshare",
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -601,7 +601,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-dp2
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-retain-dp2 SC with Deployment in default wp", func() {
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-retain SC with Deployment in default wp", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -659,7 +659,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-eit-retain-dp2",
+					VolumeType:    "ibmc-vpc-file-eit-retain",
 					FSType:        "ibmshare",
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -684,7 +684,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-eit-retain-dp2 STORAGE CLASS RESTRICTED TO DEFAULT WP : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-eit-retain STORAGE CLASS RESTRICTED TO DEFAULT WP : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -766,7 +766,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 				Volumes: []testsuites.VolumeDetails{
 					{
 						PVCName:       "ics-vol-dp2-",
-						VolumeType:    "ibmc-vpc-file-eit-dp2",
+						VolumeType:    "ibmc-vpc-file-eit",
 						ClaimSize:     "10Gi",
 						ReclaimPolicy: &reclaimPolicy,
 						MountOptions:  []string{"rw"},
@@ -883,7 +883,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 				Volumes: []testsuites.VolumeDetails{
 					{
 						PVCName:       "ics-vol-dp2-",
-						VolumeType:    "ibmc-vpc-file-eit-retain-dp2",
+						VolumeType:    "ibmc-vpc-file-eit-retain",
 						FSType:        "ibmshare",
 						ClaimSize:     "10Gi",
 						ReclaimPolicy: &reclaimPolicy,
