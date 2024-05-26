@@ -818,7 +818,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT is not enabled -- Expected for pod to be stuck in containerCreating state", func() {
+var _ = Describe("[ics-e2e] [eit] [negative] Dynamic Provisioning on worker-pool where EIT is not enabled -- Expected for pod to be stuck in containerCreating state", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -860,6 +860,11 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		// Skip this if Multi-zone is disabled
 		secondary_wp := os.Getenv("cluster_worker_pool")
 		if secondary_wp == "" {
+			fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+			if err != nil {
+				panic(err)
+			}
+			defer fpointer.Close()
 			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
 				panic(err)
 			}
