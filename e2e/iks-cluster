@@ -542,15 +542,17 @@ function check_storage_operator_addon {
     cluster_name="$1"
     addon_version="$2"
 
+    sudo apt-get install bc -y
+
     # Operator should only be enabled for vpc file addon versions >=2.0
     if [[ $(echo "$addon_version < 2.0" | bc -l) -eq 1 ]]; then
         echo "Addon version $addon_version does not require storage operator"
         return 0
     fi
 
-    addon_present=$(ibmcloud ks cluster addon ls -c $cluster_name | grep ibm-storage-operator)
-    if [[ addon_present != "" ]]; then
-        echo "Storage operator enabled in the cluster"
+    addon_present=$(ibmcloud ks cluster addon ls -c $cluster_name -q | grep ibm-storage-operator)
+    if [[ $addon_present != "" ]]; then
+        echo "Storage operator already enabled on the cluster"
         return 0
     fi
 
