@@ -818,7 +818,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] [negative] Dynamic Provisioning on worker-pool where EIT is not enabled -- Expected for pod to be stuck in containerCreating state", func() {
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT is not enabled -- Expected for pod to be stuck in containerCreating state", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
