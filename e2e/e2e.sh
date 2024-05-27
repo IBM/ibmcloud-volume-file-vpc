@@ -166,11 +166,11 @@ fi
 if [[ $rc3 -eq 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
 else
-	echo -e "VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
 grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex1=$?
-grep  'VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
+grep  'VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
 
 if [[ $ex1 -eq 0 || $ex2 -eq 0 ]]; then
 	exit 1

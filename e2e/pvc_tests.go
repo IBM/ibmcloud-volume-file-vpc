@@ -576,7 +576,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 			ServiceName: service.Name,
 		}
 		test.Run(cs, ns, false)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -684,7 +684,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-eit-retain STORAGE CLASS RESTRICTED TO DEFAULT WP : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-eit-retain STORAGE CLASS RESTRICTED TO DEFAULT WP : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -793,7 +793,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 			ExpandedSize:   40,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] VERIFYING PVC EXPANSION USING DEPLOYMENT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: VERIFYING PVC EXPANSION USING DEPLOYMENT: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -865,7 +865,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 				panic(err)
 			}
 			defer fpointer.Close()
-			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
+			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
 				panic(err)
 			}
 		} else {
@@ -913,7 +913,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 				ReplicaCount: replicaCount,
 			}
 			test.Run(cs, ns)
-			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: [EIT BASED] PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n"); err != nil {
+			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n"); err != nil {
 				panic(err)
 			}
 		}
