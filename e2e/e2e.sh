@@ -164,7 +164,7 @@ if [[ $(echo "$e2e_addon_version < 2.0" | bc -l) -eq 0 ]]; then
 fi
 
 if [[ $rc3 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
 else
 	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
