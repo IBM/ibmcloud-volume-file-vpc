@@ -550,15 +550,20 @@ function check_storage_operator_addon {
         return 0
     fi
 
-    addon_present=$(ibmcloud ks cluster addon ls -c $cluster_name -q | grep ibm-storage-operator)
-    if [[ $addon_present != "" ]]; then
-        echo "Storage operator already enabled on the cluster"
-        return 0
-    fi
+    token=`ibmcloud iam oauth-tokens | awk '{print $4}'`
 
-    # If not present enable ibm-storage-operator. This command will fail if kube version is <IKS1.30 or <ROKS4.15
-    ibmcloud ks cluster addon enable ibm-storage-operator -c $cluster_name
+    curl -X PATCH -H "Authorization: Bearer $token" "https://containers.test.cloud.ibm.com/global/v1/clusters/$cluster_name/addons" -d '{"enable":true,"update":false,"addons":[{"name":"ibm-storage-operator","version":"1.0","installOptionsTemplate":{}}]}'
     sleep 30
+
+    # addon_present=$(ibmcloud ks cluster addon ls -c $cluster_name -q | grep ibm-storage-operator)
+    # if [[ $addon_present != "" ]]; then
+    #     echo "Storage operator already enabled on the cluster"
+    #     return 0
+    # fi
+
+    # # If not present enable ibm-storage-operator. This command will fail if kube version is <IKS1.30 or <ROKS4.15
+    # ibmcloud ks cluster addon enable ibm-storage-operator -c $cluster_name
+    # sleep 30
 }
 
 function delete_cluster {
