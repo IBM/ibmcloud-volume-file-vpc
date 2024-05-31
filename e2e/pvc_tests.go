@@ -40,7 +40,7 @@ import (
 
 const (
 	defaultSecret              = ""
-	waitForPackageInstallation = 2 * time.Minute
+	waitForPackageInstallation = 3 * time.Minute
 )
 
 var (
@@ -499,7 +499,7 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 })
 
 // **EIT test cases**
-var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet", func() {
+var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet", func() {
 	f := framework.NewDefaultFramework("ics-e2e-daemonsets")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -512,6 +512,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
 		fmt.Printf("Installing EIT packages on all worker nodes")
 		secondary_wp := os.Getenv("cluster_worker_pool")
+		fmt.Printf("cluster_worker_pool: %s", secondary_wp)
 		wp_list := "default"
 		if secondary_wp != "" {
 			wp_list = wp_list + "," + secondary_wp
@@ -538,6 +539,30 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 
 		// Add wait for packages to be installed on the system
 		time.Sleep(waitForPackageInstallation)
+		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
+		if err != nil {
+			panic(err)
+		}
+
+		eitEnabledWorkerNodes, exists := cm_status.Data["EIT_ENABLED_WORKER_NODES"]
+		if !exists {
+			fmt.Println("EIT_ENABLED_WORKER_NODES not found in ConfigMap")
+			return
+		}
+
+		// Print the content of EIT_ENABLED_WORKER_NODES
+		fmt.Println("EIT_ENABLED_WORKER_NODES:")
+		fmt.Println(eitEnabledWorkerNodes)
+
+		var nodesMap map[string]interface{}
+		err = json.Unmarshal([]byte(eitEnabledWorkerNodes), &nodesMap)
+		if err != nil {
+			panic(err)
+		}
+
+		// Print the parsed content
+		fmt.Printf("Parsed EIT_ENABLED_WORKER_NODES: %+v\n", nodesMap)
+		fmt.Print(cm_status.Data)
 	})
 	It("With eit-dp2 SC: should create pv, pvc, daemonSet resources. Write and read to volume.", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
@@ -722,7 +747,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE PVC USING POD", func() {
+var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning OF EIT VOLUME AND RESIZE PVC USING POD", func() {
 	f := framework.NewDefaultFramework("ics-e2e-pods")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
