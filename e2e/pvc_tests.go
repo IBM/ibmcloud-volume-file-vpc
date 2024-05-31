@@ -38,7 +38,10 @@ import (
 	admissionapi "k8s.io/pod-security-admission/api"
 )
 
-const defaultSecret = ""
+const (
+	defaultSecret              = ""
+	waitForPackageInstallation = 2 * time.Minute
+)
 
 var (
 	testResultFile = os.Getenv("E2E_TEST_RESULT")
@@ -533,8 +536,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
 		fmt.Print(cm.Data)
 
-		// Add 2 min wait for packages to be installed on the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be installed on the system
+		time.Sleep(waitForPackageInstallation)
 	})
 	It("With eit-dp2 SC: should create pv, pvc, daemonSet resources. Write and read to volume.", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
@@ -601,8 +604,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 			panic(err)
 		}
 
-		// Add 1 min wait for packages to be uninstalled from the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be uninstalled from the system
+		time.Sleep(waitForPackageInstallation)
 	})
 })
 
@@ -645,8 +648,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
 		fmt.Print(cm.Data)
 
-		// Add 2 min wait for packages to be installed on the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be installed on the system
+		time.Sleep(waitForPackageInstallation)
 	})
 
 	It("with eit-retain sc: should create pv, pvc, deployment resources. Write and read to volume; delete the pod; write and read to volume again", func() {
@@ -714,8 +717,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 			panic(err)
 		}
 
-		// Add 1 min wait for packages to be uninstalled from the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be uninstalled from the system
+		time.Sleep(waitForPackageInstallation)
 	})
 })
 
@@ -763,8 +766,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
 		fmt.Print(cm.Data)
 
-		// Sleep for 2 min to finish installation
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be uninstalled from the system
+		time.Sleep(waitForPackageInstallation)
 	})
 
 	It("with eit-dp2 sc: should create pv, pvc and pod resources, and resize the volume", func() {
@@ -830,8 +833,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 			panic(err)
 		}
 
-		// Add 2 min wait for packages to be uninstalled from the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be uninstalled from the system
+		time.Sleep(waitForPackageInstallation)
 	})
 })
 
@@ -849,19 +852,18 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		secretKey = defaultSecret
 	}
 
-	fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer fpointer.Close()
-
 	BeforeEach(func() {
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
 		// Skip this if Multi-zone is disabled
 		secondary_wp := os.Getenv("cluster_worker_pool")
 		if secondary_wp == "" {
 			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
 				panic(err)
 			}
+			fpointer.Close()
 			Skip("Skipping test because secondary worker pool is not set")
 		}
 
@@ -888,8 +890,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
 		fmt.Print(cm.Data)
 
-		// Add 2 min wait for packages to be installed on the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be installed on the system
+		time.Sleep(waitForPackageInstallation)
 	})
 
 	It("with eit-retain sc: should create pv, pvc, deployment resources. Pod should be stuck in 'ContainerCreating' state", func() {
@@ -943,6 +945,12 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		}
 	})
 	AfterEach(func() {
+		// Skip this if Multi-zone is disabled
+		secondary_wp := os.Getenv("cluster_worker_pool")
+		if secondary_wp == "" {
+			Skip("Skipping test because secondary worker pool is not set")
+		}
+
 		cmData := map[string]interface{}{
 			"data": map[string]string{
 				"ENABLE_EIT": "false",
@@ -958,8 +966,8 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 			panic(err)
 		}
 
-		// Add 1 min wait for packages to be uninstalled from the system
-		time.Sleep(2 * time.Minute)
+		// Add wait for packages to be uninstalled from the system
+		time.Sleep(waitForPackageInstallation)
 	})
 })
 
