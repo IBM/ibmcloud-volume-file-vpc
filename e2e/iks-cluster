@@ -749,7 +749,7 @@ key="$1"
 	;;
 
 	--mz)
-	e2e_mz="$2"
+	e2e_mz="true"
 	shift
 	;;
 
