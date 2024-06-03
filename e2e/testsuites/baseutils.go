@@ -982,6 +982,16 @@ func (t *TestDeployment) WaitForPodReady() {
 	framework.ExpectNoError(err)
 }
 
+func (t *TestDeployment) WaitForPodNotReady() {
+	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
+	framework.ExpectNoError(err)
+	// always get first pod as there should only be one
+	pod := pods.Items[0]
+	t.podName = pod.Name
+	err = k8sDevPod.WaitForPodRunningInNamespace(context.TODO(), t.client, &pod)
+	framework.ExpectError(err)
+}
+
 func (t *TestDeployment) Exec(command []string, expectedString string) {
 	By("Deployment Exec: executing cmd in POD")
 	framework.Logf("executing cmd in POD [%s/%s]", t.namespace.Name, t.podName)

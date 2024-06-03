@@ -1001,7 +1001,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 			},
 			ReplicaCount: replicaCount,
 		}
-		test.Run(cs, ns)
+		test.RunShouldFail(cs, ns)
 		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n"); err != nil {
 			panic(err)
 		}

@@ -25,6 +25,8 @@ export E2E_TEST_SETUP=$E2E_TEST_SETUP
 cat /tmp/e2e_vars.sh
 source /tmp/e2e_vars.sh
 echo "Sourced /tmp/e2e_vars.sh file"
+echo $cluster_worker_pool
+export $cluster_worker_pool
 
 export cluster_worker_pool="e2etest-vpc"
 

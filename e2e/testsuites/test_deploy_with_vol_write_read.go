@@ -60,6 +60,25 @@ func (t *DynamicallyProvisioneDeployWithVolWRTest) Run(client clientset.Interfac
 	}
 }
 
+func (t *DynamicallyProvisioneDeployWithVolWRTest) RunShouldFail(client clientset.Interface, namespace *v1.Namespace) {
+	tDeployment, cleanup := t.Pod.SetupDeployment(client, namespace, t.ReplicaCount)
+	// defer must be called here for resources not get removed before using them
+	for i := range cleanup {
+		defer cleanup[i]()
+	}
+
+	By("deploying the deployment")
+	tDeployment.Create()
+
+	By("checking that the pod stuck in ContainerCreating state")
+	tDeployment.WaitForPodNotReady()
+
+	if t.PodCheck != nil {
+		By("checking pod exec before pod delete")
+		tDeployment.Exec(t.PodCheck.Cmd, t.PodCheck.ExpectedString01)
+	}
+}
+
 func (t *DynamicallyProvisioneDeployWithVolWRTest) RunMultiVol(client clientset.Interface, namespace *v1.Namespace) {
 	tDeployment, cleanup := t.Pod.SetupDeploymentWithMultiVol(client, namespace)
 	// defer must be called here for resources not get removed before using them
