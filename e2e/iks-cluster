@@ -397,7 +397,8 @@ function cluster_create_vpc {
 
     if [[ $E2ETEST_MZ == "true" ]]; then
 	random_string=${cluster_name%%-*}
-        export cluster_worker_pool="e2etest-${random_string}"
+        cluster_worker_pool="e2etest-${random_string}"
+        echo "cluster_worker_pool=\"$cluster_worker_pool\"" > /tmp/e2e_vars.sh
         ibmcloud ks worker-pool create $IC_PROVIDER --name ${cluster_worker_pool} --cluster $cluster_name \
           --flavor $WORKER_NODE_FLAVOR --vpc-id $VPC_ID --size-per-zone $WORKER_NODE_COUNT_PERZONE; rc=$?
         if [[ $rc -ne 0 ]]; then set +x;  return 1; fi

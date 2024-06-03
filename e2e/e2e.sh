@@ -142,23 +142,23 @@ go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
 set +e
 
 # Non EIT based tests
-# ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e -- -e2e-verify-service-account=false
-# rc1=$?
-# echo "Exit status for basic volume test: $rc1"
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e -- -e2e-verify-service-account=false
+rc1=$?
+echo "Exit status for basic volume test: $rc1"
 
-# ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
-# rc2=$?
-# echo "Exit status for resize volume test: $rc2"
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
+rc2=$?
+echo "Exit status for resize volume test: $rc2"
 
-# if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
-# 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
-# else
-# 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
-# fi
+if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
 
 # EIT based tests (To be run only for addon version >=2.0)
 if [[ $(echo "$e2e_addon_version < 2.0" | bc -l) -eq 0 ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\] \[test\]" ./e2e -- -e2e-verify-service-account=false
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
 	rc3=$?
 	echo "Exit status for EIT volume test: $rc3"
 fi

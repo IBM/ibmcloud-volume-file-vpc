@@ -499,7 +499,7 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 })
 
 // **EIT test cases**
-var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet", func() {
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet", func() {
 	f := framework.NewDefaultFramework("ics-e2e-daemonsets")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -534,37 +534,28 @@ var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning for ibmc-vpc-file-
 			panic(err)
 		}
 
-		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
-		fmt.Print(cm.Data)
+		fmt.Println("Updated ConfigMap addon-vpc-file-csi-driver-configmap...")
+		fmt.Println("Data section of 'addon-vpc-file-csi-driver-configmap': ")
+		fmt.Println(cm.Data)
 
 		// Add wait for packages to be installed on the system
+		fmt.Printf("Sleep for %s min to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
 		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
 		if err != nil {
 			panic(err)
 		}
-
 		eitEnabledWorkerNodes, exists := cm_status.Data["EIT_ENABLED_WORKER_NODES"]
 		if !exists {
 			fmt.Println("EIT_ENABLED_WORKER_NODES not found in ConfigMap")
-			return
+			err = fmt.Errorf("unknown problem with 'file-csi-driver-status' configmap")
+			panic(err)
 		}
-
 		// Print the content of EIT_ENABLED_WORKER_NODES
 		fmt.Println("EIT_ENABLED_WORKER_NODES:")
 		fmt.Println(eitEnabledWorkerNodes)
-
-		var nodesMap map[string]interface{}
-		err = json.Unmarshal([]byte(eitEnabledWorkerNodes), &nodesMap)
-		if err != nil {
-			panic(err)
-		}
-
-		// Print the parsed content
-		fmt.Printf("Parsed EIT_ENABLED_WORKER_NODES: %+v\n", nodesMap)
-		fmt.Print(cm_status.Data)
 	})
-	It("With eit-dp2 SC: should create pv, pvc, daemonSet resources. Write and read to volume.", func() {
+	It("With eit SC: should create pv, pvc, daemonSet resources. Write and read to volume.", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -652,7 +643,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 		cs = f.ClientSet
 		ns = f.Namespace
 		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
-		fmt.Printf("Installing EIT packages on default worker pool worker nodes")
+		fmt.Println("Installing EIT packages on default worker pool worker nodes...")
 		cmData := map[string]interface{}{
 			"data": map[string]string{
 				"ENABLE_EIT":               "true",
@@ -670,11 +661,26 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 			panic(err)
 		}
 
-		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
-		fmt.Print(cm.Data)
+		fmt.Println("Updated ConfigMap addon-vpc-file-csi-driver-configmap...")
+		fmt.Println("Data section of 'addon-vpc-file-csi-driver-configmap': ")
+		fmt.Println(cm.Data)
 
 		// Add wait for packages to be installed on the system
+		fmt.Printf("Sleep for %s min to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
+		if err != nil {
+			panic(err)
+		}
+		eitEnabledWorkerNodes, exists := cm_status.Data["EIT_ENABLED_WORKER_NODES"]
+		if !exists {
+			fmt.Println("EIT_ENABLED_WORKER_NODES not found in ConfigMap")
+			err = fmt.Errorf("unknown problem with 'file-csi-driver-status' configmap")
+			panic(err)
+		}
+		// Print the content of EIT_ENABLED_WORKER_NODES
+		fmt.Println("EIT_ENABLED_WORKER_NODES:")
+		fmt.Println(eitEnabledWorkerNodes)
 	})
 
 	It("with eit-retain sc: should create pv, pvc, deployment resources. Write and read to volume; delete the pod; write and read to volume again", func() {
@@ -747,7 +753,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit-ret
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning OF EIT VOLUME AND RESIZE PVC USING POD", func() {
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE PVC USING POD", func() {
 	f := framework.NewDefaultFramework("ics-e2e-pods")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -765,7 +771,7 @@ var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning OF EIT VOLUME AND 
 		cs = f.ClientSet
 		ns = f.Namespace
 		// Patch 'addon-vpc-file-csi-driver-configmap' to enable eit from operator
-		fmt.Printf("Installing EIT packages on worker nodes")
+		fmt.Println("Installing EIT packages on worker nodes...")
 		secondary_wp := os.Getenv("cluster_worker_pool")
 		wp_list := "default"
 		if secondary_wp != "" {
@@ -788,11 +794,26 @@ var _ = Describe("[ics-e2e] [eit] [test] Dynamic Provisioning OF EIT VOLUME AND 
 			panic(err)
 		}
 
-		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
-		fmt.Print(cm.Data)
+		fmt.Println("Updated ConfigMap addon-vpc-file-csi-driver-configmap...")
+		fmt.Println("Data section of 'addon-vpc-file-csi-driver-configmap': ")
+		fmt.Println(cm.Data)
 
-		// Add wait for packages to be uninstalled from the system
+		// Add wait for packages to be installed on the system
+		fmt.Printf("Sleep for %s min to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
+		if err != nil {
+			panic(err)
+		}
+		eitEnabledWorkerNodes, exists := cm_status.Data["EIT_ENABLED_WORKER_NODES"]
+		if !exists {
+			fmt.Println("EIT_ENABLED_WORKER_NODES not found in ConfigMap")
+			err = fmt.Errorf("unknown problem with 'file-csi-driver-status' configmap")
+			panic(err)
+		}
+		// Print the content of EIT_ENABLED_WORKER_NODES
+		fmt.Println("EIT_ENABLED_WORKER_NODES:")
+		fmt.Println(eitEnabledWorkerNodes)
 	})
 
 	It("with eit-dp2 sc: should create pv, pvc and pod resources, and resize the volume", func() {
@@ -912,11 +933,27 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		if err != nil {
 			panic(err)
 		}
-		fmt.Print("Updated ConfigMap addon-vpc-file-csi-driver-configmap")
-		fmt.Print(cm.Data)
+
+		fmt.Println("Updated ConfigMap addon-vpc-file-csi-driver-configmap...")
+		fmt.Println("Data section of 'addon-vpc-file-csi-driver-configmap': ")
+		fmt.Println(cm.Data)
 
 		// Add wait for packages to be installed on the system
+		fmt.Printf("Sleep for %s min to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
+		if err != nil {
+			panic(err)
+		}
+		eitEnabledWorkerNodes, exists := cm_status.Data["EIT_ENABLED_WORKER_NODES"]
+		if !exists {
+			fmt.Println("EIT_ENABLED_WORKER_NODES not found in ConfigMap")
+			err = fmt.Errorf("unknown problem with 'file-csi-driver-status' configmap")
+			panic(err)
+		}
+		// Print the content of EIT_ENABLED_WORKER_NODES
+		fmt.Println("EIT_ENABLED_WORKER_NODES:")
+		fmt.Println(eitEnabledWorkerNodes)
 	})
 
 	It("with eit-retain sc: should create pv, pvc, deployment resources. Pod should be stuck in 'ContainerCreating' state", func() {
