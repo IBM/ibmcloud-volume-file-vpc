@@ -21,7 +21,12 @@ E2E_TEST_SETUP="$VPC_FILE_CSI_HOME/e2e-setup.out"
 E2E_TEST_RESULT="$VPC_FILE_CSI_HOME/e2e-test.out"
 export E2E_TEST_RESULT=$E2E_TEST_RESULT
 export E2E_TEST_SETUP=$E2E_TEST_SETUP
+
+cat /tmp/e2e_vars.sh
 source /tmp/e2e_vars.sh
+echo "Sourced /tmp/e2e_vars.sh file"
+
+export cluster_worker_pool="e2etest-vpc"
 
 rm -f $E2E_TEST_RESULT
 rm -f $E2E_TEST_SETUP
