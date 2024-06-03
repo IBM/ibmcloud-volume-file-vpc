@@ -40,7 +40,7 @@ import (
 
 const (
 	defaultSecret              = ""
-	waitForPackageInstallation = 3 * time.Minute
+	waitForPackageInstallation = 2 * time.Minute
 )
 
 var (
