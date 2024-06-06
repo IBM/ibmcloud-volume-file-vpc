@@ -61,7 +61,7 @@ type ErrorItem struct {
 
 // Error ...
 func (ei ErrorItem) Error() string {
-	return ei.Message + " Please check " + ei.MoreInfo
+	return ei.Message + ". " + ei.MoreInfo
 }
 
 // Error ...
