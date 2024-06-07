@@ -57,7 +57,7 @@ func TestListSecurityGroups(t *testing.T) {
 			name:      "Verify that a 404 is returned to the caller",
 			status:    http.StatusNotFound,
 			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr Please check ",
+			expectErr: "Trace Code:, testerr. ",
 		}, {
 			name:   "Verify that limit is added to the query",
 			limit:  12,

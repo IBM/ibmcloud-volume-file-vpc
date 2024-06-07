@@ -54,7 +54,7 @@ func TestDeleteFileShareTarget(t *testing.T) {
 			name:      "Verify that a 404 is returned to the caller",
 			status:    http.StatusNotFound,
 			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr Please check ",
+			expectErr: "Trace Code:, testerr. ",
 		}, {
 			name:   "Verify that the share target deletion is done correctly",
 			status: http.StatusOK,
