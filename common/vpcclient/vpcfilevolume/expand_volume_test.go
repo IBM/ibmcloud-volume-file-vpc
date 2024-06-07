@@ -71,7 +71,7 @@ func TestExpandVolume(t *testing.T) {
 			},
 			status:    http.StatusNotFound,
 			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr Please check ",
+			expectErr: "Trace Code:, testerr. ",
 		},
 		{
 			name: "False positive: What if the volume ID is not matched",

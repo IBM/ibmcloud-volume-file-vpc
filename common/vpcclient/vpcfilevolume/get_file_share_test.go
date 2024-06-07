@@ -72,7 +72,7 @@ func TestGetFileShare(t *testing.T) {
 			name:      "Verify that a 404 is returned to the caller",
 			status:    http.StatusNotFound,
 			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr Please check ",
+			expectErr: "Trace Code:, testerr. ",
 		}, {
 			name:    "Verify that the share is parsed correctly",
 			status:  http.StatusOK,
@@ -148,7 +148,7 @@ func TestGetFileShareByName(t *testing.T) {
 			name:      "Verify that a 404 is returned to the caller",
 			status:    http.StatusNotFound,
 			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr Please check ",
+			expectErr: "Trace Code:, testerr. ",
 		}, {
 			name:    "Verify that the share name is parsed correctly",
 			status:  http.StatusOK,
@@ -161,7 +161,7 @@ func TestGetFileShareByName(t *testing.T) {
 		}, {
 			name:      "Verify that the share is empty if the shares are empty",
 			status:    http.StatusOK,
-			expectErr: "Trace Code:, testerr Please check ",
+			expectErr: "Trace Code:, testerr. ",
 		},
 	}
 
