@@ -68,15 +68,7 @@ func (t *DynamicallyProvisioneDeployWithVolWRTest) RunShouldFail(client clientse
 	}
 
 	By("deploying the deployment")
-	tDeployment.Create()
-
-	By("checking that the pod stuck in ContainerCreating state")
-	tDeployment.WaitForPodNotReady()
-
-	if t.PodCheck != nil {
-		By("checking pod exec before pod delete")
-		tDeployment.Exec(t.PodCheck.Cmd, t.PodCheck.ExpectedString01)
-	}
+	tDeployment.CreateWithoutWaitingForDeploymemtStatus()
 }
 
 func (t *DynamicallyProvisioneDeployWithVolWRTest) RunMultiVol(client clientset.Interface, namespace *v1.Namespace) {

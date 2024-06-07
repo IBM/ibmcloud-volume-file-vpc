@@ -28,6 +28,7 @@ import (
 	volumesnapshotv1 "github.com/kubernetes-csi/external-snapshotter/client/v4/apis/volumesnapshot/v1"
 	snapshotclientset "github.com/kubernetes-csi/external-snapshotter/client/v4/clientset/versioned"
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -972,6 +973,32 @@ func (t *TestDeployment) Create() {
 	//framework.ExpectNoError(err)
 }
 
+// CreateWithoutWaitingForDeploymemtStatus creates deployment without waiting for the pods to be in running state.
+func (t *TestDeployment) CreateWithoutWaitingForDeploymemtStatus() {
+	var err error
+	t.deployment, err = t.client.AppsV1().Deployments(t.namespace.Name).Create(context.Background(), t.deployment, metav1.CreateOptions{})
+	framework.ExpectNoError(err)
+
+	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
+	framework.ExpectNoError(err)
+	// always get first pod as there should only be one
+	t.podName = pods.Items[0].Name
+
+	By("Check if pod is stuck in containerCreating state after 60sec")
+	time.Sleep(1 * time.Minute)
+
+	gomega.Eventually(func() string {
+		pod, err := t.client.CoreV1().Pods(t.namespace.Name).Get(context.TODO(), t.podName, metav1.GetOptions{})
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
+		if len(pod.Status.ContainerStatuses) > 0 && pod.Status.ContainerStatuses[0].State.Waiting != nil {
+			return pod.Status.ContainerStatuses[0].State.Waiting.Reason
+		}
+		return ""
+	}, 60*time.Second, 5*time.Second).Should(gomega.Equal("ContainerCreating"))
+	// gomega.Expect(pod.Status.Phase).To(gomega.Equal(v1.PodPending))
+	// gomega.Expect(pod.Status.ContainerStatuses[0].State.Waiting.Reason).To(gomega.Equal("ContainerCreating"))
+}
+
 func (t *TestDeployment) WaitForPodReady() {
 	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
 	framework.ExpectNoError(err)
@@ -980,16 +1007,6 @@ func (t *TestDeployment) WaitForPodReady() {
 	t.podName = pod.Name
 	err = k8sDevPod.WaitForPodRunningInNamespace(context.TODO(), t.client, &pod)
 	framework.ExpectNoError(err)
-}
-
-func (t *TestDeployment) WaitForPodNotReady() {
-	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
-	framework.ExpectNoError(err)
-	// always get first pod as there should only be one
-	pod := pods.Items[0]
-	t.podName = pod.Name
-	err = k8sDevPod.WaitForPodRunningInNamespace(context.TODO(), t.client, &pod)
-	framework.ExpectError(err)
 }
 
 func (t *TestDeployment) Exec(command []string, expectedString string) {
