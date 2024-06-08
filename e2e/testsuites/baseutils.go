@@ -46,7 +46,10 @@ import (
 	k8sDevPod "k8s.io/kubernetes/test/e2e/framework/pod"
 	e2eoutput "k8s.io/kubernetes/test/e2e/framework/pod/output"
 	k8sDevPV "k8s.io/kubernetes/test/e2e/framework/pv"
-	imageutils "k8s.io/kubernetes/test/utils/image"
+)
+
+const (
+	icrImage = "icr.io/ext/portworx/nginx-unprivileged:1.23"
 )
 
 type TestSecret struct {
@@ -131,7 +134,7 @@ func (t *TestPersistentVolumeClaim) NewTestStatefulset(c clientset.Interface, ns
 						Containers: []v1.Container{
 							{
 								Name:    "statefulset",
-								Image:   imageutils.GetE2EImage(imageutils.Nginx),
+								Image:   icrImage,
 								Command: []string{"/bin/sh"},
 								Args:    []string{"-c", command},
 								Ports: []v1.ContainerPort{
@@ -177,7 +180,7 @@ func (t *TestPersistentVolumeClaim) NewTestDaemonset(c clientset.Interface, ns *
 						Containers: []v1.Container{
 							{
 								Name:    "daemonset",
-								Image:   imageutils.GetE2EImage(imageutils.Nginx),
+								Image:   icrImage,
 								Command: []string{"/bin/sh"},
 								Args:    []string{"-c", command},
 								Ports: []v1.ContainerPort{
@@ -865,7 +868,7 @@ func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, 
 						Containers: []v1.Container{
 							{
 								Name:    "ics-e2e-tester",
-								Image:   imageutils.GetE2EImage(imageutils.BusyBox),
+								Image:   icrImage,
 								Command: []string{"/bin/sh"},
 								Args:    []string{"-c", command},
 								VolumeMounts: []v1.VolumeMount{
@@ -919,7 +922,7 @@ func NewTestDeploymentWitoutPVC(c clientset.Interface, ns *v1.Namespace, command
 						Containers: []v1.Container{
 							{
 								Name:         "ics-e2e-tester",
-								Image:        imageutils.GetE2EImage(imageutils.BusyBox),
+								Image:        icrImage,
 								Command:      []string{"/bin/sh"},
 								Args:         []string{"-c", command},
 								VolumeMounts: make([]v1.VolumeMount, 0),
@@ -1075,7 +1078,7 @@ func NewTestPodWithName(c clientset.Interface, ns *v1.Namespace, name, command s
 				Containers: []v1.Container{
 					{
 						Name:         "ics-e2e-tester",
-						Image:        imageutils.GetE2EImage(imageutils.BusyBox),
+						Image:        icrImage,
 						Command:      []string{"/bin/sh"},
 						Args:         []string{"-c", command},
 						VolumeMounts: make([]v1.VolumeMount, 0),
@@ -1103,7 +1106,7 @@ func NewTestPod(c clientset.Interface, ns *v1.Namespace, command string) *TestPo
 				Containers: []v1.Container{
 					{
 						Name:         "ics-e2e-tester",
-						Image:        imageutils.GetE2EImage(imageutils.BusyBox),
+						Image:        icrImage,
 						Command:      []string{"/bin/sh"},
 						Args:         []string{"-c", command},
 						VolumeMounts: make([]v1.VolumeMount, 0),
