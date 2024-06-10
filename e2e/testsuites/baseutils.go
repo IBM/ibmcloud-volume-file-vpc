@@ -49,7 +49,7 @@ import (
 )
 
 const (
-	icrImage = "icr.io/ext/portworx/nginx-unprivileged:1.23"
+	icrImage = "icr.io/ibm/alpine:latest"
 )
 
 type TestSecret struct {
