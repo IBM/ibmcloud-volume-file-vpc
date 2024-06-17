@@ -49,7 +49,7 @@ import (
 )
 
 const (
-	icrImage = "icr.io/ibm/alpine:latest"
+	icrImage = "us.icr.io/armada-master/agnhost:2.52"
 )
 
 type TestSecret struct {

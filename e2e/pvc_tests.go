@@ -89,7 +89,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning for
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-retain-dp2",
+					VolumeType:    "ibmc-vpc-file-retain-500-iops",
 					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,

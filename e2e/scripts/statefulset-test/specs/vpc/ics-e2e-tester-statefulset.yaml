@@ -17,35 +17,35 @@ kind: StatefulSet
 metadata:
   name: web-vpc-file
   labels:
-    app: nginx-vpc-file
+    app: test-vpc-file
 spec:
   selector:
     matchLabels:
-      app: nginx-vpc-file # has to match .spec.template.metadata.labels
-  serviceName: "nginx-vpc-file"
+      app: test-vpc-file # has to match .spec.template.metadata.labels
+  serviceName: "test-vpc-file"
   podManagementPolicy: "Parallel"
   replicas: REPLICA_COUNT # replace REPLICA_COUNT with actual replicas count
   template:
     metadata:
       labels:
-        app: nginx-vpc-file # has to match .spec.selector.matchLabels
+        app: test-vpc-file # has to match .spec.selector.matchLabels
     spec:
       terminationGracePeriodSeconds: 10
       containers:
-      - name: nginx
-        image: icr.io/ext/portworx/nginx-unprivileged:1.23
+      - name: test
+        image: us.icr.io/armada-master/agnhost:2.52
         ports:
         - containerPort: 80
           name: web
         volumeMounts:
         - name: pvc-www-0
-          mountPath: /usr/share/nginx0/html
+          mountPath: /usr/share/test0/html
         - name: pvc-www-1
-          mountPath: /usr/share/nginx1/html
+          mountPath: /usr/share/test1/html
   volumeClaimTemplates:
   - metadata:
       labels:
-        app: nginx-vpc-file
+        app: test-vpc-file
       name: pvc-www-0
     spec:
       accessModes: [ "ReadWriteMany" ]
@@ -56,7 +56,7 @@ spec:
   - metadata:
       name: pvc-www-1
       labels:
-        app: nginx-vpc-file
+        app: test-vpc-file
     spec:
       accessModes: [ "ReadWriteMany" ]
       storageClassName: "ibmc-vpc-file-dp2"
