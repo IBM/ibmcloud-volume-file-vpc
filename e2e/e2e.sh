@@ -52,6 +52,16 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
+		--run-eit-test-cases)
+		e2e_eit_test_case="$2"
+		shift
+		shift
+		;;
+		-t|--type)
+		e2e_k8s_platform="$2"
+		shift
+		shift
+		;;
     		*)
     		UNKOWNPARAM+=("$1")
     		shift
@@ -157,11 +167,23 @@ else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
-# EIT based tests (To be run only for addon version >=2.0)
-if [[ $(echo "$e2e_addon_version < 2.0" | bc -l) -eq 0 ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
-	rc3=$?
-	echo "Exit status for EIT volume test: $rc3"
+version_ge() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
+# EIT based tests (To be run only for addon version >=2.0, IKS>=1.30/ROKS>=4.16)
+if [[ "$K8S_PLATFORM" == "openshift" ]]; then
+	if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
+		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
+		rc3=$?
+		echo "Exit status for EIT volume test: $rc3"
+	fi
+else
+	if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
+		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
+		rc3=$?
+		echo "Exit status for EIT volume test: $rc3"
+	fi
 fi
 
 if [[ $rc3 -eq 0 ]]; then
