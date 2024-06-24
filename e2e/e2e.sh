@@ -146,6 +146,20 @@ set +e
 echo "Running E2E for region: [$TEST_ENV]"
 echo "                  Path: `pwd`"
 
+# Set storage class based on addon version
+# To be removed once 1.2 addon version is unsupoo
+version_ge() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
+if version_ge "$e2e_addon_version" "2.0"; then
+	export SC="ibmc-vpc-file-500-iops"
+	export SC_RETAIN="ibmc-vpc-file-retain-500-iops"
+else
+	export SC="ibmc-vpc-file-dp2"
+	export SC_RETAIN="ibmc-vpc-file-retain-dp2"
+fi
+
 # E2E Execution
 go clean -modcache
 export GO111MODULE=on
@@ -167,31 +181,34 @@ else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
-version_ge() {
-  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
-}
+# EIT based tests
 
-# EIT based tests (To be run only for addon version >=2.0, IKS>=1.30/ROKS>=4.16)
-if [[ "$K8S_PLATFORM" == "openshift" ]]; then
-	if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
+
+if [[ "$e2e_eit_test_case" == "true" ]]; then
+	# EIT based tests (To be run only for addon version >=2.0, IKS>=1.30/ROKS>=4.16)
+	if [[ "$e2e_k8s_platform" == "openshift" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
 		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
 		rc3=$?
 		echo "Exit status for EIT volume test: $rc3"
-	fi
-else
-	if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
+	elif [[ "$e2e_k8s_platform" == "kubernetes" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
 		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
 		rc3=$?
 		echo "Exit status for EIT volume test: $rc3"
+	else
+		echo "Conditions to run EIT test cases did not pass..."
+		rc3=1
 	fi
-fi
 
-if [[ $rc3 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+	if [[ $rc3 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
 fi
 
+# Publish final reports
 grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex1=$?
 grep  'VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
 

@@ -43,6 +43,8 @@ var (
 	testResultFile = os.Getenv("E2E_TEST_RESULT")
 	err            error
 	fpointer       *os.File
+	sc             = os.Getenv("SC")
+	sc_retain      = os.Getenv("SC_RETAIN")
 )
 
 var _ = BeforeSuite(func() {
@@ -89,7 +91,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning for
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-retain-500-iops",
+					VolumeType:    sc_retain,
 					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -157,7 +159,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for ibmc-vpc
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-500-iops",
+					VolumeType:    sc,
 					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -224,7 +226,7 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-500-iops",
+					VolumeType:    sc,
 					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -286,7 +288,7 @@ var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for ib
 		volList = []testsuites.VolumeDetails{
 			{
 				PVCName:       "ics-vol-dp2-",
-				VolumeType:    "ibmc-vpc-file-500-iops",
+				VolumeType:    sc,
 				AccessMode:    &accessMode,
 				ClaimSize:     "15Gi",
 				ReclaimPolicy: &reclaimPolicy,
@@ -397,7 +399,7 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-dp2-",
-					VolumeType:    "ibmc-vpc-file-500-iops",
+					VolumeType:    sc,
 					FSType:        "ext4",
 					ClaimSize:     "20Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -464,7 +466,7 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 				Volumes: []testsuites.VolumeDetails{
 					{
 						PVCName:       "ics-vol-dp2-",
-						VolumeType:    "ibmc-vpc-file-500-iops",
+						VolumeType:    sc,
 						ClaimSize:     "20Gi",
 						ReclaimPolicy: &reclaimPolicy,
 						MountOptions:  []string{"rw"},
