@@ -50,6 +50,10 @@ import (
 
 const (
 	icrImage = "us.icr.io/armada-master/agnhost:2.52"
+	//VolumeIDSeperator ...
+	VolumeIDSeperator = "#"
+	//DeprecatedVolumeIDSeperator ...
+	DeprecatedVolumeIDSeperator = ":"
 )
 
 type TestSecret struct {
@@ -677,7 +681,15 @@ func generatePVC(name, namespace,
 
 func (t *TestPersistentVolumeClaim) Cleanup() {
 
-	volumeHandle := strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, "#")
+	var volumeHandle []string
+	if strings.Contains(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, VolumeIDSeperator) {
+		//Volume ID is in format volumeID#volumeAccessPointID
+		volumeHandle = strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, VolumeIDSeperator)
+	} else {
+		//Deprecated -- Try for volumeID:volumeAccessPointID, support for old format for few releases.
+		volumeHandle = strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, DeprecatedVolumeIDSeperator)
+	}
+
 	getShareMountTargetOptions := &vpcbetav1.GetShareMountTargetOptions{
 		ShareID: &volumeHandle[0],
 		ID:      &volumeHandle[1],
