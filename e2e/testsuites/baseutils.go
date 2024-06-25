@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2024 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import (
 	volumesnapshotv1 "github.com/kubernetes-csi/external-snapshotter/client/v4/apis/volumesnapshot/v1"
 	snapshotclientset "github.com/kubernetes-csi/external-snapshotter/client/v4/clientset/versioned"
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -45,7 +46,14 @@ import (
 	k8sDevPod "k8s.io/kubernetes/test/e2e/framework/pod"
 	e2eoutput "k8s.io/kubernetes/test/e2e/framework/pod/output"
 	k8sDevPV "k8s.io/kubernetes/test/e2e/framework/pv"
-	imageutils "k8s.io/kubernetes/test/utils/image"
+)
+
+const (
+	icrImage = "us.icr.io/armada-master/agnhost:2.52"
+	//VolumeIDSeperator ...
+	VolumeIDSeperator = "#"
+	//DeprecatedVolumeIDSeperator ...
+	DeprecatedVolumeIDSeperator = ":"
 )
 
 type TestSecret struct {
@@ -130,7 +138,7 @@ func (t *TestPersistentVolumeClaim) NewTestStatefulset(c clientset.Interface, ns
 						Containers: []v1.Container{
 							{
 								Name:    "statefulset",
-								Image:   imageutils.GetE2EImage(imageutils.Nginx),
+								Image:   icrImage,
 								Command: []string{"/bin/sh"},
 								Args:    []string{"-c", command},
 								Ports: []v1.ContainerPort{
@@ -176,7 +184,7 @@ func (t *TestPersistentVolumeClaim) NewTestDaemonset(c clientset.Interface, ns *
 						Containers: []v1.Container{
 							{
 								Name:    "daemonset",
-								Image:   imageutils.GetE2EImage(imageutils.Nginx),
+								Image:   icrImage,
 								Command: []string{"/bin/sh"},
 								Args:    []string{"-c", command},
 								Ports: []v1.ContainerPort{
@@ -673,7 +681,15 @@ func generatePVC(name, namespace,
 
 func (t *TestPersistentVolumeClaim) Cleanup() {
 
-	volumeHandle := strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, ":")
+	var volumeHandle []string
+	if strings.Contains(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, VolumeIDSeperator) {
+		//Volume ID is in format volumeID#volumeAccessPointID
+		volumeHandle = strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, VolumeIDSeperator)
+	} else {
+		//Deprecated -- Try for volumeID:volumeAccessPointID, support for old format for few releases.
+		volumeHandle = strings.Split(t.persistentVolume.Spec.PersistentVolumeSource.CSI.VolumeHandle, DeprecatedVolumeIDSeperator)
+	}
+
 	getShareMountTargetOptions := &vpcbetav1.GetShareMountTargetOptions{
 		ShareID: &volumeHandle[0],
 		ID:      &volumeHandle[1],
@@ -840,7 +856,7 @@ type TestDeployment struct {
 	podName    string
 }
 
-func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32) *TestDeployment {
+func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32, nodeSelector map[string]string) *TestDeployment {
 	generateName := "ics-e2e-tester-"
 	selectorValue := fmt.Sprintf("%s%d", generateName, rand.Int())
 	return &TestDeployment{
@@ -860,10 +876,11 @@ func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, 
 						Labels: map[string]string{"app": selectorValue},
 					},
 					Spec: v1.PodSpec{
+						NodeSelector: nodeSelector,
 						Containers: []v1.Container{
 							{
 								Name:    "ics-e2e-tester",
-								Image:   imageutils.GetE2EImage(imageutils.BusyBox),
+								Image:   icrImage,
 								Command: []string{"/bin/sh"},
 								Args:    []string{"-c", command},
 								VolumeMounts: []v1.VolumeMount{
@@ -917,7 +934,7 @@ func NewTestDeploymentWitoutPVC(c clientset.Interface, ns *v1.Namespace, command
 						Containers: []v1.Container{
 							{
 								Name:         "ics-e2e-tester",
-								Image:        imageutils.GetE2EImage(imageutils.BusyBox),
+								Image:        icrImage,
 								Command:      []string{"/bin/sh"},
 								Args:         []string{"-c", command},
 								VolumeMounts: make([]v1.VolumeMount, 0),
@@ -969,6 +986,32 @@ func (t *TestDeployment) Create() {
 	//framework.ExpectNoError(err)
 	//err = framework.WaitForDeploymentComplete(t.client, t.deployment)
 	//framework.ExpectNoError(err)
+}
+
+// CreateWithoutWaitingForDeploymemtStatus creates deployment without waiting for the pods to be in running state.
+func (t *TestDeployment) CreateWithoutWaitingForDeploymemtStatus() {
+	var err error
+	t.deployment, err = t.client.AppsV1().Deployments(t.namespace.Name).Create(context.Background(), t.deployment, metav1.CreateOptions{})
+	framework.ExpectNoError(err)
+
+	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
+	framework.ExpectNoError(err)
+	// always get first pod as there should only be one
+	t.podName = pods.Items[0].Name
+
+	By("Check if pod is stuck in containerCreating state after 60sec")
+	time.Sleep(1 * time.Minute)
+
+	gomega.Eventually(func() string {
+		pod, err := t.client.CoreV1().Pods(t.namespace.Name).Get(context.TODO(), t.podName, metav1.GetOptions{})
+		gomega.Expect(err).NotTo(gomega.HaveOccurred())
+		if len(pod.Status.ContainerStatuses) > 0 && pod.Status.ContainerStatuses[0].State.Waiting != nil {
+			return pod.Status.ContainerStatuses[0].State.Waiting.Reason
+		}
+		return ""
+	}, 60*time.Second, 5*time.Second).Should(gomega.Equal("ContainerCreating"))
+	// gomega.Expect(pod.Status.Phase).To(gomega.Equal(v1.PodPending))
+	// gomega.Expect(pod.Status.ContainerStatuses[0].State.Waiting.Reason).To(gomega.Equal("ContainerCreating"))
 }
 
 func (t *TestDeployment) WaitForPodReady() {
@@ -1047,7 +1090,7 @@ func NewTestPodWithName(c clientset.Interface, ns *v1.Namespace, name, command s
 				Containers: []v1.Container{
 					{
 						Name:         "ics-e2e-tester",
-						Image:        imageutils.GetE2EImage(imageutils.BusyBox),
+						Image:        icrImage,
 						Command:      []string{"/bin/sh"},
 						Args:         []string{"-c", command},
 						VolumeMounts: make([]v1.VolumeMount, 0),
@@ -1075,7 +1118,7 @@ func NewTestPod(c clientset.Interface, ns *v1.Namespace, command string) *TestPo
 				Containers: []v1.Container{
 					{
 						Name:         "ics-e2e-tester",
-						Image:        imageutils.GetE2EImage(imageutils.BusyBox),
+						Image:        icrImage,
 						Command:      []string{"/bin/sh"},
 						Args:         []string{"-c", command},
 						VolumeMounts: make([]v1.VolumeMount, 0),

@@ -60,6 +60,17 @@ func (t *DynamicallyProvisioneDeployWithVolWRTest) Run(client clientset.Interfac
 	}
 }
 
+func (t *DynamicallyProvisioneDeployWithVolWRTest) RunShouldFail(client clientset.Interface, namespace *v1.Namespace) {
+	tDeployment, cleanup := t.Pod.SetupDeployment(client, namespace, t.ReplicaCount)
+	// defer must be called here for resources not get removed before using them
+	for i := range cleanup {
+		defer cleanup[i]()
+	}
+
+	By("deploying the deployment")
+	tDeployment.CreateWithoutWaitingForDeploymemtStatus()
+}
+
 func (t *DynamicallyProvisioneDeployWithVolWRTest) RunMultiVol(client clientset.Interface, namespace *v1.Namespace) {
 	tDeployment, cleanup := t.Pod.SetupDeploymentWithMultiVol(client, namespace)
 	// defer must be called here for resources not get removed before using them

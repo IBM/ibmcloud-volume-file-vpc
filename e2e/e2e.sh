@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #/******************************************************************************
-# Copyright 2021 IBM Corp.
+# Copyright 2024 IBM Corp.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -21,6 +21,7 @@ E2E_TEST_SETUP="$VPC_FILE_CSI_HOME/e2e-setup.out"
 E2E_TEST_RESULT="$VPC_FILE_CSI_HOME/e2e-test.out"
 export E2E_TEST_RESULT=$E2E_TEST_RESULT
 export E2E_TEST_SETUP=$E2E_TEST_SETUP
+export cluster_worker_pool="e2etest-vpc"
 
 rm -f $E2E_TEST_RESULT
 rm -f $E2E_TEST_SETUP
@@ -41,8 +42,23 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
-    		-r|--region)
+		-r|--region)
 		REGION="$2"
+		shift
+		shift
+		;;
+		--addon-version)
+		e2e_addon_version="$2"
+		shift
+		shift
+		;;
+		--run-eit-test-cases)
+		e2e_eit_test_case="$2"
+		shift
+		shift
+		;;
+		-t|--type)
+		e2e_k8s_platform="$2"
 		shift
 		shift
 		;;
@@ -130,27 +146,73 @@ set +e
 echo "Running E2E for region: [$TEST_ENV]"
 echo "                  Path: `pwd`"
 
+# Set storage class based on addon version
+# To be removed once 1.2 addon version is unsupoo
+version_ge() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
+if version_ge "$e2e_addon_version" "2.0"; then
+	export SC="ibmc-vpc-file-500-iops"
+	export SC_RETAIN="ibmc-vpc-file-retain-500-iops"
+else
+	export SC="ibmc-vpc-file-dp2"
+	export SC_RETAIN="ibmc-vpc-file-retain-dp2"
+fi
+
 # E2E Execution
 go clean -modcache
 export GO111MODULE=on
 go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
 set +e
+
+# Non EIT based tests
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
 
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
-rc3=$?
-echo "Exit status for resize volume test: $rc3"
+rc2=$?
+echo "Exit status for resize volume test: $rc2"
 
-if [[ $rc1 -eq 0 && $rc2 -eq 0 && $rc3 -eq 0 ]]; then
+if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
 else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
-grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; rc=$?
-if [[ $rc -eq 0 ]]; then
+# EIT based tests
+
+
+if [[ "$e2e_eit_test_case" == "true" ]]; then
+	# EIT based tests (To be run only for addon version >=2.0, IKS>=1.30/ROKS>=4.16)
+	if [[ "$e2e_k8s_platform" == "openshift" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
+		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
+		rc3=$?
+		echo "Exit status for EIT volume test: $rc3"
+	elif [[ "$e2e_k8s_platform" == "kubernetes" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
+		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
+		rc3=$?
+		echo "Exit status for EIT volume test: $rc3"
+	else
+		echo "Conditions to run EIT test cases did not pass..."
+		rc3=1
+	fi
+
+	if [[ $rc3 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	fi
+else
+	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
+fi
+
+# Publish final reports
+grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex1=$?
+grep  'VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
+
+if [[ $ex1 -eq 0 || $ex2 -eq 0 ]]; then
 	exit 1
 else
 	exit 0
