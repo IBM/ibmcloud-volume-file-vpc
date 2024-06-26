@@ -177,7 +177,8 @@ else
 fi
 
 # EIT based tests
-if [[ "$e2e_eit_test_case" == "true" && "$kube_ver_trim=" != "4.15" ]]; then
+
+if [[ "$e2e_eit_test_case" == "true" && "$CLUSTER_KUBE_VER_TRIM=" != "4.15" ]]; then
 	# EIT based tests (To be run only for addon version >=2.0)
 	if version_ge "$e2e_addon_version" "2.0"; then
 		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
