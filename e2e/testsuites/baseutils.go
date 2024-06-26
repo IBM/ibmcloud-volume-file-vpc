@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -49,11 +50,14 @@ import (
 )
 
 const (
-	icrImage = "us.icr.io/armada-master/agnhost:2.52"
 	//VolumeIDSeperator ...
 	VolumeIDSeperator = "#"
 	//DeprecatedVolumeIDSeperator ...
 	DeprecatedVolumeIDSeperator = ":"
+)
+
+var (
+	icrImage = os.Getenv("icrImage")
 )
 
 type TestSecret struct {

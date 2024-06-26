@@ -371,6 +371,9 @@ function cluster_create_vpc {
 
     cluster_name="$1"
     kube_ver="$2"
+    # kube_ver_trim is used in e2e.sh
+    kube_ver_trim=${kube_ver%.*}
+    export kube_ver_trim
     echo "Info: Creating cluster [$cluster_name] [$kube_ver]..."
     set -x
     worker_node_count=$WORKER_NODE_COUNT
