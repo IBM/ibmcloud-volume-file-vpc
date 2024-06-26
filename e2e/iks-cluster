@@ -1011,7 +1011,12 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
         fi
         kube_vers="${versions[0]}"
     else
-      kube_vers="$PLATFORM_VERSION"
+        if [[ "$K8S_PLATFORM" == "openshift" ]]; then
+            version=($(ibmcloud ks versions --show-version $K8S_PLATFORM  | grep $K8S_PLATFORM | grep $PLATFORM_VERSION  | awk '{ print $1 }'))
+        else
+            version=($(ibmcloud ks versions --show-version $K8S_PLATFORM  | grep -oE "\b([0-9]{1,2}\.){2}[0-9]{1,2}\b" | grep $PLATFORM_VERSION |  awk '{ print $1 }'))
+        fi
+        kube_vers=$version
     fi
     echo "Info: kube_version: [$kube_vers]"
 
