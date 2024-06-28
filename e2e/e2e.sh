@@ -57,11 +57,6 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
-		-t|--type)
-		e2e_k8s_platform="$2"
-		shift
-		shift
-		;;
     		*)
     		UNKOWNPARAM+=("$1")
     		shift
@@ -183,14 +178,9 @@ fi
 
 # EIT based tests
 
-
-if [[ "$e2e_eit_test_case" == "true" ]]; then
-	# EIT based tests (To be run only for addon version >=2.0, IKS>=1.30/ROKS>=4.16)
-	if [[ "$e2e_k8s_platform" == "openshift" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
-		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
-		rc3=$?
-		echo "Exit status for EIT volume test: $rc3"
-	elif [[ "$e2e_k8s_platform" == "kubernetes" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
+if [[ "$e2e_eit_test_case" == "true" && "$CLUSTER_KUBE_VER_TRIM=" != "4.15" ]]; then
+	# EIT based tests (To be run only for addon version >=2.0)
+	if version_ge "$e2e_addon_version" "2.0"; then
 		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
 		rc3=$?
 		echo "Exit status for EIT volume test: $rc3"
