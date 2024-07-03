@@ -52,7 +52,7 @@ var _ = BeforeSuite(func() {
 	testsuites.InitializeVPCClient()
 })
 
-var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning for ibmc-vpc-file-retain-dp2 SC with Deployment", func() {
+var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning using retain SC with Deployment", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -71,7 +71,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning for
 		ns = f.Namespace
 	})
 
-	It("with dp2 sc: should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+	It("with retain sc: should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -113,13 +113,13 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-retain-dp2 STORAGE CLASS : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc_retain)); err != nil {
 			panic(err)
 		}
 	})
 })
 
-var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for ibmc-vpc-file-dp2 SC with Deployment", func() {
+var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC with Deployment", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -181,13 +181,13 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for ibmc-vpc
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH ibmc-vpc-file-dp2 STORAGE CLASS : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
 })
 
-var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning for ibmc-vpc-file-dp2 SC with Deployment running multiple pods on same node", func() {
+var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning for dp2 SC with Deployment running multiple pods on same node", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -254,7 +254,7 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 	})
 })
 
-var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for ibmc-vpc-file-dp2 SC in RWO Mode with Deployment", func() {
+var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for dp2 SC in RWO Mode with Deployment", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
