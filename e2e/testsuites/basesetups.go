@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/IBM/go-sdk-core/v5/core"
 	"github.com/IBM/vpc-beta-go-sdk/vpcbetav1"
@@ -104,7 +105,10 @@ func InitializeVPCClient() {
 	var apiKey string
 	var url string
 	var serviceURL string
-	version := "2024-05-20"
+	// Set sdk version to 20 days before current date
+	timeNow := time.Now()
+	pastDate := timeNow.AddDate(0, 0, -20)
+	version := pastDate.Format("2020-01-02")
 
 	if testEnv == "prod" {
 		apiKey = os.Getenv("IC_API_KEY_PROD")
