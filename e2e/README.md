@@ -14,6 +14,7 @@
    export IC_REGION=<us-south>
    export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
    export ADDON_VERSION=<1.2 or 2.0>
+   export icrImage=<Give the image which will be used by pods>
 
    # Optional
    export E2E_POD_COUNT="1"

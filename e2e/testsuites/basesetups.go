@@ -108,7 +108,7 @@ func InitializeVPCClient() {
 	// Set sdk version to 20 days before current date
 	timeNow := time.Now()
 	pastDate := timeNow.AddDate(0, 0, -20)
-	version := pastDate.Format("2020-01-02")
+	version := pastDate.Format("2006-01-02")
 
 	if testEnv == "prod" {
 		apiKey = os.Getenv("IC_API_KEY_PROD")
