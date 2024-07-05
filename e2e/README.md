@@ -13,7 +13,7 @@
    export TEST_ENV=<stage/prod>
    export IC_REGION=<us-south>
    export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
-   export ADDON_VERSION=<1.2 or 2.0>
+   export e2e_addon_version=<1.2 or 2.0>
    export icrImage=<Give the image which will be used by pods>
 
    # Optional
@@ -23,13 +23,13 @@
 
 5. Test DP2 profile with deployment
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e --addon-version $ADDON_VERSION
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e
    ```
 6. Test volume expansion
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e --addon-version $ADDON_VERSION
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e
    ```
 7. Test EIT enabled volume test cases
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e --addon-version $ADDON_VERSION
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e
    ```
