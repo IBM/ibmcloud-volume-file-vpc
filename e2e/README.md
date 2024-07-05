@@ -13,6 +13,7 @@
    export TEST_ENV=<stage/prod>
    export IC_REGION=<us-south>
    export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
+   export ADDON_VERSION=<1.2 or 2.0>
 
    # Optional
    export E2E_POD_COUNT="1"
@@ -21,13 +22,13 @@
 
 5. Test DP2 profile with deployment
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e --addon-version $ADDON_VERSION
    ```
 6. Test volume expansion
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e --addon-version $ADDON_VERSION
    ```
 7. Test EIT enabled volume test cases
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e --addon-version $ADDON_VERSION
    ```
