@@ -13,6 +13,8 @@
    export TEST_ENV=<stage/prod>
    export IC_REGION=<us-south>
    export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
+   export e2e_addon_version=<1.2 or 2.0>
+   export icrImage=<Give the image which will be used by pods>
 
    # Optional
    export E2E_POD_COUNT="1"
