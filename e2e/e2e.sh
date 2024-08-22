@@ -158,7 +158,7 @@ fi
 # E2E Execution
 go clean -modcache
 export GO111MODULE=on
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.17.2
+go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.19.0
 set +e
 
 # Non EIT based tests
