@@ -414,6 +414,8 @@ function cluster_create_vpc {
     fi
     if [[ $rc -ne 0 ]]; then set +x;  return 1; fi
 
+    echo "Sleeping for 30 sec after cluster creation..."
+    # TODO: Add iteration to check worker pool creation for 3 iteration every 10 sec
     sleep 30 # Sometimes ks worker-pool create command fails with error 'Unable to find cluster'
 
     if [[ $E2ETEST_MZ == "true" ]]; then
