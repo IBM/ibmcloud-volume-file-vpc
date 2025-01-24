@@ -4,7 +4,6 @@ go 1.22.0
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibm-csi-common v1.1.15
 	github.com/IBM/ibmcloud-volume-interface v1.2.6
 	github.com/IBM/secret-common-lib v1.1.11
 	github.com/IBM/secret-utils-lib v1.1.11
@@ -76,6 +75,7 @@ require (
 	k8s.io/component-base v0.30.4 // indirect
 	k8s.io/component-helpers v0.30.4 // indirect
 	k8s.io/controller-manager v0.30.4 // indirect
+	k8s.io/csi-translation-lib v0.30.4 // indirect
 	k8s.io/kms v0.30.4 // indirect
 	k8s.io/kubectl v0.30.4 // indirect
 	k8s.io/kubelet v0.30.4 // indirect
@@ -89,7 +89,6 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/container-storage-interface/spec v1.9.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
