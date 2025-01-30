@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetFileShare POSTs to /shares/{share-id}
+// GetFileShare GET to /shares/{share-id}
 func (vs *FileShareService) GetFileShareEtag(shareID string, ctxLogger *zap.Logger) (*models.Share, string, error) {
 	ctxLogger.Debug("Entry Backend GetFileShareEtag")
 	defer ctxLogger.Debug("Exit Backend GetFileShareEtag")

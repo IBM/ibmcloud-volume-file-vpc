@@ -48,7 +48,7 @@ type FileShareManager interface {
 	// Get the file share etag by using ID
 	GetFileShareEtag(shareID string, ctxLogger *zap.Logger) (*models.Share, string, error)
 
-	// UpdateVolumeWithEtag updates the shares with tags by passing etag in header
+	// UpdateFileShareWithEtag updates the shares with tags by passing etag in header
 	UpdateFileShareWithEtag(shareID string, etag string, shareTemplate *models.Share, ctxLogger *zap.Logger) error
 
 	// Delete the file share
