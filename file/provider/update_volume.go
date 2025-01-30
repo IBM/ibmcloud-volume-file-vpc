@@ -40,33 +40,28 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 		if err != nil {
 			return err
 		}
+
 		if existShare != nil && existShare.Status == StatusStable {
 			vpcs.Logger.Info("Volume got valid (available) state", zap.Reflect("etag", etag))
+		} else {
+			return userError.GetUserError("VolumeNotInValidState", err, volumeTemplate.VolumeID)
+		}
+
+		//If tags are equal then skip the UpdateFileShare RIAAS API call
+		if ifTagsEqual(existShare.UserTags, volumeTemplate.VPCVolume.Tags) {
+			vpcs.Logger.Info("There is no change in user tags for volume, skipping the updateVolume for VPC IaaS... ", zap.Reflect("existShare", existShare.UserTags), zap.Reflect("volumeRequest", volumeTemplate.VPCVolume.Tags))
 			return nil
 		}
-		return userError.GetUserError("VolumeNotInValidState", err, volumeTemplate.VolumeID)
-	})
 
-	if err != nil {
-		return err
-	}
+		//Append the existing tags with the requested input tags
+		existShare.UserTags = append(existShare.UserTags, volumeTemplate.VPCVolume.Tags...)
 
-	//If tags are equal then skip the UpdateFileShare RIAAS API call
-	if ifTagsEqual(existShare.UserTags, volumeTemplate.VPCVolume.Tags) {
-		vpcs.Logger.Info("There is no change in user tags for volume, skipping the updateVolume for VPC IaaS... ", zap.Reflect("existShare", existShare.UserTags), zap.Reflect("volumeRequest", volumeTemplate.VPCVolume.Tags))
-		return nil
-	}
+		volume := &models.Share{
+			UserTags: existShare.UserTags,
+		}
 
-	//Append the existing tags with the requested input tags
-	existShare.UserTags = append(existShare.UserTags, volumeTemplate.VPCVolume.Tags...)
+		vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...")
 
-	volume := &models.Share{
-		UserTags: existShare.UserTags,
-	}
-
-	vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...")
-
-	err = retryWithMinRetries(vpcs.Logger, func() error {
 		err = vpcs.Apiclient.FileShareService().UpdateFileShareWithEtag(volumeTemplate.VolumeID, etag, volume, vpcs.Logger)
 		return err
 	})

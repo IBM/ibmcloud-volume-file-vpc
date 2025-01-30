@@ -31,7 +31,7 @@ import (
 var maxRetryAttempt = 10
 
 // minRetryAttempt ...
-var minRetryAttempt = 3
+var minRetryAttempt = 5
 
 // maxRetryGap ...
 var maxRetryGap = 60
