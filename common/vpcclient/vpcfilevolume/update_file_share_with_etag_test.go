@@ -61,7 +61,7 @@ func TestUpdateFileShareWithEtag(t *testing.T) {
 	for _, testcase := range testCases {
 		t.Run(testcase.name, func(t *testing.T) {
 			template := &models.Share{
-				ID:   "share-id",
+				ID:       "share-id",
 				UserTags: []string{"tag1:val1", "tag2:val2"},
 			}
 			mux, client, teardown := test.SetupServer(t)

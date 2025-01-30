@@ -28,10 +28,10 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/IBM/ibmcloud-volume-interface/config"
-	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	iks_vpc_provider "github.com/IBM/ibmcloud-volume-file-vpc/iks/provider"
 	cloudprovider "github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider"
+	"github.com/IBM/ibmcloud-volume-interface/config"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 
 	"go.uber.org/zap"
 	"golang.org/x/net/context"

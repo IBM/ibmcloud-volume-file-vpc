@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/IBM/ibmcloud-volume-interface/config"
 	cloudprovider "github.com/IBM/ibmcloud-volume-file-vpc/pkg/ibmcloudprovider"
+	"github.com/IBM/ibmcloud-volume-interface/config"
 	"github.com/golang/glog"
 	"github.com/onsi/gomega/ghttp"
 	"github.com/stretchr/testify/assert"
