@@ -138,7 +138,7 @@ func TestAddTags(t *testing.T) {
 			}
 			assert.Equal(t, expectedTagNum, len(tags))
 			assert.Equal(t, "test-volcrn", volCRN)
-			vol := pvw.getVolume(pv, logger)
+			vol := pvw.getVolumeFromPV(pv, logger)
 			assert.Equal(t, 1, *vol.Capacity)
 			assert.Equal(t, "3000", *vol.Iops)
 			assert.Equal(t, "test-volumeid", vol.VolumeID)
