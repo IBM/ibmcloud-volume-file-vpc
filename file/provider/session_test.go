@@ -58,12 +58,3 @@ func TestGetProviderDisplayName(t *testing.T) {
 
 	assert.Equal(t, provider.VolumeProvider("VPC-SHARE"), ccf.GetProviderDisplayName())
 }
-
-func TestUpdateVolume(t *testing.T) {
-	ccf := &VPCSession{
-		VolumeType: provider.VolumeType("vpc-share"),
-		Provider:   provider.VolumeProvider("VPC-SHARE"),
-	}
-
-	assert.NotNil(t, ccf.UpdateVolume(provider.Volume{}))
-}

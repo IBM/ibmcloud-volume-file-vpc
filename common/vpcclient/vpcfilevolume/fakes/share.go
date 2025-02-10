@@ -109,6 +109,22 @@ type FileShareService struct {
 		result1 *models.Share
 		result2 error
 	}
+	GetFileShareEtagStub        func(string, *zap.Logger) (*models.Share, string, error)
+	getFileShareEtagMutex       sync.RWMutex
+	getFileShareEtagArgsForCall []struct {
+		arg1 string
+		arg2 *zap.Logger
+	}
+	getFileShareEtagReturns struct {
+		result1 *models.Share
+		result2 string
+		result3 error
+	}
+	getFileShareEtagReturnsOnCall map[int]struct {
+		result1 *models.Share
+		result2 string
+		result3 error
+	}
 	GetFileShareTargetStub        func(string, string, *zap.Logger) (*models.ShareTarget, error)
 	getFileShareTargetMutex       sync.RWMutex
 	getFileShareTargetArgsForCall []struct {
@@ -201,6 +217,20 @@ type FileShareService struct {
 	listSubnetsReturnsOnCall map[int]struct {
 		result1 *models.SubnetList
 		result2 error
+	}
+	UpdateFileShareWithEtagStub        func(string, string, *models.Share, *zap.Logger) error
+	updateFileShareWithEtagMutex       sync.RWMutex
+	updateFileShareWithEtagArgsForCall []struct {
+		arg1 string
+		arg2 string
+		arg3 *models.Share
+		arg4 *zap.Logger
+	}
+	updateFileShareWithEtagReturns struct {
+		result1 error
+	}
+	updateFileShareWithEtagReturnsOnCall map[int]struct {
+		result1 error
 	}
 	UpdateVolumeStub        func(*provider.UpdatePVC, *zap.Logger) error
 	updateVolumeMutex       sync.RWMutex
@@ -671,6 +701,74 @@ func (fake *FileShareService) GetFileShareByNameReturnsOnCall(i int, result1 *mo
 	}{result1, result2}
 }
 
+func (fake *FileShareService) GetFileShareEtag(arg1 string, arg2 *zap.Logger) (*models.Share, string, error) {
+	fake.getFileShareEtagMutex.Lock()
+	ret, specificReturn := fake.getFileShareEtagReturnsOnCall[len(fake.getFileShareEtagArgsForCall)]
+	fake.getFileShareEtagArgsForCall = append(fake.getFileShareEtagArgsForCall, struct {
+		arg1 string
+		arg2 *zap.Logger
+	}{arg1, arg2})
+	stub := fake.GetFileShareEtagStub
+	fakeReturns := fake.getFileShareEtagReturns
+	fake.recordInvocation("GetFileShareEtag", []interface{}{arg1, arg2})
+	fake.getFileShareEtagMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2, ret.result3
+	}
+	return fakeReturns.result1, fakeReturns.result2, fakeReturns.result3
+}
+
+func (fake *FileShareService) GetFileShareEtagCallCount() int {
+	fake.getFileShareEtagMutex.RLock()
+	defer fake.getFileShareEtagMutex.RUnlock()
+	return len(fake.getFileShareEtagArgsForCall)
+}
+
+func (fake *FileShareService) GetFileShareEtagCalls(stub func(string, *zap.Logger) (*models.Share, string, error)) {
+	fake.getFileShareEtagMutex.Lock()
+	defer fake.getFileShareEtagMutex.Unlock()
+	fake.GetFileShareEtagStub = stub
+}
+
+func (fake *FileShareService) GetFileShareEtagArgsForCall(i int) (string, *zap.Logger) {
+	fake.getFileShareEtagMutex.RLock()
+	defer fake.getFileShareEtagMutex.RUnlock()
+	argsForCall := fake.getFileShareEtagArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FileShareService) GetFileShareEtagReturns(result1 *models.Share, result2 string, result3 error) {
+	fake.getFileShareEtagMutex.Lock()
+	defer fake.getFileShareEtagMutex.Unlock()
+	fake.GetFileShareEtagStub = nil
+	fake.getFileShareEtagReturns = struct {
+		result1 *models.Share
+		result2 string
+		result3 error
+	}{result1, result2, result3}
+}
+
+func (fake *FileShareService) GetFileShareEtagReturnsOnCall(i int, result1 *models.Share, result2 string, result3 error) {
+	fake.getFileShareEtagMutex.Lock()
+	defer fake.getFileShareEtagMutex.Unlock()
+	fake.GetFileShareEtagStub = nil
+	if fake.getFileShareEtagReturnsOnCall == nil {
+		fake.getFileShareEtagReturnsOnCall = make(map[int]struct {
+			result1 *models.Share
+			result2 string
+			result3 error
+		})
+	}
+	fake.getFileShareEtagReturnsOnCall[i] = struct {
+		result1 *models.Share
+		result2 string
+		result3 error
+	}{result1, result2, result3}
+}
+
 func (fake *FileShareService) GetFileShareTarget(arg1 string, arg2 string, arg3 *zap.Logger) (*models.ShareTarget, error) {
 	fake.getFileShareTargetMutex.Lock()
 	ret, specificReturn := fake.getFileShareTargetReturnsOnCall[len(fake.getFileShareTargetArgsForCall)]
@@ -1070,6 +1168,70 @@ func (fake *FileShareService) ListSubnetsReturnsOnCall(i int, result1 *models.Su
 	}{result1, result2}
 }
 
+func (fake *FileShareService) UpdateFileShareWithEtag(arg1 string, arg2 string, arg3 *models.Share, arg4 *zap.Logger) error {
+	fake.updateFileShareWithEtagMutex.Lock()
+	ret, specificReturn := fake.updateFileShareWithEtagReturnsOnCall[len(fake.updateFileShareWithEtagArgsForCall)]
+	fake.updateFileShareWithEtagArgsForCall = append(fake.updateFileShareWithEtagArgsForCall, struct {
+		arg1 string
+		arg2 string
+		arg3 *models.Share
+		arg4 *zap.Logger
+	}{arg1, arg2, arg3, arg4})
+	stub := fake.UpdateFileShareWithEtagStub
+	fakeReturns := fake.updateFileShareWithEtagReturns
+	fake.recordInvocation("UpdateFileShareWithEtag", []interface{}{arg1, arg2, arg3, arg4})
+	fake.updateFileShareWithEtagMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FileShareService) UpdateFileShareWithEtagCallCount() int {
+	fake.updateFileShareWithEtagMutex.RLock()
+	defer fake.updateFileShareWithEtagMutex.RUnlock()
+	return len(fake.updateFileShareWithEtagArgsForCall)
+}
+
+func (fake *FileShareService) UpdateFileShareWithEtagCalls(stub func(string, string, *models.Share, *zap.Logger) error) {
+	fake.updateFileShareWithEtagMutex.Lock()
+	defer fake.updateFileShareWithEtagMutex.Unlock()
+	fake.UpdateFileShareWithEtagStub = stub
+}
+
+func (fake *FileShareService) UpdateFileShareWithEtagArgsForCall(i int) (string, string, *models.Share, *zap.Logger) {
+	fake.updateFileShareWithEtagMutex.RLock()
+	defer fake.updateFileShareWithEtagMutex.RUnlock()
+	argsForCall := fake.updateFileShareWithEtagArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+}
+
+func (fake *FileShareService) UpdateFileShareWithEtagReturns(result1 error) {
+	fake.updateFileShareWithEtagMutex.Lock()
+	defer fake.updateFileShareWithEtagMutex.Unlock()
+	fake.UpdateFileShareWithEtagStub = nil
+	fake.updateFileShareWithEtagReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FileShareService) UpdateFileShareWithEtagReturnsOnCall(i int, result1 error) {
+	fake.updateFileShareWithEtagMutex.Lock()
+	defer fake.updateFileShareWithEtagMutex.Unlock()
+	fake.UpdateFileShareWithEtagStub = nil
+	if fake.updateFileShareWithEtagReturnsOnCall == nil {
+		fake.updateFileShareWithEtagReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.updateFileShareWithEtagReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FileShareService) UpdateVolume(arg1 *provider.UpdatePVC, arg2 *zap.Logger) error {
 	fake.updateVolumeMutex.Lock()
 	ret, specificReturn := fake.updateVolumeReturnsOnCall[len(fake.updateVolumeArgsForCall)]
@@ -1149,6 +1311,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.getFileShareMutex.RUnlock()
 	fake.getFileShareByNameMutex.RLock()
 	defer fake.getFileShareByNameMutex.RUnlock()
+	fake.getFileShareEtagMutex.RLock()
+	defer fake.getFileShareEtagMutex.RUnlock()
 	fake.getFileShareTargetMutex.RLock()
 	defer fake.getFileShareTargetMutex.RUnlock()
 	fake.getFileShareTargetByNameMutex.RLock()
@@ -1161,6 +1325,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.listSecurityGroupsMutex.RUnlock()
 	fake.listSubnetsMutex.RLock()
 	defer fake.listSubnetsMutex.RUnlock()
+	fake.updateFileShareWithEtagMutex.RLock()
+	defer fake.updateFileShareWithEtagMutex.RUnlock()
 	fake.updateVolumeMutex.RLock()
 	defer fake.updateVolumeMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

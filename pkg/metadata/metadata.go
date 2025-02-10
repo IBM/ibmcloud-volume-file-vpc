@@ -22,11 +22,27 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/IBM/ibm-csi-common/pkg/utils"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+)
+
+const (
+	// NodeZoneLabel  Zone Label attached to node
+	NodeZoneLabel = "failure-domain.beta.kubernetes.io/zone"
+
+	// NodeRegionLabel Region Label attached to node
+	NodeRegionLabel = "failure-domain.beta.kubernetes.io/region"
+
+	// NodeInstanceIDLabel VPC ID label attached to satellite host
+	NodeInstanceIDLabel = "ibm-cloud.kubernetes.io/vpc-instance-id"
+
+	// MachineTypeLabel is the node label used to identify the cluster type (upi,ipi,etc)
+	MachineTypeLabel = "ibm-cloud.kubernetes.io/machine-type"
+
+	// UPI is the expected value assigned to machine-type label on satellite cluster nodes
+	UPI = "upi"
 )
 
 // NodeMetadata is a fakeable interface exposing necessary data
@@ -67,16 +83,16 @@ func NewNodeMetadata(nodeName string, logger *zap.Logger) (NodeMetadata, error) 
 	}
 
 	nodeLabels := node.ObjectMeta.Labels
-	if len(nodeLabels[utils.NodeRegionLabel]) == 0 || len(nodeLabels[utils.NodeZoneLabel]) == 0 {
-		errorMsg := fmt.Errorf("One or few required node label(s) is/are missing [%s, %s]. Node Labels Found = [#%v]", utils.NodeRegionLabel, utils.NodeZoneLabel, nodeLabels) //nolint:golint
+	if len(nodeLabels[NodeRegionLabel]) == 0 || len(nodeLabels[NodeZoneLabel]) == 0 {
+		errorMsg := fmt.Errorf("One or few required node label(s) is/are missing [%s, %s]. Node Labels Found = [#%v]", NodeRegionLabel, NodeZoneLabel, nodeLabels) //nolint:golint
 		return nil, errorMsg
 	}
 
 	var workerID string
 	// If the cluster is satellite, the machine-type label equals to UPI
-	if nodeLabels[utils.MachineTypeLabel] == utils.UPI {
+	if nodeLabels[MachineTypeLabel] == UPI {
 		// For a satellite cluster, workerID is fetched from vpc-instance-id node label, which is updated by the vpc-node-label-updater (init container)
-		workerID = nodeLabels[utils.NodeInstanceIDLabel]
+		workerID = nodeLabels[NodeInstanceIDLabel]
 	} else {
 		// For managed and IPI cluster, workerID is fetched from the ProviderID in node spec.
 		workerID = fetchInstanceID(node.Spec.ProviderID)
@@ -86,8 +102,8 @@ func NewNodeMetadata(nodeName string, logger *zap.Logger) (NodeMetadata, error) 
 	}
 
 	return &nodeMetadataManager{
-		zone:     nodeLabels[utils.NodeZoneLabel],
-		region:   nodeLabels[utils.NodeRegionLabel],
+		zone:     nodeLabels[NodeZoneLabel],
+		region:   nodeLabels[NodeRegionLabel],
 		workerID: workerID,
 	}, nil
 }

@@ -30,6 +30,9 @@ import (
 // maxRetryAttempt ...
 var maxRetryAttempt = 10
 
+// minRetryAttempt ...
+var minRetryAttempt = 5
+
 // maxRetryGap ...
 var maxRetryGap = 60
 
@@ -104,6 +107,41 @@ func retry(logger *zap.Logger, retryfunc func() error) error {
 			}
 			if (i + 1) < maxRetryAttempt {
 				logger.Info("Error while executing the function. Re-attempting execution ..", zap.Int("attempt..", i+2), zap.Int("retry-gap", retryGap), zap.Int("max-retry-Attempts", maxRetryAttempt), zap.Error(err))
+			}
+			continue
+		}
+		return err
+	}
+	return err
+}
+
+// retry ...
+func retryWithMinRetries(logger *zap.Logger, retryfunc func() error) error {
+	var err error
+	retryGap := 10
+	for i := 0; i < minRetryAttempt; i++ {
+		if i > 0 {
+			time.Sleep(time.Duration(retryGap) * time.Second)
+		}
+		err = retryfunc()
+		if err != nil {
+			logger.Info("err object is not nil", zap.Reflect("ERR", err))
+			//Skip retry for the below type of Errors
+			modelError, ok := err.(*models.Error)
+			if !ok {
+				continue
+			}
+			if skipRetry(modelError) {
+				break
+			}
+			if i >= 1 {
+				retryGap = 2 * retryGap
+				if retryGap > maxRetryGap {
+					retryGap = maxRetryGap
+				}
+			}
+			if (i + 1) < minRetryAttempt {
+				logger.Info("Error while executing the function. Re-attempting execution ..", zap.Int("attempt..", i+2), zap.Int("retry-gap", retryGap), zap.Int("max-retry-Attempts", minRetryAttempt), zap.Error(err))
 			}
 			continue
 		}

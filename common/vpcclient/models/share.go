@@ -34,6 +34,7 @@ type Share struct {
 	InitialOwner  *InitialOwner  `json:"initial_owner,omitempty"`
 	Profile       *Profile       `json:"profile,omitempty"`
 	CreatedAt     *time.Time     `json:"created_at,omitempty"`
+	UserTags      []string       `json:"user_tags,omitempty"`
 	// Status of share named - deleted, deleting, failed, pending, stable, updating, waiting, suspended
 	Status            StatusType     `json:"lifecycle_state,omitempty"`
 	ShareTargets      *[]ShareTarget `json:"mount_targets,omitempty"`
