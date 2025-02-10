@@ -386,9 +386,9 @@ function cluster_create_vpc {
         # OpenShift minimum 2 worker nodes are required
         worker_node_count=$WORKER_NODE_COUNT
         if [[ "$e2e_env" == "prod" ]]; then
-            E2ETEST_IC_COS_INSTANCE=$(ibmcloud resource service-instance e2e-test-roks  | grep "^ID:" | awk '{print $2}')
+            E2ETEST_IC_COS_INSTANCE=$(ibmcloud resource service-instance e2e-test-roks --output json | jq -r '.[].id')
         else
-            E2ETEST_IC_COS_INSTANCE=$(ibmcloud resource service-instance "Cloud Object Storage-rz"  | grep "^ID:" | awk '{print $2}')
+            E2ETEST_IC_COS_INSTANCE=$(ibmcloud resource service-instance "Cloud Object Storage-rz" --output json | jq -r '.[].id')
         fi
         # Disable outbound traffic protection in case EIT test cases are to be executed
         if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
