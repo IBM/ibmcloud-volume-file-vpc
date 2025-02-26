@@ -47,7 +47,7 @@ func (vs *FileShareService) CreateFileShare(shareTemplate *models.Share, ctxLogg
 
 	resp, err := request.JSONBody(shareTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
-		apiErr.Errors[0].Status = resp.StatusCode
+		apiErr.Errors[0].Status = resp.Status
 		return nil, err
 	}
 
