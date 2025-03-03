@@ -57,12 +57,11 @@ type ErrorItem struct {
 	Message  string       `json:"message,omitempty"`
 	MoreInfo string       `json:"more_info,omitempty"`
 	Target   *ErrorTarget `json:"reqID,omitempty"`
-	Status   string       `json:"status,omitempty"`
 }
 
 // Error ...
 func (ei ErrorItem) Error() string {
-	return ei.Message + ", " + "RC:" + string(ei.Status)
+	return "Code:" + string(ei.Code) + ", Description:" + ei.Message
 }
 
 // Error ...
