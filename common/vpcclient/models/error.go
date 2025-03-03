@@ -57,7 +57,6 @@ type ErrorItem struct {
 	Message  string       `json:"message,omitempty"`
 	MoreInfo string       `json:"more_info,omitempty"`
 	Target   *ErrorTarget `json:"reqID,omitempty"`
-	Status   string       `json:"status,omitempty"`
 }
 
 // Error ...
