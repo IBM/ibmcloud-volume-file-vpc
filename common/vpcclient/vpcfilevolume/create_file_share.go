@@ -45,8 +45,9 @@ func (vs *FileShareService) CreateFileShare(shareTemplate *models.Share, ctxLogg
 	request := vs.client.NewRequest(operation)
 	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", request.URL()), zap.Reflect("Payload", shareTemplate), zap.Reflect("Operation", operation))
 
-	_, err := request.JSONBody(shareTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
+	resp, err := request.JSONBody(shareTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
+		apiErr.Errors[0].Status = resp.Status
 		return nil, err
 	}
 

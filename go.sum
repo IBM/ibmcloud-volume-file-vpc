@@ -31,12 +31,17 @@ github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7/go.mod h1:RiUvKuHKTBmBApDMUQzBL14p
 github.com/IBM/go-sdk-core/v5 v5.17.4 h1:VGb9+mRrnS2HpHZFM5hy4J6ppIWnwNrw0G+tLSgcJLc=
 github.com/IBM/go-sdk-core/v5 v5.17.4/go.mod h1:KsAAI7eStAWwQa4F96MLy+whYSh39JzNjklZRbN/8ns=
 <<<<<<< HEAD
+<<<<<<< HEAD
 github.com/IBM/ibmcloud-volume-interface v1.2.10 h1:XzylfkmXwSs+sdEtxBfhf9OwmyHmA+BSXj8+3QWwh0Y=
 github.com/IBM/ibmcloud-volume-interface v1.2.10/go.mod h1:sDeQiPuN8k9yTRl9FbE2GZCXPNg4cV3oldUfL8wwGNA=
 =======
 github.com/IBM/ibmcloud-volume-interface v1.2.10-0.20250304045414-b15e348d52c9 h1:IOVWxcn8Cf1uDAlGJQnk+Q0LMuVzzizvhmdOm00qIYA=
 github.com/IBM/ibmcloud-volume-interface v1.2.10-0.20250304045414-b15e348d52c9/go.mod h1:sDeQiPuN8k9yTRl9FbE2GZCXPNg4cV3oldUfL8wwGNA=
 >>>>>>> 609ef4d (Return error code to caller)
+=======
+github.com/IBM/ibmcloud-volume-interface v1.2.10-0.20250304074419-4c98acf56ef0 h1:tQ1+69PktvTp7z7nt0UCVSfre5F3Z/aRim4XKqXTN3o=
+github.com/IBM/ibmcloud-volume-interface v1.2.10-0.20250304074419-4c98acf56ef0/go.mod h1:sDeQiPuN8k9yTRl9FbE2GZCXPNg4cV3oldUfL8wwGNA=
+>>>>>>> 4038f87 (Return error code to caller)
 github.com/IBM/secret-common-lib v1.1.11 h1:EpfEe1gT1bnFQ3bxQPrh6bzTPeGjUo1NReVkCCP+TOc=
 github.com/IBM/secret-common-lib v1.1.11/go.mod h1:7YJF0ipT979nHIPkiCpvjFboFoIhrmYnIliE1vjCjZM=
 github.com/IBM/secret-utils-lib v1.1.11 h1:w87BzkddoFFlhRuWRteuGj3/561lEUg6Oo0RajVC87A=
