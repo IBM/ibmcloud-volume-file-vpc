@@ -93,5 +93,5 @@ type IksError struct {
 
 // Error ...
 func (ikserr IksError) Error() string {
-	return fmt.Sprintf("%s: %s", ikserr.Code, ikserr.Err)
+	return fmt.Sprintf("Trace Code:%s, Code:%s, Description:%s, RC:%d", ikserr.ReqID, ikserr.Code, ikserr.Err, ikserr.RC)
 }
