@@ -116,7 +116,7 @@ func TestClient(t *testing.T) {
 			operation:    getOperation,
 			responseBody: "{\"errors\":[{\"message\":\" testerr \"}]}",
 			responseCode: http.StatusNotAcceptable,
-			expectErr:    "Trace Code:,  testerr . ",
+			expectErr:    "Trace Code:, Code:, Description:testerr, RC:",
 			verify: func(t *testing.T) {
 				assert.Equal(t, 1, len(errResult.Errors))
 			},
@@ -125,7 +125,7 @@ func TestClient(t *testing.T) {
 			operation:    getOperation,
 			responseBody: "{\"errors\":[{\"message\":\"testerr\"},{\"message\":\"another\"}]}",
 			responseCode: http.StatusNotAcceptable,
-			expectErr:    "Trace Code:, testerr. ",
+			expectErr:    "Trace Code:, Code:, Description:testerr, RC:",
 			verify: func(t *testing.T) {
 				assert.Equal(t, 2, len(errResult.Errors))
 				assert.Equal(t, "another", errResult.Errors[1].Message)
