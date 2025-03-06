@@ -114,7 +114,7 @@ func TestClient(t *testing.T) {
 		}, {
 			name:         "single error",
 			operation:    getOperation,
-			responseBody: "{\"errors\":[{\"message\":\" testerr \"}]}",
+			responseBody: "{\"errors\":[{\"message\":\"testerr\"}]}",
 			responseCode: http.StatusNotAcceptable,
 			expectErr:    "Trace Code:, Code:, Description:testerr, RC:",
 			verify: func(t *testing.T) {
