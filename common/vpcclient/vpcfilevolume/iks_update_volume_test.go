@@ -64,8 +64,8 @@ func TestUpdateVolume(t *testing.T) {
 		}, {
 			name:      "Incorrect endpoint is invoked",
 			status:    http.StatusNotFound,
-			content:   "{\"code\":\"404\"}",
-			expectErr: "404: ",
+			content:   "{\"incidentID\":\"2af63776-4df7-4970-b52d-4e25676ec0e4\",\"code\":\"P0404\", \"description\":\"Not found\",\"RC\":404}",
+			expectErr: "Trace Code:2af63776-4df7-4970-b52d-4e25676ec0e4, Code:P0404, Description:Not found, RC:404",
 		},
 	}
 

@@ -70,8 +70,8 @@ func TestExpandVolume(t *testing.T) {
 				Size: 300,
 			},
 			status:    http.StatusNotFound,
-			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr. ",
+			content:   "{\"errors\":[{\"message\":\"testerr\",\"Code\":\"share_not_found\"}], \"trace\":\"2af63776-4df7-4970-b52d-4e25676ec0e4\"}",
+			expectErr: "Trace Code:2af63776-4df7-4970-b52d-4e25676ec0e4, Code:share_not_found, Description:testerr, RC:404 Not Found",
 		},
 		{
 			name: "False positive: What if the volume ID is not matched",

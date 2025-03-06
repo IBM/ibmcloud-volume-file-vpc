@@ -65,8 +65,9 @@ func (vs *FileShareService) ListFileShares(limit int, start string, filters *mod
 		}
 	}
 
-	_, err := req.Invoke()
+	resp, err := req.Invoke()
 	if err != nil {
+		apiErr.Errors[0].Status = resp.Status
 		return nil, err
 	}
 

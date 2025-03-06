@@ -112,21 +112,21 @@ func TestGetFileShareTargetByName(t *testing.T) {
 		}, {
 			name:      "Verify that a 404 is returned to the caller",
 			status:    http.StatusNotFound,
-			content:   "{\"errors\":[{\"message\":\"testerr\"}]}",
-			expectErr: "Trace Code:, testerr. ",
+			content:   "{\"errors\":[{\"message\":\"testerr\",\"Code\":\"share_target_not_found\"}], \"trace\":\"2af63776-4df7-4970-b52d-4e25676ec0e4\"}",
+			expectErr: "Trace Code:2af63776-4df7-4970-b52d-4e25676ec0e4, Code:share_target_not_found, Description:testerr, RC:404 Not Found",
 		}, {
 			name:    "Verify that the share name is parsed correctly",
 			status:  http.StatusOK,
-			content: "{\"mount_targets\":[{\"id\":\"voltarget1\", \"name\":\"vvoltarget1\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
+			content: "{\"mount_targets\":[{\"id\":\"voltarget1\", \"name\":\"voltarget1\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
 			verify: func(t *testing.T, shareTarget *models.ShareTarget, err error) {
 				if assert.NotNil(t, shareTarget) {
 					assert.Equal(t, "voltarget1", shareTarget.ID)
 				}
 			},
 		}, {
-			name:      "Verify that the share target is empty if the shares are empty",
-			status:    http.StatusOK,
-			expectErr: "Trace Code:, testerr. ",
+			name:    "Verify that the share target is empty if the shares are empty",
+			status:  http.StatusOK,
+			content: "{\"mount_targets\":[{\"id\":\"voltarget2\", \"name\":\"voltarget2\", \"vpc\": {\"id\":\"xvdc\"},\"status\":\"pending\"}]}",
 		},
 	}
 
