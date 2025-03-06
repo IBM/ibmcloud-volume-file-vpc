@@ -46,9 +46,10 @@ func (vs *FileShareService) UpdateFileShareWithEtag(shareID string, etag string,
 
 	req := request.PathParameter(shareIDParam, shareID)
 	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", req.URL()), zap.Reflect("Payload", shareTemplate), zap.Reflect("Operation", operation))
-	_, err := req.JSONBody(shareTemplate).JSONError(&apiErr).Invoke()
+	resp, err := req.JSONBody(shareTemplate).JSONError(&apiErr).Invoke()
 
 	if err != nil {
+		apiErr.Errors[0].Status = resp.Status
 		return err
 	}
 

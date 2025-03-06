@@ -44,8 +44,9 @@ func (vs *FileShareService) DeleteFileShare(shareID string, ctxLogger *zap.Logge
 	request := vs.client.NewRequest(operation)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
-	_, err := request.PathParameter(shareIDParam, shareID).JSONError(&apiErr).Invoke()
+	resp, err := request.PathParameter(shareIDParam, shareID).JSONError(&apiErr).Invoke()
 	if err != nil {
+		apiErr.Errors[0].Status = resp.Status
 		return err
 	}
 

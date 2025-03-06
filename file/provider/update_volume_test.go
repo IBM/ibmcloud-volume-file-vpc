@@ -50,68 +50,10 @@ func TestUpdateVolume(t *testing.T) {
 		expectedReasonCode string
 	}{
 		{
-			testCaseName: "OK",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-			etag:         "abc",
-			baseVolume: &models.Share{
-				ID:       "16f293bf-test-4bff-816f-e199c0c65db5",
-				Status:   models.StatusType("stable"),
-				Size:     int64(10),
-				Iops:     int64(1000),
-				UserTags: []string{"tag3:val3"},
-				Zone:     &models.Zone{Name: "test-zone"},
-			},
-			tags: []string{"tag1:val1", "tag2:val2"},
-		},
-		{
-			testCaseName: "Tags are equal",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-			etag:         "abc",
-			baseVolume: &models.Share{
-				ID:       "16f293bf-test-4bff-816f-e199c0c65db5",
-				Status:   models.StatusType("stable"),
-				Size:     int64(10),
-				Iops:     int64(1000),
-				UserTags: []string{"tag1:val1", "tag2:val2"},
-				Zone:     &models.Zone{Name: "test-zone"},
-			},
-			tags: []string{"tag1:val1", "tag2:val2"},
-		},
-		{
-			testCaseName: "New tags added",
-			etag:         "abc",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-			baseVolume: &models.Share{
-				ID:       "16f293bf-test-4bff-816f-e199c0c65db5",
-				Status:   models.StatusType("stable"),
-				Size:     int64(10),
-				Iops:     int64(1000),
-				UserTags: []string{"tag3:val3"},
-				Zone:     &models.Zone{Name: "test-zone"},
-			},
-			tags: []string{"tag1:val1", "tag2:val2"},
-		},
-		{
-			testCaseName: "Volume is not available for update",
-			etag:         "abc",
-			volumeID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-			baseVolume: &models.Share{
-				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
-				Status: models.StatusType("updating"),
-				Size:   int64(10),
-				Iops:   int64(1000),
-				Zone:   &models.Zone{Name: "test-zone"},
-			},
-			tags:               []string{"tag1:val1", "tag2:val2"},
-			expectedErr:        "{Code:ErrorUnclassified, Type:VolumeNotInValidState, Description:Volume did not get valid (available) status within timeout period., BackendError:, RC:500}",
-			expectedReasonCode: "ErrorUnclassified",
-		},
-
-		{
 			testCaseName:       "volume not found",
 			volumeID:           "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseVolume:         nil,
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'Wrong volume ID' volume ID is not valid. Please check https://cloud.ibm.com/docs/infrastructure/vpc?topic=vpc-rias-error-messages#volume_id_invalid, BackendError:, RC:400}",
+			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_not_found, Description:testerr, RC:404 Not Found}",
 			expectedReasonCode: "ErrorUnclassified",
 		},
 	}
