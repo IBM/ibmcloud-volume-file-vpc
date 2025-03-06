@@ -46,8 +46,9 @@ func (vs *FileShareService) GetFileShare(shareID string, ctxLogger *zap.Logger) 
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
 	req := request.PathParameter(shareIDParam, shareID)
-	_, err := req.JSONSuccess(&share).JSONError(&apiErr).Invoke()
+	resp, err := req.JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
+		apiErr.Errors[0].Status = resp.Status
 		return nil, err
 	}
 
