@@ -49,7 +49,9 @@ func (vs *FileShareService) GetFileShareTarget(shareID string, targetID string, 
 
 	resp, err := req.JSONSuccess(&shareTarget).JSONError(&apiErr).Invoke()
 	if err != nil {
-		apiErr.Errors[0].Status = resp.Status
+		if len(apiErr.Errors) > 0 {
+			apiErr.Errors[0].Status = resp.Status
+		}
 		return nil, err
 	}
 

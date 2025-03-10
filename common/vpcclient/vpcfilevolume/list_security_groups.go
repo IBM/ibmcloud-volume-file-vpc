@@ -69,7 +69,9 @@ func (vs *FileShareService) ListSecurityGroups(limit int, start string, filters 
 
 	resp, err := req.Invoke()
 	if err != nil {
-		apiErr.Errors[0].Status = resp.Status
+		if len(apiErr.Errors) > 0 {
+			apiErr.Errors[0].Status = resp.Status
+		}
 		return nil, err
 	}
 
