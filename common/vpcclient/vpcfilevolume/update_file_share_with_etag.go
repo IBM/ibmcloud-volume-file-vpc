@@ -49,7 +49,9 @@ func (vs *FileShareService) UpdateFileShareWithEtag(shareID string, etag string,
 	resp, err := req.JSONBody(shareTemplate).JSONError(&apiErr).Invoke()
 
 	if err != nil {
-		apiErr.Errors[0].Status = resp.Status
+		if len(apiErr.Errors) > 0 {
+			apiErr.Errors[0].Status = resp.Status
+		}
 		return err
 	}
 

@@ -46,7 +46,9 @@ func (vs *FileShareService) DeleteFileShare(shareID string, ctxLogger *zap.Logge
 
 	resp, err := request.PathParameter(shareIDParam, shareID).JSONError(&apiErr).Invoke()
 	if err != nil {
-		apiErr.Errors[0].Status = resp.Status
+		if len(apiErr.Errors) > 0 {
+			apiErr.Errors[0].Status = resp.Status
+		}
 		return err
 	}
 
