@@ -48,7 +48,9 @@ func (vs *FileShareService) GetFileShare(shareID string, ctxLogger *zap.Logger) 
 	req := request.PathParameter(shareIDParam, shareID)
 	resp, err := req.JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
-		apiErr.Errors[0].Status = resp.Status
+		if len(apiErr.Errors) > 0 {
+			apiErr.Errors[0].Status = resp.Status
+		}
 		return nil, err
 	}
 
