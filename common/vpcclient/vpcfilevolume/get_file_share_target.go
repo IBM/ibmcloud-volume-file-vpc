@@ -47,11 +47,8 @@ func (vs *FileShareService) GetFileShareTarget(shareID string, targetID string, 
 
 	req := request.PathParameter(shareIDParam, shareID).PathParameter(shareTargetIDParam, targetID)
 
-	resp, err := req.JSONSuccess(&shareTarget).JSONError(&apiErr).Invoke()
+	_, err := req.JSONSuccess(&shareTarget).JSONError(&apiErr).Invoke()
 	if err != nil {
-		if len(apiErr.Errors) > 0 {
-			apiErr.Errors[0].Status = resp.Status
-		}
 		return nil, err
 	}
 
