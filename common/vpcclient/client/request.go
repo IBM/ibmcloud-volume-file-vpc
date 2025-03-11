@@ -224,7 +224,6 @@ func (r *Request) Invoke() (*http.Response, error) {
 			err = r.errorConsumer.Consume(resp.Body)
 			if err == nil {
 				err = r.errorConsumer.Receiver().(error)
-			} else {
 				apiErr, ok := err.(*models.Error)
 				if ok && len(apiErr.Errors) > 0 {
 					apiErr.Errors[0].Status = resp.Status
