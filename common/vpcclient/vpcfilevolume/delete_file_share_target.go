@@ -51,9 +51,6 @@ func (vs *FileShareService) DeleteFileShareTarget(deleteShareTargetRequest *mode
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			// file share target is deleted. So do not want to retry
 			ctxLogger.Info("Exit DeleteFileShareTarget", zap.Any("resp", resp.StatusCode), zap.Error(err), zap.Error(apiErr))
-			if len(apiErr.Errors) > 0 {
-				apiErr.Errors[0].Status = resp.Status
-			}
 			return resp, apiErr
 		}
 	}

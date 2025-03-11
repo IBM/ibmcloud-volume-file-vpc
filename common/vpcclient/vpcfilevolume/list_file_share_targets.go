@@ -55,11 +55,8 @@ func (vs *FileShareService) ListFileShareTargets(shareID string, filters *models
 		}
 	}
 
-	resp, err := req.Invoke()
+	_, err := req.Invoke()
 	if err != nil {
-		if len(apiErr.Errors) > 0 {
-			apiErr.Errors[0].Status = resp.Status
-		}
 		return nil, err
 	}
 

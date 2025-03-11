@@ -49,11 +49,8 @@ func (vs *FileShareService) CreateFileShareTarget(fileShareTargetRequest *models
 
 	req := request.PathParameter(shareIDParam, fileShareTargetRequest.ShareID)
 
-	resp, err := req.JSONBody(fileShareTargetRequest).JSONSuccess(&shareTarget).JSONError(&apiErr).Invoke()
+	_, err := req.JSONBody(fileShareTargetRequest).JSONSuccess(&shareTarget).JSONError(&apiErr).Invoke()
 	if err != nil {
-		if len(apiErr.Errors) > 0 {
-			apiErr.Errors[0].Status = resp.Status
-		}
 		return nil, err
 	}
 	ctxLogger.Info("Successfully created the file share target")

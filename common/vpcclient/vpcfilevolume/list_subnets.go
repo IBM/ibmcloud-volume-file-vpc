@@ -69,11 +69,8 @@ func (vs *FileShareService) ListSubnets(limit int, start string, filters *models
 
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", req.URL()))
 
-	resp, err := req.Invoke()
+	_, err := req.Invoke()
 	if err != nil {
-		if len(apiErr.Errors) > 0 {
-			apiErr.Errors[0].Status = resp.Status
-		}
 		return nil, err
 	}
 

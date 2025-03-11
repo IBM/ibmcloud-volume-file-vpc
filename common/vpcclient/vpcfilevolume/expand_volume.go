@@ -45,11 +45,8 @@ func (vs *FileShareService) ExpandVolume(shareID string, volumeTemplate *models.
 	request := vs.client.NewRequest(operation)
 	req := request.PathParameter(shareIDParam, shareID)
 	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", req.URL()), zap.Reflect("Payload", volumeTemplate), zap.Reflect("Operation", operation))
-	resp, err := req.JSONBody(volumeTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
+	_, err := req.JSONBody(volumeTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
-		if len(apiErr.Errors) > 0 {
-			apiErr.Errors[0].Status = resp.Status
-		}
 		ctxLogger.Info("Exit Backend ExpandVolume due to error.", zap.Reflect("Error: ", err))
 		return nil, err
 	}
