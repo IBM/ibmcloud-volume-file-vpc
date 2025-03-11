@@ -168,6 +168,7 @@ func (r *Request) JSONSuccess(receiver interface{}) *Request {
 // (non-2xx) response
 func (r *Request) JSONError(receiver error) *Request {
 	r.errorConsumer = payload.NewJSONConsumer(receiver)
+
 	return r
 }
 
