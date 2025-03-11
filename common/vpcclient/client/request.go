@@ -168,6 +168,7 @@ func (r *Request) JSONSuccess(receiver interface{}) *Request {
 // (non-2xx) response
 func (r *Request) JSONError(receiver error) *Request {
 	r.errorConsumer = payload.NewJSONConsumer(receiver)
+
 	return r
 }
 
@@ -224,7 +225,7 @@ func (r *Request) Invoke() (*http.Response, error) {
 			if err == nil {
 				err = r.errorConsumer.Receiver().(error)
 			} else {
-				apiErr, ok := err.(models.Error)
+				apiErr, ok := err.(*models.Error)
 				if ok && len(apiErr.Errors) > 0 {
 					apiErr.Errors[0].Status = resp.Status
 				}
