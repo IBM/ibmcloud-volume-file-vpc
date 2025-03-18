@@ -1,5 +1,5 @@
 
-GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /samples | grep -v /e2e)
+GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /samples | grep -v /common/registry/fakes | grep -v common/vpcclient/client/fakes | grep -v /common/vpcclient/riaas/fakes | grep -v /common/vpcclient/vpcfilevolume/fakes | grep -v /common/vpcclient/riaas/test | grep -v /common/vpcclient/models | grep -v /file/vpcconfig  | grep -v /e2e)
 GOFILES=$(shell find . -type f -name '*.go' -not -path "./vendor/*")
 ARCH = $(shell uname -m)
 LINT_VERSION="1.60.1"
