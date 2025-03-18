@@ -46,4 +46,12 @@ func TestNewVPCFileContextCredentialsFactory(t *testing.T) {
 	_ = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
 	_, err := NewVPCContextCredentialsFactory(conf, &kc)
 	assert.Nil(t, err)
+
+	//Invalid libconfig file
+	kc, _ = k8s_utils.FakeGetk8sClientSet()
+	pwd, _ = os.Getwd()
+	file = filepath.Join(pwd, "..", "..", "etc", "libconfigxyz.toml")
+	_ = k8s_utils.FakeCreateSecret(kc, "DEFAULT", file)
+	_, err = NewVPCContextCredentialsFactory(conf, &kc)
+	assert.NotNil(t, err)
 }
