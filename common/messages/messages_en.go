@@ -25,7 +25,7 @@ import (
 var messagesEn = map[string]util.Message{
 	"AuthenticationFailed": {
 		Code:        AuthenticationFailed,
-		Description: "Failed to authenticate the user.",
+		Description: "Failed to authenticate the user",
 		Type:        util.Unauthenticated,
 		RC:          400,
 		Action:      "Verify that you entered the correct IBM Cloud user name and password. If the error persists, the authentication service might be unavailable. Wait a few minutes and try again. ",
