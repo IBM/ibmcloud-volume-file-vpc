@@ -28,20 +28,20 @@ import (
 )
 
 // maxRetryAttempt ...
-var maxRetryAttempt = 0
+var maxRetryAttempt = 10
 
 // minRetryAttempt ...
-var minRetryAttempt = 1
+var minRetryAttempt = 5
 
 // maxRetryGap ...
-var maxRetryGap = 0
+var maxRetryGap = 60
 
 // retryGap ...
-var retryGap = 0
+var retryGap = 10
 
 // ConstantRetryGap ...
 const (
-	ConstantRetryGap     = 0 // seconds
+	ConstantRetryGap     = 10 // seconds
 	SecurityGroup        = "security_group"
 	EncryptionTrasitMode = "user_managed"
 	pageSize             = 50
