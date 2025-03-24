@@ -21,11 +21,10 @@ import (
 	"errors"
 	"testing"
 
+	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	fileShareServiceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -49,6 +48,7 @@ func TestGetSecurityGroup(t *testing.T) {
 		skipErrTest        bool
 		expectedErr        string
 		expectedReasonCode string
+		notExistErr        string
 
 		verify func(t *testing.T, securityGroup string, err error)
 	}{
@@ -96,7 +96,32 @@ func TestGetSecurityGroup(t *testing.T) {
 				},
 			},
 			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'A securityGroup with the specified zone test-zone and available cluster securityGroup list {16f293bf-test-4bff-816f-e199c0c65db5ss,16f293bf-test-4bff-816f-e199c0c65db2} could not be found.",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedReasonCode: "SecurityGroupsListFailed",
+			verify: func(t *testing.T, securityGroup string, err error) {
+				assert.Equal(t, "", securityGroup)
+				assert.NotNil(t, err)
+			},
+		}, {
+			testCaseName: "Security Group does not exists",
+			securityGroupReq: provider.SecurityGroupRequest{
+				Name:  "kube-cluster-2",
+				VPCID: "VPC-id1",
+				ResourceGroup: &provider.ResourceGroup{
+					ID: "16f293bf-test-4bff-816f-e199c0wdwd5db5",
+				},
+			},
+			securityGroupList: &models.SecurityGroupList{
+				Limit: 50,
+				SecurityGroups: []models.SecurityGroup{
+					{
+						ID:   "kube-cluster-1",
+						VPC:  &provider.VPC{ID: "VPC-id1"},
+						Name: "kube-cluster-1",
+					},
+				},
+			},
+			notExistErr:        "{Code:SecurityGroupFindFailed, Description:A securityGroup with the specified securityGroup name 'kube-cluster-2' could not be found.No securityGroup found, RC:404}",
+			expectedReasonCode: "SecurityGroupFindFailed",
 			verify: func(t *testing.T, securityGroup string, err error) {
 				assert.Equal(t, "", securityGroup)
 				assert.NotNil(t, err)
@@ -121,14 +146,16 @@ func TestGetSecurityGroup(t *testing.T) {
 					},
 				},
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'A securityGroup with the specified zone test-zone and available cluster securityGroup list {16f293bf-test-4bff-816f-e199c0c65db5ss,16f293bf-test-4bff-816f-e199c0c65db2} could not be found.",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr:        "{Code:SecurityGroupsListFailed, Description:Unable to fetch list of securityGroup, RC:500}",
+			expectedReasonCode: "SecurityGroupsListFailed",
 			verify: func(t *testing.T, securityGroup string, err error) {
 				assert.Equal(t, "", securityGroup)
 				assert.NotNil(t, err)
 			},
 		},
 	}
+
+	userError.MessagesEn = userError.InitMessages()
 
 	for _, testcase := range testCases {
 		t.Run(testcase.testCaseName, func(t *testing.T) {
@@ -153,7 +180,7 @@ func TestGetSecurityGroup(t *testing.T) {
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.ErrorContains(t, err, testcase.expectedReasonCode)
 			}
 
 			if testcase.verify != nil {

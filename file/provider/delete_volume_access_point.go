@@ -42,7 +42,6 @@ func (vpcs *VPCSession) DeleteVolumeAccessPoint(deleteAccessPointRequest provide
 	}
 
 	var response *http.Response
-	var volumeAccessPoint models.ShareTarget
 
 	err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) {
 		// First , check if volume AccessPoint is already deleted to given instance
@@ -70,7 +69,7 @@ func (vpcs *VPCSession) DeleteVolumeAccessPoint(deleteAccessPointRequest provide
 		return nil, true // skip retry if volume AccessPoint is not found OR already in deleting, pending deletion state
 	})
 	if err != nil {
-		userErr := userError.GetUserError(string(userError.DeleteVolumeAccessPointFailed), err, deleteAccessPointRequest.VolumeID, volumeAccessPoint.ID)
+		userErr := userError.GetUserError(string(userError.DeleteVolumeAccessPointFailed), err, deleteAccessPointRequest.VolumeID, deleteAccessPointRequest.AccessPointID)
 		vpcs.Logger.Error("Volume AccessPoint delete failed with error", zap.Error(err))
 		return response, userErr
 	}
