@@ -37,6 +37,8 @@ script:
 - make coverage && touch "Passing" || touch "Failed"
 
 after_success:
+- git config credential.helper "store --file=.git/credentials"
+- echo "https://${GHE_TOKEN}:@github.com" > .git/credentials
 - "./scripts/calculateCoverage.sh"
 - "./scripts/publishCoverage.sh"
 
