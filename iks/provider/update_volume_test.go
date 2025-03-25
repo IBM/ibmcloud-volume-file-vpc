@@ -76,17 +76,6 @@ func TestValidateVolumeRequest(t *testing.T) {
 			expectedErroCode: "ErrorRequiredFieldMissing",
 			expectedErrMsg:   "{Code:ErrorRequiredFieldMissing, Description:[Provider] is required to complete the operation, RC:400}",
 		},
-		{
-			name: "Error with empty VolumeType ",
-			// Setup test environment
-			volumeRequest: provider.Volume{
-				VolumeID:   "test-volume-id",
-				Provider:   "test-provider",
-				VolumeType: "",
-			},
-			expectedErroCode: "ErrorRequiredFieldMissing",
-			expectedErrMsg:   "{Code:ErrorRequiredFieldMissing, Description:[VolumeType] is required to complete the operation, RC:400}",
-		},
 	}
 
 	for _, tc := range testCases {

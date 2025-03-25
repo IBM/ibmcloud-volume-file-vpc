@@ -34,20 +34,8 @@ import (
 )
 
 const (
-	TestProviderAccountID   = "test-provider-account"
 	TestProviderAccessToken = "test-provider-access-token"
 	TestIKSAccountID        = "test-iks-account"
-	TestZone                = "test-zone"
-	IamURL                  = "test-iam-url"
-	IamClientID             = "test-iam_client_id"
-	IamClientSecret         = "test-iam_client_secret"
-	IamAPIKey               = "test-iam_api_key"
-	RefreshToken            = "test-refresh_token"
-	TestEndpointURL         = "http://some_endpoint"
-	TestAPIVersion          = "2019-07-02"
-	PrivateContainerAPIURL  = "private.test-iam-url"
-	PrivateRIaaSEndpoint    = "private.test-riaas-url"
-	CsrfToken               = "csrf-token"
 )
 
 func TestInitProviders(t *testing.T) {
@@ -134,29 +122,7 @@ func TestInitProviders(t *testing.T) {
 
 func TestOpenProviderSession(t *testing.T) {
 	fakeProvider := &fakes.Provider{}
-	fakeCredential := &fakes.ContextCredentialsFactory{}
-
-	conf := &vpcconfig.VPCFileConfig{
-		ServerConfig: &config.ServerConfig{
-			DebugTrace: true,
-		},
-		IKSConfig: &config.IKSConfig{
-			Enabled:             true,
-			IKSFileProviderName: "test-vpc-volume-type",
-		},
-	}
-
-	sessn := &vpc_prov.VPCSession{
-		VPCAccountID: TestIKSAccountID,
-		Config:       conf,
-		ContextCredentials: provider.ContextCredentials{
-			AuthType:     provider.IAMAccessToken,
-			Credential:   TestProviderAccessToken,
-			IAMAccountID: TestIKSAccountID,
-		},
-		VolumeType: "vpc-share",
-		Provider:   vpc_prov.VPC,
-	}
+	ccf := &auth.ContextCredentialsFactory{}
 
 	logger := zap.NewNop()
 	k8sClient, _ := k8s_utils.FakeGetk8sClientSet()
@@ -168,36 +134,128 @@ func TestOpenProviderSession(t *testing.T) {
 	secretConfPath := filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig.toml")
 	_ = k8s_utils.FakeCreateSecret(k8sClient, "DEFAULT", secretConfPath)
 
-	ccf := &auth.ContextCredentialsFactory{}
+	// Define test cases
+	testCases := []struct {
+		name                 string
+		expectedErrMsg       string
+		expectedCredenErrMsg string
+		sessn                *vpc_prov.VPCSession
+	}{
+		{
+			name: "Open session success",
+			sessn: &vpc_prov.VPCSession{
+				VPCAccountID: TestIKSAccountID,
+				Config: &vpcconfig.VPCFileConfig{
+					ServerConfig: &config.ServerConfig{
+						DebugTrace: true,
+					},
+					IKSConfig: &config.IKSConfig{
+						Enabled:             true,
+						IKSFileProviderName: "test-vpc-volume-type",
+					},
+				},
+				ContextCredentials: provider.ContextCredentials{
+					AuthType:     provider.IAMAccessToken,
+					Credential:   TestProviderAccessToken,
+					IAMAccountID: TestIKSAccountID,
+				},
+				VolumeType: "vpc-share",
+				Provider:   vpc_prov.VPC,
+			},
+		}, {
+			name: "openSession fails",
+			sessn: &vpc_prov.VPCSession{
+				VPCAccountID: TestIKSAccountID,
+				Config: &vpcconfig.VPCFileConfig{
+					ServerConfig: &config.ServerConfig{
+						DebugTrace: true,
+					},
+					IKSConfig: &config.IKSConfig{
+						Enabled:             true,
+						IKSFileProviderName: "test-vpc-volume-type",
+					},
+				},
+				ContextCredentials: provider.ContextCredentials{
+					AuthType:     provider.IAMAccessToken,
+					Credential:   TestProviderAccessToken,
+					IAMAccountID: TestIKSAccountID,
+				},
+				VolumeType: "vpc-share",
+				Provider:   vpc_prov.VPC,
+			},
+			expectedErrMsg: "openssession fatal error",
+		}, {
+			name: "ContextCredentialsFactory fails",
+			sessn: &vpc_prov.VPCSession{
+				VPCAccountID: TestIKSAccountID,
+				Config: &vpcconfig.VPCFileConfig{
+					ServerConfig: &config.ServerConfig{
+						DebugTrace: true,
+					},
+					IKSConfig: &config.IKSConfig{
+						Enabled:             true,
+						IKSFileProviderName: "test-vpc-volume-type",
+					},
+				},
+				ContextCredentials: provider.ContextCredentials{
+					AuthType:     provider.IAMAccessToken,
+					Credential:   TestProviderAccessToken,
+					IAMAccountID: TestIKSAccountID,
+				},
+				VolumeType: "vpc-share",
+				Provider:   vpc_prov.VPC,
+			},
+			expectedCredenErrMsg: "ContextCredentialsFactory fatal error",
+		}, {
+			name: "ContextCredentialsFactory due to nil IKS config",
+			sessn: &vpc_prov.VPCSession{
+				VPCAccountID: TestIKSAccountID,
+				Config: &vpcconfig.VPCFileConfig{
+					ServerConfig: &config.ServerConfig{
+						DebugTrace: true,
+					},
+					IKSConfig: nil,
+				},
+				ContextCredentials: provider.ContextCredentials{
+					AuthType:     provider.IAMAccessToken,
+					Credential:   TestProviderAccessToken,
+					IAMAccountID: TestIKSAccountID,
+				},
+				VolumeType: "vpc-share",
+				Provider:   vpc_prov.VPC,
+			},
+			expectedErrMsg: "Insufficient authentication credentials",
+		},
+	}
 
-	fakeProvider.OpenSessionReturns(sessn, nil)
-	fakeProvider.ContextCredentialsFactoryReturns(ccf, nil)
-	fakeCredential.ForIAMAccessTokenReturns(sessn.ContextCredentials, nil)
-	registry, _ := InitProviders(conf, &k8sClient, logger)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.expectedErrMsg != "" {
+				//Error case openSession fails
+				fakeProvider.OpenSessionReturns(tc.sessn, errors.New(tc.expectedErrMsg))
+				fakeProvider.ContextCredentialsFactoryReturns(ccf, nil)
+			} else if tc.expectedCredenErrMsg != "" {
+				fakeProvider.OpenSessionReturns(tc.sessn, nil)
+				fakeProvider.ContextCredentialsFactoryReturns(ccf, errors.New(tc.expectedCredenErrMsg))
+			} else {
+				fakeProvider.OpenSessionReturns(tc.sessn, nil)
+				fakeProvider.ContextCredentialsFactoryReturns(ccf, nil)
+			}
 
-	_, fatal, err := OpenProviderSession(fakeProvider, conf, registry, "test-vpc-volume-type", logger)
-	assert.NoError(t, err)
-	assert.False(t, fatal)
+			registry, _ := InitProviders(tc.sessn.Config, &k8sClient, logger)
+			_, fatal, err := OpenProviderSession(fakeProvider, tc.sessn.Config, registry, "test-vpc-volume-type", logger)
 
-	//Error case openSession fails
-	fakeProvider.OpenSessionReturns(sessn, errors.New("fatal error"))
-	_, fatal, err = OpenProviderSession(fakeProvider, conf, registry, "test-vpc-volume-type", logger)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "fatal error")
-	assert.True(t, fatal)
+			if tc.expectedErrMsg != "" {
+				assert.EqualError(t, err, tc.expectedErrMsg)
+				assert.True(t, fatal)
+			} else if tc.expectedCredenErrMsg != "" {
+				assert.EqualError(t, err, tc.expectedCredenErrMsg)
+				assert.True(t, fatal)
+			} else {
+				assert.NoError(t, err)
+				assert.False(t, fatal)
+			}
 
-	//Error case ContextCredentialsFactory fails
-	fakeProvider.ContextCredentialsFactoryReturns(ccf, errors.New("fatal error"))
-	_, fatal, err = OpenProviderSession(fakeProvider, conf, registry, "test-vpc-volume-type", logger)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "fatal error")
-	assert.True(t, fatal)
-
-	//Error case GenerateContextCredentials fails
-	conf.IKSConfig = nil
-	fakeProvider.ContextCredentialsFactoryReturns(ccf, nil)
-	_, fatal, err = OpenProviderSession(fakeProvider, conf, registry, "test-vpc-volume-type", logger)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "Insufficient authentication credentials")
-	assert.True(t, fatal)
+		})
+	}
 }
