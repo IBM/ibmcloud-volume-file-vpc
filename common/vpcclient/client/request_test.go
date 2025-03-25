@@ -23,17 +23,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client/payload"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
-
-type MockAuthenHandler struct {
-	mock.Mock
-}
-
-func (m *MockAuthenHandler) Before(r *Request) error {
-	args := m.Called(r)
-	return args.Error(0)
-}
 
 func TestRequest_path(t *testing.T) {
 	tests := []struct {

@@ -62,41 +62,74 @@ func TestInitProviders(t *testing.T) {
 	secretConfPath := filepath.Join(pwd, "..", "..", "test-fixtures", "slconfig.toml")
 	_ = k8s_utils.FakeCreateSecret(k8sClient, "DEFAULT", secretConfPath)
 
-	// Test case 1: Both VPC and IKS providers are enabled
-	vpcConfig := &config.VPCProviderConfig{
-		Enabled:       true,
-		VPCVolumeType: "test-vpc-volume-type",
+	// Define test cases
+	testCases := []struct {
+		name           string
+		expectedErrMsg string
+		vpcConfig      *config.VPCProviderConfig
+		iksConfig      *config.IKSConfig
+		client         *k8s_utils.KubernetesClient
+	}{
+		{
+			name:           "Both VPC and IKS providers are enabled",
+			client:         &k8sClient,
+			expectedErrMsg: "",
+			// Setup test environment
+			vpcConfig: &config.VPCProviderConfig{
+				Enabled:       true,
+				VPCVolumeType: "test-vpc-volume-type",
+			},
+			iksConfig: &config.IKSConfig{
+				Enabled:             true,
+				IKSFileProviderName: "test-iks-file-provider",
+			},
+		},
+		{
+			name:           "VPC provider is enabled",
+			client:         &k8sClient,
+			expectedErrMsg: "",
+			// Setup test environment
+			vpcConfig: &config.VPCProviderConfig{
+				Enabled:       true,
+				VPCVolumeType: "test-vpc-volume-type",
+			},
+			iksConfig: nil,
+		},
+		{
+			name:   "No providers are enabled",
+			client: &k8sClient,
+			// Setup test environment
+			vpcConfig:      nil,
+			iksConfig:      nil,
+			expectedErrMsg: "no providers registered",
+		},
+		{
+			name: "pass nill k8s",
+			// Setup test environment
+			vpcConfig: &config.VPCProviderConfig{
+				Enabled:       true,
+				VPCVolumeType: "test-vpc-volume-type",
+			},
+			iksConfig:      nil,
+			client:         nil,
+			expectedErrMsg: "Description: Error initialising k8s client BackendError: validator: (nil *k8s_utils.KubernetesClient) ",
+		},
 	}
-	iksConfig := &config.IKSConfig{
-		Enabled:             true,
-		IKSFileProviderName: "test-iks-file-provider",
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			vpcfileconf.VPCConfig = tc.vpcConfig
+			vpcfileconf.IKSConfig = tc.iksConfig
+
+			_, err := InitProviders(vpcfileconf, tc.client, logger)
+			if tc.expectedErrMsg != "" {
+				assert.EqualError(t, err, tc.expectedErrMsg)
+			} else {
+				assert.NoError(t, err)
+			}
+
+		})
 	}
-	vpcfileconf.VPCConfig = vpcConfig
-	vpcfileconf.IKSConfig = iksConfig
-
-	_, err := InitProviders(vpcfileconf, &k8sClient, logger)
-	assert.NoError(t, err)
-
-	// Test case 2: Only VPC provider is enabled
-	vpcfileconf.IKSConfig = nil
-
-	_, err = InitProviders(vpcfileconf, &k8sClient, logger)
-	assert.NoError(t, err)
-
-	// Test case 3: Pass nill k8s
-	vpcfileconf.VPCConfig = vpcConfig
-	vpcfileconf.IKSConfig = nil
-	_, err = InitProviders(vpcfileconf, nil, logger)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "Description: Error initialising k8s client BackendError: validator: (nil *k8s_utils.KubernetesClient) ")
-
-	// Test case 4: No providers are enabled
-	vpcfileconf.VPCConfig = nil
-	vpcfileconf.IKSConfig = nil
-	_, err = InitProviders(vpcfileconf, &k8sClient, logger)
-	assert.Error(t, err)
-	assert.EqualError(t, err, "no providers registered")
-
 }
 
 func TestOpenProviderSession(t *testing.T) {
