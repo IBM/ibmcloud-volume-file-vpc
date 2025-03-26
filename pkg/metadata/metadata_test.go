@@ -35,10 +35,10 @@ func TestNewNodeMetadata(t *testing.T) {
 	assert.Nil(t, nodeMeta)
 
 	// statically creating
-	nodeMetadata := &nodeMetadataManager{zone: "myzone", region: "myregion", workerID: "myworkerid"}
-	assert.Equal(t, "myzone", nodeMetadata.GetZone())
-	assert.Equal(t, "myregion", nodeMetadata.GetRegion())
-	assert.Equal(t, "myworkerid", nodeMetadata.GetWorkerID())
+	nodeMetadata, _ := InitMetadata("node1", logger)
+	assert.Equal(t, "testzone", nodeMetadata.GetZone())
+	assert.Equal(t, "testregion", nodeMetadata.GetRegion())
+	assert.Equal(t, "testworkerid", nodeMetadata.GetWorkerID())
 }
 
 func TestGetZone(t *testing.T) {

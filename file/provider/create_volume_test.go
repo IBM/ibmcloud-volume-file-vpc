@@ -141,6 +141,113 @@ func TestCreateVolume(t *testing.T) {
 				assert.Nil(t, err)
 			},
 		}, {
+			testCaseName: "Volume profile is nil",
+			providerVolume: provider.Volume{
+				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:     String("test volume name"),
+				Capacity: Int(10),
+				Iops:     String("0"),
+				VPCVolume: provider.VPCVolume{
+					Profile:       nil,
+					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
+				},
+			},
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.Nil(t, volumeResponse)
+				assert.NotNil(t, err)
+			},
+		}, {
+			testCaseName: "Volume with VPC Mode",
+			profileName:  "tier-10iops",
+			baseVolume: &models.Share{
+				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:   "test-volume-name",
+				Status: models.StatusType("stable"),
+				Size:   int64(10),
+				Iops:   int64(1000),
+				Zone:   &models.Zone{Name: "test-zone"},
+				ShareTargets: &[]models.ShareTarget{
+					{
+						ID: "testVolumeAccessPointId",
+						VPC: &provider.VPC{
+							ID: "1234",
+						},
+						Zone: &models.Zone{Name: "test-zone"},
+					},
+				},
+			},
+			providerVolume: provider.Volume{
+				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:     String("test volume name"),
+				Capacity: Int(10),
+				Iops:     String("0"),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: profileName},
+					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
+					VPCFileVolume: provider.VPCFileVolume{
+						AccessControlMode: "VPC",
+						VPCID:             "VPC-id1",
+					},
+				},
+			},
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.NotNil(t, volumeResponse)
+				assert.Nil(t, err)
+			},
+		}, {
+			testCaseName: "Volume with securityGroup Mode",
+			profileName:  "tier-10iops",
+			baseVolume: &models.Share{
+				ID:     "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:   "test-volume-name",
+				Status: models.StatusType("stable"),
+				Size:   int64(10),
+				Iops:   int64(1000),
+				Zone:   &models.Zone{Name: "test-zone"},
+				ShareTargets: &[]models.ShareTarget{
+					{
+						ID: "testVolumeAccessPointId",
+						VPC: &provider.VPC{
+							ID: "1234",
+						},
+						Zone: &models.Zone{Name: "test-zone"},
+					},
+				},
+			},
+			providerVolume: provider.Volume{
+				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+				Name:     String("test volume name"),
+				Capacity: Int(10),
+				Iops:     String("0"),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: profileName},
+					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
+					VPCFileVolume: provider.VPCFileVolume{
+						AccessControlMode: "security_group",
+						VPCID:             "VPC-id1",
+						TransitEncryption: "user_managed",
+						SecurityGroups: &[]provider.SecurityGroup{
+							{
+								ID: "securityGroup-1",
+							},
+							{
+								ID: "securityGroup-2",
+							},
+						},
+						PrimaryIP: &provider.PrimaryIP{
+							PrimaryIPID: provider.PrimaryIPID{
+								ID: "primary-ip-id-1",
+							},
+						},
+						SubnetID: "subnetID-1",
+					},
+				},
+			},
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.NotNil(t, volumeResponse)
+				assert.Nil(t, err)
+			},
+		}, {
 			testCaseName: "Volume creation failure",
 			profileName:  "tier-10iops",
 			providerVolume: provider.Volume{
