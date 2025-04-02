@@ -42,7 +42,7 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 		}
 
 		if existShare != nil && existShare.Status == StatusStable {
-			vpcs.Logger.Info("Volume got valid (available) state", zap.Reflect("etag", etag))
+			vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("etag", etag))
 		} else {
 			return userError.GetUserError("VolumeNotInValidState", err, volumeTemplate.VolumeID)
 		}
