@@ -23,13 +23,6 @@ import (
 
 // messagesEn ...
 var messagesEn = map[string]util.Message{
-	"AuthenticationFailed": {
-		Code:        AuthenticationFailed,
-		Description: "Failed to authenticate the user.",
-		Type:        util.Unauthenticated,
-		RC:          400,
-		Action:      "Verify that you entered the correct IBM Cloud user name and password. If the error persists, the authentication service might be unavailable. Wait a few minutes and try again. ",
-	},
 	"ErrorRequiredFieldMissing": {
 		Code:        "ErrorRequiredFieldMissing",
 		Description: "[%s] is required to complete the operation.",
@@ -162,13 +155,6 @@ var messagesEn = map[string]util.Message{
 		Type:        util.ProvisioningFailed,
 		RC:          500,
 		Action:      "Please wait for some time. Run ibmcloud is share <SHARE-ID> and check the current status if is not stable then raise ticket for VPC team else on IKS team.",
-	},
-	"VolumeDeletionInProgress": {
-		Code:        "VolumeDeletionInProgress",
-		Description: "File share %s deletion in progress.",
-		Type:        util.ProvisioningFailed,
-		RC:          500,
-		Action:      "Wait for file share deletion",
 	},
 	"SubnetsListFailed": {
 		Code:        "SubnetsListFailed",
