@@ -151,10 +151,10 @@ var messagesEn = map[string]util.Message{
 	},
 	"VolumeNotInValidState": {
 		Code:        "VolumeNotInValidState",
-		Description: "File share %s did not get valid (stable) status within timeout period.",
+		Description: "Share %s did not get valid (stable) status within timeout period.",
 		Type:        util.ProvisioningFailed,
 		RC:          500,
-		Action:      "Please wait for some time. Run ibmcloud is share <SHARE-ID> and check the current status if is not stable then raise ticket for VPC team else on IKS team.",
+		Action:      "Run ibmcloud is share <SHARE-ID> and check the current status if is not stable then raise ticket for VPC team else on IKS team.",
 	},
 	"SubnetsListFailed": {
 		Code:        "SubnetsListFailed",
@@ -168,7 +168,7 @@ var messagesEn = map[string]util.Message{
 		Description: "A subnet with the specified zone '%s' and available cluster subnet list '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Please verify if VPC and Cluster are part of the same ResourceGroup. Please refer https://cloud.ibm.com/docs/containers?topic=containers-storage-file-vpc-apps#storage-file-vpc-custom-sc for more details and if required raise ticket for IKS team.",
+		Action:      "Please verify if VPC and Cluster are part of the different ResourceGroup. If yes then please refer https://cloud.ibm.com/docs/containers?topic=containers-storage-file-vpc-apps#storage-file-vpc-custom-sc for more details. Else please raise ticket for IKS team.",
 	},
 	"SecurityGroupsListFailed": {
 		Code:        "SecurityGroupsListFailed",
