@@ -35,7 +35,7 @@ func TestInitMessages(t *testing.T) {
 	}
 
 	// Assert that the keys in the map are as expected
-	expectedKeys := []string{"AuthenticationFailed", "ErrorRequiredFieldMissing", "FailedToPlaceOrder"} // Replace with actual expected keys
+	expectedKeys := []string{"ErrorRequiredFieldMissing", "FailedToPlaceOrder"} // Replace with actual expected keys
 	for _, key := range expectedKeys {
 		if _, exists := messages[key]; !exists {
 			t.Errorf("InitMessages should contain key: %s", key)

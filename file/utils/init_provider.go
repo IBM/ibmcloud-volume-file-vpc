@@ -83,7 +83,6 @@ func OpenProviderSessionWithContext(ctx context.Context, prov local.Provider, vp
 		ctxLogger.Error("Unable to fetch credentials", local.ZapError(err))
 		return nil, true, err
 	}
-	ctxLogger.Info("Calling provider/utils/init_provider.go GenerateContextCredentials")
 	contextCredentials, err := GenerateContextCredentials(vpcfileconf, providerID, ccf, ctxLogger)
 	if err != nil {
 		ctxLogger.Error("Unable to generate credentials", local.ZapError(err))

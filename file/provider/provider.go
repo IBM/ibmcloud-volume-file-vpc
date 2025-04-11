@@ -164,7 +164,6 @@ func (vpcp *VPCFileProvider) OpenSession(ctx context.Context, contextCredentials
 	if ctx != nil && ctx.Value(provider.RequestID) != nil {
 		// set ContextID only of speicifed in the context
 		vpcp.APIConfig.ContextID = fmt.Sprintf("%v", ctx.Value(provider.RequestID))
-		ctxLogger.Info("", zap.Reflect("apiConfig.ContextID", vpcp.APIConfig.ContextID))
 	}
 	client, err := vpcp.ClientProvider.New(vpcp.APIConfig)
 	if err != nil {
