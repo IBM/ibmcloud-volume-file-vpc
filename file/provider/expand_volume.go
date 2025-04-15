@@ -68,7 +68,7 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 		return -1, userError.GetUserError("FailedToExpandVolume", err, expandVolumeRequest.VolumeID)
 	}
 
-	vpcs.Logger.Info("Successfully accepted volume expansion request, now waiting for volume state equal to available")
+	vpcs.Logger.Info("Successfully accepted volume expansion request, now waiting for volume state equal to stable")
 	err = WaitForValidVolumeState(vpcs, share.ID)
 	if err != nil {
 		return -1, userError.GetUserError("VolumeNotInValidState", err, share.ID)

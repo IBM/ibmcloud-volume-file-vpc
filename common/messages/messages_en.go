@@ -23,13 +23,6 @@ import (
 
 // messagesEn ...
 var messagesEn = map[string]util.Message{
-	"AuthenticationFailed": {
-		Code:        AuthenticationFailed,
-		Description: "Failed to authenticate the user.",
-		Type:        util.Unauthenticated,
-		RC:          400,
-		Action:      "Verify that you entered the correct IBM Cloud user name and password. If the error persists, the authentication service might be unavailable. Wait a few minutes and try again. ",
-	},
 	"ErrorRequiredFieldMissing": {
 		Code:        "ErrorRequiredFieldMissing",
 		Description: "[%s] is required to complete the operation.",
@@ -158,17 +151,10 @@ var messagesEn = map[string]util.Message{
 	},
 	"VolumeNotInValidState": {
 		Code:        "VolumeNotInValidState",
-		Description: "File share %s did not get valid (available) status within timeout period.",
+		Description: "Share %s did not get valid (stable) status within timeout period.",
 		Type:        util.ProvisioningFailed,
 		RC:          500,
-		Action:      "Please check your input",
-	},
-	"VolumeDeletionInProgress": {
-		Code:        "VolumeDeletionInProgress",
-		Description: "File share %s deletion in progress.",
-		Type:        util.ProvisioningFailed,
-		RC:          500,
-		Action:      "Wait for file share deletion",
+		Action:      "Run 'ibmcloud is share <SHARE-ID>' and check the current status. If the status is not stable, contact support.",
 	},
 	"SubnetsListFailed": {
 		Code:        "SubnetsListFailed",
@@ -182,7 +168,7 @@ var messagesEn = map[string]util.Message{
 		Description: "A subnet with the specified zone '%s' and available cluster subnet list '%s' could not be found.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
-		Action:      "Verify that the subnet from the cluster subnet list exists. Target to appropriate region 'ibmcloud target -r <region>' and verify if 'ibmcloud is subnets' is returning the subnets. If it is not returning the matching subnet from the cluster subnet list then raise ticket for VPC team else raise ticket for IKS team.",
+		Action:      "Check whether your VPC and cluster are in different resource groups. If your VPC and cluster are in different resource groups, then refer to https://cloud.ibm.com/docs/containers?topic=containers-storage-file-vpc-apps#storage-file-vpc-custom-sc for more details. If your VPC and cluster are in the same resource group, contact support.",
 	},
 	"SecurityGroupsListFailed": {
 		Code:        "SecurityGroupsListFailed",
