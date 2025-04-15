@@ -84,7 +84,7 @@ func TestGetUserError(t *testing.T) {
 			code:           "VolumeNotInValidState",
 			err:            fmt.Errorf("Volume stuck in pending state"),
 			arg:            "volume-id",
-			expectedErrMsg: "{Code:VolumeNotInValidState, Description:File share volume-id did not get valid (stable) status within timeout period..Volume stuck in pending state, RC:500}",
+			expectedErrMsg: "{Code:VolumeNotInValidState, Description:Share volume-id did not get valid (stable) status within timeout period..Volume stuck in pending state, RC:500}",
 		},
 	}
 
