@@ -750,7 +750,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	//Now PVC is deleted wait for some time and display that PV is still exists
 	if t.persistentVolume != nil && t.persistentVolume.Spec.PersistentVolumeReclaimPolicy == v1.PersistentVolumeReclaimRetain {
 		err = k8sDevPV.WaitForPersistentVolumeDeleted(context.TODO(), t.client, t.persistentVolume.Name, 5*time.Second, 2*time.Minute)
-		framework.ExpectError(err)
+		Expect(err).To(HaveOccurred())
 		By(fmt.Sprintf("Deleting PV object [%s]", t.persistentVolume.Name))
 		err = k8sDevPV.DeletePersistentVolume(context.TODO(), t.client, t.persistentVolume.Name)
 		framework.ExpectNoError(err)
@@ -1322,7 +1322,7 @@ func (t *TestVolumeSnapshotClass) ReadyToUse(snapshot *volumesnapshotv1.VolumeSn
 		return *vs.Status.ReadyToUse, nil
 	})
 	if snapFail == true {
-		framework.ExpectError(err)
+		Expect(err).To(HaveOccurred())
 	} else {
 		framework.ExpectNoError(err)
 	}
