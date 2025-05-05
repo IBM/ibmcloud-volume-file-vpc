@@ -70,6 +70,7 @@ var skipErrorCodes = map[string]bool{
 	"targets_primary_ip_not_related_to_subnet":  true,
 	"shares_target_vpc_and_network_interface":   true,
 	"shares_security_group_id_invalid":          true,
+	"shares_target_security_group_not_found":    true,
 	"targets_primary_ip_address_already_in_use": true,
 	"reserved_ip_not_found":                     true,
 	"shares_subnet_not_found":                   true,
