@@ -411,6 +411,7 @@ function cluster_create_vpc {
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
                 --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count; rc=$?
             fi
+        fi
     else
         # Disable outbound traffic protection in case EIT test cases are to be executed
         if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
