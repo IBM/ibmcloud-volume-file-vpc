@@ -777,6 +777,7 @@ key="$1"
 	;;
     --os)
     e2e_cluster_os="$2"
+    WORKER_OS="$2"
     shift
     shift
     ;;
