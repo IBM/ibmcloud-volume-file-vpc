@@ -399,7 +399,7 @@ function cluster_create_vpc {
             else
                 ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system "$WORKER_OS" --disable-outbound-traffic-protection; rc=$?
+                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection; rc=$?
             fi
         else
             if [[ "$WORKER_OS" == "RHCOS" ]]; then
@@ -409,7 +409,7 @@ function cluster_create_vpc {
             else
                 ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system "$WORKER_OS"; rc=$?
+                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count; rc=$?
             fi
         fi
     else
@@ -777,7 +777,6 @@ key="$1"
 	;;
     --os)
     e2e_cluster_os="$2"
-    WORKER_OS="$2"
     shift
     shift
     ;;
@@ -850,19 +849,7 @@ if [[ "$e2e_k8s_platform" != "k8s" && "$e2e_k8s_platform" != "ocp" ]]; then
 fi
 if [[ "$e2e_k8s_platform" == "k8s" ]]; then  K8S_PLATFORM="kubernetes"; else K8S_PLATFORM="openshift"; fi
 
-WORKER_OS="ubuntu"
-
-# Argument parsing
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --os)
-            e2e_cluster_os="$2"
-            WORKER_OS="$2"
-            shift
-            shift
-            ;;
-    esac
-done
+WORKER_OS="$e2e_cluster_os"
 
 # Set APIs
 if [[ "$e2e_env" = "stage" ]]; then
