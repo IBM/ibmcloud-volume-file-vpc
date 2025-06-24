@@ -62,7 +62,6 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 			return userError.GetUserError("VolumeNotInValidState", err, volumeTemplate.VolumeID)
 		}
 
-<<<<<<< Updated upstream
 		vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("etag", etag))
 
 		// Tag check using new map-based tags
@@ -101,19 +100,6 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 		if !shouldUpdate {
 			vpcs.Logger.Info("No changes detected, skipping update call")
 			return nil
-=======
-		//If tags are equal then skip the UpdateFileShare RIAAS API call
-		if ifTagsEqual(existShare.UserTags, volumeTemplate.Tags) {
-			vpcs.Logger.Info("There is no change in user tags for volume, skipping the updateVolume for VPC IaaS... ", zap.Reflect("existShare", existShare.UserTags), zap.Reflect("volumeRequest", volumeTemplate.Tags))
-			return nil
-		}
-
-		//Append the existing tags with the requested input tags
-		existShare.UserTags = append(existShare.UserTags, volumeTemplate.Tags...)
-
-		volume := &models.Share{
-			UserTags: existShare.UserTags,
->>>>>>> Stashed changes
 		}
 
 		vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...",

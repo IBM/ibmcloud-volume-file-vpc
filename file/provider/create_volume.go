@@ -33,19 +33,13 @@ const (
 	minSize       = 10    //10 GB
 	maxSize       = 16000 //16 TB
 	customProfile = "custom-iops"
-<<<<<<< Updated upstream
 )
 
 var (
 	SupportedProfiles        = []string{"dp2", "rfs"}
 	IOPSAllowedProfiles      = []string{"dp2"}
 	BandwidthAllowedProfiles = []string{"rfs"}
-=======
-	//dp2Profile    = "dp2"
->>>>>>> Stashed changes
 )
-
-var Profiles = []string{"dp2", "rfs"}
 
 // CreateVolume creates file share
 func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeResponse *provider.Volume, err error) {
@@ -71,7 +65,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		AccessControlMode: volumeRequest.AccessControlMode,
 		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
-			Name: volumeRequest.Profile.Name,
+			Name: volumeRequest.VPCVolume.Profile.Name,
 		},
 		Bandwidth: func() *int64 {
 			profile := volumeRequest.VPCVolume.Profile.Name
@@ -123,8 +117,8 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	}
 
 	var encryptionKeyCRN string
-	if volumeRequest.VolumeEncryptionKey != nil && len(volumeRequest.VolumeEncryptionKey.CRN) > 0 {
-		encryptionKeyCRN = volumeRequest.VolumeEncryptionKey.CRN
+	if volumeRequest.VPCVolume.VolumeEncryptionKey != nil && len(volumeRequest.VPCVolume.VolumeEncryptionKey.CRN) > 0 {
+		encryptionKeyCRN = volumeRequest.VPCVolume.VolumeEncryptionKey.CRN
 		shareTemplate.EncryptionKey = &models.EncryptionKey{CRN: encryptionKeyCRN}
 	}
 
@@ -201,7 +195,6 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	if volumeRequest.Iops != nil {
 		iops = ToInt64(*volumeRequest.Iops)
 	}
-<<<<<<< Updated upstream
 
 	if volumeRequest.Bandwidth != nil {
 		bandwidth = ToInt64(*volumeRequest.Bandwidth)
@@ -226,35 +219,14 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 
 	if volumeRequest.VPCVolume.ResourceGroup == nil {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("EmptyResourceGroup", nil)
-=======
-	if volumeRequest.Profile == nil {
-		return resourceGroup, iops, userError.GetUserError("VolumeProfileEmpty", nil)
-	}
-	// if volumeRequest.VPCVolume.Profile.Name != customProfile && volumeRequest.VPCVolume.Profile.Name != dp2Profile && iops > 0 {
-	// 	return resourceGroup, iops, userError.GetUserError("VolumeProfileIopsInvalid", nil)
-	// }
-
-	if volumeRequest.Profile.Name != customProfile && !contains(Profiles, volumeRequest.Profile.Name) && iops > 0 {
-		return resourceGroup, iops, userError.GetUserError("VolumeProfileIopsInvalid", nil)
 	}
 
-	// validate and add resource group ID or Name whichever is provided by user
-	if volumeRequest.ResourceGroup == nil {
-		return resourceGroup, iops, userError.GetUserError("EmptyResourceGroup", nil)
+	if len(volumeRequest.VPCVolume.ResourceGroup.ID) > 0 {
+		resourceGroup.ID = volumeRequest.VPCVolume.ResourceGroup.ID
 	}
-
-	// validate and add resource group ID or Name whichever is provided by user
-	if len(volumeRequest.ResourceGroup.ID) == 0 && len(volumeRequest.ResourceGroup.Name) == 0 {
-		return resourceGroup, iops, userError.GetUserError("EmptyResourceGroupIDandName", nil)
->>>>>>> Stashed changes
-	}
-
-	if len(volumeRequest.ResourceGroup.ID) > 0 {
-		resourceGroup.ID = volumeRequest.ResourceGroup.ID
-	}
-	if len(volumeRequest.ResourceGroup.Name) > 0 {
+	if len(volumeRequest.VPCVolume.ResourceGroup.Name) > 0 {
 		// get the resource group ID from resource group name as Name is not supported by RIaaS
-		resourceGroup.Name = volumeRequest.ResourceGroup.Name
+		resourceGroup.Name = volumeRequest.VPCVolume.ResourceGroup.Name
 	}
 
 	return resourceGroup, iops, bandwidth, nil
