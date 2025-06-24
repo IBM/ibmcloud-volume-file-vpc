@@ -224,7 +224,7 @@ func main() {
 			}
 			*/
 
-			volume.VPCVolume.ResourceGroup = &provider.ResourceGroup{}
+			volume.ResourceGroup = &provider.ResourceGroup{}
 
 			var (
 				profile         string
@@ -247,6 +247,7 @@ func main() {
 
 			fmt.Printf("\nPlease enter profile name (supported: dp2, rfs, tier-10iops, tier-5iops, tier-3iops): ")
 			_, _ = fmt.Scanf("%s", &profile)
+<<<<<<< Updated upstream
 
 			caps, ok := supportedProfiles[profile]
 			if !ok {
@@ -279,6 +280,9 @@ func main() {
 					volume.Bandwidth = &bandwidthStr
 				}
 			}
+=======
+			volume.Profile = &provider.Profile{Name: profile}
+>>>>>>> Stashed changes
 
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)
@@ -292,10 +296,14 @@ func main() {
 
 			fmt.Printf("\nPlease enter resource group ID: ")
 			_, _ = fmt.Scanf("%s", &resourceGroup)
+<<<<<<< Updated upstream
 			if volume.VPCVolume.ResourceGroup == nil {
 				volume.VPCVolume.ResourceGroup = &provider.ResourceGroup{}
 			}
 			volume.VPCVolume.ResourceGroup.ID = resourceGroup
+=======
+			volume.ResourceGroup.ID = resourceGroup
+>>>>>>> Stashed changes
 
 			volumeObj, errr := sess.CreateVolume(*volume)
 			if errr == nil {

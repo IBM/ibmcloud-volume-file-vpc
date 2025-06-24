@@ -20,7 +20,7 @@ fmt:
 
 .PHONY: dofmt
 dofmt:
-	golangci-lint run --disable-all --enable=gofmt --fix
+	golangci-lint run --fix --config=.golangci.yml
 
 .PHONY: lint
 lint:
@@ -32,7 +32,7 @@ makefmt:
 
 .PHONY: build
 build:
-	go build -gcflags '-N -l' -o libSample samples/main.go samples/volume_operations.go
+	go build -gcflags '-N -l' -o libSample samples/main.go
 
 .PHONY: test
 test:

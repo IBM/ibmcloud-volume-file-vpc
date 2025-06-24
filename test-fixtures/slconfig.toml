@@ -4,10 +4,10 @@
 [vpc]
   vpc_enabled = true
   g2_token_exchange_endpoint_url = "https://iam.stage1.bluemix.net"
-  g2_riaas_endpoint_url = "https://us-south-stage01.iaasdev.cloud.ibm.com/"
-  g2_riaas_endpoint_private_url = "https://us-south-stage01.iaasdev.cloud.ibm.com"
+  g2_riaas_endpoint_url = "https://us-south-genesis-dal-dev50-etcd.iaasdev.cloud.ibm.com/"
+  g2_riaas_endpoint_private_url = "https://us-south-genesis-dal-dev50-etcd.iaasdev.cloud.ibm.com"
   g2_resource_group_id = ""
-  g2_api_key = "api-key"
+  g2_api_key = "ubiMcbyZ07DGA1lTBL1Ot7_BB4BHjC8o1Nea_vgIfbhG"
   provider_type = "g2"
   vpc_block_provider_name = "vpc"
   vpc_volume_type="vpc-block"

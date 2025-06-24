@@ -253,7 +253,7 @@ func (pvw *PVWatcher) getTags(pv *v1.PersistentVolume, ctxLogger *zap.Logger) (s
 	tags = append(tags, StorageClassTag+pv.Spec.StorageClassName)
 	tags = append(tags, NameSpaceTag+pv.Spec.ClaimRef.Namespace)
 	tags = append(tags, PVCNameTag+pv.Spec.ClaimRef.Name)
-	tags = append(tags, PVNameTag+pv.ObjectMeta.Name)
+	tags = append(tags, PVNameTag+pv.Name)
 	tags = append(tags, ProvisionerTag+pvw.provisionerName)
 	ctxLogger.Debug("Exit getTags()", zap.String("VolumeCRN", volAttributes[VolumeCRN]), zap.Reflect("tags", tags))
 	return volAttributes[VolumeCRN], tags

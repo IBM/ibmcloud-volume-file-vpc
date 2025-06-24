@@ -50,7 +50,7 @@ func (t *StatefulsetWithVolWRTest) Run(client clientset.Interface, namespace *v1
 		By("checking pod exec before pod delete")
 		tStatefulset.Exec(t.PodCheck.Cmd, t.PodCheck.ExpectedString01)
 	}
-	if drainNode == true {
+	if drainNode {
 		tStatefulset.drainNode()
 		defer tStatefulset.uncordonNode()
 		By("checking again that the pod(s) is/are running")
