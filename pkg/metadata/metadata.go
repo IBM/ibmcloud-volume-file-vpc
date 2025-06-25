@@ -94,7 +94,7 @@ func (nodeManager *NodeInfoManager) NewNodeMetadata(logger *zap.Logger) (NodeMet
 		return nil, err
 	}
 
-	nodeLabels := node.ObjectMeta.Labels
+	nodeLabels := node.Labels
 	if len(nodeLabels[NodeRegionLabel]) == 0 || len(nodeLabels[NodeZoneLabel]) == 0 {
 		errorMsg := fmt.Errorf("One or few required node label(s) is/are missing [%s, %s]. Node Labels Found = [#%v]", NodeRegionLabel, NodeZoneLabel, nodeLabels) //nolint:golint
 		return nil, errorMsg

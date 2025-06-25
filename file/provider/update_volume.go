@@ -19,6 +19,7 @@ package provider
 
 import (
 	"strings"
+	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
@@ -26,11 +27,28 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	StatusFailed             = "failed"
+	StatusProvisioningFailed = "provisioning_failed"
+)
+
+func convertMapToTagList(tagMap map[string]string) []string {
+	tags := []string{}
+	for k, v := range tagMap {
+		tags = append(tags, k+":"+v)
+	}
+	return tags
+}
+
 // UpdateVolume PATCH to /volumes
 func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 	var existShare *models.Share
 	var err error
 	var etag string
+	updatePayload := &models.Share{}
+	shouldUpdate := false
+
+	requestedTags := convertMapToTagList(volumeTemplate.Tags)
 
 	//Fetch existing volume Tags
 	err = retryWithMinRetries(vpcs.Logger, func() error {
@@ -40,29 +58,56 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 		if err != nil {
 			return err
 		}
-
-		if existShare != nil && existShare.Status == StatusStable {
-			vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("etag", etag))
-		} else {
+		if existShare == nil || existShare.Status != StatusStable {
 			return userError.GetUserError("VolumeNotInValidState", err, volumeTemplate.VolumeID)
 		}
 
-		//If tags are equal then skip the UpdateFileShare RIAAS API call
-		if ifTagsEqual(existShare.UserTags, volumeTemplate.VPCVolume.Tags) {
-			vpcs.Logger.Info("There is no change in user tags for volume, skipping the updateVolume for VPC IaaS... ", zap.Reflect("existShare", existShare.UserTags), zap.Reflect("volumeRequest", volumeTemplate.VPCVolume.Tags))
+		vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("etag", etag))
+
+		// Tag check using new map-based tags
+		if !ifTagsEqual(existShare.UserTags, requestedTags) {
+			updatePayload.UserTags = append(existShare.UserTags, requestedTags...)
+			shouldUpdate = true
+		}
+
+		// Profile check for bandwidth / iops
+		profile := strings.ToLower(existShare.Profile.Name)
+
+		// Bandwidth support for rfs
+		if profile == "rfs" && volumeTemplate.Bandwidth != nil {
+			newBandwidth := ToInt64(*volumeTemplate.Bandwidth)
+			if existShare.Bandwidth == nil || *existShare.Bandwidth != newBandwidth {
+				updatePayload.Bandwidth = &newBandwidth
+				shouldUpdate = true
+			}
+		}
+
+		// IOPS support for dp2
+		if profile == "dp2" && volumeTemplate.Iops != nil {
+			newIops := ToInt64(*volumeTemplate.Iops)
+			if existShare.Iops != newIops {
+				updatePayload.Iops = newIops
+				shouldUpdate = true
+			}
+		}
+
+		// If no change detected, skip API call
+		if !shouldUpdate {
+			vpcs.Logger.Info("No changes detected, skipping update call")
 			return nil
 		}
 
-		//Append the existing tags with the requested input tags
-		existShare.UserTags = append(existShare.UserTags, volumeTemplate.VPCVolume.Tags...)
-
-		volume := &models.Share{
-			UserTags: existShare.UserTags,
+		if !shouldUpdate {
+			vpcs.Logger.Info("No changes detected, skipping update call")
+			return nil
 		}
 
-		vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...")
+		vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...",
+			zap.Reflect("VolumeID", volumeTemplate.VolumeID),
+			zap.Reflect("Payload", updatePayload),
+		)
 
-		err = vpcs.Apiclient.FileShareService().UpdateFileShareWithEtag(volumeTemplate.VolumeID, etag, volume, vpcs.Logger)
+		err = vpcs.Apiclient.FileShareService().UpdateFileShareWithEtag(volumeTemplate.VolumeID, etag, updatePayload, vpcs.Logger)
 		return err
 	})
 
@@ -70,7 +115,13 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 		vpcs.Logger.Error("Failed to update volume tags from VPC provider", zap.Reflect("BackendError", err))
 		return userError.GetUserError("FailedToUpdateVolume", err, volumeTemplate.VolumeID)
 	}
-
+	// Wait until volume returns to 'stable'
+	vpcs.Logger.Info("Waiting for volume to reach stable state...")
+	err = waitForStableState(vpcs, volumeTemplate.VolumeID, vpcs.Logger, 20, 10*time.Second)
+	if err != nil {
+		vpcs.Logger.Error("Volume did not reach stable state", zap.Error(err))
+		return err
+	}
 	return err
 }
 
@@ -86,4 +137,38 @@ func ifTagsEqual(existingTags []string, newTags []string) bool {
 	}
 	//Tags are equal
 	return true
+}
+
+// waitForStableState polls the volume (file share) status until it reaches a 'stable' state.
+// It retries up to `maxRetries` with a sleep interval of `interval` between attempts.
+// Returns an error if the volume enters a failed state or does not become stable within the retry limit.
+func waitForStableState(vpcs *VPCSession, shareID string, ctxLogger *zap.Logger, maxRetries int, interval time.Duration) error {
+	for i := 0; i < maxRetries; i++ {
+		share, _, err := vpcs.Apiclient.FileShareService().GetFileShareEtag(shareID, ctxLogger)
+		if err != nil {
+			ctxLogger.Warn("Failed to get volume state during wait", zap.Error(err))
+			return err
+		}
+
+		state := strings.ToLower(string(share.Status))
+		ctxLogger.Info("Polling share state", zap.String("state", state), zap.Int("attempt", i+1))
+
+		if state == StatusStable {
+			return nil
+		}
+		if state == "failed" || state == "provisioning_failed" {
+			return userError.GetUserError("VolumeNotInValidState", nil, shareID)
+		}
+
+		if state == StatusStable {
+			return nil
+		}
+		if state == StatusFailed || state == StatusProvisioningFailed {
+			return userError.GetUserError("VolumeNotInValidState", nil, shareID)
+		}
+
+		time.Sleep(interval)
+	}
+
+	return userError.GetUserError("VolumeNotInValidState", nil, shareID)
 }

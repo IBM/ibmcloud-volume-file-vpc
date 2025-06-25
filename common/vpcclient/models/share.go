@@ -29,6 +29,7 @@ type Share struct {
 	Name          string         `json:"name,omitempty"`
 	Size          int64          `json:"size,omitempty"`
 	Iops          int64          `json:"iops,omitempty"`
+	Bandwidth     *int64         `json:"bandwidth,omitempty"`
 	EncryptionKey *EncryptionKey `json:"encryption_key,omitempty"`
 	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
 	InitialOwner  *InitialOwner  `json:"initial_owner,omitempty"`

@@ -91,7 +91,7 @@ func NewUpdatePVC(volumeRequest provider.Volume) provider.UpdatePVC {
 	pvc := provider.UpdatePVC{
 		ID:         volumeRequest.VolumeID,
 		CRN:        volumeRequest.CRN,
-		Tags:       volumeRequest.VPCVolume.Tags,
+		Tags:       volumeRequest.Tags,
 		Provider:   string(volumeRequest.Provider),
 		VolumeType: string(volumeRequest.VolumeType),
 	}

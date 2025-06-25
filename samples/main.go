@@ -21,6 +21,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -33,6 +35,8 @@ import (
 	userError "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
 	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
+	utils "github.com/IBM/secret-utils-lib/pkg/utils"
+
 	uid "github.com/gofrs/uuid"
 )
 
@@ -80,6 +84,7 @@ func main() {
 
 	// Load config file
 	k8sClient, _ := k8s_utils.FakeGetk8sClientSet()
+	_ = k8s_utils.FakeCreateSecret(k8sClient, utils.DEFAULT, "./samples/sample-secret-config.toml")
 	conf, err := config.ReadConfig(k8sClient, logger)
 	if err != nil {
 		logger.Fatal("Error loading configuration")
@@ -96,9 +101,10 @@ func main() {
 		VPCConfig:    conf.VPC,
 		ServerConfig: conf.Server,
 	}
-
+	// enabling VPC provider as default
+	vpcFileConfig.VPCConfig.Enabled = true
+	// Prepare provider registry
 	providerRegistry, err := provider_file_util.InitProviders(vpcFileConfig, &k8sClient, logger)
-
 	if err != nil {
 		logger.Fatal("Error configuring providers", local.ZapError(err))
 	}
@@ -117,7 +123,7 @@ func main() {
 
 	valid := true
 	for valid {
-		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n Your choice?:")
+		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume  \n 23 - Update volume (bandwidth/iops) \n Your choice?:")
 
 		var choiceN int
 		var volumeID, targetID string
@@ -209,43 +215,88 @@ func main() {
 			fmt.Printf("\n\n")
 		} else if choiceN == 13 {
 			fmt.Println("You selected choice to Create VPC volume")
-			volume := &provider.Volume{}
-			volumeName := ""
-			volume.VolumeType = "vpc-share"
-			/* volume.VolumeEncryptionKey = &provider.VolumeEncryptionKey{
-				CRN: "crn:v1:bluemix:public:kms:us-south:a/b661e758bf044d2d928fef7900d5130b:f5be30ff-b5d8-4edd-9f5a-cc313b3584db:key:8e282989-19e8-4415-b6e3-b9d2ec1911d0",
-			} */
 
-			resourceGroup := ""
-			zone := "us-south-3"
-			volSize := 0
-			volume.Az = zone
+			volume := &provider.Volume{}
+
+			/* Optional: Enable this if you want to use a customer-managed encryption key
+			volume.VolumeEncryptionKey = &provider.VolumeEncryptionKey{
+			CRN: "crn:v1:bluemix:public:kms:us-south:a/b661e758bf044d2d928fef7900d5130b:f5be30ff-b5d8-4edd-9f5a-cc313b3584db:key:8e282989-19e8-4415-b6e3-b9d2ec1911d0",
+			}
+			*/
 
 			volume.VPCVolume.ResourceGroup = &provider.ResourceGroup{}
 
-			profile := "tier-10iops"
-			fmt.Printf("\nPlease enter profile name supported profiles are [tier-10iops, tier-5iops, tier-3iops]: ")
+			var (
+				profile         string
+				zone            string
+				volumeName      string
+				resourceGroup   string
+				volSize         int
+				iops, bandwidth int
+			)
+
+			supportedProfiles := map[string]struct {
+				EnableIOPS      bool
+				EnableBandwidth bool
+				EnableZone      bool
+			}{
+				"dp2":         {EnableIOPS: true, EnableBandwidth: false, EnableZone: true},
+				"rfs":         {EnableIOPS: false, EnableBandwidth: true, EnableZone: false},
+				"tier-10iops": {}, "tier-5iops": {}, "tier-3iops": {}, // Tiered profiles
+			}
+
+			fmt.Printf("\nPlease enter profile name (supported: dp2, rfs, tier-10iops, tier-5iops, tier-3iops): ")
 			_, _ = fmt.Scanf("%s", &profile)
-			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
+
+			caps, ok := supportedProfiles[profile]
+			if !ok {
+				fmt.Printf("Invalid profile: %s\n", profile)
+				continue
+			}
+
+			if caps.EnableZone {
+				fmt.Printf("\nPlease enter zone: ")
+				_, _ = fmt.Scanf("%s", &zone)
+				volume.Az = &zone
+			} else {
+				volume.Az = nil
+			}
+
+			if caps.EnableIOPS {
+				fmt.Printf("\nEnter IOPS (optional for profile '%s', 0 to skip): ", profile)
+				_, _ = fmt.Scanf("%d", &iops)
+				if iops > 0 {
+					iopsStr := strconv.Itoa(iops)
+					volume.Iops = &iopsStr
+				}
+			}
+
+			if caps.EnableBandwidth {
+				fmt.Printf("\nEnter Bandwidth (optional for profile '%s', 0 to skip): ", profile)
+				_, _ = fmt.Scanf("%d", &bandwidth)
+				if bandwidth > 0 {
+					bandwidthStr := strconv.Itoa(bandwidth)
+					volume.Bandwidth = &bandwidthStr
+				}
+			}
 
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)
 			volume.Name = &volumeName
 
+			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
+
 			fmt.Printf("\nPlease enter volume size (Specify 10 GB - 16 TB of capacity in 1 GB increments): ")
 			_, _ = fmt.Scanf("%d", &volSize)
 			volume.Capacity = &volSize
 
-			fmt.Printf("\nPlease enter resource group ID:")
+			fmt.Printf("\nPlease enter resource group ID: ")
 			_, _ = fmt.Scanf("%s", &resourceGroup)
+			if volume.VPCVolume.ResourceGroup == nil {
+				volume.VPCVolume.ResourceGroup = &provider.ResourceGroup{}
+			}
 			volume.VPCVolume.ResourceGroup.ID = resourceGroup
 
-			fmt.Printf("\nPlease enter zone: ")
-			_, _ = fmt.Scanf("%s", &zone)
-			volume.Az = zone
-
-			//volume.SnapshotSpace = &volSize
-			//volume.VPCVolume.Tags = []string{"Testing VPC Volume"}
 			volumeObj, errr := sess.CreateVolume(*volume)
 			if errr == nil {
 				ctxLogger.Info("SUCCESSFULLY created volume...", zap.Reflect("volumeObj", volumeObj))
@@ -501,6 +552,63 @@ func main() {
 			} else {
 				er11 = updateRequestID(er11, requestID)
 				ctxLogger.Info("failed to expand================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
+			}
+			fmt.Printf("\n\n")
+		} else if choiceN == 23 {
+			fmt.Println("You selected choice to update volume (bandwidth/iops/name/tags)")
+			var newIops, newBandwidth int
+			var newName, tagsInput string
+
+			fmt.Printf("Enter Volume ID to update: ")
+			_, _ = fmt.Scanf("%s", &volumeID)
+
+			volume := provider.Volume{}
+			volume.VolumeID = volumeID
+
+			fmt.Printf("Enter new IOPS (0 to skip): ")
+			_, _ = fmt.Scanf("%d", &newIops)
+			if newIops > 0 {
+				iopsStr := strconv.Itoa(newIops)
+				volume.Iops = &iopsStr
+			}
+
+			fmt.Printf("Enter new Bandwidth (0 to skip): ")
+			_, _ = fmt.Scanf("%d", &newBandwidth)
+			if newBandwidth > 0 {
+				bwStr := strconv.Itoa(newBandwidth)
+				volume.Bandwidth = &bwStr
+			}
+
+			fmt.Printf("Enter new Volume Name (leave blank to skip): ")
+			_, _ = fmt.Scanf("%s", &newName)
+			if newName != "" {
+				volume.Name = &newName
+			}
+
+			fmt.Printf("Enter comma-separated tags (key=value) (optional): ")
+			_, _ = fmt.Scanf("%s", &tagsInput)
+			if tagsInput != "" {
+				tagsMap := map[string]string{}
+				pairs := strings.Split(tagsInput, ",")
+				for _, pair := range pairs {
+					kv := strings.SplitN(pair, "=", 2)
+					if len(kv) == 2 {
+						tagsMap[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
+					}
+				}
+				volume.Tags = tagsMap
+			}
+
+			if volume.Iops == nil && volume.Bandwidth == nil && volume.Name == nil && len(volume.Tags) == 0 {
+				fmt.Println("Nothing to update.")
+			} else {
+				err = sess.UpdateVolume(volume)
+				if err != nil {
+					err = updateRequestID(err, requestID)
+					ctxLogger.Error("Update volume failed", zap.Reflect("VolumeID", volumeID), zap.Reflect("Error", err))
+				} else {
+					ctxLogger.Info("Volume update successful", zap.Reflect("VolumeID", volumeID))
+				}
 			}
 			fmt.Printf("\n\n")
 		} else {
