@@ -301,7 +301,7 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		CreationTime: createdDate,
 	}
 	if vpcVolume.Zone != nil {
-		libVolume.Az = vpcVolume.Zone.Name
+		libVolume.Az = &vpcVolume.Zone.Name
 	}
 	libVolume.CRN = vpcVolume.CRN
 

@@ -26,11 +26,29 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	StatusFailed             = "failed"
+	StatusProvisioningFailed = "provisioning_failed"
+)
+
+func convertMapToTagList(tagMap map[string]string) []string {
+	tags := []string{}
+	for k, v := range tagMap {
+		tags = append(tags, k+":"+v)
+	}
+	return tags
+}
+
 // UpdateVolume PATCH to /volumes
 func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 	var existShare *models.Share
 	var err error
 	var etag string
+
+	updatePayload := &models.Share{}
+	shouldUpdate := false
+
+	requestedTags := convertMapToTagList(volumeTemplate.Tags)
 
 	//Fetch existing volume Tags
 	err = retryWithMinRetries(vpcs.Logger, func() error {
@@ -41,28 +59,56 @@ func (vpcs *VPCSession) UpdateVolume(volumeTemplate provider.Volume) error {
 			return err
 		}
 
-		if existShare != nil && existShare.Status == StatusStable {
+		if existShare != nil || existShare.Status == StatusStable {
 			vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("etag", etag))
 		} else {
 			return userError.GetUserError("VolumeNotInValidState", err, volumeTemplate.VolumeID)
 		}
 
-		//If tags are equal then skip the UpdateFileShare RIAAS API call
-		if ifTagsEqual(existShare.UserTags, volumeTemplate.VPCVolume.Tags) {
-			vpcs.Logger.Info("There is no change in user tags for volume, skipping the updateVolume for VPC IaaS... ", zap.Reflect("existShare", existShare.UserTags), zap.Reflect("volumeRequest", volumeTemplate.VPCVolume.Tags))
+		vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("etag", etag))
+
+		// Tag check using new map-based tags
+		if !ifTagsEqual(existShare.UserTags, requestedTags) {
+			updatePayload.UserTags = append(existShare.UserTags, requestedTags...)
+			shouldUpdate = true
+		}
+
+		// Profile check for bandwidth / iops
+		profile := strings.ToLower(existShare.Profile.Name)
+
+		if profile == "rfs" && volumeTemplate.Bandwidth != nil {
+			newBandwidth := ToInt64(*volumeTemplate.Bandwidth)
+			if existShare.Bandwidth == nil || *existShare.Bandwidth != newBandwidth {
+				updatePayload.Bandwidth = &newBandwidth
+				shouldUpdate = true
+			}
+		}
+		// IOPS support for dp2
+		if profile == "dp2" && volumeTemplate.Iops != nil {
+			newIops := ToInt64(*volumeTemplate.Iops)
+			if existShare.Iops != newIops {
+				updatePayload.Iops = newIops
+				shouldUpdate = true
+			}
+		}
+
+		// If no change detected, skip API call
+		if !shouldUpdate {
+			vpcs.Logger.Info("No changes detected, skipping update call")
 			return nil
 		}
 
-		//Append the existing tags with the requested input tags
-		existShare.UserTags = append(existShare.UserTags, volumeTemplate.VPCVolume.Tags...)
-
-		volume := &models.Share{
-			UserTags: existShare.UserTags,
+		if !shouldUpdate {
+			vpcs.Logger.Info("No changes detected, skipping update call")
+			return nil
 		}
 
-		vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...")
+		vpcs.Logger.Info("Calling VPC provider for volume UpdateVolumeWithTags...",
+			zap.Reflect("VolumeID", volumeTemplate.VolumeID),
+			zap.Reflect("Payload", updatePayload),
+		)
 
-		err = vpcs.Apiclient.FileShareService().UpdateFileShareWithEtag(volumeTemplate.VolumeID, etag, volume, vpcs.Logger)
+		err = vpcs.Apiclient.FileShareService().UpdateFileShareWithEtag(volumeTemplate.VolumeID, etag, updatePayload, vpcs.Logger)
 		return err
 	})
 
