@@ -54,11 +54,6 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	if bandwidth > 0 {
 		bandwidthPtr = &bandwidth
 	}
-	// bandwidthPtr := &bandwidth
-	// if volumeRequest.Bandwidth != nil && *volumeRequest.Bandwidth > 0 {
-	// 	b := *volumeRequest.Bandwidth
-	// 	bandwidthPtr = &b
-	// }
 
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
