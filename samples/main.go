@@ -22,9 +22,6 @@ import (
 	"fmt"
 	"os"
 
-	"strconv"
-	"strings"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/net/context"
@@ -124,7 +121,7 @@ func main() {
 
 	valid := true
 	for valid {
-		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n 23 - Update volume (bandwidth/iops) \n Your choice?:")
+		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n Your choice?:")
 
 		var choiceN int
 		var volumeID, targetID string
@@ -232,57 +229,35 @@ func main() {
 				iops, bandwidth int
 			)
 
-			supportedProfiles := map[string]struct {
-				EnableIOPS      bool
-				EnableBandwidth bool
-				EnableZone      bool
-			}{
-				"dp2":         {EnableIOPS: true, EnableBandwidth: false, EnableZone: true},
-				"rfs":         {EnableIOPS: false, EnableBandwidth: true, EnableZone: false},
-				"tier-10iops": {}, "tier-5iops": {}, "tier-3iops": {}, // Tiered profiles
-			}
-
 			fmt.Printf("\nPlease enter profile name (supported: dp2, rfs, tier-10iops, tier-5iops, tier-3iops): ")
-
 			_, _ = fmt.Scanf("%s", &profile)
+			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
 
-			caps, ok := supportedProfiles[profile]
-			if !ok {
-				fmt.Printf("Invalid profile: %s\n", profile)
-				continue
-			}
-
-			if caps.EnableZone {
-				fmt.Printf("\nPlease enter zone: ")
-				_, _ = fmt.Scanf("%s", &zone)
+			// Always prompt for zone (optional for rfs, required for dp2)
+			fmt.Printf("\nPlease enter zone (press Enter to skip): ")
+			_, _ = fmt.Scanf("%s", &zone)
+			if zone != "" {
 				volume.Az = &zone
-			} else {
-				volume.Az = nil
 			}
 
-			if caps.EnableIOPS {
-				fmt.Printf("\nEnter IOPS (optional for profile '%s', 0 to skip): ", profile)
-				_, _ = fmt.Scanf("%d", &iops)
-				if iops > 0 {
-					iopsStr := strconv.Itoa(iops)
-					volume.Iops = &iopsStr
-				}
+			// Always prompt for IOPS
+			fmt.Printf("\nEnter IOPS (optional, 0 to skip): ")
+			_, _ = fmt.Scanf("%d", &iops)
+			if iops > 0 {
+				iopsVal := int64(iops)
+				volume.Iops = &iopsVal
 			}
 
-			if caps.EnableBandwidth {
-				fmt.Printf("\nEnter Bandwidth (optional for profile '%s', 0 to skip): ", profile)
-				_, _ = fmt.Scanf("%d", &bandwidth)
-				if bandwidth > 0 {
-					bandwidthStr := strconv.Itoa(bandwidth)
-					volume.Bandwidth = &bandwidthStr
-				}
+			// Always prompt for Bandwidth
+			fmt.Printf("\nEnter Bandwidth (optional, 0 to skip): ")
+			_, _ = fmt.Scanf("%d", &bandwidth)
+			if bandwidth > 0 {
+				bwVal := int64(bandwidth)
+				volume.Bandwidth = &bwVal
 			}
-
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)
 			volume.Name = &volumeName
-
-			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
 
 			fmt.Printf("\nPlease enter volume size (Specify 10 GB - 16 TB of capacity in 1 GB increments): ")
 			_, _ = fmt.Scanf("%d", &volSize)
@@ -537,78 +512,41 @@ func main() {
 			}
 			fmt.Printf("\n\n")
 		} else if choiceN == 22 {
-			var capacity int64
+			var capacity, newIops, newBandwidth int64
 			fmt.Println("You selected choice to expand volume")
 			share := &provider.ExpandVolumeRequest{}
-			fmt.Printf("Please enter volume ID to exand: ")
+
+			fmt.Printf("Please enter volume ID to expand: ")
 			_, _ = fmt.Scanf("%s", &volumeID)
-			fmt.Printf("Please enter new capacity: ")
+
+			fmt.Printf("Please enter new capacity (0 to skip): ")
 			_, _ = fmt.Scanf("%d", &capacity)
+
+			fmt.Printf("Please enter new IOPS (0 to skip): ")
+			_, _ = fmt.Scanf("%d", &newIops)
+
+			fmt.Printf("Please enter new Bandwidth (0 to skip): ")
+			_, _ = fmt.Scanf("%d", &newBandwidth)
+
+			// Set user inputs into request
 			share.VolumeID = volumeID
-			share.Capacity = capacity
+			if capacity > 0 {
+				share.Capacity = capacity
+			}
+			if newIops > 0 {
+				share.Iops = newIops
+			}
+			if newBandwidth > 0 {
+				share.Bandwidth = newBandwidth
+			}
+
+			// Call ExpandVolume
 			expandedVolumeSize, er11 := sess.ExpandVolume(*share)
 			if er11 == nil {
 				ctxLogger.Info("Successfully expanded volume ================>", zap.Reflect("Volume ID", expandedVolumeSize))
 			} else {
 				er11 = updateRequestID(er11, requestID)
-				ctxLogger.Info("failed to expand================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
-			}
-			fmt.Printf("\n\n")
-		} else if choiceN == 23 {
-			fmt.Println("You selected choice to update volume (bandwidth/iops/name/tags)")
-			var newIops, newBandwidth int
-			var newName, tagsInput string
-
-			fmt.Printf("Enter Volume ID to update: ")
-			_, _ = fmt.Scanf("%s", &volumeID)
-
-			volume := provider.Volume{}
-			volume.VolumeID = volumeID
-
-			fmt.Printf("Enter new IOPS (0 to skip): ")
-			_, _ = fmt.Scanf("%d", &newIops)
-			if newIops > 0 {
-				iopsStr := strconv.Itoa(newIops)
-				volume.Iops = &iopsStr
-			}
-
-			fmt.Printf("Enter new Bandwidth (0 to skip): ")
-			_, _ = fmt.Scanf("%d", &newBandwidth)
-			if newBandwidth > 0 {
-				bwStr := strconv.Itoa(newBandwidth)
-				volume.Bandwidth = &bwStr
-			}
-
-			fmt.Printf("Enter new Volume Name (leave blank to skip): ")
-			_, _ = fmt.Scanf("%s", &newName)
-			if newName != "" {
-				volume.Name = &newName
-			}
-
-			fmt.Printf("Enter comma-separated tags (key=value) (optional): ")
-			_, _ = fmt.Scanf("%s", &tagsInput)
-			if tagsInput != "" {
-				tagsMap := map[string]string{}
-				pairs := strings.Split(tagsInput, ",")
-				for _, pair := range pairs {
-					kv := strings.SplitN(pair, "=", 2)
-					if len(kv) == 2 {
-						tagsMap[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
-					}
-				}
-				volume.Tags = tagsMap
-			}
-
-			if volume.Iops == nil && volume.Bandwidth == nil && volume.Name == nil && len(volume.Tags) == 0 {
-				fmt.Println("Nothing to update.")
-			} else {
-				err = sess.UpdateVolume(volume)
-				if err != nil {
-					err = updateRequestID(err, requestID)
-					ctxLogger.Error("Update volume failed", zap.Reflect("VolumeID", volumeID), zap.Reflect("Error", err))
-				} else {
-					ctxLogger.Info("Volume update successful", zap.Reflect("VolumeID", volumeID))
-				}
+				ctxLogger.Info("Failed to expand =================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
 			}
 			fmt.Printf("\n\n")
 		} else {
