@@ -12,7 +12,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/golang/glog v1.2.1
-	github.com/kubernetes-csi/external-snapshotter/client/v4 v4.3.0
+	github.com/kubernetes-csi/external-snapshotter/client/v4 v4.2.0
 	github.com/onsi/ginkgo/v2 v2.21.0
 	github.com/onsi/gomega v1.35.1
 	github.com/stretchr/testify v1.10.0
@@ -98,11 +98,11 @@ require (
 	k8s.io/component-base v0.32.6 // indirect
 	k8s.io/component-helpers v0.32.6 // indirect
 	k8s.io/controller-manager v0.32.6 // indirect
-	k8s.io/cri-api v0.32.36// indirect
+	k8s.io/cri-api v0.32.6 // indirect
 	k8s.io/cri-client v0.0.0 // indirect
 	k8s.io/csi-translation-lib v0.32.6 // indirect
 	k8s.io/dynamic-resource-allocation v0.0.0 // indirect
-	k8s.io/kms v0.32.3 // indirect
+	k8s.io/kms v0.32.6 // indirect
 	k8s.io/kube-scheduler v0.0.0 // indirect
 	k8s.io/kubectl v0.32.6 // indirect
 	k8s.io/kubelet v0.32.6 // indirect
@@ -154,7 +154,7 @@ require (
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/oauth2 v0.24.0 // indirect
+	golang.org/x/oauth2 v0.27.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
