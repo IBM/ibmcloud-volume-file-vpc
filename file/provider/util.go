@@ -277,32 +277,41 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		logger.Info("Volume details are empty")
 		return
 	}
-
-	if vpcVolume.Zone == nil {
-		logger.Info("Volume zone is empty")
-		return
-	}
-
 	logger.Debug("Volume details of VPC client", zap.Reflect("models.Volume", vpcVolume))
 
 	volumeCap := int(vpcVolume.Size)
-	iops := strconv.Itoa(int(vpcVolume.Iops))
+
 	var createdDate time.Time
 	if vpcVolume.CreatedAt != nil {
 		createdDate = *vpcVolume.CreatedAt
+	}
+
+	var bandwidth *int64
+	if vpcVolume.Bandwidth != nil {
+		bw := *vpcVolume.Bandwidth
+		bandwidth = &bw
+	}
+	var iops *int64
+	if vpcVolume.Iops != 0 {
+		i := vpcVolume.Iops
+		iops = &i
 	}
 
 	libVolume = &provider.Volume{
 		VolumeID:     vpcVolume.ID,
 		Provider:     VPC,
 		Capacity:     &volumeCap,
-		Iops:         &iops,
+		Iops:         iops,
+		Bandwidth:    bandwidth,
 		VolumeType:   VolumeType,
 		CreationTime: createdDate,
 	}
-	if vpcVolume.Zone != nil {
+
+	// Zone can be nil for RFS profile volumes, so set only if present
+	if vpcVolume.Zone != nil && vpcVolume.Zone.Name != "" {
 		libVolume.Az = &vpcVolume.Zone.Name
 	}
+
 	libVolume.CRN = vpcVolume.CRN
 
 	var respAccessPointlist = []provider.VolumeAccessPoint{}
