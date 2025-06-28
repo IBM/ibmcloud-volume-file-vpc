@@ -29,59 +29,50 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	minSize       = 10    //10 GB
-	maxSize       = 16000 //16 TB
-	customProfile = "custom-iops"
-)
-
-var (
-	SupportedProfiles        = []string{"dp2", "rfs"}
-	IOPSAllowedProfiles      = []string{"dp2"}
-	BandwidthAllowedProfiles = []string{"rfs"}
-)
-
 // CreateVolume creates file share
 func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeResponse *provider.Volume, err error) {
 	vpcs.Logger.Debug("Entry of CreateVolume method...")
 	defer vpcs.Logger.Debug("Exit from CreateVolume method...")
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "CreateVolume", time.Now())
 
-	var iops int64
+	//var iops int64
 	vpcs.Logger.Info("Basic validation for CreateVolume request... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
 	resourceGroup, iops, bandwidth, err := validateVolumeRequest(volumeRequest)
 	if err != nil {
 		return nil, err
 	}
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
+	// Set zone if provided
+	var zone *models.Zone
+	if volumeRequest.Az != nil && len(*volumeRequest.Az) > 0 {
+		zone = &models.Zone{
+			Name: *volumeRequest.Az,
+		}
+	}
+	iopsPtr := &iops
+	var bandwidthPtr *int64
+	if bandwidth > 0 {
+		bandwidthPtr = &bandwidth
+	}
+	// bandwidthPtr := &bandwidth
+	// if volumeRequest.Bandwidth != nil && *volumeRequest.Bandwidth > 0 {
+	// 	b := *volumeRequest.Bandwidth
+	// 	bandwidthPtr = &b
+	// }
 
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
 		Name:              *volumeRequest.Name,
 		Size:              int64(*volumeRequest.Capacity),
 		InitialOwner:      (*models.InitialOwner)(volumeRequest.InitialOwner),
-		Iops:              iops,
+		Iops:              *iopsPtr,
+		Bandwidth:         bandwidthPtr,
 		AccessControlMode: volumeRequest.AccessControlMode,
 		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
 			Name: volumeRequest.VPCVolume.Profile.Name,
 		},
-		Bandwidth: func() *int64 {
-			profile := volumeRequest.VPCVolume.Profile.Name
-			if contains(BandwidthAllowedProfiles, profile) && bandwidth > 0 {
-				return &bandwidth
-			}
-			return nil
-		}(),
-		Zone: func() *models.Zone {
-			profile := volumeRequest.VPCVolume.Profile.Name
-			if contains(IOPSAllowedProfiles, profile) || contains(SupportedProfiles, profile) {
-				if volumeRequest.Az != nil && *volumeRequest.Az != "" {
-					return &models.Zone{Name: *volumeRequest.Az}
-				}
-			}
-			return nil
-		}(),
+		Zone: zone,
 	}
 
 	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint/FileShareTarget creation
@@ -123,6 +114,8 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		shareTemplate.EncryptionKey = &models.EncryptionKey{CRN: encryptionKeyCRN}
 	}
 
+	vpcs.Logger.Info("Final volume create payload", zap.Reflect("ShareTemplate", shareTemplate))
+
 	vpcs.Logger.Info("Calling VPC provider for volume creation...")
 	var volume *models.Share
 	err = retry(vpcs.Logger, func() error {
@@ -163,64 +156,39 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	return volumeResponse, err
 }
 
-func contains(slice []string, item string) bool {
-	for _, v := range slice {
-		if v == item {
-			return true
-		}
-	}
-	return false
-}
-
 // validateVolumeRequest validating volume request
 func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup, int64, int64, error) {
 	resourceGroup := models.ResourceGroup{}
 	var iops int64
-	var bandwidth int64 = 0
-	iops = 0
+	var bandwidth int64
 
 	// Volume name should not be empty
 	if volumeRequest.Name == nil {
-		return resourceGroup, iops, 0, userError.GetUserError("InvalidVolumeName", nil, nil)
+		return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeName", nil, nil)
 	} else if len(*volumeRequest.Name) == 0 {
-		return resourceGroup, iops, 0, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
+		return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
 	}
 
-	// Capacity should not be empty
-	if volumeRequest.Capacity == nil {
-		return resourceGroup, iops, 0, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
-	} else if *volumeRequest.Capacity < minSize {
-		return resourceGroup, iops, 0, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
-	}
-
-	// Read user provided error, no harm to pass the 0 values to RIaaS in case of tiered profiles
+	// Set IOPS and Bandwidth if provided
 	if volumeRequest.Iops != nil {
-		iops = ToInt64(*volumeRequest.Iops)
+		iops = *volumeRequest.Iops
 	}
 	if volumeRequest.Bandwidth != nil {
-		bandwidth = ToInt64(*volumeRequest.Bandwidth)
+		bandwidth = *volumeRequest.Bandwidth
 	}
 
 	if volumeRequest.VPCVolume.Profile == nil {
 		return resourceGroup, iops, 0, userError.GetUserError("VolumeProfileEmpty", nil)
 	}
 
-	profile := volumeRequest.VPCVolume.Profile.Name
-	if !contains(SupportedProfiles, profile) {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeProfileNotSupported", nil)
+	// Profile presence check
+	if volumeRequest.VPCVolume.Profile == nil {
+		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeProfileEmpty", nil)
 	}
 
 	// validate and add resource group ID or Name whichever is provided by user
 	if volumeRequest.VPCVolume.ResourceGroup == nil {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("EmptyResourceGroup", nil)
-	}
-
-	if iops > 0 && !contains(IOPSAllowedProfiles, profile) {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeProfileIopsInvalid", nil)
-	}
-
-	if bandwidth > 0 && !contains(BandwidthAllowedProfiles, profile) {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeProfileBandwidthInvalid", nil)
 	}
 
 	// validate and add resource group ID or Name whichever is provided by user
