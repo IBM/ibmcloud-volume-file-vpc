@@ -176,6 +176,6 @@ require (
 
 replace (
 	k8s.io/cri-client => k8s.io/cri-client v0.32.6
-	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.32.3
+	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.32.6
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.32.6
 )
