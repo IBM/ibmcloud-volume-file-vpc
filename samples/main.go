@@ -534,10 +534,10 @@ func main() {
 				share.Capacity = capacity
 			}
 			if newIops > 0 {
-				share.Iops = newIops
+				share.Iops = &newIops
 			}
 			if newBandwidth > 0 {
-				share.Bandwidth = newBandwidth
+				share.Bandwidth = &newBandwidth
 			}
 
 			// Call ExpandVolume
