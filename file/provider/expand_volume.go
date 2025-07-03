@@ -46,7 +46,8 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 	if existingVolume.Capacity != nil && int64(*existingVolume.Capacity) >= expandVolumeRequest.Capacity {
 		vpcs.Logger.Warn("Requested size is less than current size.", zap.Reflect("Current Size: ", existingVolume.VolumeID), zap.Reflect("Requested Size: ", expandVolumeRequest.Capacity))
 		// Only return early if no other update (bandwidth/iops) is requested
-		if expandVolumeRequest.Bandwidth == 0 && expandVolumeRequest.Iops == 0 {
+		if (expandVolumeRequest.Bandwidth == nil || *expandVolumeRequest.Bandwidth == 0) &&
+			(expandVolumeRequest.Iops == nil || *expandVolumeRequest.Iops == 0) {
 			return int64(*existingVolume.Capacity), nil
 		}
 	}
@@ -55,13 +56,13 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 	newSize := roundUpSize(expandVolumeRequest.Capacity, GiB)
 
 	var newBandwidth *int64
-	if expandVolumeRequest.Bandwidth > 0 {
-		newBandwidth = &expandVolumeRequest.Bandwidth
+	if expandVolumeRequest.Bandwidth != nil && *expandVolumeRequest.Bandwidth > 0 {
+		newBandwidth = expandVolumeRequest.Bandwidth
 	}
 
-	newIops := int64(0)
-	if expandVolumeRequest.Iops > 0 {
-		newIops = expandVolumeRequest.Iops
+	var newIops int64
+	if expandVolumeRequest.Iops != nil && *expandVolumeRequest.Iops > 0 {
+		newIops = *expandVolumeRequest.Iops
 	}
 
 	// Build the template to send to backend
