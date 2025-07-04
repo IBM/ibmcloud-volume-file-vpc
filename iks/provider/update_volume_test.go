@@ -92,6 +92,11 @@ func TestValidateVolumeRequest(t *testing.T) {
 	}
 }
 
+// Int64 returns a pointer to the int64 value provided
+func Int64(v int64) *int64 {
+	return &v
+}
+
 func TestNewUpdatePVC(t *testing.T) {
 
 	// Define test cases
@@ -115,7 +120,7 @@ func TestNewUpdatePVC(t *testing.T) {
 				VolumeType: "test-volume-type",
 				Name:       String("test-volume-name"),
 				Capacity:   Int(10),
-				Iops:       String("1000"),
+				Iops:       Int64(1000),
 				Attributes: map[string]string{
 					ClusterIDTagName: "test-cluster-id",
 					VolumeStatus:     "available",
