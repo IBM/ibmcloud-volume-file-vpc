@@ -1,0 +1,13 @@
+service:
+  - containers-kubernetes
+  - satellite
+production_code: yes
+production_branches:
+  - master
+security_sensitive: no
+ip_sensitive: no
+public_override:
+  other: required for razeeflags deployment tooling
+compliance:
+  owner: ibm-armada-vpc-storage
+  psirt_issue_location: https://github.ibm.com/ibm-armada/ibmcloud-volume-file-security
