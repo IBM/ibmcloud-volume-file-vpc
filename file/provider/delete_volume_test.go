@@ -59,7 +59,7 @@ func TestDeleteVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("Test volume"),
 				Capacity: Int(10),
-				Iops:     Int64(1000),
+				Iops:     String("1000"),
 				VPCVolume: provider.VPCVolume{
 					Profile: &provider.Profile{Name: "tier-10iops"},
 				},
@@ -83,7 +83,7 @@ func TestDeleteVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("Test volume"),
 				Capacity: Int(10),
-				Iops:     Int64(1000),
+				Iops:     String("1000"),
 				VPCVolume: provider.VPCVolume{
 					Profile: &provider.Profile{Name: "tier-10iops"},
 				},
@@ -125,7 +125,7 @@ func TestDeleteVolume(t *testing.T) {
 				VolumeID: "wrong volume ID",
 				Name:     String("Test volume"),
 				Capacity: Int(10),
-				Iops:     Int64(1000),
+				Iops:     String("1000"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: "tier-10iops"},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -142,7 +142,7 @@ func TestDeleteVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("Test volume"),
 				Capacity: Int(10),
-				Iops:     Int64(1000),
+				Iops:     String("1000"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: "tier-10iops"},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -215,7 +215,7 @@ func TestDeleteVolumeTwo(t *testing.T) {
 		VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 		Name:     String("Test volume"),
 		Capacity: Int(10),
-		Iops:     Int64(1000),
+		Iops:     String("1000"),
 		VPCVolume: provider.VPCVolume{
 			Profile:       &provider.Profile{Name: "tier-10iops"},
 			ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},

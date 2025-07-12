@@ -20,6 +20,7 @@ package provider
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -41,33 +42,43 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	if err != nil {
 		return nil, err
 	}
+
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
 	// Set zone if provided
 	var zone *models.Zone
-	if volumeRequest.Az != nil && len(*volumeRequest.Az) > 0 {
+	if volumeRequest.Az != "" {
 		zone = &models.Zone{
-			Name: *volumeRequest.Az,
+			Name: volumeRequest.Az,
 		}
 	}
+
 	iopsPtr := &iops
 	var bandwidthPtr *int64
 	if bandwidth > 0 {
 		bandwidthPtr = &bandwidth
 	}
 
+	var initialOwner *models.InitialOwner
+	if volumeRequest.InitialOwner != nil {
+		initialOwner = (*models.InitialOwner)(volumeRequest.InitialOwner)
+	}
+
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
 		Name:              *volumeRequest.Name,
 		Size:              int64(*volumeRequest.Capacity),
-		InitialOwner:      (*models.InitialOwner)(volumeRequest.InitialOwner),
+		InitialOwner:      initialOwner,
 		Iops:              *iopsPtr,
-		Bandwidth:         bandwidthPtr,
 		AccessControlMode: volumeRequest.AccessControlMode,
 		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
 			Name: volumeRequest.VPCVolume.Profile.Name,
 		},
 		Zone: zone,
+	}
+
+	if bandwidthPtr != nil {
+		shareTemplate.Bandwidth = *bandwidthPtr
 	}
 
 	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint/FileShareTarget creation
@@ -135,6 +146,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	if err != nil {
 		return nil, userError.GetUserError("VolumeNotInValidState", err, volume.ID)
 	}
+
 	vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", volume))
 
 	// Converting share to lib volume type
@@ -157,19 +169,32 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	var iops int64
 	var bandwidth int64
 
-	// Volume name should not be empty
+	if volumeRequest.Name == nil || len(*volumeRequest.Name) == 0 {
+		return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeName", nil, nil)
+	}
+
+	// Convert string to int64 if present
+	if volumeRequest.Iops != nil && *volumeRequest.Iops != "" {
+		var err error
+		iops, err = strconv.ParseInt(*volumeRequest.Iops, 10, 64)
+		if err != nil {
+			return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeIops", err, *volumeRequest.Iops)
+		}
+	}
+
+	if volumeRequest.Bandwidth != nil && *volumeRequest.Bandwidth != "" {
+		var err error
+		bandwidth, err = strconv.ParseInt(*volumeRequest.Bandwidth, 10, 64)
+		if err != nil {
+			return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeBandwidth", err, *volumeRequest.Bandwidth)
+		}
+	}
+
+	//Volume name should not be empty
 	if volumeRequest.Name == nil {
 		return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeName", nil, nil)
 	} else if len(*volumeRequest.Name) == 0 {
 		return resourceGroup, 0, 0, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
-	}
-
-	// Set IOPS and Bandwidth if provided
-	if volumeRequest.Iops != nil {
-		iops = *volumeRequest.Iops
-	}
-	if volumeRequest.Bandwidth != nil {
-		bandwidth = *volumeRequest.Bandwidth
 	}
 
 	if volumeRequest.VPCVolume.Profile == nil {

@@ -20,7 +20,6 @@ package watcher
 import (
 	"flag"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -280,12 +279,8 @@ func (pvw *PVWatcher) getVolumeFromPV(pv *v1.PersistentVolume, ctxLogger *zap.Lo
 		capacity := pv.Spec.Capacity[v1.ResourceStorage]
 		capacityGiB := BytesToGiB(capacity.Value())
 		volume.Capacity = &capacityGiB
-		iopsStr := pv.Spec.CSI.VolumeAttributes[IOPSLabel]
-		if iopsStr != "" {
-			if iopsVal, err := strconv.ParseInt(iopsStr, 10, 64); err == nil {
-				volume.Iops = &iopsVal
-			}
-		}
+		iops := pv.Spec.CSI.VolumeAttributes[IOPSLabel]
+		volume.Iops = &iops
 		volume.Attributes[VolumeStatus] = VolumeStatusCreated
 	}
 	ctxLogger.Debug("Exit getVolume()", zap.Reflect("volume", volume))

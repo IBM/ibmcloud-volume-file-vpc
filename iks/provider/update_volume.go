@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"strconv"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -102,9 +103,11 @@ func NewUpdatePVC(volumeRequest provider.Volume) provider.UpdatePVC {
 	}
 
 	if volumeRequest.Iops != nil {
-		pvc.Iops = *volumeRequest.Iops
-	} else {
-		pvc.Iops = 0
+		value, err := strconv.ParseInt(*volumeRequest.Iops, 10, 64)
+		if err != nil {
+			pvc.Iops = 0
+		}
+		pvc.Iops = value
 	}
 
 	pvc.Cluster = volumeRequest.Attributes[ClusterIDTagName]

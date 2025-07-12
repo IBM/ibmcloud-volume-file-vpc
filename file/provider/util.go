@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -28,7 +29,7 @@ import (
 )
 
 // maxRetryAttempt ...
-var maxRetryAttempt = 10
+var maxRetryAttempt = 20
 
 // minRetryAttempt ...
 var minRetryAttempt = 5
@@ -286,30 +287,29 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		createdDate = *vpcVolume.CreatedAt
 	}
 
-	var bandwidth *int64
-	if vpcVolume.Bandwidth != nil {
-		bw := *vpcVolume.Bandwidth
-		bandwidth = &bw
+	var bandwidth string
+	if vpcVolume.Bandwidth != 0 {
+		bandwidth = fmt.Sprintf("%d", vpcVolume.Bandwidth)
 	}
-	var iops *int64
+
+	var iops string
 	if vpcVolume.Iops != 0 {
-		i := vpcVolume.Iops
-		iops = &i
+		iops = fmt.Sprintf("%d", vpcVolume.Iops)
 	}
 
 	libVolume = &provider.Volume{
 		VolumeID:     vpcVolume.ID,
 		Provider:     VPC,
 		Capacity:     &volumeCap,
-		Iops:         iops,
-		Bandwidth:    bandwidth,
+		Iops:         &iops,
+		Bandwidth:    &bandwidth,
 		VolumeType:   VolumeType,
 		CreationTime: createdDate,
 	}
 
 	// Zone can be nil for RFS profile volumes, so set only if present
 	if vpcVolume.Zone != nil && vpcVolume.Zone.Name != "" {
-		libVolume.Az = &vpcVolume.Zone.Name
+		libVolume.Az = vpcVolume.Zone.Name
 	}
 
 	libVolume.CRN = vpcVolume.CRN
