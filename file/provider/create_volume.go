@@ -67,7 +67,6 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		Name:              *volumeRequest.Name,
 		Size:              int64(*volumeRequest.Capacity),
 		InitialOwner:      initialOwner,
-		Iops:              *iopsPtr,
 		AccessControlMode: volumeRequest.AccessControlMode,
 		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
@@ -75,6 +74,9 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		},
 		Zone: zone,
 	}
+
+	// Safely set IOPS and Bandwidth only if values are valid (non-nil)
+	shareTemplate.Iops = *iopsPtr
 
 	if bandwidthPtr != nil {
 		shareTemplate.Bandwidth = *bandwidthPtr
