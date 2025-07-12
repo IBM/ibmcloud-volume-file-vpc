@@ -69,6 +69,7 @@ func New(config Config) (*Session, error) {
 	queryValues := url.Values{
 		"version":    []string{backendAPIVersion},
 		"generation": []string{strconv.Itoa(apiGen)},
+		"maturity":   []string{"beta"},
 	}
 
 	riaasClient := client.New(ctx, config.baseURL(), queryValues, config.httpClient(), config.ContextID, config.ResourceGroup)

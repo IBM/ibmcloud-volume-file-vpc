@@ -19,6 +19,7 @@ package provider
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -260,9 +261,9 @@ func TestListVolumes(t *testing.T) {
 						assert.Equal(t, testcase.volumeList.Shares[index].ID, vol.VolumeID)
 						assert.Equal(t, testcase.volumeList.Shares[index].Size, int64(*vol.Capacity))
 
-						iops := *vol.Iops
+						iops, _ := strconv.ParseInt(*vol.Iops, 10, 64)
 						assert.Equal(t, testcase.volumeList.Shares[index].Iops, iops)
-						assert.Equal(t, testcase.volumeList.Shares[index].Zone, &models.Zone{Name: *vol.Az})
+						assert.Equal(t, testcase.volumeList.Shares[index].Zone, &models.Zone{Name: vol.Az})
 					}
 				}
 			}

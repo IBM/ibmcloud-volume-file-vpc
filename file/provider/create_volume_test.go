@@ -90,7 +90,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(1000),
+				Iops:     String("1000"),
 				VPCVolume: provider.VPCVolume{
 					Profile: &provider.Profile{Name: profileName},
 				},
@@ -130,7 +130,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -146,7 +146,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       nil,
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -180,7 +180,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -218,7 +218,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -254,7 +254,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -281,7 +281,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:             &provider.Profile{Name: profileName},
 					ResourceGroup:       &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -299,7 +299,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{},
@@ -335,7 +335,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
@@ -390,7 +390,7 @@ func TestCreateVolume(t *testing.T) {
 				VolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:     String("test volume name"),
 				Capacity: Int(10),
-				Iops:     Int64(0),
+				Iops:     String("0"),
 				VPCVolume: provider.VPCVolume{
 					Profile:       &provider.Profile{Name: profileName},
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},

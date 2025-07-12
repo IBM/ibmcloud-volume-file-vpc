@@ -120,7 +120,7 @@ func TestNewUpdatePVC(t *testing.T) {
 				VolumeType: "test-volume-type",
 				Name:       String("test-volume-name"),
 				Capacity:   Int(10),
-				Iops:       Int64(1000),
+				Iops:       String("1000"),
 				Attributes: map[string]string{
 					ClusterIDTagName: "test-cluster-id",
 					VolumeStatus:     "available",

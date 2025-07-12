@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -233,28 +234,26 @@ func main() {
 			_, _ = fmt.Scanf("%s", &profile)
 			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
 
-			// Always prompt for zone (optional for rfs, required for dp2)
-			fmt.Printf("\nPlease enter zone (press Enter to skip): ")
+			fmt.Printf("Enter zone: ")
 			_, _ = fmt.Scanf("%s", &zone)
-			if zone != "" {
-				volume.Az = &zone
-			}
+			volume.Az = zone
 
 			// Always prompt for IOPS
 			fmt.Printf("\nEnter IOPS (optional, 0 to skip): ")
 			_, _ = fmt.Scanf("%d", &iops)
 			if iops > 0 {
-				iopsVal := int64(iops)
-				volume.Iops = &iopsVal
+				iopsStr := fmt.Sprintf("%d", iops)
+				volume.Iops = &iopsStr
 			}
 
 			// Always prompt for Bandwidth
 			fmt.Printf("\nEnter Bandwidth (optional, 0 to skip): ")
 			_, _ = fmt.Scanf("%d", &bandwidth)
 			if bandwidth > 0 {
-				bwVal := int64(bandwidth)
-				volume.Bandwidth = &bwVal
+				bwStr := fmt.Sprintf("%d", bandwidth)
+				volume.Bandwidth = &bwStr
 			}
+
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)
 			volume.Name = &volumeName
@@ -533,13 +532,16 @@ func main() {
 			if capacity > 0 {
 				share.Capacity = capacity
 			}
+
 			if newIops > 0 {
-				share.Iops = &newIops
-			}
-			if newBandwidth > 0 {
-				share.Bandwidth = &newBandwidth
+				iopsStr := strconv.FormatInt(newIops, 10)
+				share.Iops = &iopsStr
 			}
 
+			if newBandwidth > 0 {
+				bandwidthStr := strconv.FormatInt(newBandwidth, 10)
+				share.Bandwidth = &bandwidthStr
+			}
 			// Call ExpandVolume
 			expandedVolumeSize, er11 := sess.ExpandVolume(*share)
 			if er11 == nil {
