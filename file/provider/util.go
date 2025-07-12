@@ -29,7 +29,7 @@ import (
 )
 
 // maxRetryAttempt ...
-var maxRetryAttempt = 20
+var maxRetryAttempt = 10
 
 // minRetryAttempt ...
 var minRetryAttempt = 5

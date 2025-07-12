@@ -18,7 +18,6 @@
 package provider
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -107,9 +106,6 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 
 		volumeAccessPointList := make([]models.ShareTarget, 1)
 		volumeAccessPointList[0] = shareTargetTemplate
-
-		jsonBytes, _ := json.Marshal(shareTemplate)
-		fmt.Println("DEBUG PAYLOAD:\n", string(jsonBytes))
 
 		shareTemplate.ShareTargets = &volumeAccessPointList
 	}

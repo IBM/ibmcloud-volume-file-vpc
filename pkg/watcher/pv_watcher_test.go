@@ -140,7 +140,7 @@ func TestAddTags(t *testing.T) {
 			assert.Equal(t, "test-volcrn", volCRN)
 			vol := pvw.getVolumeFromPV(pv, logger)
 			assert.Equal(t, 1, *vol.Capacity)
-			assert.Equal(t, int64(3000), *vol.Iops)
+			assert.Equal(t, string("3000"), *vol.Iops)
 			assert.Equal(t, "test-volumeid", vol.VolumeID)
 			assert.NotNil(t, vol.Attributes)
 			assert.Equal(t, "12345", vol.Attributes[strings.ToLower(ClusterIDLabel)])
