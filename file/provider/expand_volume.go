@@ -43,7 +43,7 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 		return -1, err
 	}
 
-	// Return existing Capacity if it's greater or equal to requested, and no IOPS/BW update
+	// Return existing Capacity if its greater or equal to expandable size
 	if existingVolume.Capacity != nil && int64(*existingVolume.Capacity) >= expandVolumeRequest.Capacity {
 		vpcs.Logger.Warn("Requested size is less than current size.", zap.Reflect("Current Size: ", existingVolume.VolumeID), zap.Reflect("Requested Size: ", expandVolumeRequest.Capacity))
 		return int64(*existingVolume.Capacity), nil
