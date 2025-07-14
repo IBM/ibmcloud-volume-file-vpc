@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -241,18 +240,14 @@ func main() {
 			// Always prompt for IOPS
 			fmt.Printf("\nEnter IOPS (optional, 0 to skip): ")
 			_, _ = fmt.Scanf("%d", &iops)
-			if iops > 0 {
-				iopsStr := fmt.Sprintf("%d", iops)
-				volume.Iops = &iopsStr
-			}
+			iopsStr := fmt.Sprintf("%d", iops)
+			volume.Iops = &iopsStr
 
 			// Always prompt for Bandwidth
 			fmt.Printf("\nEnter Bandwidth (optional, 0 to skip): ")
 			_, _ = fmt.Scanf("%d", &bandwidth)
-			if bandwidth > 0 {
-				bwStr := fmt.Sprintf("%d", bandwidth)
-				volume.Bandwidth = &bwStr
-			}
+			bwStr := fmt.Sprintf("%d", bandwidth)
+			volume.Bandwidth = &bwStr
 
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)
@@ -511,37 +506,15 @@ func main() {
 			}
 			fmt.Printf("\n\n")
 		} else if choiceN == 22 {
-			var capacity, newIops, newBandwidth int64
+			var capacity int64
 			fmt.Println("You selected choice to expand volume")
 			share := &provider.ExpandVolumeRequest{}
-
-			fmt.Printf("Please enter volume ID to expand: ")
+			fmt.Printf("Please enter volume ID to exand: ")
 			_, _ = fmt.Scanf("%s", &volumeID)
-
-			fmt.Printf("Please enter new capacity (0 to skip): ")
+			fmt.Printf("Please enter new capacity: ")
 			_, _ = fmt.Scanf("%d", &capacity)
-
-			fmt.Printf("Please enter new IOPS (0 to skip): ")
-			_, _ = fmt.Scanf("%d", &newIops)
-
-			fmt.Printf("Please enter new Bandwidth (0 to skip): ")
-			_, _ = fmt.Scanf("%d", &newBandwidth)
-
-			// Set user inputs into request
 			share.VolumeID = volumeID
-			if capacity > 0 {
-				share.Capacity = capacity
-			}
-
-			if newIops > 0 {
-				iopsStr := strconv.FormatInt(newIops, 10)
-				share.Iops = &iopsStr
-			}
-
-			if newBandwidth > 0 {
-				bandwidthStr := strconv.FormatInt(newBandwidth, 10)
-				share.Bandwidth = &bandwidthStr
-			}
+			share.Capacity = capacity
 			// Call ExpandVolume
 			expandedVolumeSize, er11 := sess.ExpandVolume(*share)
 			if er11 == nil {
