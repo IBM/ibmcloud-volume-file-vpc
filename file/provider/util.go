@@ -79,6 +79,8 @@ var skipErrorCodes = map[string]bool{
 	"internal_error":                            false,
 	"invalid_route":                             true,
 	"service_error":                             false,
+	"shares_bad_field_for_rfs_profile":          true,
+	"shares_profile_bandwidth_not_allowed":      true,
 }
 
 // retry ...
@@ -278,11 +280,6 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		return
 	}
 
-	// Zone can be nil for RFS profile volumes, so set only if present
-	if vpcVolume.Zone != nil && vpcVolume.Zone.Name != "" {
-		libVolume.Az = vpcVolume.Zone.Name
-	}
-
 	logger.Debug("Volume details of VPC client", zap.Reflect("models.Volume", vpcVolume))
 
 	volumeCap := int(vpcVolume.Size)
@@ -301,6 +298,11 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		Bandwidth:    &bandwidth,
 		VolumeType:   VolumeType,
 		CreationTime: createdDate,
+	}
+
+	// Zone can be nil for RFS profile volumes, so set only if present
+	if vpcVolume.Zone != nil && vpcVolume.Zone.Name != "" {
+		libVolume.Az = vpcVolume.Zone.Name
 	}
 
 	if vpcVolume.Zone != nil {
