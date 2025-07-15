@@ -116,12 +116,10 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	vpcs.Logger.Info("Calling VPC provider for volume creation...")
 	var volume *models.Share
 
-	// Replace with direct call:
-	volume, err = vpcs.Apiclient.FileShareService().CreateFileShare(shareTemplate, vpcs.Logger)
-	if err != nil {
-		vpcs.Logger.Debug("Failed to create volume from VPC provider", zap.Reflect("BackendError", err))
-		return nil, userError.GetUserError("FailedToPlaceOrder", err)
-	}
+	err = retry(vpcs.Logger, func() error {
+		volume, err = vpcs.Apiclient.FileShareService().CreateFileShare(shareTemplate, vpcs.Logger)
+		return err
+	})
 
 	if err != nil {
 		vpcs.Logger.Debug("Failed to create volume from VPC provider", zap.Reflect("BackendError", err))
