@@ -301,14 +301,8 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 	}
 
 	// Zone can be nil for some profiles (e.g., RFS); only set if present and name is non-empty
-	if vpcVolume.Zone != nil {
-		if vpcVolume.Zone.Name != "" {
-			libVolume.Az = vpcVolume.Zone.Name
-		} else {
-			logger.Info("Volume zone is present but zone name is empty", zap.Reflect("Zone", vpcVolume.Zone))
-		}
-	} else {
-		logger.Info("Volume zone is nil; this can happen for RFS profile volumes")
+	if vpcVolume.Zone != nil && vpcVolume.Profile.Name != "rfs" {
+		libVolume.Az = vpcVolume.Zone.Name
 	}
 
 	libVolume.CRN = vpcVolume.CRN
