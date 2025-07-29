@@ -81,6 +81,7 @@ var skipErrorCodes = map[string]bool{
 	"service_error":                             false,
 	"shares_bad_field_for_rfs_profile":          true,
 	"shares_profile_bandwidth_not_allowed":      true,
+	"shares_bandwidth_invalid":                  true,
 }
 
 // retry ...
@@ -300,8 +301,8 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		CreationTime: createdDate,
 	}
 
-	// Zone can be nil for some profiles (e.g., RFS); only set if present and name is non-empty
-	if vpcVolume.Zone != nil && vpcVolume.Profile.Name != "rfs" {
+	// Zone can be nil for some profiles (e.g., RFS)
+	if vpcVolume.Zone != nil && vpcVolume.Profile != nil && vpcVolume.Profile.Name != "rfs" {
 		libVolume.Az = vpcVolume.Zone.Name
 	}
 
