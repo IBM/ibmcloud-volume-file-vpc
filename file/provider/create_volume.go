@@ -18,7 +18,6 @@
 package provider
 
 import (
-	"fmt"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -121,14 +120,9 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		return err
 	})
 
-	if err != nil {
+	if err != nil || volume == nil {
 		vpcs.Logger.Debug("Failed to create volume from VPC provider", zap.Reflect("BackendError", err))
 		return nil, userError.GetUserError("FailedToPlaceOrder", err)
-	}
-
-	if volume == nil {
-		vpcs.Logger.Error("CreateFileShare returned nil volume but no error")
-		return nil, userError.GetUserError("FailedToPlaceOrder", fmt.Errorf("nil volume received from backend"))
 	}
 
 	vpcs.Logger.Info("Successfully created volume from VPC provider...", zap.Reflect("VolumeDetails", volume))
