@@ -229,7 +229,7 @@ func main() {
 				iops, bandwidth int
 			)
 
-			fmt.Printf("\nPlease enter profile name (supported: dp2, rfs, tier-10iops, tier-5iops, tier-3iops): ")
+			fmt.Printf("\nPlease enter profile name (supported: dp2, rfs): ")
 			_, _ = fmt.Scanf("%s", &profile)
 			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
 
