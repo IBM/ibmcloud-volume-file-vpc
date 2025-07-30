@@ -20,7 +20,9 @@ package riaas
 import (
 	"context"
 	"net/url"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
@@ -69,6 +71,11 @@ func New(config Config) (*Session, error) {
 	queryValues := url.Values{
 		"version":    []string{backendAPIVersion},
 		"generation": []string{strconv.Itoa(apiGen)},
+	}
+
+	enableBeta := os.Getenv("ENABLE_REGIONAL_FILE")
+	if strings.EqualFold(enableBeta, "True") {
+		queryValues.Add("maturity", "beta")
 	}
 
 	riaasClient := client.New(ctx, config.baseURL(), queryValues, config.httpClient(), config.ContextID, config.ResourceGroup)
