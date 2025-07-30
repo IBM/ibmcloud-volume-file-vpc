@@ -246,8 +246,7 @@ func main() {
 			// Always prompt for Bandwidth
 			fmt.Printf("\nEnter Bandwidth (optional, 0 to skip): ")
 			_, _ = fmt.Scanf("%d", &bandwidth)
-			bwStr := fmt.Sprintf("%d", bandwidth)
-			volume.Bandwidth = &bwStr
+			volume.Bandwidth = int32(bandwidth)
 
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)

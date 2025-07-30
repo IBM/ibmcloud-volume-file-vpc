@@ -30,7 +30,7 @@ type Share struct {
 	Size          int64          `json:"size,omitempty"`
 	Iops          int64          `json:"iops,omitempty"`
 	EncryptionKey *EncryptionKey `json:"encryption_key,omitempty"`
-	Bandwidth     int64          `json:"bandwidth,omitempty"`
+	Bandwidth     int32          `json:"bandwidth,omitempty"`
 	ResourceGroup *ResourceGroup `json:"resource_group,omitempty"`
 	InitialOwner  *InitialOwner  `json:"initial_owner,omitempty"`
 	Profile       *Profile       `json:"profile,omitempty"`
