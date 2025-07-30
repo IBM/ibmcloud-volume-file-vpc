@@ -38,7 +38,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "CreateVolume", time.Now())
 
 	var iops int64
-	var bandwidth int64
+	var bandwidth int32
 	vpcs.Logger.Info("Basic validation for CreateVolume request... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
 	resourceGroup, iops, bandwidth, err := validateVolumeRequest(volumeRequest)
 	if err != nil {
@@ -46,6 +46,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	}
 
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
+
 	// Set zone if provided
 	var zone *models.Zone
 	if volumeRequest.Az != "" {
@@ -54,16 +55,11 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 	}
 
-	var initialOwner *models.InitialOwner
-	if volumeRequest.InitialOwner != nil {
-		initialOwner = (*models.InitialOwner)(volumeRequest.InitialOwner)
-	}
-
 	// Build the share template to send to backend
 	shareTemplate := &models.Share{
 		Name:              *volumeRequest.Name,
 		Size:              int64(*volumeRequest.Capacity),
-		InitialOwner:      initialOwner,
+		InitialOwner:      (*models.InitialOwner)(volumeRequest.InitialOwner),
 		Iops:              iops,
 		Bandwidth:         bandwidth,
 		AccessControlMode: volumeRequest.AccessControlMode,
@@ -120,7 +116,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		return err
 	})
 
-	if err != nil || volume == nil {
+	if err != nil {
 		vpcs.Logger.Debug("Failed to create volume from VPC provider", zap.Reflect("BackendError", err))
 		return nil, userError.GetUserError("FailedToPlaceOrder", err)
 	}
@@ -150,11 +146,11 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 }
 
 // validateVolumeRequest validating volume request
-func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup, int64, int64, error) {
+func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup, int64, int32, error) {
 	resourceGroup := models.ResourceGroup{}
 	var iops int64
 	iops = 0
-	var bandwidth int64
+	var bandwidth int32
 	bandwidth = 0
 
 	// Volume name should not be empty
@@ -175,8 +171,8 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 		iops = ToInt64(*volumeRequest.Iops)
 	}
 
-	if volumeRequest.Bandwidth != nil {
-		bandwidth = ToInt64(*volumeRequest.Bandwidth)
+	if volumeRequest.Bandwidth != 0 {
+		bandwidth = volumeRequest.VPCVolume.Bandwidth
 	}
 
 	if volumeRequest.VPCVolume.Profile == nil {

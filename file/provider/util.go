@@ -271,6 +271,15 @@ func ToInt64(valueInInt string) int64 {
 	return value
 }
 
+// ToInt32 ...
+func ToInt32(valueInInt string) int32 {
+	value, err := strconv.ParseInt(valueInInt, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return int32(value)
+}
+
 // FromProviderToLibVolume converting vpc provider share type to generic lib volume type
 func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVolume *provider.Volume) {
 	logger.Debug("Entry of FromProviderToLibVolume method...")
@@ -285,24 +294,26 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 
 	volumeCap := int(vpcVolume.Size)
 	iops := strconv.Itoa(int(vpcVolume.Iops))
-	bandwidth := strconv.Itoa(int(vpcVolume.Bandwidth))
+	bandwidth := vpcVolume.Bandwidth
 	var createdDate time.Time
 	if vpcVolume.CreatedAt != nil {
 		createdDate = *vpcVolume.CreatedAt
 	}
 
 	libVolume = &provider.Volume{
-		VolumeID:     vpcVolume.ID,
-		Provider:     VPC,
-		Capacity:     &volumeCap,
-		Iops:         &iops,
-		Bandwidth:    &bandwidth,
+		VolumeID: vpcVolume.ID,
+		Provider: VPC,
+		Capacity: &volumeCap,
+		Iops:     &iops,
+		VPCVolume: provider.VPCVolume{
+			Bandwidth: bandwidth,
+		},
 		VolumeType:   VolumeType,
 		CreationTime: createdDate,
 	}
 
 	// Zone can be nil for some profiles (e.g., RFS)
-	if vpcVolume.Zone != nil && vpcVolume.Profile != nil && vpcVolume.Profile.Name != "rfs" {
+	if vpcVolume.Zone != nil {
 		libVolume.Az = vpcVolume.Zone.Name
 	}
 
