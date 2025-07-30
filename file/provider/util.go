@@ -271,15 +271,6 @@ func ToInt64(valueInInt string) int64 {
 	return value
 }
 
-// ToInt32 ...
-func ToInt32(valueInInt string) int32 {
-	value, err := strconv.ParseInt(valueInInt, 10, 64)
-	if err != nil {
-		return 0
-	}
-	return int32(value)
-}
-
 // FromProviderToLibVolume converting vpc provider share type to generic lib volume type
 func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVolume *provider.Volume) {
 	logger.Debug("Entry of FromProviderToLibVolume method...")

@@ -106,8 +106,6 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		shareTemplate.EncryptionKey = &models.EncryptionKey{CRN: encryptionKeyCRN}
 	}
 
-	vpcs.Logger.Info("Final volume create payload", zap.Reflect("ShareTemplate", shareTemplate))
-
 	vpcs.Logger.Info("Calling VPC provider for volume creation...")
 	var volume *models.Share
 
