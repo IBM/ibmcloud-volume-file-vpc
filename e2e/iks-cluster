@@ -395,21 +395,21 @@ function cluster_create_vpc {
             if [[ "$WORKER_OS" == "RHCOS" ]]; then
                 ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system $WORKER_OS --disable-outbound-traffic-protection; rc=$?
+                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system $WORKER_OS --disable-outbound-traffic-protection --trusted-profile-id $e2e_tp; rc=$?
             else
                 ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection; rc=$?
+                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection --trusted-profile-id $e2e_tp; rc=$?
             fi
         else
             if [[ "$WORKER_OS" == "RHCOS" ]]; then
                 ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system $WORKER_OS; rc=$?
+                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system $WORKER_OS --trusted-profile-id $e2e_tp; rc=$?
             else
                 ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
                 --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count; rc=$?
+                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --trusted-profile-id $e2e_tp; rc=$?
             fi
         fi
     else
@@ -417,11 +417,11 @@ function cluster_create_vpc {
         if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
             ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
             --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver \
-            --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection; rc=$?
+            --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection --trusted-profile-id $e2e_tp; rc=$?
         else
             ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
             --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver \
-            --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count; rc=$?
+            --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --trusted-profile-id $e2e_tp; rc=$?
         fi
     fi
     if [[ $rc -ne 0 ]]; then set +x;  return 1; fi
@@ -766,6 +766,12 @@ key="$1"
 
 	-p|--provider)
 	e2e_ic_provider="$2"
+	shift;
+	shift
+	;;
+
+    -tp|--trustedProfile)
+	e2e_tp="$2"
 	shift;
 	shift
 	;;
