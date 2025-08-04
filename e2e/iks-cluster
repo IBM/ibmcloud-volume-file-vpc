@@ -1152,7 +1152,7 @@ cluster_id=$(ibmcloud ks cluster get --cluster $cluster_name  --json | jq ".id")
 cluster_id=${cluster_id//\"/}
 
 if [[ "$e2e_tp" == "true" ]]; then
-    if [["$e2e_env" == "stage"]]; then
+    if [[ "$e2e_env" == "stage" ]]; then
     ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $STAGE_TRUSTED_PROFILE_ID
     else
     ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
