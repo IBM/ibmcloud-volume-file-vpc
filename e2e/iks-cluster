@@ -1157,6 +1157,7 @@ if [[ "$e2e_tp" == "true" ]]; then
     else
     ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
     fi
+    ibmcloud ks experimental trusted-profile get --cluster $cluster_id
 fi
 
 # From Jenkins there is option to mention addon version and by default FILE CSI driver is not enabled
