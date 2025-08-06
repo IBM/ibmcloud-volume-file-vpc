@@ -34,6 +34,7 @@ SLEEP_TIME=60 # Seconds
 CLUSTER_STATE_TIMEOUT=39  # 30Mins
 WORKER_STATE_TIMEOUT=90   # 90Mins
 WORKER_PROVISION_TIMEOUT=30
+SECRET_CREATION_WAIT=600 #seconds
 
 # kubernetes / openshift
 K8S_PLATFORM="kubernetes"
@@ -1150,15 +1151,54 @@ fi
 exportKubeConfig $cluster_name; rc=$?
 cluster_id=$(ibmcloud ks cluster get --cluster $cluster_name  --json | jq ".id")
 cluster_id=${cluster_id//\"/}
-
+expected_profile_id=""
 if [[ "$e2e_tp" == "true" ]]; then
     if [[ "$e2e_env" == "stage" ]]; then
-    ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $STAGE_TRUSTED_PROFILE_ID
+        expected_profile_id = $STAGE_TRUSTED_PROFILE_ID
+        ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $STAGE_TRUSTED_PROFILE_ID
     else
-    ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
+        expected_profile_id = $PROD_TRUSTED_PROFILE_ID
+        ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
     fi
-    ibmcloud ks experimental trusted-profile get --cluster $cluster_id
+
+     # Secret existence
+    wait_for_secret
+    local secret_json
+    secret_json=$(kubectl get secret ibm-cloud-credentials -n kube-system -o json)
+
+    local encoded decoded
+
+    encoded=$(jq -r '.data["ibm-credentials.env"]' <<< "$secret_json")
+    decoded=$(base64 --decode <<< "$encoded")
+    profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f2-)
+    if [[ "$profileID" == "$expected_profile_id" ]]; then
+        echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
+    else
+        echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED" >> $E2E_TEST_SETUP
+        exit 1
+    fi
 fi
+
+# Validate that ibm-cloud-credentials is created
+wait_for_secret() {
+    echo
+    echo "⏳ Waiting up to ${SECRET_CREATION_WAIT}s for ibm-cloud-credentials to appear..."
+
+    local elapsed=0
+    while [[ $elapsed -lt ${SECRET_CREATION_WAIT} ]]; do
+      if kubectl get secret ibm-cloud-credentials -n kube-system; then
+        echo "✅ ibm-cloud-credentials found in namespace kube-system."
+        return 0
+      fi
+
+      sleep 5
+      ((elapsed+=5))
+    done
+
+    echo "❌ ibm-cloud-credentials was not created within ${SECRET_CREATION_WAIT}s."
+    return 1
+}
+
 
 # From Jenkins there is option to mention addon version and by default FILE CSI driver is not enabled
 # Enable user specified version
