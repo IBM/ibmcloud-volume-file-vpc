@@ -18,7 +18,6 @@
 package provider
 
 import (
-	"strings"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -97,14 +96,9 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 
 		// Set access_protocol and transit_encryption ONLY for 'rfs' profile
-		if volumeRequest.VPCVolume.Profile != nil &&
-			strings.EqualFold(volumeRequest.VPCVolume.Profile.Name, RFSProfile) {
-			vpcs.Logger.Info("Setting access_protocol and transit_encryption for 'rfs' profile")
+		if volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == RFSProfile {
 			shareTargetTemplate.AccessProtocol = "nfs4"
 			shareTargetTemplate.TransitEncryption = "none"
-		} else if volumeRequest.TransitEncryption == EncryptionTrasitMode {
-			// If EIT enabled and not rfs
-			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
 		}
 
 		volumeAccessPointList := make([]models.ShareTarget, 1)
