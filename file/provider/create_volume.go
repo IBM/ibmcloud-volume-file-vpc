@@ -45,6 +45,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 	if err != nil {
 		return nil, err
 	}
+
 	vpcs.Logger.Info("Successfully validated inputs for CreateVolume request... ")
 
 	// Build the share template to send to backend
@@ -101,8 +102,13 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 
 	vpcs.Logger.Info("Calling VPC provider for volume creation...")
 	var volume *models.Share
+	fileShareService := vpcs.Apiclient.FileShareService()
+	if vpcs.GetMaturityBeta() {
+		fileShareService.SetEnableBeta(true, vpcs.Logger)
+	}
+
 	err = retry(vpcs.Logger, func() error {
-		volume, err = vpcs.Apiclient.FileShareService().CreateFileShare(shareTemplate, vpcs.Logger)
+		volume, err = fileShareService.CreateFileShare(shareTemplate, vpcs.Logger)
 		return err
 	})
 

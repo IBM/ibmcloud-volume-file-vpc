@@ -32,13 +32,16 @@ type handler interface {
 }
 
 // SessionClient provides an interface for a REST API client
-// go:generate counterfeiter -o fakes/client.go --fake-name SessionClient . SessionClient
+//
+//go:generate counterfeiter -o fakes/client.go --fake-name SessionClient . SessionClient
 type SessionClient interface {
 	NewRequest(operation *Operation) *Request
 	WithDebug(writer io.Writer) SessionClient
 	WithAuthToken(authToken string) SessionClient
 	WithPathParameter(name, value string) SessionClient
 	WithQueryValue(name, value string) SessionClient
+	SetEnableBeta(enableBeta bool) SessionClient
+	GetEnableBeta() bool
 }
 
 type client struct {
@@ -51,6 +54,7 @@ type client struct {
 	resourceGroup string
 	contextID     string
 	context       context.Context
+	EnableBeta    bool
 }
 
 // New creates a new instance of a SessionClient
@@ -64,6 +68,7 @@ func New(ctx context.Context, baseURL string, queryValues url.Values, httpClient
 		contextID:     contextID,
 		context:       ctx,
 		resourceGroup: resourceGroupID,
+		EnableBeta:    false,
 	}
 }
 
@@ -79,6 +84,10 @@ func (c *client) NewRequest(operation *Operation) *Request {
 
 	if c.resourceGroup != "" {
 		headers.Set("X-Auth-Resource-Group-ID", c.resourceGroup)
+	}
+
+	if c.EnableBeta {
+		c.queryValues.Set("maturity", "beta")
 	}
 
 	// Copy the query values to a new map
@@ -125,4 +134,15 @@ func (c *client) WithPathParameter(name, value string) SessionClient {
 func (c *client) WithQueryValue(name, value string) SessionClient {
 	c.queryValues.Set(name, value)
 	return c
+}
+
+// getEnableBeta a
+func (c *client) SetEnableBeta(enableBeta bool) SessionClient {
+	c.EnableBeta = enableBeta
+	return c
+}
+
+// getEnableBeta a
+func (c *client) GetEnableBeta() bool {
+	return c.EnableBeta
 }

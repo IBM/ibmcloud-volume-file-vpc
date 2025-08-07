@@ -77,6 +77,8 @@ type FileShareManager interface {
 
 	// Get all securityGroups by using filter options
 	ListSecurityGroups(limit int, start string, filters *models.ListSecurityGroupFilters, ctxLogger *zap.Logger) (*models.SecurityGroupList, error)
+
+	SetEnableBeta(enableBeta bool, ctxLogger *zap.Logger)
 }
 
 // FileShareService ...

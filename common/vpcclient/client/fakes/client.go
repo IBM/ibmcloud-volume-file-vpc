@@ -9,6 +9,16 @@ import (
 )
 
 type SessionClient struct {
+	GetEnableBetaStub        func() bool
+	getEnableBetaMutex       sync.RWMutex
+	getEnableBetaArgsForCall []struct {
+	}
+	getEnableBetaReturns struct {
+		result1 bool
+	}
+	getEnableBetaReturnsOnCall map[int]struct {
+		result1 bool
+	}
 	NewRequestStub        func(*client.Operation) *client.Request
 	newRequestMutex       sync.RWMutex
 	newRequestArgsForCall []struct {
@@ -19,6 +29,17 @@ type SessionClient struct {
 	}
 	newRequestReturnsOnCall map[int]struct {
 		result1 *client.Request
+	}
+	SetEnableBetaStub        func(bool) client.SessionClient
+	setEnableBetaMutex       sync.RWMutex
+	setEnableBetaArgsForCall []struct {
+		arg1 bool
+	}
+	setEnableBetaReturns struct {
+		result1 client.SessionClient
+	}
+	setEnableBetaReturnsOnCall map[int]struct {
+		result1 client.SessionClient
 	}
 	WithAuthTokenStub        func(string) client.SessionClient
 	withAuthTokenMutex       sync.RWMutex
@@ -70,21 +91,75 @@ type SessionClient struct {
 	invocationsMutex sync.RWMutex
 }
 
+func (fake *SessionClient) GetEnableBeta() bool {
+	fake.getEnableBetaMutex.Lock()
+	ret, specificReturn := fake.getEnableBetaReturnsOnCall[len(fake.getEnableBetaArgsForCall)]
+	fake.getEnableBetaArgsForCall = append(fake.getEnableBetaArgsForCall, struct {
+	}{})
+	stub := fake.GetEnableBetaStub
+	fakeReturns := fake.getEnableBetaReturns
+	fake.recordInvocation("GetEnableBeta", []interface{}{})
+	fake.getEnableBetaMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *SessionClient) GetEnableBetaCallCount() int {
+	fake.getEnableBetaMutex.RLock()
+	defer fake.getEnableBetaMutex.RUnlock()
+	return len(fake.getEnableBetaArgsForCall)
+}
+
+func (fake *SessionClient) GetEnableBetaCalls(stub func() bool) {
+	fake.getEnableBetaMutex.Lock()
+	defer fake.getEnableBetaMutex.Unlock()
+	fake.GetEnableBetaStub = stub
+}
+
+func (fake *SessionClient) GetEnableBetaReturns(result1 bool) {
+	fake.getEnableBetaMutex.Lock()
+	defer fake.getEnableBetaMutex.Unlock()
+	fake.GetEnableBetaStub = nil
+	fake.getEnableBetaReturns = struct {
+		result1 bool
+	}{result1}
+}
+
+func (fake *SessionClient) GetEnableBetaReturnsOnCall(i int, result1 bool) {
+	fake.getEnableBetaMutex.Lock()
+	defer fake.getEnableBetaMutex.Unlock()
+	fake.GetEnableBetaStub = nil
+	if fake.getEnableBetaReturnsOnCall == nil {
+		fake.getEnableBetaReturnsOnCall = make(map[int]struct {
+			result1 bool
+		})
+	}
+	fake.getEnableBetaReturnsOnCall[i] = struct {
+		result1 bool
+	}{result1}
+}
+
 func (fake *SessionClient) NewRequest(arg1 *client.Operation) *client.Request {
 	fake.newRequestMutex.Lock()
 	ret, specificReturn := fake.newRequestReturnsOnCall[len(fake.newRequestArgsForCall)]
 	fake.newRequestArgsForCall = append(fake.newRequestArgsForCall, struct {
 		arg1 *client.Operation
 	}{arg1})
+	stub := fake.NewRequestStub
+	fakeReturns := fake.newRequestReturns
 	fake.recordInvocation("NewRequest", []interface{}{arg1})
 	fake.newRequestMutex.Unlock()
-	if fake.NewRequestStub != nil {
-		return fake.NewRequestStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.newRequestReturns
 	return fakeReturns.result1
 }
 
@@ -130,21 +205,83 @@ func (fake *SessionClient) NewRequestReturnsOnCall(i int, result1 *client.Reques
 	}{result1}
 }
 
+func (fake *SessionClient) SetEnableBeta(arg1 bool) client.SessionClient {
+	fake.setEnableBetaMutex.Lock()
+	ret, specificReturn := fake.setEnableBetaReturnsOnCall[len(fake.setEnableBetaArgsForCall)]
+	fake.setEnableBetaArgsForCall = append(fake.setEnableBetaArgsForCall, struct {
+		arg1 bool
+	}{arg1})
+	stub := fake.SetEnableBetaStub
+	fakeReturns := fake.setEnableBetaReturns
+	fake.recordInvocation("SetEnableBeta", []interface{}{arg1})
+	fake.setEnableBetaMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *SessionClient) SetEnableBetaCallCount() int {
+	fake.setEnableBetaMutex.RLock()
+	defer fake.setEnableBetaMutex.RUnlock()
+	return len(fake.setEnableBetaArgsForCall)
+}
+
+func (fake *SessionClient) SetEnableBetaCalls(stub func(bool) client.SessionClient) {
+	fake.setEnableBetaMutex.Lock()
+	defer fake.setEnableBetaMutex.Unlock()
+	fake.SetEnableBetaStub = stub
+}
+
+func (fake *SessionClient) SetEnableBetaArgsForCall(i int) bool {
+	fake.setEnableBetaMutex.RLock()
+	defer fake.setEnableBetaMutex.RUnlock()
+	argsForCall := fake.setEnableBetaArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *SessionClient) SetEnableBetaReturns(result1 client.SessionClient) {
+	fake.setEnableBetaMutex.Lock()
+	defer fake.setEnableBetaMutex.Unlock()
+	fake.SetEnableBetaStub = nil
+	fake.setEnableBetaReturns = struct {
+		result1 client.SessionClient
+	}{result1}
+}
+
+func (fake *SessionClient) SetEnableBetaReturnsOnCall(i int, result1 client.SessionClient) {
+	fake.setEnableBetaMutex.Lock()
+	defer fake.setEnableBetaMutex.Unlock()
+	fake.SetEnableBetaStub = nil
+	if fake.setEnableBetaReturnsOnCall == nil {
+		fake.setEnableBetaReturnsOnCall = make(map[int]struct {
+			result1 client.SessionClient
+		})
+	}
+	fake.setEnableBetaReturnsOnCall[i] = struct {
+		result1 client.SessionClient
+	}{result1}
+}
+
 func (fake *SessionClient) WithAuthToken(arg1 string) client.SessionClient {
 	fake.withAuthTokenMutex.Lock()
 	ret, specificReturn := fake.withAuthTokenReturnsOnCall[len(fake.withAuthTokenArgsForCall)]
 	fake.withAuthTokenArgsForCall = append(fake.withAuthTokenArgsForCall, struct {
 		arg1 string
 	}{arg1})
+	stub := fake.WithAuthTokenStub
+	fakeReturns := fake.withAuthTokenReturns
 	fake.recordInvocation("WithAuthToken", []interface{}{arg1})
 	fake.withAuthTokenMutex.Unlock()
-	if fake.WithAuthTokenStub != nil {
-		return fake.WithAuthTokenStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.withAuthTokenReturns
 	return fakeReturns.result1
 }
 
@@ -196,15 +333,16 @@ func (fake *SessionClient) WithDebug(arg1 io.Writer) client.SessionClient {
 	fake.withDebugArgsForCall = append(fake.withDebugArgsForCall, struct {
 		arg1 io.Writer
 	}{arg1})
+	stub := fake.WithDebugStub
+	fakeReturns := fake.withDebugReturns
 	fake.recordInvocation("WithDebug", []interface{}{arg1})
 	fake.withDebugMutex.Unlock()
-	if fake.WithDebugStub != nil {
-		return fake.WithDebugStub(arg1)
+	if stub != nil {
+		return stub(arg1)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.withDebugReturns
 	return fakeReturns.result1
 }
 
@@ -257,15 +395,16 @@ func (fake *SessionClient) WithPathParameter(arg1 string, arg2 string) client.Se
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.WithPathParameterStub
+	fakeReturns := fake.withPathParameterReturns
 	fake.recordInvocation("WithPathParameter", []interface{}{arg1, arg2})
 	fake.withPathParameterMutex.Unlock()
-	if fake.WithPathParameterStub != nil {
-		return fake.WithPathParameterStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.withPathParameterReturns
 	return fakeReturns.result1
 }
 
@@ -318,15 +457,16 @@ func (fake *SessionClient) WithQueryValue(arg1 string, arg2 string) client.Sessi
 		arg1 string
 		arg2 string
 	}{arg1, arg2})
+	stub := fake.WithQueryValueStub
+	fakeReturns := fake.withQueryValueReturns
 	fake.recordInvocation("WithQueryValue", []interface{}{arg1, arg2})
 	fake.withQueryValueMutex.Unlock()
-	if fake.WithQueryValueStub != nil {
-		return fake.WithQueryValueStub(arg1, arg2)
+	if stub != nil {
+		return stub(arg1, arg2)
 	}
 	if specificReturn {
 		return ret.result1
 	}
-	fakeReturns := fake.withQueryValueReturns
 	return fakeReturns.result1
 }
 
@@ -375,8 +515,12 @@ func (fake *SessionClient) WithQueryValueReturnsOnCall(i int, result1 client.Ses
 func (fake *SessionClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.getEnableBetaMutex.RLock()
+	defer fake.getEnableBetaMutex.RUnlock()
 	fake.newRequestMutex.RLock()
 	defer fake.newRequestMutex.RUnlock()
+	fake.setEnableBetaMutex.RLock()
+	defer fake.setEnableBetaMutex.RUnlock()
 	fake.withAuthTokenMutex.RLock()
 	defer fake.withAuthTokenMutex.RUnlock()
 	fake.withDebugMutex.RLock()

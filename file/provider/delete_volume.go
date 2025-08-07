@@ -55,10 +55,15 @@ func (vpcs *VPCSession) DeleteVolume(volume *provider.Volume) (err error) {
 		return userError.GetUserError(string(userError.VolumeAccessPointExist), nil, volume.VolumeID, vpcIDList)
 	}
 
+	fileShareService := vpcs.Apiclient.FileShareService()
+	if vpcs.GetMaturityBeta() {
+		fileShareService.SetEnableBeta(true, vpcs.Logger)
+	}
+
 	vpcs.Logger.Info("Deleting file share from VPC provider...")
 	err = retry(vpcs.Logger, func() error {
 		vpcs.Logger.Info("Calling VPC client for file share deletion...")
-		err = vpcs.Apiclient.FileShareService().DeleteFileShare(volume.VolumeID, vpcs.Logger)
+		err = fileShareService.DeleteFileShare(volume.VolumeID, vpcs.Logger)
 		return err
 	})
 	if err != nil {
@@ -96,8 +101,13 @@ func WaitForVolumeDeletion(vpcs *VPCSession, volumeID string) (err error) {
 
 	vpcs.Logger.Info("Getting volume details from VPC provider...", zap.Reflect("VolumeID", volumeID))
 
+	fileShareService := vpcs.Apiclient.FileShareService()
+	if vpcs.GetMaturityBeta() {
+		fileShareService.SetEnableBeta(true, vpcs.Logger)
+	}
+
 	err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) {
-		_, err = vpcs.Apiclient.FileShareService().GetFileShare(volumeID, vpcs.Logger)
+		_, err = fileShareService.GetFileShare(volumeID, vpcs.Logger)
 		// Keep retry, until GetVolume returns volume not found
 		if err != nil {
 			skip = skipRetry(err.(*models.Error))

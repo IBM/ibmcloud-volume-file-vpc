@@ -34,9 +34,14 @@ func WaitForValidVolumeState(vpcs *VPCSession, volumeID string) (err error) {
 
 	vpcs.Logger.Info("Getting file share details from VPC file provider...", zap.Reflect("VolumeID", volumeID))
 
+	fileShareService := vpcs.Apiclient.FileShareService()
+	if vpcs.GetMaturityBeta() {
+		fileShareService.SetEnableBeta(true, vpcs.Logger)
+	}
+
 	var volume *models.Share
 	err = retry(vpcs.Logger, func() error {
-		volume, err = vpcs.Apiclient.FileShareService().GetFileShare(volumeID, vpcs.Logger)
+		volume, err = fileShareService.GetFileShare(volumeID, vpcs.Logger)
 		if err != nil {
 			return err
 		}

@@ -218,6 +218,12 @@ type FileShareService struct {
 		result1 *models.SubnetList
 		result2 error
 	}
+	SetEnableBetaStub        func(bool, *zap.Logger)
+	setEnableBetaMutex       sync.RWMutex
+	setEnableBetaArgsForCall []struct {
+		arg1 bool
+		arg2 *zap.Logger
+	}
 	UpdateFileShareWithEtagStub        func(string, string, *models.Share, *zap.Logger) error
 	updateFileShareWithEtagMutex       sync.RWMutex
 	updateFileShareWithEtagArgsForCall []struct {
@@ -1168,6 +1174,39 @@ func (fake *FileShareService) ListSubnetsReturnsOnCall(i int, result1 *models.Su
 	}{result1, result2}
 }
 
+func (fake *FileShareService) SetEnableBeta(arg1 bool, arg2 *zap.Logger) {
+	fake.setEnableBetaMutex.Lock()
+	fake.setEnableBetaArgsForCall = append(fake.setEnableBetaArgsForCall, struct {
+		arg1 bool
+		arg2 *zap.Logger
+	}{arg1, arg2})
+	stub := fake.SetEnableBetaStub
+	fake.recordInvocation("SetEnableBeta", []interface{}{arg1, arg2})
+	fake.setEnableBetaMutex.Unlock()
+	if stub != nil {
+		fake.SetEnableBetaStub(arg1, arg2)
+	}
+}
+
+func (fake *FileShareService) SetEnableBetaCallCount() int {
+	fake.setEnableBetaMutex.RLock()
+	defer fake.setEnableBetaMutex.RUnlock()
+	return len(fake.setEnableBetaArgsForCall)
+}
+
+func (fake *FileShareService) SetEnableBetaCalls(stub func(bool, *zap.Logger)) {
+	fake.setEnableBetaMutex.Lock()
+	defer fake.setEnableBetaMutex.Unlock()
+	fake.SetEnableBetaStub = stub
+}
+
+func (fake *FileShareService) SetEnableBetaArgsForCall(i int) (bool, *zap.Logger) {
+	fake.setEnableBetaMutex.RLock()
+	defer fake.setEnableBetaMutex.RUnlock()
+	argsForCall := fake.setEnableBetaArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
 func (fake *FileShareService) UpdateFileShareWithEtag(arg1 string, arg2 string, arg3 *models.Share, arg4 *zap.Logger) error {
 	fake.updateFileShareWithEtagMutex.Lock()
 	ret, specificReturn := fake.updateFileShareWithEtagReturnsOnCall[len(fake.updateFileShareWithEtagArgsForCall)]
@@ -1325,6 +1364,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.listSecurityGroupsMutex.RUnlock()
 	fake.listSubnetsMutex.RLock()
 	defer fake.listSubnetsMutex.RUnlock()
+	fake.setEnableBetaMutex.RLock()
+	defer fake.setEnableBetaMutex.RUnlock()
 	fake.updateFileShareWithEtagMutex.RLock()
 	defer fake.updateFileShareWithEtagMutex.RUnlock()
 	fake.updateVolumeMutex.RLock()

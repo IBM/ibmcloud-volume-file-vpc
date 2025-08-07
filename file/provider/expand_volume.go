@@ -56,10 +56,15 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 		Size: newSize,
 	}
 
+	fileShareService := vpcs.Apiclient.FileShareService()
+	if vpcs.GetMaturityBeta() {
+		fileShareService.SetEnableBeta(true, vpcs.Logger)
+	}
+
 	vpcs.Logger.Info("Calling VPC provider for volume expand...")
 	var share *models.Share
 	err = retry(vpcs.Logger, func() error {
-		share, err = vpcs.Apiclient.FileShareService().ExpandVolume(expandVolumeRequest.VolumeID, shareTemplate, vpcs.Logger)
+		share, err = fileShareService.ExpandVolume(expandVolumeRequest.VolumeID, shareTemplate, vpcs.Logger)
 		return err
 	})
 

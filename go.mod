@@ -4,7 +4,7 @@ go 1.23.10
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibmcloud-volume-interface v1.2.13
+	github.com/IBM/ibmcloud-volume-interface v1.2.14-0.20250807063714-791258b23157
 	github.com/IBM/secret-common-lib v1.1.13
 	github.com/IBM/secret-utils-lib v1.1.14
 	github.com/IBM/vpc-beta-go-sdk v0.8.0
