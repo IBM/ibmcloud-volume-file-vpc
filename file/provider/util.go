@@ -305,6 +305,12 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 	}
 	libVolume.CRN = vpcVolume.CRN
 
+	if vpcVolume.Profile != nil {
+		libVolume.Profile = &provider.Profile{
+			Name: vpcVolume.Profile.Name,
+		}
+	}
+
 	var respAccessPointlist = []provider.VolumeAccessPoint{}
 
 	shareTargetlist := vpcVolume.ShareTargets
