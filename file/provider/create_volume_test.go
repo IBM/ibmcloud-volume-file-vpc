@@ -512,8 +512,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Code:InvalidParameter, Type:InvalidRequest, Description: Bandwidth '9000' Mbps is invalid. It must be between '1' Mbps and '8192' Mbps for the specified size of '10' GB.}",
-			expectedReasonCode: "InvalidParameter",
+			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: bandwidth must be between '1' Mbps and '8192' Mbps for the specified size of 10 GB. }",
+			expectedReasonCode: "ErrorUnclassified",
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
 				assert.Nil(t, volumeResponse)
 				assert.NotNil(t, err)
@@ -532,8 +532,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Code:InvalidParameter, Type:InvalidRequest, Description: Bandwidth '9000' Mbps is invalid. It must be between '1' Mbps and '8192' Mbps for the specified size of '10' GB.}",
-			expectedReasonCode: "InvalidParameter",
+			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: bandwidth must be between '1' Mbps and '8192' Mbps for the specified size of 10 GB. }",
+			expectedReasonCode: "ErrorUnclassified",
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
 				assert.Nil(t, volumeResponse)
 				assert.NotNil(t, err)
