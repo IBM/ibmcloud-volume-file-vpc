@@ -1183,9 +1183,14 @@ if [[ "$e2e_tp" == "true" ]]; then
      # Secret existence
     wait_for_secret
     secret_json=$(kubectl get secret ibm-cloud-credentials -n kube-system -o json)
+    echo $secret_json
     encoded=$(jq -r '.data["ibm-credentials.env"]' <<< "$secret_json")
+    echo $encoded
     decoded=$(base64 --decode <<< "$encoded")
+    echo $decoded
     profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f2-)
+    echo "parsed $profileID"
+    echo "expected $expected_profile_id"
     if [[ "$profileID" == "$expected_profile_id" ]]; then
         echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
     else
