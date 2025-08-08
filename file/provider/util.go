@@ -79,6 +79,9 @@ var skipErrorCodes = map[string]bool{
 	"internal_error":                            false,
 	"invalid_route":                             true,
 	"service_error":                             false,
+	"shares_bad_field_for_rfs_profile":          true,
+	"shares_profile_bandwidth_not_allowed":      true,
+	"shares_bandwidth_invalid":                  true,
 }
 
 // retry ...
@@ -278,31 +281,33 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		return
 	}
 
-	if vpcVolume.Zone == nil {
-		logger.Info("Volume zone is empty")
-		return
-	}
-
 	logger.Debug("Volume details of VPC client", zap.Reflect("models.Volume", vpcVolume))
 
 	volumeCap := int(vpcVolume.Size)
 	iops := strconv.Itoa(int(vpcVolume.Iops))
+	bandwidth := vpcVolume.Bandwidth
 	var createdDate time.Time
 	if vpcVolume.CreatedAt != nil {
 		createdDate = *vpcVolume.CreatedAt
 	}
 
 	libVolume = &provider.Volume{
-		VolumeID:     vpcVolume.ID,
-		Provider:     VPC,
-		Capacity:     &volumeCap,
-		Iops:         &iops,
+		VolumeID: vpcVolume.ID,
+		Provider: VPC,
+		Capacity: &volumeCap,
+		Iops:     &iops,
+		VPCVolume: provider.VPCVolume{
+			Bandwidth: bandwidth,
+		},
 		VolumeType:   VolumeType,
 		CreationTime: createdDate,
 	}
+
+	// Zone can be nil for some profiles (e.g., RFS)
 	if vpcVolume.Zone != nil {
 		libVolume.Az = vpcVolume.Zone.Name
 	}
+
 	libVolume.CRN = vpcVolume.CRN
 
 	var respAccessPointlist = []provider.VolumeAccessPoint{}
