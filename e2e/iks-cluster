@@ -1190,8 +1190,13 @@ if [[ "$e2e_tp" == "true" ]]; then
     echo "expected $expected_profile_id"
     if [[ "$profileID" == "$expected_profile_id" ]]; then
         echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
+        echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS"
+        echo $E2E_TEST_SETUP
+        
     else
         echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED" >> $E2E_TEST_SETUP
+        echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED"
+        echo $E2E_TEST_SETUP
         exit 1
     fi
 fi
