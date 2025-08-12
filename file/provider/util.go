@@ -297,6 +297,10 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		Capacity: &volumeCap,
 		Iops:     &iops,
 		VPCVolume: provider.VPCVolume{
+			Href: vpcVolume.Href,
+			Profile: &provider.Profile{
+				Name: vpcVolume.Profile.Name,
+			},
 			Bandwidth: bandwidth,
 		},
 		VolumeType:   VolumeType,
