@@ -290,17 +290,20 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 	if vpcVolume.CreatedAt != nil {
 		createdDate = *vpcVolume.CreatedAt
 	}
-
+	var profile *provider.Profile
+	if vpcVolume.Profile != nil {
+		profile = &provider.Profile{
+			Name: vpcVolume.Profile.Name,
+		}
+	}
 	libVolume = &provider.Volume{
 		VolumeID: vpcVolume.ID,
 		Provider: VPC,
 		Capacity: &volumeCap,
 		Iops:     &iops,
 		VPCVolume: provider.VPCVolume{
-			Href: vpcVolume.Href,
-			Profile: &provider.Profile{
-				Name: vpcVolume.Profile.Name,
-			},
+			Href:      vpcVolume.Href,
+			Profile:   profile,
 			Bandwidth: bandwidth,
 		},
 		VolumeType:   VolumeType,
