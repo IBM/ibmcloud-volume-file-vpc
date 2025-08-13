@@ -401,6 +401,144 @@ func TestCreateVolume(t *testing.T) {
 				assert.NotNil(t, err)
 			},
 		},
+		{
+			testCaseName: "No Bandwidth",
+			profileName:  "rfs",
+			baseVolume: &models.Share{
+				ID:     "vol-no-bw",
+				Name:   "volume-no-bandwidth",
+				Status: models.StatusType("stable"),
+				Size:   int64(1024),
+				Zone:   &models.Zone{Name: "zone1"},
+			},
+			providerVolume: provider.Volume{
+				VolumeID: "vol-no-bw",
+				Name:     String("volume-no-bandwidth"),
+				Capacity: Int(1024),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: "rfs"},
+					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
+				},
+			},
+		},
+		{
+			testCaseName: "Min Bandwidth and Min Size",
+			profileName:  "rfs",
+			baseVolume: &models.Share{
+				ID:        "vol-min-bw",
+				Name:      "volume-min-bandwidth",
+				Status:    models.StatusType("stable"),
+				Size:      int64(10),
+				Bandwidth: int32(25),
+				Zone:      &models.Zone{Name: "zone1"},
+			},
+			providerVolume: provider.Volume{
+				VolumeID: "vol-min-bw",
+				Name:     String("volume-min-bandwidth"),
+				Capacity: Int(10),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: "rfs"},
+					Bandwidth:     int32(25),
+					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
+				},
+			},
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.NotNil(t, volumeResponse)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			testCaseName: "Valid Bandwidth and Invalid Size",
+			profileName:  "rfs",
+			baseVolume: &models.Share{
+				ID:        "vol-valid-bw",
+				Name:      "volume-valid-bandwidth",
+				Status:    models.StatusType("stable"),
+				Size:      int64(34000),
+				Bandwidth: int32(8192),
+				Zone:      &models.Zone{Name: "zone1"},
+			},
+			providerVolume: provider.Volume{
+				VolumeID: "vol-valid-bw",
+				Name:     String("volume-valid-bandwidth"),
+				Capacity: Int(34000),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: "rfs"},
+					Bandwidth:     int32(8192),
+					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
+				},
+			},
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.NotNil(t, volumeResponse)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			testCaseName: "Invalid Bandwidth and Valid Size",
+			profileName:  "rfs",
+			baseVolume: &models.Share{
+				ID:        "vol-invalid-bw",
+				Name:      "volume-invalid-bandwidth",
+				Status:    models.StatusType("stable"),
+				Size:      int64(1000),
+				Bandwidth: int32(9000),
+				Zone:      &models.Zone{Name: "zone1"},
+			},
+			providerVolume: provider.Volume{
+				VolumeID: "vol-invalid-bw",
+				Name:     String("volume-invalid-bandwidth"),
+				Capacity: Int(1000),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: "rfs"},
+					Bandwidth:     int32(9000),
+					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
+				},
+			},
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.NotNil(t, volumeResponse)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			testCaseName: "Zero Bandwidth",
+			profileName:  "rfs",
+			providerVolume: provider.Volume{
+				VolumeID: "vol-zero-bw",
+				Name:     String("volume-zero-bandwidth"),
+				Capacity: Int(100),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: "rfs"},
+					Bandwidth:     0,
+					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
+				},
+			},
+			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: bandwidth must be between '1' Mbps and '8192' Mbps for the specified size of 10 GB. }",
+			expectedReasonCode: "ErrorUnclassified",
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.Nil(t, volumeResponse)
+				assert.NotNil(t, err)
+			},
+		},
+		{
+			testCaseName: "Invalid Bandwidth - 9000",
+			profileName:  "rfs",
+			providerVolume: provider.Volume{
+				VolumeID: "vol-invalid-bw",
+				Name:     String("volume-invalid-bandwidth"),
+				Capacity: Int(100),
+				VPCVolume: provider.VPCVolume{
+					Profile:       &provider.Profile{Name: "rfs"},
+					Bandwidth:     int32(9000),
+					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
+				},
+			},
+			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: bandwidth must be between '1' Mbps and '8192' Mbps for the specified size of 10 GB. }",
+			expectedReasonCode: "ErrorUnclassified",
+			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
+				assert.Nil(t, volumeResponse)
+				assert.NotNil(t, err)
+			},
+		},
 	}
 
 	for _, testcase := range testCases {
