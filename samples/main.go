@@ -33,6 +33,7 @@ import (
 	userError "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"github.com/IBM/ibmcloud-volume-interface/provider/local"
 	"github.com/IBM/secret-utils-lib/pkg/k8s_utils"
+	utils "github.com/IBM/secret-utils-lib/pkg/utils"
 	uid "github.com/gofrs/uuid"
 )
 
@@ -80,6 +81,7 @@ func main() {
 
 	// Load config file
 	k8sClient, _ := k8s_utils.FakeGetk8sClientSet()
+	_ = k8s_utils.FakeCreateSecret(k8sClient, utils.DEFAULT, "./samples/sample-secret-config.toml")
 	conf, err := config.ReadConfig(k8sClient, logger)
 	if err != nil {
 		logger.Fatal("Error loading configuration")
@@ -96,6 +98,8 @@ func main() {
 		VPCConfig:    conf.VPC,
 		ServerConfig: conf.Server,
 	}
+	// enabling VPC provider as default
+	vpcFileConfig.VPCConfig.Enabled = true
 
 	providerRegistry, err := provider_file_util.InitProviders(vpcFileConfig, &k8sClient, logger)
 
@@ -210,23 +214,39 @@ func main() {
 		} else if choiceN == 13 {
 			fmt.Println("You selected choice to Create VPC volume")
 			volume := &provider.Volume{}
-			volumeName := ""
-			volume.VolumeType = "vpc-share"
 			/* volume.VolumeEncryptionKey = &provider.VolumeEncryptionKey{
 				CRN: "crn:v1:bluemix:public:kms:us-south:a/b661e758bf044d2d928fef7900d5130b:f5be30ff-b5d8-4edd-9f5a-cc313b3584db:key:8e282989-19e8-4415-b6e3-b9d2ec1911d0",
 			} */
 
-			resourceGroup := ""
-			zone := "us-south-3"
-			volSize := 0
-			volume.Az = zone
-
 			volume.VPCVolume.ResourceGroup = &provider.ResourceGroup{}
 
-			profile := "tier-10iops"
-			fmt.Printf("\nPlease enter profile name supported profiles are [tier-10iops, tier-5iops, tier-3iops]: ")
+			var (
+				profile         string
+				zone            string
+				volumeName      string
+				resourceGroup   string
+				volSize         int
+				iops, bandwidth int
+			)
+
+			fmt.Printf("\nPlease enter profile name (supported: dp2, rfs): ")
 			_, _ = fmt.Scanf("%s", &profile)
 			volume.VPCVolume.Profile = &provider.Profile{Name: profile}
+
+			fmt.Printf("Enter zone: ")
+			_, _ = fmt.Scanf("%s", &zone)
+			volume.Az = zone
+
+			// Always prompt for IOPS
+			fmt.Printf("\nEnter IOPS (optional, 0 to skip): ")
+			_, _ = fmt.Scanf("%d", &iops)
+			iopsStr := fmt.Sprintf("%d", iops)
+			volume.Iops = &iopsStr
+
+			// Always prompt for Bandwidth
+			fmt.Printf("\nEnter Bandwidth (optional, 0 to skip): ")
+			_, _ = fmt.Scanf("%d", &bandwidth)
+			volume.Bandwidth = int32(bandwidth)
 
 			fmt.Printf("\nPlease enter volume name: ")
 			_, _ = fmt.Scanf("%s", &volumeName)
@@ -238,11 +258,10 @@ func main() {
 
 			fmt.Printf("\nPlease enter resource group ID:")
 			_, _ = fmt.Scanf("%s", &resourceGroup)
+			if volume.VPCVolume.ResourceGroup == nil {
+				volume.VPCVolume.ResourceGroup = &provider.ResourceGroup{}
+			}
 			volume.VPCVolume.ResourceGroup.ID = resourceGroup
-
-			fmt.Printf("\nPlease enter zone: ")
-			_, _ = fmt.Scanf("%s", &zone)
-			volume.Az = zone
 
 			//volume.SnapshotSpace = &volSize
 			//volume.VPCVolume.Tags = []string{"Testing VPC Volume"}
@@ -495,12 +514,13 @@ func main() {
 			_, _ = fmt.Scanf("%d", &capacity)
 			share.VolumeID = volumeID
 			share.Capacity = capacity
+			// Call ExpandVolume
 			expandedVolumeSize, er11 := sess.ExpandVolume(*share)
 			if er11 == nil {
 				ctxLogger.Info("Successfully expanded volume ================>", zap.Reflect("Volume ID", expandedVolumeSize))
 			} else {
 				er11 = updateRequestID(er11, requestID)
-				ctxLogger.Info("failed to expand================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
+				ctxLogger.Info("Failed to expand =================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
 			}
 			fmt.Printf("\n\n")
 		} else {
