@@ -247,6 +247,8 @@ function set_trusted_profile {
             expected_profile_id=$PROD_TRUSTED_PROFILE_ID
             ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
         fi
+    fi
+    export EXPECTED_PROFILE_ID="$expected_profile_id"
 }
 
 function createSubnet {
