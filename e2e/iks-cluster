@@ -234,7 +234,8 @@ function check_addon_pod_status {
   done
 }
 
-function set_trusted_profile{
+function set_trusted_profile {
+    set -x
     cluster_id=$(ibmcloud ks cluster get --cluster $cluster_name  --json | jq ".id")
     cluster_id=${cluster_id//\"/}
     expected_profile_id=""

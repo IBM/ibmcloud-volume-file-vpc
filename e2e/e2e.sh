@@ -103,6 +103,7 @@ wait_for_secret() {
 }
 
 function check_trusted_profile_status {
+	set -x
     expected_profile_id=""
     if [[ "$e2e_tp" == "true" ]]; then
 		echo "************************Trusted Profile Check ***************************" >> $E2E_TEST_SETUP
