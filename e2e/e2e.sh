@@ -22,6 +22,7 @@ E2E_TEST_RESULT="$VPC_FILE_CSI_HOME/e2e-test.out"
 export E2E_TEST_RESULT=$E2E_TEST_RESULT
 export E2E_TEST_SETUP=$E2E_TEST_SETUP
 export cluster_worker_pool="e2etest-vpc"
+SECRET_CREATION_WAIT=600 #seconds
 
 rm -f $E2E_TEST_RESULT
 rm -f $E2E_TEST_SETUP
