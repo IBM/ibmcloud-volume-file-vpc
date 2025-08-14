@@ -52,6 +52,13 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
+		
+		-tp| --use-trusted-profile)
+		e2e_tp="$2"
+		shift;
+		shift
+		;;
+
 		--run-eit-test-cases)
 		e2e_eit_test_case="$2"
 		shift
@@ -74,6 +81,50 @@ if [[ "$IC_LOGIN" != "true" ]]; then
    exit 1
 fi
 
+# Validate that ibm-cloud-credentials is created
+wait_for_secret() {
+    echo
+    echo "⏳ Waiting up to ${SECRET_CREATION_WAIT}s for ibm-cloud-credentials to appear..."
+
+    local elapsed=0
+    while [[ $elapsed -lt ${SECRET_CREATION_WAIT} ]]; do
+      if kubectl get secret ibm-cloud-credentials -n kube-system; then
+        echo "✅ ibm-cloud-credentials found in namespace kube-system."
+        return 0
+      fi
+
+      sleep 5
+      ((elapsed+=5))
+    done
+
+    echo "❌ ibm-cloud-credentials was not created within ${SECRET_CREATION_WAIT}s."
+    return 1
+}
+
+function check_trusted_profile_status {
+    set -x
+    expected_profile_id=""
+    if [[ "$e2e_tp" == "true" ]]; then
+		echo "************************Trusted Profile Check ***************************" >> $E2E_TEST_SETUP
+        # Secret existence
+        wait_for_secret
+        secret_json=$(kubectl get secret ibm-cloud-credentials -n kube-system -o json)
+        encoded=$(jq -r '.data["ibm-credentials.env"]' <<< "$secret_json")
+        decoded=$(base64 --decode <<< "$encoded")
+        profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f3-)
+        echo "parsed $profileID"
+        echo "expected $expected_profile_id"
+        if [[ "$profileID" == "$expected_profile_id" ]]; then
+            echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
+			echo "***************************************************" >> $E2E_TEST_SETUP
+        else
+            echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED" >> $E2E_TEST_SETUP
+			echo "***************************************************" >> $E2E_TEST_SETUP
+            exit 1
+        fi
+    fi
+}
+
 echo "**********VPC-File-Volume-Tests**********" > $E2E_TEST_RESULT
 echo "********** E2E Test Details **********" > $E2E_TEST_SETUP
 echo -e "StartTime   : $(date "+%F-%T")" >> $E2E_TEST_SETUP
@@ -87,6 +138,8 @@ if [[ $rc -ne 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 	exit 1
 fi
+
+check_trusted_profile_status
 
 CLUSTER_KUBE_DETAIL=$(kubectl get nodes -o jsonpath="{range .items[*]}{.metadata.name}:{.status.nodeInfo.kubeletVersion}:{.status.nodeInfo.osImage} {'\n'}"); rc=$?
 echo -e "***************** Cluster Details ******************" >> $E2E_TEST_SETUP
