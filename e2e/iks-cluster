@@ -232,6 +232,62 @@ function check_addon_pod_status {
   done
 }
 
+# Validate that ibm-cloud-credentials is created
+wait_for_secret() {
+    echo
+    echo "⏳ Waiting up to ${SECRET_CREATION_WAIT}s for ibm-cloud-credentials to appear..."
+
+    local elapsed=0
+    while [[ $elapsed -lt ${SECRET_CREATION_WAIT} ]]; do
+      if kubectl get secret ibm-cloud-credentials -n kube-system; then
+        echo "✅ ibm-cloud-credentials found in namespace kube-system."
+        return 0
+      fi
+
+      sleep 5
+      ((elapsed+=5))
+    done
+
+    echo "❌ ibm-cloud-credentials was not created within ${SECRET_CREATION_WAIT}s."
+    return 1
+}
+
+function check_trusted_profile_status {
+    set -x
+    cluster_id=$(ibmcloud ks cluster get --cluster $cluster_name  --json | jq ".id")
+    cluster_id=${cluster_id//\"/}
+    expected_profile_id=""
+    if [[ "$e2e_tp" == "true" ]]; then
+        if [[ "$e2e_env" == "stage" ]]; then
+            expected_profile_id=$STAGE_TRUSTED_PROFILE_ID
+            ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $STAGE_TRUSTED_PROFILE_ID
+        else
+            expected_profile_id=$PROD_TRUSTED_PROFILE_ID
+            ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
+        fi
+
+        # Secret existence
+        wait_for_secret
+        secret_json=$(kubectl get secret ibm-cloud-credentials -n kube-system -o json)
+        encoded=$(jq -r '.data["ibm-credentials.env"]' <<< "$secret_json")
+        decoded=$(base64 --decode <<< "$encoded")
+        profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f3-)
+        echo "parsed $profileID"
+        echo "expected $expected_profile_id"
+        if [[ "$profileID" == "$expected_profile_id" ]]; then
+            echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
+            echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS"
+            echo $E2E_TEST_SETUP
+            
+        else
+            echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED" >> $E2E_TEST_SETUP
+            echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED"
+            echo $E2E_TEST_SETUP
+            exit 1
+        fi
+    fi
+}
+
 function createSubnet {
 	res_grp_name="$1"
 	vpc_id="$2"
@@ -677,26 +733,6 @@ function check_cluster_deleted {
     # ibmcloud ks cluster ls
     echo -e "Cluster: [$cluster_name ($cluster_id)] deleted successfully." >> $E2E_TEST_SETUP
     return 0
-}
-
-# Validate that ibm-cloud-credentials is created
-wait_for_secret() {
-    echo
-    echo "⏳ Waiting up to ${SECRET_CREATION_WAIT}s for ibm-cloud-credentials to appear..."
-
-    local elapsed=0
-    while [[ $elapsed -lt ${SECRET_CREATION_WAIT} ]]; do
-      if kubectl get secret ibm-cloud-credentials -n kube-system; then
-        echo "✅ ibm-cloud-credentials found in namespace kube-system."
-        return 0
-      fi
-
-      sleep 5
-      ((elapsed+=5))
-    done
-
-    echo "❌ ibm-cloud-credentials was not created within ${SECRET_CREATION_WAIT}s."
-    return 1
 }
 
 # ##### MAIN #####
@@ -1168,41 +1204,6 @@ else
 fi
 
 exportKubeConfig $cluster_name; rc=$?
-cluster_id=$(ibmcloud ks cluster get --cluster $cluster_name  --json | jq ".id")
-cluster_id=${cluster_id//\"/}
-expected_profile_id=""
-if [[ "$e2e_tp" == "true" ]]; then
-    if [[ "$e2e_env" == "stage" ]]; then
-        expected_profile_id=$STAGE_TRUSTED_PROFILE_ID
-        ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $STAGE_TRUSTED_PROFILE_ID
-    else
-        expected_profile_id=$PROD_TRUSTED_PROFILE_ID
-        ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
-    fi
-
-     # Secret existence
-    wait_for_secret
-    secret_json=$(kubectl get secret ibm-cloud-credentials -n kube-system -o json)
-    encoded=$(jq -r '.data["ibm-credentials.env"]' <<< "$secret_json")
-    decoded=$(base64 --decode <<< "$encoded")
-    profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f3-)
-    echo "parsed $profileID"
-    echo "expected $expected_profile_id"
-    if [[ "$profileID" == "$expected_profile_id" ]]; then
-        echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
-        echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS"
-        echo $E2E_TEST_SETUP
-        
-    else
-        echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED" >> $E2E_TEST_SETUP
-        echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: FAILED"
-        echo $E2E_TEST_SETUP
-        exit 1
-    fi
-fi
-
-
-
 
 # From Jenkins there is option to mention addon version and by default FILE CSI driver is not enabled
 # Enable user specified version
@@ -1214,6 +1215,7 @@ check_storage_operator_addon $cluster_name $e2e_addon_version
 ibmcloud ks cluster addon enable vpc-file-csi-driver --version $e2e_addon_version --cluster $cluster_name
 sleep 30
 check_addon_pod_status ibm-vpc-file-csi-controller
+check_trusted_profile_status 
 
 set -x 
 if [[ $rc -ne 0 ]]; then echo -e "Error: Cluster ($cluster_name) export kube config failed!!!" >> $E2E_TEST_SETUP; exit 1; fi
