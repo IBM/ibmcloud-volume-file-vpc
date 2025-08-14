@@ -120,7 +120,7 @@ function check_trusted_profile_status {
         profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f3-)
         echo "parsed $profileID"
 		echo "expected $expected_profile_id"
-        if [[ "$profileID" == "$EXPECTED_PROFILE_ID" ]]; then
+        if [[ "$profileID" == "$expected_profile_id" ]]; then
             echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
 			echo "***************************************************" >> $E2E_TEST_SETUP
         else
