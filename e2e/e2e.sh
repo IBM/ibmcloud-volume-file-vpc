@@ -104,7 +104,13 @@ wait_for_secret() {
 
 function check_trusted_profile_status {
 	set -x
+	expected_profile_id=""
     if [[ "$e2e_tp" == "true" ]]; then
+		if [[ "$TEST_ENV" == "stage" ]]; then
+            expected_profile_id=$STAGE_TRUSTED_PROFILE_ID
+        else
+            expected_profile_id=$PROD_TRUSTED_PROFILE_ID
+        fi
 		echo "************************Trusted Profile Check ***************************" >> $E2E_TEST_SETUP
         # Secret existence
         wait_for_secret
@@ -113,7 +119,7 @@ function check_trusted_profile_status {
         decoded=$(base64 --decode <<< "$encoded")
         profileID=$(echo $decoded | grep IBMCLOUD_PROFILEID | cut -d'=' -f3-)
         echo "parsed $profileID"
-        echo "expected $expected_profile_id"
+		echo "expected $expected_profile_id"
         if [[ "$profileID" == "$EXPECTED_PROFILE_ID" ]]; then
             echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
 			echo "***************************************************" >> $E2E_TEST_SETUP

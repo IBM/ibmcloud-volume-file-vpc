@@ -238,17 +238,13 @@ function set_trusted_profile {
     set -x
     cluster_id=$(ibmcloud ks cluster get --cluster $cluster_name  --json | jq ".id")
     cluster_id=${cluster_id//\"/}
-    expected_profile_id=""
     if [[ "$e2e_tp" == "true" ]]; then
         if [[ "$e2e_env" == "stage" ]]; then
-            expected_profile_id=$STAGE_TRUSTED_PROFILE_ID
             ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $STAGE_TRUSTED_PROFILE_ID
         else
-            expected_profile_id=$PROD_TRUSTED_PROFILE_ID
             ibmcloud ks experimental trusted-profile set --cluster $cluster_id --trusted-profile $PROD_TRUSTED_PROFILE_ID
         fi
     fi
-    export EXPECTED_PROFILE_ID="$expected_profile_id"
 }
 
 function createSubnet {
