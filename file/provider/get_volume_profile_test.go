@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,7 @@ func TestGetVolumeProfileByName(t *testing.T) {
 			} else {
 				volumeService.GetShareProfileReturns(nil)
 			}
-			err := vpcs.GetShareProfile(testcase.volumeName)
-			logger.Info("Volume details", zap.Reflect("volume", volume))
+			err = vpcs.GetVolumeProfileByName(testcase.volumeProfileName)
 
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
