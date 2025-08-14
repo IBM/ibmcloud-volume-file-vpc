@@ -124,7 +124,7 @@ func NewProvider(conf *vpcconfig.VPCFileConfig, k8sClient *k8s_utils.KubernetesC
 		APIConfig: riaas.Config{
 			BaseURL:       conf.VPCConfig.G2EndpointURL,
 			HTTPClient:    httpClient,
-			APIVersion:    conf.VPCConfig.G2APIVersion,
+			APIVersion:    conf.VPCConfig.APIVersion,
 			APIGeneration: conf.VPCConfig.G2VPCAPIGeneration,
 			ResourceGroup: conf.VPCConfig.G2ResourceGroupID,
 		},
