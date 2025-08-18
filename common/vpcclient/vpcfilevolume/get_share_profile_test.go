@@ -40,7 +40,6 @@ func TestGetShareProfile(t *testing.T) {
 
 		// Expected return
 		expectErr string
-		verify    func(*testing.T, error)
 	}{
 		{
 			name:   "Verify that the correct endpoint is invoked",
@@ -53,9 +52,6 @@ func TestGetShareProfile(t *testing.T) {
 		}, {
 			name:   "Verify that the profile exists",
 			status: http.StatusOK,
-			verify: func(t *testing.T, err error) {
-				assert.NotNil(t, err)
-			},
 		},
 	}
 
@@ -63,7 +59,7 @@ func TestGetShareProfile(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			mux, client, teardown := test.SetupServer(t)
 			emptyString := ""
-			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/shares/profiles/profile-name", http.MethodGet, &emptyString, testcase.status, testcase.content, nil)
+			test.SetupMuxResponse(t, mux, vpcfilevolume.Version+"/share/profiles/profile-name", http.MethodGet, &emptyString, testcase.status, testcase.content, nil)
 
 			defer teardown()
 
@@ -79,9 +75,6 @@ func TestGetShareProfile(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			if testcase.verify != nil {
-				testcase.verify(t, err)
-			}
 		})
 	}
 }
