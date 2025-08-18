@@ -22,8 +22,6 @@ import (
 	"testing"
 
 	fileShareServiceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -53,8 +51,8 @@ func TestGetVolumeProfileByName(t *testing.T) {
 		}, {
 			testCaseName:       "Wrong Profile Name",
 			volumeProfileName:  "rfs2",
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'rfs2' volume profile name is not valid, BackendError:, RC:400}",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr:        "{Code:InvalidRequest, Description:'rfs2' volume profile name is not valid, BackendError:, RC:400}",
+			expectedReasonCode: "{Code:InvalidRequest, Description:'rfs2' volume profile name is not valid, BackendError:, RC:400}",
 		},
 	}
 
@@ -80,7 +78,7 @@ func TestGetVolumeProfileByName(t *testing.T) {
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.Equal(t, err.Error(), testcase.expectedErr)
 			}
 		})
 	}
