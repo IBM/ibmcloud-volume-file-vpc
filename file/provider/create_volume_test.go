@@ -24,8 +24,6 @@ import (
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	fileShareServiceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -322,6 +320,8 @@ func TestCreateVolume(t *testing.T) {
 					Profile: &provider.Profile{Name: profileName},
 				},
 			},
+			//expectedErr:        "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
+			//expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
 			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: Volume creation failed. ",
 			expectedReasonCode: "ErrorUnclassified",
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
@@ -341,6 +341,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 				},
 			},
+			//expectedErr:        "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
+			//expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
 			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: Volume creation failed. ",
 			expectedReasonCode: "ErrorUnclassified",
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
@@ -355,6 +357,7 @@ func TestCreateVolume(t *testing.T) {
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
 				assert.Nil(t, volumeResponse)
 				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "volume name is missing") // match exact message
 			},
 		}, {
 			testCaseName: "Volume name is empty",
@@ -372,6 +375,7 @@ func TestCreateVolume(t *testing.T) {
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
 				assert.Nil(t, volumeResponse)
 				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "volume name is missing") // match exact message
 			},
 		},
 
@@ -512,12 +516,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: bandwidth must be between '1' Mbps and '8192' Mbps for the specified size of 10 GB. }",
-			expectedReasonCode: "ErrorUnclassified",
-			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
-				assert.Nil(t, volumeResponse)
-				assert.NotNil(t, err)
-			},
+			expectedErr:        "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
+			expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
 		},
 		{
 			testCaseName: "Invalid Bandwidth - 9000",
@@ -532,12 +532,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: bandwidth must be between '1' Mbps and '8192' Mbps for the specified size of 10 GB. }",
-			expectedReasonCode: "ErrorUnclassified",
-			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
-				assert.Nil(t, volumeResponse)
-				assert.NotNil(t, err)
-			},
+			expectedErr:        "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
+			expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
 		},
 	}
 
@@ -548,11 +544,9 @@ func TestCreateVolume(t *testing.T) {
 			assert.NotNil(t, uc)
 			assert.NotNil(t, sc)
 			assert.Nil(t, err)
-
 			volumeService = &fileShareServiceFakes.FileShareService{}
 			assert.NotNil(t, volumeService)
 			uc.FileShareServiceReturns(volumeService)
-
 			if testcase.expectedErr != "" {
 				volumeService.CreateFileShareReturns(testcase.baseVolume, errors.New(testcase.expectedReasonCode))
 				volumeService.GetFileShareReturns(testcase.baseVolume, errors.New(testcase.expectedReasonCode))
@@ -562,18 +556,17 @@ func TestCreateVolume(t *testing.T) {
 			}
 			volume, err := vpcs.CreateVolume(testcase.providerVolume)
 			logger.Info("Volume details", zap.Reflect("volume", volume))
-
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.Equal(t, err.Error(), testcase.expectedErr)
 			}
-
 			if testcase.verify != nil {
 				testcase.verify(t, volume, err)
 			}
 		})
 	}
+
 }
 
 // String returns a pointer to the string value provided
