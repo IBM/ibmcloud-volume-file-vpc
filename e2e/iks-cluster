@@ -218,9 +218,6 @@ function check_addon_pod_status {
     if [[ "$pod_status_deployment" == "2/2" ]]; then
       echo "$pod_name is  running ."
       echo -e "VPC-FILE-CSI-TEST: VERIFYING VPC FILE CSI DRIVER HEALTH: PASS" >> $E2E_TEST_SETUP
-      echo -e "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS" >> $E2E_TEST_SETUP
-      echo "VPC-FILE-CSI-TEST: VERIFYING TRUSTED_PROFILE: PASS"
-      echo $E2E_TEST_SETUP
       break
     fi
     if [[ $attempts -gt 30 ]]; then
