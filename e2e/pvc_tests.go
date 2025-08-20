@@ -45,6 +45,8 @@ var (
 	fpointer       *os.File
 	sc             = os.Getenv("SC")
 	sc_retain      = os.Getenv("SC_RETAIN")
+	sc_rfs         = os.Getenv("SC_RFS")
+	sc_rfs_retain  = os.Getenv("SC_RFS_RETAIN")
 )
 
 var _ = BeforeSuite(func() {
@@ -114,6 +116,74 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 		}
 		test.Run(cs, ns)
 		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc_retain)); err != nil {
+			panic(err)
+		}
+	})
+})
+
+var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for RFS SC with Deployment", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs        clientset.Interface
+		ns        *v1.Namespace
+		secretKey string
+	)
+
+	secretKey = os.Getenv("E2E_SECRET_ENCRYPTION_KEY")
+	if secretKey == "" {
+		secretKey = defaultSecret
+	}
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+	})
+
+	It("with RFS sc: should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc_rfs,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
