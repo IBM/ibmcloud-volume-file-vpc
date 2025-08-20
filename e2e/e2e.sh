@@ -212,6 +212,8 @@ else
 	export SC_RETAIN="ibmc-vpc-file-retain-dp2"
 fi
 
+export SC_RFS="ibmc-vpc-file-regional"
+
 # E2E Execution
 go clean -modcache
 export GO111MODULE=on
@@ -226,6 +228,11 @@ echo "Exit status for basic volume test: $rc1"
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
 rc2=$?
 echo "Exit status for resize volume test: $rc2"
+
+# Non EIT based RFS tests
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\] \[with-rfs-profile\]"  ./e2e -- -e2e-verify-service-account=false
+rc4=$?
+echo "Exit status for basic volume test: $rc4"
 
 if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
