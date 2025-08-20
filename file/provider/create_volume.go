@@ -90,15 +90,17 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 			}
 		}
 
-		// if EIT enabled
-		if volumeRequest.TransitEncryption == EncryptionTrasitMode {
-			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
-		}
-
 		// Set access_protocol and transit_encryption ONLY for 'rfs' profile
 		if volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == RFSProfile {
 			shareTargetTemplate.AccessProtocol = "nfs4"
 			shareTargetTemplate.TransitEncryption = "none"
+		}
+
+		// if EIT enabled
+		if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == "dp2" {
+			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
+		} else {
+			shareTargetTemplate.TransitEncryption = "stunnel"
 		}
 
 		volumeAccessPointList := make([]models.ShareTarget, 1)
