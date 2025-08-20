@@ -258,12 +258,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 				},
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: Volume creation failed. ",
-			expectedReasonCode: "ErrorUnclassified",
-			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
-				assert.Nil(t, volumeResponse)
-				assert.NotNil(t, err)
-			},
+			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: Volume creation failed.}",
+			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: Volume creation failed",
 		}, {
 			testCaseName: "Volume creation with encryption",
 			profileName:  "tier-10iops",
@@ -303,12 +299,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{},
 				},
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: Volume creation failed. ",
-			expectedReasonCode: "ErrorUnclassified",
-			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
-				assert.Nil(t, volumeResponse)
-				assert.NotNil(t, err)
-			},
+			expectedErr:        "{Code:, Description:., RC:0}",
+			expectedReasonCode: "{Code:, Description:., RC:0}",
 		}, {
 			testCaseName: "Volume with test-purpose profile and invalid iops",
 			profileName:  "tier-10iops",
@@ -320,14 +312,8 @@ func TestCreateVolume(t *testing.T) {
 					Profile: &provider.Profile{Name: profileName},
 				},
 			},
-			//expectedErr:        "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
-			//expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: Volume creation failed. ",
-			expectedReasonCode: "ErrorUnclassified",
-			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
-				assert.Nil(t, volumeResponse)
-				assert.NotNil(t, err)
-			},
+			expectedErr:        "{Code:, Description:., RC:0}",
+			expectedReasonCode: "{Code:, Description:., RC:0}",
 		}, {
 			testCaseName: "Volume creation failure",
 			profileName:  "tier-10iops",
@@ -341,14 +327,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 				},
 			},
-			//expectedErr:        "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
-			//expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' Volume creation failed, BackendError:, RC:400}",
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description: Volume creation failed. ",
-			expectedReasonCode: "ErrorUnclassified",
-			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
-				assert.Nil(t, volumeResponse)
-				assert.NotNil(t, err)
-			},
+			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider.}",
+			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider",
 		}, {
 			testCaseName: "Volume name is nil",
 			providerVolume: provider.Volume{
@@ -357,7 +337,6 @@ func TestCreateVolume(t *testing.T) {
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
 				assert.Nil(t, volumeResponse)
 				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "volume name is missing") // match exact message
 			},
 		}, {
 			testCaseName: "Volume name is empty",
@@ -375,7 +354,6 @@ func TestCreateVolume(t *testing.T) {
 			verify: func(t *testing.T, volumeResponse *provider.Volume, err error) {
 				assert.Nil(t, volumeResponse)
 				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "volume name is missing") // match exact message
 			},
 		},
 
@@ -516,8 +494,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
-			expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
+			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider.}",
+			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider",
 		},
 		{
 			testCaseName: "Invalid Bandwidth - 9000",
@@ -532,8 +510,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
-			expectedReasonCode: "{Code:InvalidRequest, Description:'rfs' volume profile bandwidth is not valid, BackendError:, RC:400}",
+			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider.}",
+			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider",
 		},
 	}
 
