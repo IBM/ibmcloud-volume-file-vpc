@@ -299,8 +299,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{},
 				},
 			},
-			expectedErr:        "{Code:, Description:., RC:0}",
-			expectedReasonCode: "{Code:, Description:., RC:0}",
+			expectedErr:        "{Code:InvalidRequest, rfs bandwidth is not valid.Failed to create file share}",
+			expectedReasonCode: "{Code:InvalidRequest, rfs bandwidth is not valid.Failed to create file share}",
 		}, {
 			testCaseName: "Volume with test-purpose profile and invalid iops",
 			profileName:  "tier-10iops",
@@ -312,8 +312,8 @@ func TestCreateVolume(t *testing.T) {
 					Profile: &provider.Profile{Name: profileName},
 				},
 			},
-			expectedErr:        "{Code:, Description:., RC:0}",
-			expectedReasonCode: "{Code:, Description:., RC:0}",
+			expectedErr:        "{Code:InvalidRequest, rfs bandwidth is not valid.Failed to create file share}",
+			expectedReasonCode: "{Code:InvalidRequest, rfs bandwidth is not valid.Failed to create file share}",
 		}, {
 			testCaseName: "Volume creation failure",
 			profileName:  "tier-10iops",
