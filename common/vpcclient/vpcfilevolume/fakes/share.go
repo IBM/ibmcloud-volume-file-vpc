@@ -155,6 +155,18 @@ type FileShareService struct {
 		result1 *models.ShareTarget
 		result2 error
 	}
+	GetShareProfileStub        func(string, *zap.Logger) error
+	getShareProfileMutex       sync.RWMutex
+	getShareProfileArgsForCall []struct {
+		arg1 string
+		arg2 *zap.Logger
+	}
+	getShareProfileReturns struct {
+		result1 error
+	}
+	getShareProfileReturnsOnCall map[int]struct {
+		result1 error
+	}
 	ListFileShareTargetsStub        func(string, *models.ListShareTargetFilters, *zap.Logger) (*models.ShareTargetList, error)
 	listFileShareTargetsMutex       sync.RWMutex
 	listFileShareTargetsArgsForCall []struct {
@@ -901,6 +913,68 @@ func (fake *FileShareService) GetFileShareTargetByNameReturnsOnCall(i int, resul
 	}{result1, result2}
 }
 
+func (fake *FileShareService) GetShareProfile(arg1 string, arg2 *zap.Logger) error {
+	fake.getShareProfileMutex.Lock()
+	ret, specificReturn := fake.getShareProfileReturnsOnCall[len(fake.getShareProfileArgsForCall)]
+	fake.getShareProfileArgsForCall = append(fake.getShareProfileArgsForCall, struct {
+		arg1 string
+		arg2 *zap.Logger
+	}{arg1, arg2})
+	stub := fake.GetShareProfileStub
+	fakeReturns := fake.getShareProfileReturns
+	fake.recordInvocation("GetShareProfile", []interface{}{arg1, arg2})
+	fake.getShareProfileMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FileShareService) GetShareProfileCallCount() int {
+	fake.getShareProfileMutex.RLock()
+	defer fake.getShareProfileMutex.RUnlock()
+	return len(fake.getShareProfileArgsForCall)
+}
+
+func (fake *FileShareService) GetShareProfileCalls(stub func(string, *zap.Logger) error) {
+	fake.getShareProfileMutex.Lock()
+	defer fake.getShareProfileMutex.Unlock()
+	fake.GetShareProfileStub = stub
+}
+
+func (fake *FileShareService) GetShareProfileArgsForCall(i int) (string, *zap.Logger) {
+	fake.getShareProfileMutex.RLock()
+	defer fake.getShareProfileMutex.RUnlock()
+	argsForCall := fake.getShareProfileArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FileShareService) GetShareProfileReturns(result1 error) {
+	fake.getShareProfileMutex.Lock()
+	defer fake.getShareProfileMutex.Unlock()
+	fake.GetShareProfileStub = nil
+	fake.getShareProfileReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FileShareService) GetShareProfileReturnsOnCall(i int, result1 error) {
+	fake.getShareProfileMutex.Lock()
+	defer fake.getShareProfileMutex.Unlock()
+	fake.GetShareProfileStub = nil
+	if fake.getShareProfileReturnsOnCall == nil {
+		fake.getShareProfileReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.getShareProfileReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FileShareService) ListFileShareTargets(arg1 string, arg2 *models.ListShareTargetFilters, arg3 *zap.Logger) (*models.ShareTargetList, error) {
 	fake.listFileShareTargetsMutex.Lock()
 	ret, specificReturn := fake.listFileShareTargetsReturnsOnCall[len(fake.listFileShareTargetsArgsForCall)]
@@ -1317,6 +1391,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.getFileShareTargetMutex.RUnlock()
 	fake.getFileShareTargetByNameMutex.RLock()
 	defer fake.getFileShareTargetByNameMutex.RUnlock()
+	fake.getShareProfileMutex.RLock()
+	defer fake.getShareProfileMutex.RUnlock()
 	fake.listFileShareTargetsMutex.RLock()
 	defer fake.listFileShareTargetsMutex.RUnlock()
 	fake.listFileSharesMutex.RLock()

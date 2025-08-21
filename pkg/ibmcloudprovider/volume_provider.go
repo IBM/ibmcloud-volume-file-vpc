@@ -53,13 +53,13 @@ func NewIBMCloudStorageProvider(clusterVolumeLabel string, k8sClient *k8s_utils.
 		logger.Error("Error loading configuration")
 		return nil, err
 	}
-	// Get only VPC_API_VERSION, in "2019-07-02T00:00:00.000Z" case vpc need only 2019-07-02"
-	dateTime, err := time.Parse(time.RFC3339, conf.VPC.APIVersion)
+	// Get only VPC_API_VERSION, in "YYYY-MM-DD" format
+	dateTime, err := time.Parse(time.DateOnly, conf.VPC.APIVersion)
 	if err == nil {
 		conf.VPC.APIVersion = fmt.Sprintf("%d-%02d-%02d", dateTime.Year(), dateTime.Month(), dateTime.Day())
 	} else {
 		logger.Warn("Failed to parse VPC_API_VERSION, setting default value")
-		conf.VPC.APIVersion = "2023-07-11" // setting default values
+		conf.VPC.APIVersion = "2025-08-05" // setting default values
 	}
 
 	var clusterInfo utilsConfig.ClusterConfig
