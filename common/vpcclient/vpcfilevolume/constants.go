@@ -19,6 +19,7 @@ package vpcfilevolume
 
 const (
 	// Version of the VPC backend service
+	RFSProfile         = "rfs"
 	Version            = "/v1"
 	sharesPath         = Version + "/shares"
 	shareIDParam       = "share-id"
@@ -29,4 +30,7 @@ const (
 	subnets            = Version + "/subnets"
 	securityGroups     = Version + "/security_groups"
 	updateVolume       = "updateVolume"
+	profileName        = "profile-name"
+	shareProfiles      = Version + "/share/profiles"
+	shareProfileName   = shareProfiles + "/{" + profileName + "}"
 )

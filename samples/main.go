@@ -121,7 +121,7 @@ func main() {
 
 	valid := true
 	for valid {
-		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n Your choice?:")
+		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Create volume \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n 23 - Get Share Profile\n Your choice?:")
 
 		var choiceN int
 		var volumeID, targetID string
@@ -521,6 +521,20 @@ func main() {
 			} else {
 				er11 = updateRequestID(er11, requestID)
 				ctxLogger.Info("Failed to expand =================>", zap.Reflect("Volume ID", volumeID), zap.Reflect("Error", er11))
+			}
+			fmt.Printf("\n\n")
+
+		} else if choiceN == 23 {
+			fmt.Println("You selected get share profile")
+			profileName := ""
+			fmt.Printf("Please enter profile name to get the details: ")
+			_, _ = fmt.Scanf("%s", &profileName)
+			er11 := sess.GetVolumeProfileByName(profileName)
+			if er11 == nil {
+				ctxLogger.Info("Successfully got Volume Profile", zap.Reflect("profileName", profileName))
+			} else {
+				er11 = updateRequestID(er11, requestID)
+				ctxLogger.Info("failed to get Profile name================>", zap.Reflect("profileName", profileName), zap.Reflect("Error", er11))
 			}
 			fmt.Printf("\n\n")
 		} else {
