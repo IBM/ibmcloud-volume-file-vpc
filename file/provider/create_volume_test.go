@@ -48,9 +48,9 @@ func TestCreateVolume(t *testing.T) {
 
 		setup func(providerVolume *provider.Volume)
 
-		skipErrTest        bool
-		expectedErr        string
-		expectedReasonCode string
+		skipErrTest bool
+		expectedErr string
+		backendErr  string
 
 		verify func(t *testing.T, volumeResponse *provider.Volume, err error)
 	}{
@@ -260,8 +260,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 				},
 			},
-			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: Volume creation failed.Failed to create file share with the storage provider}",
-			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: Volume creation failed",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: Volume creation failed.Failed to create file share with the storage provider}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: Volume creation failed",
 		}, {
 			testCaseName: "Volume creation with encryption",
 			profileName:  "tier-10iops",
@@ -301,8 +301,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{},
 				},
 			},
-			expectedErr:        "{Code:EmptyResourceGroupIDandName, Description:Resource group ID or name could not be found.., RC:400}",
-			expectedReasonCode: "Code:EmptyResourceGroupIDandName, Description:Resource group ID or name could not be found, RC:400",
+			expectedErr: "{Code:EmptyResourceGroupIDandName, Description:Resource group ID or name could not be found.., RC:400}",
+			backendErr:  "Code:EmptyResourceGroupIDandName, Description:Resource group ID or name could not be found, RC:400",
 		}, {
 			testCaseName: "Volume with test-purpose profile and invalid iops",
 			profileName:  "tier-10iops",
@@ -329,8 +329,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "default resource group id", Name: "default resource group"},
 				},
 			},
-			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider}",
-			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid",
 		}, {
 			testCaseName: "Volume name is nil",
 			providerVolume: provider.Volume{
@@ -496,8 +496,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider}",
-			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid",
 		},
 		{
 			testCaseName: "Invalid Bandwidth - 9000",
@@ -512,8 +512,8 @@ func TestCreateVolume(t *testing.T) {
 					ResourceGroup: &provider.ResourceGroup{ID: "rg-1", Name: "rg1"},
 				},
 			},
-			expectedErr:        "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider}",
-			expectedReasonCode: "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid.Failed to create file share with the storage provider}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:InvalidRequest, Description: 'rfs' volume profile bandwidth is not valid",
 		},
 	}
 
@@ -528,8 +528,8 @@ func TestCreateVolume(t *testing.T) {
 			assert.NotNil(t, volumeService)
 			uc.FileShareServiceReturns(volumeService)
 			if testcase.expectedErr != "" {
-				volumeService.CreateFileShareReturns(testcase.baseVolume, errors.New(testcase.expectedReasonCode))
-				volumeService.GetFileShareReturns(testcase.baseVolume, errors.New(testcase.expectedReasonCode))
+				volumeService.CreateFileShareReturns(testcase.baseVolume, errors.New(testcase.backendErr))
+				volumeService.GetFileShareReturns(testcase.baseVolume, errors.New(testcase.backendErr))
 			} else {
 				volumeService.CreateFileShareReturns(testcase.baseVolume, nil)
 				volumeService.GetFileShareReturns(testcase.baseVolume, nil)
