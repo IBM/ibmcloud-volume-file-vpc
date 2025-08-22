@@ -26,6 +26,7 @@ import (
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
 	v1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	clientset "k8s.io/client-go/kubernetes"
@@ -45,9 +46,28 @@ var (
 	fpointer       *os.File
 	sc             = os.Getenv("SC")
 	sc_retain      = os.Getenv("SC_RETAIN")
-	sc_rfs         = os.Getenv("SC_RFS")
-	sc_rfs_retain  = os.Getenv("SC_RFS_RETAIN")
 )
+
+// type VolumeResourceRequirements struct {
+// 	Requests v1.ResourceList `json:"requests,omitempty"`
+// 	Limits   v1.ResourceList `json:"limits,omitempty"`
+// }
+
+func createCustomRfsSC(cs clientset.Interface, name string, params map[string]string) (*storagev1.StorageClass, error) {
+	sc := &storagev1.StorageClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+		Provisioner: "vpc.file.csi.ibm.io",
+		Parameters:  params,
+	}
+	reclaimPolicy := v1.PersistentVolumeReclaimDelete
+	volumeBindingMode := storagev1.VolumeBindingImmediate
+	sc.ReclaimPolicy = &reclaimPolicy
+	sc.VolumeBindingMode = &volumeBindingMode
+
+	return cs.StorageV1().StorageClasses().Create(context.TODO(), sc, metav1.CreateOptions{})
+}
 
 var _ = BeforeSuite(func() {
 	log.Print("Successfully construct the service client instance")
@@ -129,7 +149,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		ns        *v1.Namespace
 		secretKey string
 	)
-
 	secretKey = os.Getenv("E2E_SECRET_ENCRYPTION_KEY")
 	if secretKey == "" {
 		secretKey = defaultSecret
@@ -146,7 +165,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		if labelerr != nil {
 			panic(labelerr)
 		}
-
+		sc := "ibmc-vpc-file-regional"
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
@@ -161,7 +180,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-rfs-",
-					VolumeType:    sc_rfs,
+					VolumeType:    sc,
 					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
@@ -173,12 +192,116 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 				},
 			},
 		}
+
 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
 			Pod: pod,
 			PodCheck: &testsuites.PodExecCheck{
 				Cmd:              []string{"cat", "/mnt/test-1/data"},
 				ExpectedString01: "hello world\n",
 				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
+
+	It("with RFS sc (max-bandwidth): should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		sc := "ibmc-vpc-file-regional-max-bandwidth"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
+
+	It("with RFS sc (Zero-bandwidth): should provide default throughput = 1 mbps and should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "0",
+		}
+		createCustomRfsSC(cs, "custom-rfs-sc", params)
+		sc := "custom-rfs-sc"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
 			},
 			ReplicaCount: replicaCount,
 		}
