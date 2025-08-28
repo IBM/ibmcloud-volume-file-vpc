@@ -155,18 +155,30 @@ type FileShareService struct {
 		result1 *models.ShareTarget
 		result2 error
 	}
+<<<<<<< HEAD
 	GetShareProfileStub        func(string, *zap.Logger) (*models.ProfileDetails, error)
+=======
+	GetShareProfileStub        func(string, *zap.Logger) (*models.Profile, error)
+>>>>>>> 65230db (fix UTs)
 	getShareProfileMutex       sync.RWMutex
 	getShareProfileArgsForCall []struct {
 		arg1 string
 		arg2 *zap.Logger
 	}
 	getShareProfileReturns struct {
+<<<<<<< HEAD
 		result1 *models.ProfileDetails
 		result2 error
 	}
 	getShareProfileReturnsOnCall map[int]struct {
 		result1 *models.ProfileDetails
+=======
+		result1 *models.Profile
+		result2 error
+	}
+	getShareProfileReturnsOnCall map[int]struct {
+		result1 *models.Profile
+>>>>>>> 65230db (fix UTs)
 		result2 error
 	}
 	ListFileShareTargetsStub        func(string, *models.ListShareTargetFilters, *zap.Logger) (*models.ShareTargetList, error)
@@ -915,7 +927,11 @@ func (fake *FileShareService) GetFileShareTargetByNameReturnsOnCall(i int, resul
 	}{result1, result2}
 }
 
+<<<<<<< HEAD
 func (fake *FileShareService) GetShareProfile(arg1 string, arg2 *zap.Logger) (*models.ProfileDetails, error) {
+=======
+func (fake *FileShareService) GetShareProfile(arg1 string, arg2 *zap.Logger) (*models.Profile, error) {
+>>>>>>> 65230db (fix UTs)
 	fake.getShareProfileMutex.Lock()
 	ret, specificReturn := fake.getShareProfileReturnsOnCall[len(fake.getShareProfileArgsForCall)]
 	fake.getShareProfileArgsForCall = append(fake.getShareProfileArgsForCall, struct {
@@ -941,7 +957,11 @@ func (fake *FileShareService) GetShareProfileCallCount() int {
 	return len(fake.getShareProfileArgsForCall)
 }
 
+<<<<<<< HEAD
 func (fake *FileShareService) GetShareProfileCalls(stub func(string, *zap.Logger) (*models.ProfileDetails, error)) {
+=======
+func (fake *FileShareService) GetShareProfileCalls(stub func(string, *zap.Logger) (*models.Profile, error)) {
+>>>>>>> 65230db (fix UTs)
 	fake.getShareProfileMutex.Lock()
 	defer fake.getShareProfileMutex.Unlock()
 	fake.GetShareProfileStub = stub
@@ -954,28 +974,48 @@ func (fake *FileShareService) GetShareProfileArgsForCall(i int) (string, *zap.Lo
 	return argsForCall.arg1, argsForCall.arg2
 }
 
+<<<<<<< HEAD
 func (fake *FileShareService) GetShareProfileReturns(result1 *models.ProfileDetails, result2 error) {
+=======
+func (fake *FileShareService) GetShareProfileReturns(result1 *models.Profile, result2 error) {
+>>>>>>> 65230db (fix UTs)
 	fake.getShareProfileMutex.Lock()
 	defer fake.getShareProfileMutex.Unlock()
 	fake.GetShareProfileStub = nil
 	fake.getShareProfileReturns = struct {
+<<<<<<< HEAD
 		result1 *models.ProfileDetails
+=======
+		result1 *models.Profile
+>>>>>>> 65230db (fix UTs)
 		result2 error
 	}{result1, result2}
 }
 
+<<<<<<< HEAD
 func (fake *FileShareService) GetShareProfileReturnsOnCall(i int, result1 *models.ProfileDetails, result2 error) {
+=======
+func (fake *FileShareService) GetShareProfileReturnsOnCall(i int, result1 *models.Profile, result2 error) {
+>>>>>>> 65230db (fix UTs)
 	fake.getShareProfileMutex.Lock()
 	defer fake.getShareProfileMutex.Unlock()
 	fake.GetShareProfileStub = nil
 	if fake.getShareProfileReturnsOnCall == nil {
 		fake.getShareProfileReturnsOnCall = make(map[int]struct {
+<<<<<<< HEAD
 			result1 *models.ProfileDetails
+=======
+			result1 *models.Profile
+>>>>>>> 65230db (fix UTs)
 			result2 error
 		})
 	}
 	fake.getShareProfileReturnsOnCall[i] = struct {
+<<<<<<< HEAD
 		result1 *models.ProfileDetails
+=======
+		result1 *models.Profile
+>>>>>>> 65230db (fix UTs)
 		result2 error
 	}{result1, result2}
 }

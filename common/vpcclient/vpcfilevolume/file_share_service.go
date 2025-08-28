@@ -32,7 +32,11 @@ import (
 type FileShareManager interface {
 
 	// Get the share profile by using profile name
+<<<<<<< HEAD
 	GetShareProfile(profileName string, ctxLogger *zap.Logger) (*models.ProfileDetails, error)
+=======
+	GetShareProfile(profileName string, ctxLogger *zap.Logger) (*models.Profile, error)
+>>>>>>> 65230db (fix UTs)
 
 	// Create the file share with authorisation by passing required information in the share object
 	CreateFileShare(volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)

@@ -38,7 +38,11 @@ func TestGetVolumeProfileByName(t *testing.T) {
 	testCases := []struct {
 		testCaseName      string
 		volumeProfileName string
+<<<<<<< HEAD
 		baseProfile       *models.ProfileDetails
+=======
+		baseProfile       *models.Profile
+>>>>>>> 65230db (fix UTs)
 
 		setup func()
 
@@ -49,11 +53,17 @@ func TestGetVolumeProfileByName(t *testing.T) {
 		{
 			testCaseName:      "OK",
 			volumeProfileName: "rfs",
+<<<<<<< HEAD
 			baseProfile: &models.ProfileDetails{
 				Profile: models.Profile{
 					Name: "rfs",
 					Href: "href",
 				},
+=======
+			baseProfile: &models.Profile{
+				Name: "rfs",
+				Href: "href",
+>>>>>>> 65230db (fix UTs)
 				Capacity: models.CapIops{
 					Default: 1,
 					Max:     32000,

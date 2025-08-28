@@ -29,8 +29,12 @@ import (
 )
 
 const (
+<<<<<<< HEAD
 	minSize    = 10 //10 GB
 	dp2Profile = "dp2"
+=======
+	minSize = 10 //10 GB
+>>>>>>> 65230db (fix UTs)
 )
 
 // CreateVolume creates file share
@@ -163,6 +167,24 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	// Volume name should not be empty
 	if volumeRequest.Name == nil || len(*volumeRequest.Name) == 0 {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("InvalidVolumeName", nil, nil)
+<<<<<<< HEAD
+=======
+	}
+
+	if volumeRequest.Capacity == nil {
+		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
+	} else if *volumeRequest.Capacity < minSize {
+		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
+	}
+
+	// Read user provided error, no harm to pass the 0 values to RIaaS in case of tiered profiles
+	if volumeRequest.Iops != nil {
+		iops = ToInt64(*volumeRequest.Iops)
+	}
+
+	if volumeRequest.Bandwidth != 0 {
+		bandwidth = volumeRequest.VPCVolume.Bandwidth
+>>>>>>> 65230db (fix UTs)
 	}
 
 	if volumeRequest.VPCVolume.Profile == nil {
