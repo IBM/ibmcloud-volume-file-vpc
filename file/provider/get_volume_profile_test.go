@@ -21,13 +21,13 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	fileShareServiceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
 
 func TestGetVolumeProfileByName(t *testing.T) {
-	//var err error
 	logger, teardown := GetTestLogger(t)
 	defer teardown()
 
@@ -38,6 +38,7 @@ func TestGetVolumeProfileByName(t *testing.T) {
 	testCases := []struct {
 		testCaseName      string
 		volumeProfileName string
+		baseProfile       *models.Profile
 
 		setup func()
 
@@ -48,6 +49,19 @@ func TestGetVolumeProfileByName(t *testing.T) {
 		{
 			testCaseName:      "OK",
 			volumeProfileName: "rfs",
+			baseProfile: &models.Profile{
+				Name: "rfs",
+				Href: "href",
+				Capacity: models.CapIops{
+					Default: 1,
+					Max:     32000,
+					Min:     1,
+					Step:    1,
+					Type:    "range",
+				},
+				Family:       "defined_performance",
+				ResourceType: "share_profile",
+			},
 		}, {
 			testCaseName:       "Wrong Profile Name",
 			volumeProfileName:  "rfs2",
@@ -69,16 +83,20 @@ func TestGetVolumeProfileByName(t *testing.T) {
 			uc.FileShareServiceReturns(volumeService)
 
 			if testcase.expectedErr != "" {
-				volumeService.GetShareProfileReturns(errors.New(testcase.expectedReasonCode))
+				volumeService.GetShareProfileReturns(nil, errors.New(testcase.expectedReasonCode))
 			} else {
-				volumeService.GetShareProfileReturns(nil)
+				volumeService.GetShareProfileReturns(testcase.baseProfile, nil)
 			}
-			err = vpcs.GetVolumeProfileByName(testcase.volumeProfileName)
+			profile, err := vpcs.GetVolumeProfileByName(testcase.volumeProfileName)
 
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
 				assert.Equal(t, err.Error(), testcase.expectedErr)
+			} else {
+				assert.Nil(t, err)
+				assert.NotNil(t, profile)
+				assert.Equal(t, testcase.volumeProfileName, profile.Name)
 			}
 		})
 	}

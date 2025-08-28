@@ -27,11 +27,11 @@ import (
 )
 
 // GetShareProfile GET to /shares/profiles/{profile-name}
-func (vs *FileShareService) GetShareProfile(name string, ctxLogger *zap.Logger) error {
-	ctxLogger.Debug("Entry Backend GetShareProfile")
-	defer ctxLogger.Debug("Exit Backend GetShareProfile")
+func (vs *FileShareService) GetShareProfile(name string, ctxLogger *zap.Logger) (*models.Profile, error) {
+	ctxLogger.Debug("Entry GetShareProfile")
+	defer ctxLogger.Debug("Exit GetShareProfile")
 
-	defer util.TimeTracker("GetFileShare", time.Now())
+	defer util.TimeTracker("GetShareProfile", time.Now())
 
 	operation := &client.Operation{
 		Name:        "GetShareProfile",
@@ -39,16 +39,19 @@ func (vs *FileShareService) GetShareProfile(name string, ctxLogger *zap.Logger) 
 		PathPattern: shareProfileName,
 	}
 
+	var profile models.Profile
 	var apiErr models.Error
 
 	request := vs.client.NewRequest(operation)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
 	req := request.PathParameter(profileName, name)
-	_, err := req.JSONError(&apiErr).Invoke()
+	_, err := req.JSONSuccess(&profile).JSONError(&apiErr).Invoke()
 	if err != nil {
 		ctxLogger.Error("Error fetching profile.", zap.Reflect("profileName: ", name), zap.Reflect("Error: ", err))
-		return err
+		return nil, err
 	}
-	return nil
+
+	ctxLogger.Info("Profile details", zap.Reflect("profile", profile))
+	return &profile, nil
 }

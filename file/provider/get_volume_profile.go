@@ -18,24 +18,28 @@
 package provider
 
 import (
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
 // GetVolumeProfileByName ...
-func (vpcs *VPCSession) GetVolumeProfileByName(name string) error {
+func (vpcs *VPCSession) GetVolumeProfileByName(name string) (*provider.Profile, error) {
 	vpcs.Logger.Debug("Entry of GetVolumeProfileByName method...")
 	defer vpcs.Logger.Debug("Exit from GetVolumeProfileByName method...")
 
-	vpcs.Logger.Info("Checking if Volume Profile is valid...", zap.Reflect("VolumeProfileName", name))
+	vpcs.Logger.Info("Fetching Volume Profile...", zap.Reflect("VolumeProfileName", name))
 
-	err := vpcs.Apiclient.FileShareService().GetShareProfile(name, vpcs.Logger)
+	profile, err := vpcs.Apiclient.FileShareService().GetShareProfile(name, vpcs.Logger)
 
-	if err != nil {
-		vpcs.Logger.Warn("Volume Profile is not valid...", zap.Reflect("VolumeProfileName", name))
-		return err
+	if err != nil || profile == nil {
+		vpcs.Logger.Warn("Error fetching Volume Profile ...", zap.Reflect("VolumeProfileName", name))
+		return nil, err
 	}
 
-	vpcs.Logger.Info("Volume Profile is valid...", zap.Reflect("VolumeProfileName", name))
+	// Converting lib profile to provider profile type
+	respProfile := FromLibToProviderProfile(profile, vpcs.Logger)
 
-	return nil
+	vpcs.Logger.Info("Volume Profile details...", zap.Reflect("respProfile", respProfile))
+
+	return respProfile, nil
 }

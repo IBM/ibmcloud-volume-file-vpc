@@ -336,6 +336,30 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 	return
 }
 
+// FromLibToProviderProfile converting vpc provider volume profile type from generic lib share profile type
+func FromLibToProviderProfile(vpcProfile *models.Profile, logger *zap.Logger) (libProfile *provider.Profile) {
+	logger.Debug("Entry of FromLibToProviderProfile method...")
+	defer logger.Debug("Exit from FromLibToProviderProfile method...")
+
+	if vpcProfile == nil {
+		logger.Info("Profile details are empty")
+		return nil
+	}
+
+	logger.Debug("Profile details of VPC client", zap.Reflect("models.Profile", vpcProfile))
+
+	profile := &provider.Profile{
+		Name:                          vpcProfile.Name,
+		Href:                          vpcProfile.Href,
+		Capacity:                      (provider.CapIops)(vpcProfile.Capacity),
+		Family:                        vpcProfile.Family,
+		Iops:                          (provider.CapIops)(vpcProfile.Iops),
+		ResourceType:                  vpcProfile.ResourceType,
+	}
+
+	return profile
+}
+
 // FromProviderToLibVolumeAccessPoint converting vpc provider share target type to generic lib volume accessPoint Type
 func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logger *zap.Logger) (libVolumeAccessPoint *provider.VolumeAccessPoint) {
 	logger.Info("Entry of FromProviderToLibVolumeAccessPoint method...")

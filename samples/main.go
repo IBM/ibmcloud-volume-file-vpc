@@ -529,9 +529,9 @@ func main() {
 			profileName := ""
 			fmt.Printf("Please enter profile name to get the details: ")
 			_, _ = fmt.Scanf("%s", &profileName)
-			er11 := sess.GetVolumeProfileByName(profileName)
+			profile, er11 := sess.GetVolumeProfileByName(profileName)
 			if er11 == nil {
-				ctxLogger.Info("Successfully got Volume Profile", zap.Reflect("profileName", profileName))
+				ctxLogger.Info("Successfully got Volume Profile", zap.Reflect("profile", profile))
 			} else {
 				er11 = updateRequestID(er11, requestID)
 				ctxLogger.Info("failed to get Profile name================>", zap.Reflect("profileName", profileName), zap.Reflect("Error", er11))

@@ -22,14 +22,14 @@ import (
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
+	vpcfile "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
 const (
-	minSize    = 10 //10 GB
-	RFSProfile = "rfs"
+	minSize = 10 //10 GB
 )
 
 // CreateVolume creates file share
@@ -96,7 +96,8 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 
 		// Set access_protocol and transit_encryption ONLY for 'rfs' profile
-		if volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == RFSProfile {
+		// Note: These are mandatory parameters for rfs profile
+		if volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile {
 			shareTargetTemplate.AccessProtocol = "nfs4"
 			shareTargetTemplate.TransitEncryption = "none"
 		}
@@ -159,10 +160,8 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	bandwidth = 0
 
 	// Volume name should not be empty
-	if volumeRequest.Name == nil {
+	if volumeRequest.Name == nil || len(*volumeRequest.Name) == 0 {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("InvalidVolumeName", nil, nil)
-	} else if len(*volumeRequest.Name) == 0 {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("InvalidVolumeName", nil, *volumeRequest.Name)
 	}
 
 	if volumeRequest.Capacity == nil {
