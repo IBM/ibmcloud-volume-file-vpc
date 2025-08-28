@@ -338,11 +338,7 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 }
 
 // FromLibToProviderProfile converting vpc provider volume profile type from generic lib share profile type
-<<<<<<< HEAD
 func FromLibToProviderProfile(vpcProfile *models.ProfileDetails, logger *zap.Logger) (libProfile *provider.Profile) {
-=======
-func FromLibToProviderProfile(vpcProfile *models.Profile, logger *zap.Logger) (libProfile *provider.Profile) {
->>>>>>> 65230db (fix UTs)
 	logger.Debug("Entry of FromLibToProviderProfile method...")
 	defer logger.Debug("Exit from FromLibToProviderProfile method...")
 
@@ -354,21 +350,12 @@ func FromLibToProviderProfile(vpcProfile *models.Profile, logger *zap.Logger) (l
 	logger.Debug("Profile details of VPC client", zap.Reflect("models.Profile", vpcProfile))
 
 	profile := &provider.Profile{
-<<<<<<< HEAD
 		Name:         vpcProfile.Name,
 		Href:         vpcProfile.Href,
 		Capacity:     (provider.CapIops)(vpcProfile.Capacity),
 		Family:       vpcProfile.Family,
 		Iops:         (provider.CapIops)(vpcProfile.Iops),
 		ResourceType: vpcProfile.ResourceType,
-=======
-		Name:                          vpcProfile.Name,
-		Href:                          vpcProfile.Href,
-		Capacity:                      (provider.CapIops)(vpcProfile.Capacity),
-		Family:                        vpcProfile.Family,
-		Iops:                          (provider.CapIops)(vpcProfile.Iops),
-		ResourceType:                  vpcProfile.ResourceType,
->>>>>>> 65230db (fix UTs)
 	}
 
 	return profile
