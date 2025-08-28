@@ -349,12 +349,12 @@ func FromLibToProviderProfile(vpcProfile *models.Profile, logger *zap.Logger) (l
 	logger.Debug("Profile details of VPC client", zap.Reflect("models.Profile", vpcProfile))
 
 	profile := &provider.Profile{
-		Name:                          vpcProfile.Name,
-		Href:                          vpcProfile.Href,
-		Capacity:                      (provider.CapIops)(vpcProfile.Capacity),
-		Family:                        vpcProfile.Family,
-		Iops:                          (provider.CapIops)(vpcProfile.Iops),
-		ResourceType:                  vpcProfile.ResourceType,
+		Name:         vpcProfile.Name,
+		Href:         vpcProfile.Href,
+		Capacity:     (provider.CapIops)(vpcProfile.Capacity),
+		Family:       vpcProfile.Family,
+		Iops:         (provider.CapIops)(vpcProfile.Iops),
+		ResourceType: vpcProfile.ResourceType,
 	}
 
 	return profile
