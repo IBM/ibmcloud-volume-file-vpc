@@ -29,7 +29,9 @@ import (
 )
 
 const (
-	minSize = 10 //10 GB
+	mindp2Size = 10 //10 GB
+	minrfsSize = 1  //1 GB
+	dp2Profile = "dp2"
 )
 
 // CreateVolume creates file share
@@ -164,21 +166,6 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 		return resourceGroup, iops, bandwidth, userError.GetUserError("InvalidVolumeName", nil, nil)
 	}
 
-	if volumeRequest.Capacity == nil {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
-	} else if *volumeRequest.Capacity < minSize {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
-	}
-
-	// Read user provided error, no harm to pass the 0 values to RIaaS in case of tiered profiles
-	if volumeRequest.Iops != nil {
-		iops = ToInt64(*volumeRequest.Iops)
-	}
-
-	if volumeRequest.Bandwidth != 0 {
-		bandwidth = volumeRequest.VPCVolume.Bandwidth
-	}
-
 	if volumeRequest.VPCVolume.Profile == nil {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeProfileEmpty", nil)
 	}
@@ -199,6 +186,23 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 	if len(volumeRequest.VPCVolume.ResourceGroup.Name) > 0 {
 		// get the resource group ID from resource group name as Name is not supported by RIaaS
 		resourceGroup.Name = volumeRequest.VPCVolume.ResourceGroup.Name
+	}
+
+	if volumeRequest.Capacity == nil {
+		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
+	} else if volumeRequest.VPCVolume.Profile.Name == dp2Profile && *volumeRequest.Capacity < mindp2Size {
+		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
+	} else if volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile && *volumeRequest.Capacity < minrfsSize {
+		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
+	}
+
+	// Read user provided error, no harm to pass the 0 values to RIaaS in case of tiered profiles
+	if volumeRequest.Iops != nil {
+		iops = ToInt64(*volumeRequest.Iops)
+	}
+
+	if volumeRequest.Bandwidth != 0 {
+		bandwidth = volumeRequest.VPCVolume.Bandwidth
 	}
 
 	return resourceGroup, iops, bandwidth, nil
