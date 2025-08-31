@@ -29,8 +29,7 @@ import (
 )
 
 const (
-	mindp2Size = 10 //10 GB
-	minrfsSize = 1  //1 GB
+	minSize    = 10 //10 GB
 	dp2Profile = "dp2"
 )
 
@@ -195,9 +194,10 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 
 	if volumeRequest.Capacity == nil {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, nil)
-	} else if volumeRequest.VPCVolume.Profile.Name == dp2Profile && *volumeRequest.Capacity < mindp2Size {
-		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
-	} else if volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile && *volumeRequest.Capacity < minrfsSize {
+	}
+
+	// Minimum Capacity validation for non RFS profiles.
+	if *volumeRequest.Capacity < minSize && volumeRequest.VPCVolume.Profile.Name != vpcfile.RFSProfile {
 		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
 	}
 
