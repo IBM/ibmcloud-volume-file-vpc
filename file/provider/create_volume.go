@@ -62,19 +62,14 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		Name:              *volumeRequest.Name,
 		Size:              int64(*volumeRequest.Capacity),
 		InitialOwner:      (*models.InitialOwner)(volumeRequest.InitialOwner),
+		Iops:              iops,
+		Bandwidth:         bandwidth,
 		AccessControlMode: volumeRequest.AccessControlMode,
 		ResourceGroup:     &resourceGroup,
 		Profile: &models.Profile{
 			Name: volumeRequest.VPCVolume.Profile.Name,
 		},
-	}
-
-	//Set Zone and iops if profile is dp2
-	if volumeRequest.VPCVolume.Profile.Name == dp2Profile {
-		shareTemplate.Iops = iops
-		shareTemplate.Zone = zone
-	} else if volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile { //Set bandwitdh if profile is rfs,
-		shareTemplate.Bandwidth = bandwidth
+		Zone: zone,
 	}
 
 	// Check for VPC ID, SubnetID or PrimaryIPID either of the one is mandatory for VolumeAccessPoint/FileShareTarget creation
