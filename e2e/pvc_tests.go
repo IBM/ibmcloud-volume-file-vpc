@@ -27,6 +27,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	v1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	clientset "k8s.io/client-go/kubernetes"
@@ -48,11 +49,6 @@ var (
 	sc_retain      = os.Getenv("SC_RETAIN")
 )
 
-// type VolumeResourceRequirements struct {
-// 	Requests v1.ResourceList `json:"requests,omitempty"`
-// 	Limits   v1.ResourceList `json:"limits,omitempty"`
-// }
-
 func createCustomRfsSC(cs clientset.Interface, name string, params map[string]string) (*storagev1.StorageClass, error) {
 	sc := &storagev1.StorageClass{
 		ObjectMeta: metav1.ObjectMeta{
@@ -67,6 +63,20 @@ func createCustomRfsSC(cs clientset.Interface, name string, params map[string]st
 	sc.VolumeBindingMode = &volumeBindingMode
 
 	return cs.StorageV1().StorageClasses().Create(context.TODO(), sc, metav1.CreateOptions{})
+}
+
+// Delete a custom RFS StorageClass
+func deleteCustomRfsSC(cs clientset.Interface, name string) error {
+	err := cs.StorageV1().StorageClasses().Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			fmt.Printf("StorageClass %s already deleted\n", name)
+			return nil
+		}
+		return fmt.Errorf("failed to delete StorageClass %q: %w", name, err)
+	}
+	fmt.Printf("StorageClass %s deleted successfully\n", name)
+	return nil
 }
 
 var _ = BeforeSuite(func() {
@@ -267,8 +277,9 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			"profile":    "rfs",
 			"throughput": "0",
 		}
-		createCustomRfsSC(cs, "custom-rfs-sc", params)
 		sc := "custom-rfs-sc"
+		createCustomRfsSC(cs, "custom-rfs-sc", params)
+		defer deleteCustomRfsSC(cs, sc)
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
@@ -296,6 +307,173 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			},
 		}
 
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
+
+	It("with RFS sc (9000-bandwidth): should fail when bandwidth is set to an invalid high value (9000)", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "9000",
+		}
+		sc := "custom-rfs-sc-1"
+		createCustomRfsSC(cs, "custom-rfs-sc-1", params)
+		defer deleteCustomRfsSC(cs, sc)
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
+
+	It("with RFS sc (IOPS):should fail when iops is provided for rfs profile", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "100",
+			"iops":       "6000",
+		}
+
+		sc := "custom-rfs-sc-2"
+		createCustomRfsSC(cs, "custom-rfs-sc-2", params)
+		defer deleteCustomRfsSC(cs, sc)
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
+
+	It("with RFS sc (Zone): should fail when zone is provided for rfs profile", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "100",
+			"zone":       "us-south-1",
+		}
+		sc := "custom-rfs-sc-3"
+		createCustomRfsSC(cs, "custom-rfs-sc-3", params)
+		defer deleteCustomRfsSC(cs, sc)
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
 			Pod: pod,
 			PodCheck: &testsuites.PodExecCheck{

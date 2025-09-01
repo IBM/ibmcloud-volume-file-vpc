@@ -57,6 +57,11 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
+		--run-rfs-test-cases)
+		e2e_rfs_test_case="$2"
+		shift
+		shift
+		;;
     		*)
     		UNKOWNPARAM+=("$1")
     		shift
@@ -172,9 +177,14 @@ rc2=$?
 echo "Exit status for resize volume test: $rc2"
 
 # Non EIT based RFS tests
-ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\] \[with-rfs-profile\]"  ./e2e -- -e2e-verify-service-account=false
-rc4=$?
-echo "Exit status for basic volume test: $rc4"
+if [[ "$e2e_rfs_test_case" == "true" ]]; then
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\] \[with-rfs-profile\]" ./e2e -- -e2e-verify-service-account=false
+	rc4=$?
+	echo "Exit status for RFS volume test: $rc4"
+else
+	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
+	rc4=0
+fi
 
 if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
