@@ -27,7 +27,7 @@ import (
 )
 
 // GetShareProfile GET to /shares/profiles/{profile-name}
-func (vs *FileShareService) GetShareProfile(name string, ctxLogger *zap.Logger) (*models.Profile, error) {
+func (vs *FileShareService) GetShareProfile(name string, ctxLogger *zap.Logger) (*models.ProfileDetails, error) {
 	ctxLogger.Debug("Entry GetShareProfile")
 	defer ctxLogger.Debug("Exit GetShareProfile")
 
@@ -39,7 +39,7 @@ func (vs *FileShareService) GetShareProfile(name string, ctxLogger *zap.Logger) 
 		PathPattern: shareProfileName,
 	}
 
-	var profile models.Profile
+	var profile models.ProfileDetails
 	var apiErr models.Error
 
 	request := vs.client.NewRequest(operation)

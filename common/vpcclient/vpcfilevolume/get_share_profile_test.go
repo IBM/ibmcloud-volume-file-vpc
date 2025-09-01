@@ -41,7 +41,7 @@ func TestGetShareProfile(t *testing.T) {
 
 		// Expected return
 		expectErr string
-		verify    func(*testing.T, *models.Profile, error)
+		verify    func(*testing.T, *models.ProfileDetails, error)
 	}{
 		{
 			name:   "Verify that the correct endpoint is invoked",
@@ -56,7 +56,7 @@ func TestGetShareProfile(t *testing.T) {
 			content: "{\"capacity\":{\"default\":10,\"max\":32000,\"min\":10,\"step\":1,\"type\":\"range\"},\"family\":\"defined_performance\",\"href\":\"https://us-south-stage01.iaasdev.cloud.ibm.com/v1/share/profiles/dp2\",\"name\":\"dp2\",\"resource_type\":\"share_profile\"}",
 			status:  http.StatusOK,
 
-			verify: func(t *testing.T, profile *models.Profile, err error) {
+			verify: func(t *testing.T, profile *models.ProfileDetails, err error) {
 				if assert.NotNil(t, profile) {
 					assert.Equal(t, "dp2", profile.Name)
 				}

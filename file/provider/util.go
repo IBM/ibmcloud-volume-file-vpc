@@ -337,7 +337,7 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 }
 
 // FromLibToProviderProfile converting vpc provider volume profile type from generic lib share profile type
-func FromLibToProviderProfile(vpcProfile *models.Profile, logger *zap.Logger) (libProfile *provider.Profile) {
+func FromLibToProviderProfile(vpcProfile *models.ProfileDetails, logger *zap.Logger) (libProfile *provider.Profile) {
 	logger.Debug("Entry of FromLibToProviderProfile method...")
 	defer logger.Debug("Exit from FromLibToProviderProfile method...")
 
