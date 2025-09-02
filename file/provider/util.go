@@ -79,6 +79,9 @@ var skipErrorCodes = map[string]bool{
 	"internal_error":                            false,
 	"invalid_route":                             true,
 	"service_error":                             false,
+	"shares_bad_field_for_rfs_profile":          true,
+	"shares_profile_bandwidth_not_allowed":      true,
+	"shares_bandwidth_invalid":                  true,
 }
 
 // retry ...
@@ -278,31 +281,40 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		return
 	}
 
-	if vpcVolume.Zone == nil {
-		logger.Info("Volume zone is empty")
-		return
-	}
-
 	logger.Debug("Volume details of VPC client", zap.Reflect("models.Volume", vpcVolume))
 
 	volumeCap := int(vpcVolume.Size)
 	iops := strconv.Itoa(int(vpcVolume.Iops))
+	bandwidth := vpcVolume.Bandwidth
 	var createdDate time.Time
 	if vpcVolume.CreatedAt != nil {
 		createdDate = *vpcVolume.CreatedAt
 	}
-
+	var profile *provider.Profile
+	if vpcVolume.Profile != nil {
+		profile = &provider.Profile{
+			Name: vpcVolume.Profile.Name,
+		}
+	}
 	libVolume = &provider.Volume{
-		VolumeID:     vpcVolume.ID,
-		Provider:     VPC,
-		Capacity:     &volumeCap,
-		Iops:         &iops,
+		VolumeID: vpcVolume.ID,
+		Provider: VPC,
+		Capacity: &volumeCap,
+		Iops:     &iops,
+		VPCVolume: provider.VPCVolume{
+			Href:      vpcVolume.Href,
+			Profile:   profile,
+			Bandwidth: bandwidth,
+		},
 		VolumeType:   VolumeType,
 		CreationTime: createdDate,
 	}
+
+	// Zone can be nil for some profiles (e.g., RFS)
 	if vpcVolume.Zone != nil {
 		libVolume.Az = vpcVolume.Zone.Name
 	}
+
 	libVolume.CRN = vpcVolume.CRN
 
 	var respAccessPointlist = []provider.VolumeAccessPoint{}
@@ -322,6 +334,30 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 
 	libVolume.VolumeAccessPoints = &respAccessPointlist
 	return
+}
+
+// FromLibToProviderProfile converting vpc provider volume profile type from generic lib share profile type
+func FromLibToProviderProfile(vpcProfile *models.ProfileDetails, logger *zap.Logger) (libProfile *provider.Profile) {
+	logger.Debug("Entry of FromLibToProviderProfile method...")
+	defer logger.Debug("Exit from FromLibToProviderProfile method...")
+
+	if vpcProfile == nil {
+		logger.Info("Profile details are empty")
+		return nil
+	}
+
+	logger.Debug("Profile details of VPC client", zap.Reflect("models.Profile", vpcProfile))
+
+	profile := &provider.Profile{
+		Name:         vpcProfile.Name,
+		Href:         vpcProfile.Href,
+		Capacity:     (provider.CapIops)(vpcProfile.Capacity),
+		Family:       vpcProfile.Family,
+		Iops:         (provider.CapIops)(vpcProfile.Iops),
+		ResourceType: vpcProfile.ResourceType,
+	}
+
+	return profile
 }
 
 // FromProviderToLibVolumeAccessPoint converting vpc provider share target type to generic lib volume accessPoint Type

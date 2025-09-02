@@ -30,6 +30,10 @@ import (
 //
 //go:generate counterfeiter -o fakes/share.go --fake-name FileShareService . FileShareManager
 type FileShareManager interface {
+
+	// Get the share profile by using profile name
+	GetShareProfile(profileName string, ctxLogger *zap.Logger) (*models.ProfileDetails, error)
+
 	// Create the file share with authorisation by passing required information in the share object
 	CreateFileShare(volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
 
