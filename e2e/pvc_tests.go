@@ -386,7 +386,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "100",
-			"iops":       "6000",
+			"iops":       "36000",
 		}
 
 		sc := "custom-rfs-sc-2"
