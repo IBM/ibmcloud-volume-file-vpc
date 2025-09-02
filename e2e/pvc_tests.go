@@ -213,7 +213,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH EMPTY BANDWIDTH VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -262,7 +262,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH MAX BANDWIDTH (8192) VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -317,7 +317,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH ZERO BANDWIDTH VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -372,7 +372,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH INVALID BANDWIDTH (9000) VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -429,7 +429,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH IOPS WHICH IS INVALID FOR RFS PROFILE, VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -484,7 +484,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH ZONE WHICH IS INVALID FOR RFS PROFILE, VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
