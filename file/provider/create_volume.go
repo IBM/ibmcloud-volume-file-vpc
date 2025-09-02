@@ -196,14 +196,11 @@ func validateVolumeRequest(volumeRequest provider.Volume) (models.ResourceGroup,
 		return resourceGroup, iops, bandwidth, userError.GetUserError("VolumeCapacityInvalid", nil, *volumeRequest.Capacity)
 	}
 
-	// Read user provided error, no harm to pass the 0 values to RIaaS in case of tiered profiles
 	if volumeRequest.Iops != nil {
 		iops = ToInt64(*volumeRequest.Iops)
 	}
 
-	if volumeRequest.Bandwidth != 0 {
-		bandwidth = volumeRequest.VPCVolume.Bandwidth
-	}
+	bandwidth = volumeRequest.VPCVolume.Bandwidth
 
 	return resourceGroup, iops, bandwidth, nil
 }
