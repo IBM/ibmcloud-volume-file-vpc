@@ -17,7 +17,6 @@
    export icrImage=<Give the image which will be used by pods>
    export SC=<storage-class-name-with-delete-reclaim-policy>
    export SC_RETAIN=<storage-class-name-with-retain-reclaim-policy>
-   export SC_RFS=<storage-class-name-with-delete-reclaim-policy>
 
    # Optional
    export E2E_POD_COUNT="1"
