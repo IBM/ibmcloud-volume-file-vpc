@@ -369,12 +369,9 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 
 		defer func() {
 			if r := recover(); r != nil {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH INVALID BANDWIDTH (9000) VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : FAIL (expected)\n", sc))
-			} else {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH INVALID BANDWIDTH (9000) VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : FAIL (unexpected success)\n", sc))
+				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc))
 			}
 		}()
-
 		test.Run(cs, ns)
 	})
 
@@ -422,15 +419,11 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			PodCheck:     nil,
 			ReplicaCount: replicaCount,
 		}
-
 		defer func() {
 			if r := recover(); r != nil {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH IOPS WHICH IS INVALID FOR RFS PROFILE, VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : FAIL (expected)\n", sc))
-			} else {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH IOPS WHICH IS INVALID FOR RFS PROFILE, VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : FAIL (unexpected success)\n", sc))
+				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc))
 			}
 		}()
-
 		test.Run(cs, ns)
 	})
 
@@ -478,15 +471,11 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			PodCheck:     nil,
 			ReplicaCount: replicaCount,
 		}
-
 		defer func() {
 			if r := recover(); r != nil {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH ZONE PARAM WHICH IS INVALID FOR RFS PROFILE, VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : FAIL (expected)\n", sc))
-			} else {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: WITH ZONE PARAM WHICH IS INVALID FOR RFS PROFILE, VERIFYING RFS BASED PVC CREATE/DELETE WITH %s STORAGE CLASS : FAIL (unexpected success)\n", sc))
+				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc))
 			}
 		}()
-
 		test.Run(cs, ns)
 	})
 })
