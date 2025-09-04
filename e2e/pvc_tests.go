@@ -214,7 +214,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH EMPTY BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH NIL BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
