@@ -35,3 +35,12 @@
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e
    ```
+   
+8. Test RFS profile and it's storage classes
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]"  ./e2e
+   ```
+9. Test Snapshot for DP2 and RFS profile 
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]"  ./e2e
+   ```

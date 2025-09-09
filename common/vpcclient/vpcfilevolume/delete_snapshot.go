@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,29 +26,28 @@ import (
 	"go.uber.org/zap"
 )
 
-// CreateFileShare POSTs to v1/shares
-func (vs *FileShareService) CreateFileShare(shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error) {
-	ctxLogger.Debug("Entry Backend CreateFileShare")
-	defer ctxLogger.Debug("Exit Backend CreateFileShare")
+// DeleteSnapshot DELETEs to shares/{share-id}/snapshots/{snapshot-id}
+func (ss *SnapshotService) DeleteSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) error {
+	ctxLogger.Debug("Entry Backend DeleteSnapshot")
+	defer ctxLogger.Debug("Exit Backend DeleteSnapshot")
 
-	defer util.TimeTracker("CreateFileShare", time.Now())
+	defer util.TimeTracker("DeleteSnapshot", time.Now())
 
 	operation := &client.Operation{
-		Name:        "CreateFileShare",
-		Method:      "POST",
-		PathPattern: sharesPath,
+		Name:        "DeleteSnapshot",
+		Method:      "DELETE",
+		PathPattern: snapshotIDPath,
 	}
 
-	var share models.Share
 	var apiErr models.Error
-	request := vs.client.NewRequest(operation)
 
-	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", request.URL()), zap.Reflect("Payload", shareTemplate), zap.Reflect("Operation", operation))
+	request := ss.client.NewRequest(operation).PathParameter(shareIDParam, shareID)
+	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
-	_, err := request.JSONBody(shareTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
+	_, err := request.PathParameter(snapshotIDParam, snapshotID).JSONError(&apiErr).Invoke()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &share, nil
+	return nil
 }
