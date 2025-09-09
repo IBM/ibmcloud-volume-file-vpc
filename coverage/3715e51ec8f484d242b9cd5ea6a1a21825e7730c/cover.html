@@ -173,7 +173,7 @@
 				
 				<option value="file58">github.com/IBM/ibmcloud-volume-file-vpc/pkg/metadata/metadata.go (22.2%)</option>
 				
-				<option value="file59">github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher/pv_watcher.go (47.2%)</option>
+				<option value="file59">github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher/pv_watcher.go (56.0%)</option>
 				
 				</select>
 			</div>
@@ -6538,7 +6538,7 @@ func (pvw *PVWatcher) updateVolume(oldobj, obj interface{}) <span class="cov8" t
                 var newStatus v1.PersistentVolumePhase
                 ctxLogger, requestID := GetContextLogger(context.Background(), false)
                 // panic-recovery function that avoid watcher thread to stop because of unexexpected error
-                defer func() </span><span class="cov0" title="0">{
+                defer func() </span><span class="cov8" title="1">{
                         if r := recover(); r != nil </span><span class="cov0" title="0">{
                                 ctxLogger.Error("Recovered from panic in pvwatcher", zap.Stack("stack"), zap.String("requestID", requestID))
                         }</span>
@@ -6547,7 +6547,7 @@ func (pvw *PVWatcher) updateVolume(oldobj, obj interface{}) <span class="cov8" t
                 <span class="cov8" title="1">ctxLogger.Info("Entry updateVolume()", zap.Reflect("obj", obj), zap.Reflect("oldobj", oldobj))
                 newpv, _ := obj.(*v1.PersistentVolume)
                 //If there is no change to status , capacity or iops we can skip the updateVolume call.
-                if oldobj != nil </span><span class="cov0" title="0">{
+                if oldobj != nil </span><span class="cov8" title="1">{
                         oldpv, _ := oldobj.(*v1.PersistentVolume)
                         oldCapacity := oldpv.Spec.Capacity[v1.ResourceStorage]
                         capacity := newpv.Spec.Capacity[v1.ResourceStorage]
@@ -6555,7 +6555,7 @@ func (pvw *PVWatcher) updateVolume(oldobj, obj interface{}) <span class="cov8" t
                         oldiops := oldpv.Spec.CSI.VolumeAttributes[IOPSLabel]
                         newStatus = newpv.Status.Phase
                         oldStatus = oldpv.Status.Phase
-                        if (newStatus == oldStatus) &amp;&amp; (oldCapacity.Value() == capacity.Value()) &amp;&amp; (oldiops == iops) </span><span class="cov0" title="0">{
+                        if (newStatus == oldStatus) &amp;&amp; (oldCapacity.Value() == capacity.Value()) &amp;&amp; (oldiops == iops) </span><span class="cov8" title="1">{
                                 ctxLogger.Info("Skipping update Volume as there is no change in status , capacity and iops")
                                 return
                         }</span>
