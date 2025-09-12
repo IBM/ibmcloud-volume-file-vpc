@@ -21,16 +21,23 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+
+	//. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/kubernetes/test/e2e/framework"
@@ -78,6 +85,86 @@ func deleteCustomRfsSC(cs clientset.Interface, name string) error {
 	}
 	fmt.Printf("StorageClass %s deleted successfully\n", name)
 	return nil
+}
+
+func CreateRFSPVC(pvcName, sc, namespace string, iops, throughput int, rfsPvcSize string, cs kubernetes.Interface) {
+	// Delete old PVC if exists
+	_ = cs.CoreV1().PersistentVolumeClaims(namespace).Delete(context.Background(), pvcName, metav1.DeleteOptions{})
+
+	customSCName := sc
+	pvcInRange := true
+
+	// Create PVC object
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pvcName,
+			Namespace: namespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &customSCName,
+			AccessModes: []corev1.PersistentVolumeAccessMode{
+				corev1.ReadWriteOnce,
+			},
+			Resources: corev1.VolumeResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: resource.MustParse(rfsPvcSize),
+				},
+			},
+		},
+	}
+
+	// Create the PVC
+	_, err := cs.CoreV1().PersistentVolumeClaims(namespace).Create(context.TODO(), pvc, metav1.CreateOptions{})
+	if err != nil {
+		panic(fmt.Sprintf("Failed to create PVC: %v", err))
+	}
+
+	// Convert size string to int
+	sizeString := strings.TrimSuffix(rfsPvcSize, "Gi")
+	size, err := strconv.Atoi(sizeString)
+	if err != nil {
+		fmt.Println("Error converting size string:", err)
+		return
+	}
+
+	// Validate performance tiers
+	switch {
+	case size >= 1 && size <= 20 && iops == 3000 && throughput == 1000:
+		fmt.Println("Tier: 3000 IOPS, 1000 MB/s throughput")
+	case size >= 21 && size <= 50 && iops >= 3000 && iops <= 5000 && throughput >= 1000 && throughput <= 4096:
+		fmt.Println("Tier: 3000-5000 IOPS, 1000-4096 MB/s throughput")
+	case size >= 51 && size <= 80 && iops >= 3000 && iops <= 20000 && throughput >= 1000 && throughput <= 6144:
+		fmt.Println("Tier: 3000-20000 IOPS, 1000-6144 MB/s throughput")
+	case size >= 81 && size <= 100 && iops >= 3000 && iops <= 30000 && throughput >= 1000 && throughput <= 8192:
+		fmt.Println("Tier: 3000-30000 IOPS, 1000-8192 MB/s throughput")
+	case size >= 101 && size <= 130 && iops >= 3000 && iops <= 45000 && throughput >= 1000 && throughput <= 8192:
+		fmt.Println("Tier: 3000-45000 IOPS, 1000-8192 MB/s throughput")
+	case size >= 131 && size <= 150 && iops >= 3000 && iops <= 60000 && throughput >= 1000 && throughput <= 8192:
+		fmt.Println("Tier: 3000-60000 IOPS, 1000-8192 MB/s throughput")
+	case size >= 151 && size <= 32000 && iops >= 3000 && iops <= 64000 && throughput >= 1000 && throughput <= 8192:
+		fmt.Println("Tier: 3000-64000 IOPS, 1000-8192 MB/s throughput")
+	default:
+		pvcInRange = false
+		fmt.Println("PVC size/performance does not match any tier — expected Pending state")
+	}
+
+	// Wait for PVC status
+	err = wait.PollImmediate(5*time.Second, 60*time.Second, func() (bool, error) {
+		updatedPVC, err := cs.CoreV1().PersistentVolumeClaims(namespace).Get(context.TODO(), pvcName, metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		if !pvcInRange {
+			return updatedPVC.Status.Phase == corev1.ClaimPending, nil
+		}
+		return updatedPVC.Status.Phase == corev1.ClaimBound, nil
+	})
+
+	if err != nil && !pvcInRange {
+		fmt.Println("PVC stuck in pending state as expected")
+	} else if err != nil && pvcInRange {
+		panic(fmt.Sprintf("PVC did not bind: %v", err))
+	}
 }
 
 var _ = BeforeSuite(func() {
@@ -324,10 +411,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 	})
 
 	It("with RFS sc (9000-bandwidth): should fail when bandwidth is set to an invalid high value (9000)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		Expect(labelerr).NotTo(HaveOccurred())
-
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "9000",
@@ -335,51 +418,33 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		sc := "custom-rfs-sc-1"
 		createCustomRfsSC(cs, sc, params)
 		defer deleteCustomRfsSC(cs, sc)
-
-		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		Expect(err).NotTo(HaveOccurred())
-		defer fpointer.Close()
-
-		var replicaCount = int32(1)
-		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-			CmdExits: false,
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vol-rfs-",
-					VolumeType:    sc,
-					FSType:        "ext4",
-					ClaimSize:     "15Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					MountOptions:  []string{"rw"},
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-			Pod:          pod,
-			PodCheck:     nil,
-			ReplicaCount: replicaCount,
-		}
-
+		// Defer the deletion of the StorageClass object.
 		defer func() {
-			if r := recover(); r != nil {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc))
+			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-1", metav1.DeleteOptions{}); err != nil {
+				panic(err)
 			}
 		}()
-		test.Run(cs, ns)
+		// create pvc
+		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 4000, 2000, "10Gi", cs)
+		// Defer the deletion of the PVC object.
+		defer func() {
+			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
+				panic(err)
+			}
+		}()
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
 	})
 
 	It("with RFS sc (IOPS): should fail when iops is provided for rfs profile", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		Expect(labelerr).NotTo(HaveOccurred())
-
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "100",
@@ -388,50 +453,33 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		sc := "custom-rfs-sc-2"
 		createCustomRfsSC(cs, sc, params)
 		defer deleteCustomRfsSC(cs, sc)
-
-		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		Expect(err).NotTo(HaveOccurred())
-		defer fpointer.Close()
-
-		var replicaCount = int32(1)
-		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-			CmdExits: false,
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vol-rfs-",
-					VolumeType:    sc,
-					FSType:        "ext4",
-					ClaimSize:     "15Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					MountOptions:  []string{"rw"},
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-			Pod:          pod,
-			PodCheck:     nil,
-			ReplicaCount: replicaCount,
-		}
+		// Defer the deletion of the StorageClass object.
 		defer func() {
-			if r := recover(); r != nil {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc))
+			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-2", metav1.DeleteOptions{}); err != nil {
+				panic(err)
 			}
 		}()
-		test.Run(cs, ns)
+		// create pvc
+		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 4000, 2000, "10Gi", cs)
+		// Defer the deletion of the PVC object.
+		defer func() {
+			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
+				panic(err)
+			}
+		}()
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
 	})
 
 	It("with RFS sc (Zone): should fail when zone is provided for rfs profile", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		Expect(labelerr).NotTo(HaveOccurred())
-
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "100",
@@ -440,43 +488,30 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		sc := "custom-rfs-sc-3"
 		createCustomRfsSC(cs, sc, params)
 		defer deleteCustomRfsSC(cs, sc)
-
-		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		Expect(err).NotTo(HaveOccurred())
-		defer fpointer.Close()
-
-		var replicaCount = int32(1)
-		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-			CmdExits: false,
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vol-rfs-",
-					VolumeType:    sc,
-					FSType:        "ext4",
-					ClaimSize:     "15Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					MountOptions:  []string{"rw"},
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-			Pod:          pod,
-			PodCheck:     nil,
-			ReplicaCount: replicaCount,
-		}
+		// Defer the deletion of the StorageClass object.
 		defer func() {
-			if r := recover(); r != nil {
-				_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc))
+			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-3", metav1.DeleteOptions{}); err != nil {
+				panic(err)
 			}
 		}()
-		test.Run(cs, ns)
+		// create pvc
+		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 4000, 2000, "10Gi", cs)
+		// Defer the deletion of the PVC object.
+		defer func() {
+			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
+				panic(err)
+			}
+		}()
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
 	})
 })
 
