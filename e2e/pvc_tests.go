@@ -247,158 +247,158 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		ns = f.Namespace
 	})
 
-	// It("with RFS sc: should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
-	// 	payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-	// 	_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-	// 	if labelerr != nil {
-	// 		panic(labelerr)
-	// 	}
-	// 	sc := "ibmc-vpc-file-regional"
-	// 	reclaimPolicy := v1.PersistentVolumeReclaimDelete
-	// 	fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer fpointer.Close()
+	It("with RFS sc: should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		sc := "ibmc-vpc-file-regional"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
 
-	// 	var replicaCount = int32(1)
-	// 	pod := testsuites.PodDetails{
-	// 		Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-	// 		CmdExits: false,
-	// 		Volumes: []testsuites.VolumeDetails{
-	// 			{
-	// 				PVCName:       "ics-vol-rfs-",
-	// 				VolumeType:    sc,
-	// 				FSType:        "ext4",
-	// 				ClaimSize:     "15Gi",
-	// 				ReclaimPolicy: &reclaimPolicy,
-	// 				MountOptions:  []string{"rw"},
-	// 				VolumeMount: testsuites.VolumeMountDetails{
-	// 					NameGenerate:      "test-volume-",
-	// 					MountPathGenerate: "/mnt/test-",
-	// 				},
-	// 			},
-	// 		},
-	// 	}
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-	// 	test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-	// 		Pod: pod,
-	// 		PodCheck: &testsuites.PodExecCheck{
-	// 			Cmd:              []string{"cat", "/mnt/test-1/data"},
-	// 			ExpectedString01: "hello world\n",
-	// 			ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
-	// 		},
-	// 		ReplicaCount: replicaCount,
-	// 	}
-	// 	test.Run(cs, ns)
-	// 	if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
-	// 		panic(err)
-	// 	}
-	// })
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
 
-	// It("with RFS sc (max-bandwidth): should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
-	// 	payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-	// 	_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-	// 	if labelerr != nil {
-	// 		panic(labelerr)
-	// 	}
-	// 	sc := "ibmc-vpc-file-regional-max-bandwidth"
-	// 	reclaimPolicy := v1.PersistentVolumeReclaimDelete
-	// 	fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer fpointer.Close()
+	It("with RFS sc (max-bandwidth): should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		sc := "ibmc-vpc-file-regional-max-bandwidth"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
 
-	// 	var replicaCount = int32(1)
-	// 	pod := testsuites.PodDetails{
-	// 		Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-	// 		CmdExits: false,
-	// 		Volumes: []testsuites.VolumeDetails{
-	// 			{
-	// 				PVCName:       "ics-vol-rfs-",
-	// 				VolumeType:    sc,
-	// 				FSType:        "ext4",
-	// 				ClaimSize:     "15Gi",
-	// 				ReclaimPolicy: &reclaimPolicy,
-	// 				MountOptions:  []string{"rw"},
-	// 				VolumeMount: testsuites.VolumeMountDetails{
-	// 					NameGenerate:      "test-volume-",
-	// 					MountPathGenerate: "/mnt/test-",
-	// 				},
-	// 			},
-	// 		},
-	// 	}
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-	// 	test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-	// 		Pod: pod,
-	// 		PodCheck: &testsuites.PodExecCheck{
-	// 			Cmd:              []string{"cat", "/mnt/test-1/data"},
-	// 			ExpectedString01: "hello world\n",
-	// 			ExpectedString02: "hello world\nhello world\n",
-	// 		},
-	// 		ReplicaCount: replicaCount,
-	// 	}
-	// 	test.Run(cs, ns)
-	// 	if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
-	// 		panic(err)
-	// 	}
-	// })
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
 
-	// It("with RFS sc (Zero-bandwidth): should provide default throughput = 1 mbps and should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
-	// 	payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-	// 	_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-	// 	if labelerr != nil {
-	// 		panic(labelerr)
-	// 	}
-	// 	params := map[string]string{
-	// 		"profile":    "rfs",
-	// 		"throughput": "0",
-	// 	}
-	// 	sc := "custom-rfs-sc"
-	// 	createCustomRfsSC(cs, "custom-rfs-sc", params)
-	// 	defer deleteCustomRfsSC(cs, sc)
-	// 	reclaimPolicy := v1.PersistentVolumeReclaimDelete
-	// 	fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-	// 	if err != nil {
-	// 		panic(err)
-	// 	}
-	// 	defer fpointer.Close()
+	It("with RFS sc (Zero-bandwidth): should provide default throughput = 1 mbps and should create a pvc &pv, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "0",
+		}
+		sc := "custom-rfs-sc"
+		createCustomRfsSC(cs, "custom-rfs-sc", params)
+		defer deleteCustomRfsSC(cs, sc)
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
 
-	// 	var replicaCount = int32(1)
-	// 	pod := testsuites.PodDetails{
-	// 		Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-	// 		CmdExits: false,
-	// 		Volumes: []testsuites.VolumeDetails{
-	// 			{
-	// 				PVCName:       "ics-vol-rfs-",
-	// 				VolumeType:    sc,
-	// 				FSType:        "ext4",
-	// 				ClaimSize:     "15Gi",
-	// 				ReclaimPolicy: &reclaimPolicy,
-	// 				MountOptions:  []string{"rw"},
-	// 				VolumeMount: testsuites.VolumeMountDetails{
-	// 					NameGenerate:      "test-volume-",
-	// 					MountPathGenerate: "/mnt/test-",
-	// 				},
-	// 			},
-	// 		},
-	// 	}
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "ext4",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-	// 	test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-	// 		Pod: pod,
-	// 		PodCheck: &testsuites.PodExecCheck{
-	// 			Cmd:              []string{"cat", "/mnt/test-1/data"},
-	// 			ExpectedString01: "hello world\n",
-	// 			ExpectedString02: "hello world\nhello world\n",
-	// 		},
-	// 		ReplicaCount: replicaCount,
-	// 	}
-	// 	test.Run(cs, ns)
-	// 	if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
-	// 		panic(err)
-	// 	}
-	// })
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
 
 	It("with RFS sc (9000-bandwidth): should fail when bandwidth is set to an invalid high value (9000)", func() {
 		params := map[string]string{
