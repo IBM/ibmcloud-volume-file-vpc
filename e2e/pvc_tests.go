@@ -429,7 +429,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		}
 		defer fpointer.Close()
 
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -464,7 +464,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		}
 		defer fpointer.Close()
 
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -499,7 +499,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 		}
 		defer fpointer.Close()
 
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAILED WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING RFS BASED PVC CREATE FAIL WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
