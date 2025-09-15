@@ -415,7 +415,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			}
 		}()
 		// create pvc
-		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 2000, "10Gi", cs)
+		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 9000, "10Gi", cs)
 		// Defer the deletion of the PVC object.
 		defer func() {
 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
@@ -450,7 +450,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			}
 		}()
 		// create pvc
-		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 2000, "10Gi", cs)
+		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
 		// Defer the deletion of the PVC object.
 		defer func() {
 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
@@ -485,7 +485,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] [with-rfs-profile] Dynamic Provisioning for
 			}
 		}()
 		// create pvc
-		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 2000, "10Gi", cs)
+		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
 		// Defer the deletion of the PVC object.
 		defer func() {
 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
