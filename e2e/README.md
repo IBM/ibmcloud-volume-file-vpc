@@ -27,6 +27,7 @@
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e
    ```
+
 6. Test volume expansion
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e
@@ -34,4 +35,9 @@
 7. Test EIT enabled volume test cases
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e
+   ```
+   
+8. Test RFS profile and it's storage classes
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\] \[with-rfs-profile\]"  ./e2e
    ```
