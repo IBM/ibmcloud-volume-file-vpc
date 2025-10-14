@@ -394,6 +394,37 @@ func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logg
 	return
 }
 
+// FromProviderToLibSnapshot converting vpc provider snapshot type to generic lib snapshot type
+func FromProviderToLibSnapshot(vpcSnapshot *models.Snapshot, logger *zap.Logger) (libSnapshot *provider.Snapshot) {
+	logger.Debug("Entry of FromProviderToLibSnapshot method...")
+	defer logger.Debug("Exit from FromProviderToLibSnapshot method...")
+
+	if vpcSnapshot == nil {
+		logger.Info("Snapshot details are empty")
+		return
+	}
+
+	logger.Debug("Snapshot details of VPC client", zap.Reflect("models.Snapshot", vpcSnapshot))
+
+	var createdTime time.Time
+	if vpcSnapshot.CreatedAt != nil {
+		createdTime = *vpcSnapshot.CreatedAt
+	}
+	libSnapshot = &provider.Snapshot{
+		SnapshotID:           vpcSnapshot.ID,
+		SnapshotCRN:          vpcSnapshot.CRN,
+		SnapshotCreationTime: createdTime,
+		SnapshotSize:         GiBToBytes(vpcSnapshot.MinimumSize),
+		VPC:                  provider.VPC{Href: vpcSnapshot.Href},
+	}
+	if vpcSnapshot.LifecycleState == snapshotReadyState {
+		libSnapshot.ReadyToUse = true
+	} else {
+		libSnapshot.ReadyToUse = false
+	}
+	return
+}
+
 // IsValidVolumeIDFormat validating(gc has 5 parts and NG has 6 parts)
 func IsValidVolumeIDFormat(volID string) bool {
 	parts := strings.Split(volID, "-")
@@ -413,6 +444,11 @@ func SetRetryParameters(maxAttempts int, maxGap int) {
 
 func roundUpSize(volumeSizeBytes int64, allocationUnitBytes int64) int64 {
 	return (volumeSizeBytes + allocationUnitBytes - 1) / allocationUnitBytes
+}
+
+// GiBToBytes converts GiB to Bytes
+func GiBToBytes(volumeSizeGiB int64) int64 {
+	return volumeSizeGiB * GiB
 }
 
 // SkipRetryForIKS skip retry as per listed error codes

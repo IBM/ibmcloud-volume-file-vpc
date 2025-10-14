@@ -125,6 +125,7 @@ func main() {
 
 		var choiceN int
 		var volumeID, targetID string
+		var snapshotName string
 		var er11 error
 		if *defaultChoice == 0 {
 			_, _ = fmt.Scanf("%d", &choiceN)
@@ -168,7 +169,24 @@ func main() {
 			}
 			fmt.Printf("\n\n")
 		} else if choiceN == 2 {
-			fmt.Println("You selected choice to create snapshot -- Not supported")
+			fmt.Println("You selected choice to create snapshot")
+			fmt.Printf("Please enter volume ID: ")
+			_, _ = fmt.Scanf("%s", &volumeID)
+			fmt.Printf("Please enter snapshot Name: ")
+			_, _ = fmt.Scanf("%s", &snapshotName)
+			snapshotRequest := provider.SnapshotParameters{}
+			snapshotRequest.Name = snapshotName
+			tags := make(map[string]string)
+			tags["tag1"] = "snapshot-tag1"
+			snapshotRequest.SnapshotTags = tags
+			snapshot, errr := sess.CreateSnapshot(volumeID, snapshotRequest)
+			if errr == nil {
+				ctxLogger.Info("Successfully created snapshot on ================>", zap.Reflect("SourceVolumeID", volumeID))
+				ctxLogger.Info("Snapshot details: ", zap.Reflect("Snapshot", snapshot))
+			} else {
+				errr = updateRequestID(errr, requestID)
+				ctxLogger.Info("Failed to create snapshot on ================>", zap.Reflect("VolumeID", volumeID), zap.Reflect("Error", errr))
+			}
 			fmt.Printf("\n\n")
 		} else if choiceN == 3 {
 			fmt.Println("You selected choice to list snapshot from volume -- Not supported")
