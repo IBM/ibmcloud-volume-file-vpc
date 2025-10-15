@@ -115,6 +115,10 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		shareTemplate.EncryptionKey = &models.EncryptionKey{CRN: encryptionKeyCRN}
 	}
 
+	if len(volumeRequest.SnapshotID) > 0 {
+		shareTemplate.SourceSnapshot = &models.Snapshot{ID: volumeRequest.SnapshotID}
+	}
+
 	vpcs.Logger.Info("Calling VPC provider for volume creation...")
 	var volume *models.Share
 

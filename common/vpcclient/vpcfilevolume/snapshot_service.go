@@ -27,6 +27,18 @@ import (
 type SnapshotManager interface {
 	// Create the snapshot on the volume
 	CreateSnapshot(snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error)
+
+	// Delete the snapshot
+	DeleteSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) error
+
+	// Get the snapshot
+	GetSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) (*models.Snapshot, error)
+
+	// Get the snapshot by using snapshot name
+	GetSnapshotByName(shareID string, snapshotName string, ctxLogger *zap.Logger) (*models.Snapshot, error)
+
+	// List all the  snapshots for a given volume
+	ListSnapshots(shareID string, limit int, start string, filters *models.LisSnapshotFilters, ctxLogger *zap.Logger) (*models.SnapshotList, error)
 }
 
 // SnapshotService ...

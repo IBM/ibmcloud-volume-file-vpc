@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import (
 )
 
 // DeleteSnapshot DELETEs to /snapshots
-func (ss *SnapshotService) DeleteSnapshot(snapshotID string, ctxLogger *zap.Logger) error {
+func (ss *SnapshotService) DeleteSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) error {
 	ctxLogger.Debug("Entry Backend DeleteSpanshot")
 	defer ctxLogger.Debug("Exit Backend DeleteSnapshot")
 
@@ -41,7 +41,7 @@ func (ss *SnapshotService) DeleteSnapshot(snapshotID string, ctxLogger *zap.Logg
 
 	var apiErr models.Error
 
-	request := ss.client.NewRequest(operation)
+	request := ss.client.NewRequest(operation).PathParameter(shareIDParam, shareID)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
 	_, err := request.PathParameter(snapshotIDParam, snapshotID).JSONError(&apiErr).Invoke()

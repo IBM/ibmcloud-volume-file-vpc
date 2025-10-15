@@ -18,6 +18,7 @@
 package vpcfilevolume
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
@@ -26,29 +27,45 @@ import (
 	"go.uber.org/zap"
 )
 
-// CreateSnapshot POSTs to /snapshots
-func (ss *SnapshotService) CreateSnapshot(snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error) {
-	ctxLogger.Debug("Entry Backend CreateSpanShot")
-	defer ctxLogger.Debug("Exit Backend CreateSnapshot")
+// ListSnapshots GETs /shares/{share_id}/snapshots
+func (ss *SnapshotService) ListSnapshots(shareID string, limit int, start string, filters *models.LisSnapshotFilters, ctxLogger *zap.Logger) (*models.SnapshotList, error) {
+	ctxLogger.Debug("Entry Backend ListSnapshots")
+	defer ctxLogger.Debug("Exit Backend ListSnapshots")
 
-	defer util.TimeTracker("CreateSnapshot", time.Now())
+	defer util.TimeTracker("ListSnapshots", time.Now())
 
 	operation := &client.Operation{
-		Name:        "CreateSnapshot",
-		Method:      "POST",
+		Name:        "ListSnapshots",
+		Method:      "GET",
 		PathPattern: snapshotsPath,
 	}
 
-	var snapshot models.Snapshot
+	var snapshots models.SnapshotList
 	var apiErr models.Error
 
-	request := ss.client.NewRequest(operation).PathParameter(shareIDParam, snapshotTemplate.ShareID)
-	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", request.URL()), zap.Reflect("Payload", snapshotTemplate), zap.Reflect("Operation", operation))
+	request := ss.client.NewRequest(operation).PathParameter(shareIDParam, shareID)
+	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
-	_, err := request.JSONBody(snapshotTemplate).JSONSuccess(&snapshot).JSONError(&apiErr).Invoke()
+	req := request.JSONSuccess(&snapshots).JSONError(&apiErr)
+
+	if limit > 0 {
+		req.AddQueryValue("limit", strconv.Itoa(limit))
+	}
+
+	if start != "" {
+		req.AddQueryValue("start", start)
+	}
+
+	if filters != nil {
+		if filters.Name != "" {
+			req.AddQueryValue("name", filters.Name)
+		}
+	}
+
+	_, err := req.Invoke()
 	if err != nil {
 		return nil, err
 	}
 
-	return &snapshot, nil
+	return &snapshots, nil
 }
