@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
@@ -116,8 +115,10 @@ func CreateRFSPVC(pvcName, sc, namespace string, throughput int, rfsPvcSize stri
 		panic(fmt.Sprintf("Failed to create PVC: %v", err))
 	}
 
+	pollInterval := 5 * time.Second
+	pollTimeout := 5 * time.Minute
 	// Wait for PVC status
-	err = wait.PollImmediate(5*time.Second, 60*time.Second, func() (bool, error) {
+	err = wait.PollImmediate(pollInterval, pollTimeout, func() (bool, error) {
 		updatedPVC, err := cs.CoreV1().PersistentVolumeClaims(namespace).Get(context.TODO(), pvcName, metav1.GetOptions{})
 		if err != nil {
 			return false, err
@@ -256,7 +257,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
-	It("with rfs profile sc (max-bandwidth): should create a pvc, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+	It("with rfs profile sc : should create a pvc, deployment resources, write and read to volume, delete the pod with max bandwidth ", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -300,7 +301,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
-	It("with rfs profile sc (Zero-bandwidth): should provide default throughput = 1 mbps and should create a pvc, deployment resources, write and read to volume, delete the pod, write and read to volume again", func() {
+	It("with rfs profile sc: should provide default throughput and should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -350,7 +351,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
-	It("with rfs profile sc (9000-bandwidth): should fail when bandwidth is set to an invalid high value (9000)", func() {
+	It("with rfs profile sc: should fail when bandwidth is set to an invalid high value (9000)", func() {
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "9000",
@@ -382,7 +383,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
-	It("with rfs profile sc (IOPS): should fail when iops is provided for rfs profile", func() {
+	It("with rfs profile sc: should fail when iops is provided for rfs profile", func() {
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "100",
@@ -412,7 +413,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
-	It("with rfs profile sc (Zone): should fail when zone is provided for rfs profile", func() {
+	It("with rfs profile sc: should fail when zone is provided for rfs profile", func() {
 		params := map[string]string{
 			"profile":    "rfs",
 			"throughput": "100",

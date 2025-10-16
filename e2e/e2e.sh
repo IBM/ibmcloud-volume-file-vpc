@@ -239,7 +239,6 @@ if [[ "$e2e_rfs_test_case" == "true" ]]; then
 	echo "Exit status for RFS Profile volume test: $rc4"
 else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
-	#rc4=0
 fi
 
 if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
