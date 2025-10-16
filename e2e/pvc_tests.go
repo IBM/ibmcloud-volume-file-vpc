@@ -220,9 +220,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		}
 		sc := "ibmc-vpc-file-regional"
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-
-		defer fpointer.Close()
 
 		var replicaCount = int32(1)
 		pod := testsuites.PodDetails{
@@ -254,6 +251,9 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
+
+		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		defer fpointer.Close()
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
@@ -265,8 +265,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		}
 		sc := "ibmc-vpc-file-regional-max-bandwidth"
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		defer fpointer.Close()
 
 		var replicaCount = int32(1)
 		pod := testsuites.PodDetails{
@@ -298,6 +296,9 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
+
+		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		defer fpointer.Close()
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
@@ -315,8 +316,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		createCustomRfsSC(cs, "custom-rfs-sc", params)
 		defer deleteCustomRfsSC(cs, sc)
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		defer fpointer.Close()
 
 		var replicaCount = int32(1)
 		pod := testsuites.PodDetails{
@@ -348,6 +347,9 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
+
+		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		defer fpointer.Close()
 		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
