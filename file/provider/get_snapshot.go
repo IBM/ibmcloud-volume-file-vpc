@@ -18,14 +18,14 @@
 package provider
 
 import (
+	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	userError "github.com/IBM/ibmcloud-volume-vpc/common/messages"
-	"github.com/IBM/ibmcloud-volume-vpc/common/vpcclient/models"
 	"go.uber.org/zap"
 )
 
 // GetSnapshot get snapshot
-func (vpcs *VPCSession) GetSnapshot(snapshotID string) (*provider.Snapshot, error) {
+func (vpcs *VPCSession) GetShareSnapshot(sourceShareID string, snapshotID string) (*provider.Snapshot, error) {
 	vpcs.Logger.Info("Entry GetSnapshot", zap.Reflect("SnapshotID", snapshotID))
 	defer vpcs.Logger.Info("Exit GetSnapshot", zap.Reflect("SnapshotID", snapshotID))
 
@@ -34,7 +34,7 @@ func (vpcs *VPCSession) GetSnapshot(snapshotID string) (*provider.Snapshot, erro
 	var snapshot *models.Snapshot
 	var err error
 	err = retry(vpcs.Logger, func() error {
-		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshot(snapshotID, vpcs.Logger)
+		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshot(sourceShareID, snapshotID, vpcs.Logger)
 		return err
 	})
 
@@ -49,7 +49,7 @@ func (vpcs *VPCSession) GetSnapshot(snapshotID string) (*provider.Snapshot, erro
 }
 
 // GetSnapshotByName ...
-func (vpcs *VPCSession) GetSnapshotByName(name string) (respSnap *provider.Snapshot, err error) {
+func (vpcs *VPCSession) GetSnapshotByName(sourceShareID string, name string) (respSnap *provider.Snapshot, err error) {
 	vpcs.Logger.Debug("Entry of GetSnapshotByName method...")
 	defer vpcs.Logger.Debug("Exit from GetSnapshotByName method...")
 
@@ -63,7 +63,7 @@ func (vpcs *VPCSession) GetSnapshotByName(name string) (respSnap *provider.Snaps
 
 	var snapshot *models.Snapshot
 	err = retry(vpcs.Logger, func() error {
-		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshotByName(name, vpcs.Logger)
+		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshotByName(sourceShareID, name, vpcs.Logger)
 		return err
 	})
 

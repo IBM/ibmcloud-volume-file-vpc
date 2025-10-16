@@ -22,10 +22,10 @@ import (
 	"strings"
 	"time"
 
+	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
+	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	userError "github.com/IBM/ibmcloud-volume-vpc/common/messages"
-	"github.com/IBM/ibmcloud-volume-vpc/common/vpcclient/models"
 	"go.uber.org/zap"
 )
 
@@ -47,17 +47,17 @@ func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[strin
 	}
 
 	filter := &models.LisSnapshotFilters{
-		ResourceGroupID: filters["resource_group.id"],
-		Name:            filters["name"],
-		SourceVolumeID:  filters["source_volume.id"],
+		Name: filters["name"],
 	}
+
+	sourceVolumeID := filters["source_volume.id"]
 
 	vpcs.Logger.Info("Getting snapshot list from VPC provider...", zap.Reflect("start", start), zap.Reflect("filters", filters))
 
 	var snapshots *models.SnapshotList
 	var err error
 	err = retry(vpcs.Logger, func() error {
-		snapshots, err = vpcs.Apiclient.SnapshotService().ListSnapshots(limit, start, filter, vpcs.Logger)
+		snapshots, err = vpcs.Apiclient.SnapshotService().ListSnapshots(sourceVolumeID, limit, start, filter, vpcs.Logger)
 		return err
 	})
 
@@ -74,7 +74,6 @@ func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[strin
 	if snapshots != nil {
 		if snapshots.Next != nil {
 			var next string
-			// "Next":{"href":"https://eu-gb.iaas.cloud.ibm.com/v1/snapshots?start=3e898aa7-ac71-4323-952d-a8d741c65a68\u0026limit=1\u0026zone.name=eu-gb-1"}
 			if strings.Contains(snapshots.Next.Href, "start=") {
 				next = strings.Split(strings.Split(snapshots.Next.Href, "start=")[1], "\u0026")[0]
 			} else {

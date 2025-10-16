@@ -42,7 +42,7 @@ func (vpcs *VPCSession) DeleteSnapshot(snapshot *provider.Snapshot) error {
 
 	vpcs.Logger.Info("Deleting snapshot from VPC provider...")
 	err = retry(vpcs.Logger, func() error {
-		err = vpcs.Apiclient.SnapshotService().DeleteSnapshot(snapshot.ShareID, snapshot.SnapshotID, vpcs.Logger)
+		err = vpcs.Apiclient.SnapshotService().DeleteSnapshot(snapshot.VolumeID, snapshot.SnapshotID, vpcs.Logger)
 		return err
 	})
 
@@ -54,7 +54,7 @@ func (vpcs *VPCSession) DeleteSnapshot(snapshot *provider.Snapshot) error {
 		return userError.GetUserError("FailedToDeleteSnapshot", err)
 	}
 
-	err = WaitForSnapshotDeletion(vpcs, snapshot.SnapshotID)
+	err = WaitForSnapshotDeletion(vpcs, snapshot.VolumeID, snapshot.SnapshotID)
 	if err != nil {
 		return userError.GetUserError("FailedToDeleteSnapshot", err, snapshot.SnapshotID)
 	}
@@ -63,7 +63,7 @@ func (vpcs *VPCSession) DeleteSnapshot(snapshot *provider.Snapshot) error {
 }
 
 // WaitForSnapshotDeletion checks the snapshot for valid status
-func WaitForSnapshotDeletion(vpcs *VPCSession, snapshotID string) (err error) {
+func WaitForSnapshotDeletion(vpcs *VPCSession, volumeID string, snapshotID string) (err error) {
 	vpcs.Logger.Debug("Entry of WaitForSnapshotDeletion method...")
 	defer vpcs.Logger.Debug("Exit from WaitForSnapshotDeletion method...")
 	var skip = false
@@ -71,7 +71,7 @@ func WaitForSnapshotDeletion(vpcs *VPCSession, snapshotID string) (err error) {
 	vpcs.Logger.Info("Getting snapshot details from VPC provider...", zap.Reflect("snapshotID", snapshotID))
 
 	err = vpcs.APIRetry.FlexyRetry(vpcs.Logger, func() (error, bool) {
-		_, err = vpcs.Apiclient.SnapshotService().GetSnapshot(snapshotID, vpcs.Logger)
+		_, err = vpcs.Apiclient.SnapshotService().GetSnapshot(volumeID, snapshotID, vpcs.Logger)
 		// Keep retry, until GetSnapshot returns snapshots_not_found
 		if err != nil {
 			skip = skipRetry(err.(*models.Error))

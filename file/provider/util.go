@@ -45,6 +45,7 @@ const (
 	SecurityGroup        = "security_group"
 	EncryptionTrasitMode = "user_managed"
 	pageSize             = 50
+	SnapshotNotFound     = "snapshots_not_found"
 )
 
 var volumeIDPartsCount = 5
@@ -75,6 +76,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_subnet_not_found":                   true,
 	"targets_subnet_all_addresses_taken":        true,
 	"InvalidArgument":                           true,
+	SnapshotNotFound:                            true,
 	"shares_status_pending":                     false,
 	"internal_error":                            false,
 	"invalid_route":                             true,
