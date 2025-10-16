@@ -46,12 +46,11 @@ func (vpcs *VPCSession) CreateSnapshot(sourceVolumeID string, snapshotParameters
 
 	snapshotTemplate := &models.Snapshot{
 		Name:          snapshotParameters.Name,
-		ShareID:       sourceVolumeID,
 		ResourceGroup: &models.ResourceGroup{ID: vpcs.Config.VPCConfig.G2ResourceGroupID},
 	}
 
 	err = retry(vpcs.Logger, func() error {
-		snapshotResult, err = vpcs.Apiclient.SnapshotService().CreateSnapshot(snapshotTemplate, vpcs.Logger)
+		snapshotResult, err = vpcs.Apiclient.SnapshotService().CreateSnapshot(sourceVolumeID, snapshotTemplate, vpcs.Logger)
 		return err
 	})
 	if err != nil {

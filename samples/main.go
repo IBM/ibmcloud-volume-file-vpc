@@ -237,7 +237,7 @@ func main() {
 			fmt.Printf("Please enter sourceVolumeID to filter snapshots: ")
 			_, _ = fmt.Scanf("%s", &SnapshotName)
 
-			snapdetails, errr := sess.GetShareSnapshotByName(SourceVolumeID, SnapshotName)
+			snapdetails, errr := sess.GetSnapshotByName(SnapshotName, SourceVolumeID)
 			fmt.Printf("\n\n")
 			if errr == nil {
 				ctxLogger.Info("Successfully retrieved the snapshot details ================>", zap.Reflect("Snapshot ID", snapshotID))
@@ -252,7 +252,7 @@ func main() {
 
 			fmt.Printf("Please enter Snapshot ID: ")
 			_, _ = fmt.Scanf("%s", &snapshotID)
-			snapdetails, errr := sess.GetShareSnapshot(SourceVolumeID, snapshotID)
+			snapdetails, errr := sess.GetSnapshot(snapshotID, SourceVolumeID)
 			fmt.Printf("\n\n")
 			if errr == nil {
 				ctxLogger.Info("Successfully retrieved the snapshot details ================>", zap.Reflect("Snapshot ID", snapshotID))

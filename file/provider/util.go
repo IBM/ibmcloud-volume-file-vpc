@@ -45,7 +45,7 @@ const (
 	SecurityGroup        = "security_group"
 	EncryptionTrasitMode = "user_managed"
 	pageSize             = 50
-	SnapshotNotFound     = "snapshots_not_found"
+	SnapshotNotFound     = "shares_snapshot_not_found"
 )
 
 var volumeIDPartsCount = 5

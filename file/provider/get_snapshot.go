@@ -25,16 +25,20 @@ import (
 )
 
 // GetSnapshot get snapshot
-func (vpcs *VPCSession) GetShareSnapshot(sourceShareID string, snapshotID string) (*provider.Snapshot, error) {
+func (vpcs *VPCSession) GetSnapshot(snapshotID string, sourceVolumeID ...string) (*provider.Snapshot, error) {
 	vpcs.Logger.Info("Entry GetSnapshot", zap.Reflect("SnapshotID", snapshotID))
 	defer vpcs.Logger.Info("Exit GetSnapshot", zap.Reflect("SnapshotID", snapshotID))
 
 	vpcs.Logger.Info("Getting snapshot details from VPC provider...", zap.Reflect("SnapshotID", snapshotID))
 
+	if len(sourceVolumeID) == 0 {
+		return nil, userError.GetUserError("ErrorRequiredFieldMissing", nil, "sourceVolumeID")
+	}
+
 	var snapshot *models.Snapshot
 	var err error
 	err = retry(vpcs.Logger, func() error {
-		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshot(sourceShareID, snapshotID, vpcs.Logger)
+		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshot(sourceVolumeID[0], snapshotID, vpcs.Logger)
 		return err
 	})
 
@@ -49,9 +53,13 @@ func (vpcs *VPCSession) GetShareSnapshot(sourceShareID string, snapshotID string
 }
 
 // GetSnapshotByName ...
-func (vpcs *VPCSession) GetSnapshotByName(sourceShareID string, name string) (respSnap *provider.Snapshot, err error) {
+func (vpcs *VPCSession) GetSnapshotByName(name string, sourceVolumeID ...string) (respSnap *provider.Snapshot, err error) {
 	vpcs.Logger.Debug("Entry of GetSnapshotByName method...")
 	defer vpcs.Logger.Debug("Exit from GetSnapshotByName method...")
+
+	if len(sourceVolumeID) == 0 {
+		return nil, userError.GetUserError("ErrorRequiredFieldMissing", nil, "sourceVolumeID")
+	}
 
 	vpcs.Logger.Info("Basic validation for snapshot Name...", zap.Reflect("SnapshotName", name))
 	if len(name) <= 0 {
@@ -63,7 +71,7 @@ func (vpcs *VPCSession) GetSnapshotByName(sourceShareID string, name string) (re
 
 	var snapshot *models.Snapshot
 	err = retry(vpcs.Logger, func() error {
-		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshotByName(sourceShareID, name, vpcs.Logger)
+		snapshot, err = vpcs.Apiclient.SnapshotService().GetSnapshotByName(sourceVolumeID[0], name, vpcs.Logger)
 		return err
 	})
 

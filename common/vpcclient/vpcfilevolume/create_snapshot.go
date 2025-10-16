@@ -27,7 +27,7 @@ import (
 )
 
 // CreateSnapshot POSTs to /snapshots
-func (ss *SnapshotService) CreateSnapshot(snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error) {
+func (ss *SnapshotService) CreateSnapshot(shareID string, snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error) {
 	ctxLogger.Debug("Entry Backend CreateSpanShot")
 	defer ctxLogger.Debug("Exit Backend CreateSnapshot")
 
@@ -42,7 +42,7 @@ func (ss *SnapshotService) CreateSnapshot(snapshotTemplate *models.Snapshot, ctx
 	var snapshot models.Snapshot
 	var apiErr models.Error
 
-	request := ss.client.NewRequest(operation).PathParameter(shareIDParam, snapshotTemplate.ShareID)
+	request := ss.client.NewRequest(operation).PathParameter(shareIDParam, shareID)
 	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", request.URL()), zap.Reflect("Payload", snapshotTemplate), zap.Reflect("Operation", operation))
 
 	_, err := request.JSONBody(snapshotTemplate).JSONSuccess(&snapshot).JSONError(&apiErr).Invoke()

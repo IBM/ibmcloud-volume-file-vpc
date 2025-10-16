@@ -26,7 +26,7 @@ import (
 // SnapshotManager operations
 type SnapshotManager interface {
 	// Create the snapshot on the volume
-	CreateSnapshot(snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error)
+	CreateSnapshot(shareID string, snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error)
 
 	// Delete the snapshot
 	DeleteSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) error

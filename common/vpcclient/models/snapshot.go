@@ -39,7 +39,6 @@ type Snapshot struct {
 	ID               string            `json:"id,omitempty"`
 	Name             string            `json:"name,omitempty"`
 	CRN              string            `json:"crn,omitempty"`
-	ShareID          string            `json:"-"`
 	FingerPrint      string            `json:"fingerprint,omitempty"`
 	MinimumSize      int64             `json:"minimum_size,omitempty"`
 	ResourceGroup    *ResourceGroup    `json:"resource_group,omitempty"`
