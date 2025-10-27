@@ -346,9 +346,9 @@ func main() {
 			_, _ = fmt.Scanf("%d", &volSize)
 			volume.Capacity = &volSize
 
-			fmt.Printf("\nPlease enter snapshotID: ")
+			fmt.Printf("\nPlease enter snapshotCRN: ")
 			_, _ = fmt.Scanf("%s", &snapshotID)
-			volume.SnapshotID = snapshotID
+			volume.SnapshotCRN = snapshotID
 
 			fmt.Printf("\nPlease enter resource group ID:")
 			_, _ = fmt.Scanf("%s", &resourceGroup)
