@@ -48,6 +48,7 @@ func (vpcs *VPCSession) GetSnapshot(snapshotID string, sourceVolumeID ...string)
 
 	vpcs.Logger.Info("Successfully retrieved snpashot details from VPC backend", zap.Reflect("snapshotDetails", snapshot))
 	snapshotResponse := FromProviderToLibSnapshot(snapshot, vpcs.Logger)
+	snapshotResponse.VolumeID = sourceVolumeID[0]
 	vpcs.Logger.Info("SnapshotResponse", zap.Reflect("snapshotResponse", snapshotResponse))
 	return snapshotResponse, err
 }
@@ -81,6 +82,7 @@ func (vpcs *VPCSession) GetSnapshotByName(name string, sourceVolumeID ...string)
 
 	vpcs.Logger.Info("Successfully retrieved snpashot details from VPC backend", zap.Reflect("snapshotDetails", snapshot))
 	snapshotResponse := FromProviderToLibSnapshot(snapshot, vpcs.Logger)
+	snapshotResponse.VolumeID = sourceVolumeID[0]
 	vpcs.Logger.Info("SnapshotResponse", zap.Reflect("snapshotResponse", snapshotResponse))
 	return snapshotResponse, err
 }
