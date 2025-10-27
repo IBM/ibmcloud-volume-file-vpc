@@ -123,7 +123,7 @@ func main() {
 
 	valid := true
 	for valid {
-		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshot \n 4- Get snapshot by snapshot name \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n 23 - Get Share Profile\n Your choice?:")
+		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshots \n 4- Get snapshot by snapshot name \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n 23 - Get Share Profile\n Your choice?:")
 
 		var choiceN int
 		var volumeID, targetID string
@@ -194,17 +194,10 @@ func main() {
 			fmt.Println("You selected choice to list snapshots from volume")
 			tags := map[string]string{}
 			SourceVolumeID := ""
-			SnapshotName := ""
 			fmt.Printf("Please enter sourceVolumeID to filter snapshots: ")
 			_, _ = fmt.Scanf("%s", &SourceVolumeID)
 			if SourceVolumeID != "" {
 				tags["source_volume.id"] = SourceVolumeID
-			}
-
-			fmt.Printf("Please enter sourceVolumeID to filter snapshots: ")
-			_, _ = fmt.Scanf("%s", &SnapshotName)
-			if SnapshotName != "" {
-				tags["name"] = SnapshotName
 			}
 
 			start := ""
@@ -228,13 +221,13 @@ func main() {
 			}
 			fmt.Printf("\n\n")
 		} else if choiceN == 4 {
-			fmt.Println("You selected choice to list snapshots from volume by snapshot name")
+			fmt.Println("You selected choice to get snapshot from volume by snapshot name")
 			SourceVolumeID := ""
 			SnapshotName := ""
 			fmt.Printf("Please enter sourceVolumeID to filter snapshots: ")
 			_, _ = fmt.Scanf("%s", &SourceVolumeID)
 
-			fmt.Printf("Please enter sourceVolumeID to filter snapshots: ")
+			fmt.Printf("Please enter SnapshotName to filter snapshots: ")
 			_, _ = fmt.Scanf("%s", &SnapshotName)
 
 			snapdetails, errr := sess.GetSnapshotByName(SnapshotName, SourceVolumeID)
@@ -354,7 +347,7 @@ func main() {
 			volume.Capacity = &volSize
 
 			fmt.Printf("\nPlease enter snapshotID: ")
-			_, _ = fmt.Scanf("%d", &snapshotID)
+			_, _ = fmt.Scanf("%s", &snapshotID)
 			volume.SnapshotID = snapshotID
 
 			fmt.Printf("\nPlease enter resource group ID:")
