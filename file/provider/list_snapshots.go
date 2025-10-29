@@ -84,7 +84,7 @@ func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[strin
 
 		snapshotslist := snapshots.Snapshots
 		for _, snapItem := range snapshotslist {
-			snapshotResponse := FromProviderToLibSnapshot(snapItem, vpcs.Logger)
+			snapshotResponse := FromProviderToLibSnapshot(sourceVolumeID, snapItem, vpcs.Logger)
 			snapshotResponse.VolumeID = sourceVolumeID
 			respSnapshotList.Snapshots = append(respSnapshotList.Snapshots, snapshotResponse)
 		}

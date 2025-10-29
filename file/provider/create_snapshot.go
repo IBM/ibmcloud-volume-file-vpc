@@ -59,8 +59,7 @@ func (vpcs *VPCSession) CreateSnapshot(sourceVolumeID string, snapshotParameters
 
 	vpcs.Logger.Info("Successfully created snapshot with backend (vpcclient) call. Snapshot details", zap.Reflect("Snapshot", snapshotResult))
 	// Converting volume to lib snapshot type
-	snapshotResponse := FromProviderToLibSnapshot(snapshotResult, vpcs.Logger)
-	snapshotResponse.VolumeID = sourceVolumeID
+	snapshotResponse := FromProviderToLibSnapshot(sourceVolumeID, snapshotResult, vpcs.Logger)
 	vpcs.Logger.Info("SnapshotResponse", zap.Reflect("snapshotResponse", snapshotResponse))
 	return snapshotResponse, err
 }

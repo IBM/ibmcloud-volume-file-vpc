@@ -397,7 +397,7 @@ func FromProviderToLibVolumeAccessPoint(vpcShareTarget *models.ShareTarget, logg
 }
 
 // FromProviderToLibSnapshot converting vpc provider snapshot type to generic lib snapshot type
-func FromProviderToLibSnapshot(vpcSnapshot *models.Snapshot, logger *zap.Logger) (libSnapshot *provider.Snapshot) {
+func FromProviderToLibSnapshot(sourceVolumeID string, vpcSnapshot *models.Snapshot, logger *zap.Logger) (libSnapshot *provider.Snapshot) {
 	logger.Debug("Entry of FromProviderToLibSnapshot method...")
 	defer logger.Debug("Exit from FromProviderToLibSnapshot method...")
 
@@ -413,6 +413,7 @@ func FromProviderToLibSnapshot(vpcSnapshot *models.Snapshot, logger *zap.Logger)
 		createdTime = *vpcSnapshot.CreatedAt
 	}
 	libSnapshot = &provider.Snapshot{
+		VolumeID:             sourceVolumeID,
 		SnapshotID:           vpcSnapshot.ID,
 		SnapshotCRN:          vpcSnapshot.CRN,
 		SnapshotCreationTime: createdTime,
