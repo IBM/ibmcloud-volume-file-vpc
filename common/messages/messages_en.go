@@ -211,6 +211,55 @@ var messagesEn = map[string]util.Message{
 		Type:        util.DeletionFailed,
 		Action:      "User need to review all mount targets and delete them first before deleting file share. Run `ibmcloud is share-targets <SHARE_ID>` to get the mount target for the file share. ",
 	},
+	"SnapshotSpaceOrderFailed": {
+		Code:        "SnapshotSpaceOrderFailed",
+		Description: "Snapshot space order failed for the given volume ID",
+		Type:        util.ProvisioningFailed,
+		RC:          500,
+		Action:      "Please check your input",
+	},
+	"ListSnapshotsFailed": {
+		Code:        "ListSnapshotsFailed",
+		Description: "Unable to fetch list of volumes.",
+		Type:        util.RetrivalFailed,
+		RC:          404,
+		Action:      "Run 'ibmcloud is share-snapshots' to list available snapshots in your account.",
+	},
+	"InvalidListSnapshotLimit": {
+		Code:        "InvalidListSnapshotLimit",
+		Description: "The value '%v' specified in the limit parameter of the list snapshot call is not valid.",
+		Type:        util.InvalidRequest,
+		RC:          400,
+		Action:      "Verify the limit parameter's value. The limit must be a positive number between 0 and 100.",
+	},
+	"StartSnapshotIDNotFound": {
+		Code:        "StartSnapshotIDNotFound",
+		Description: "The snapshot ID '%s' specified in the start parameter of the list volume call could not be found.",
+		Type:        util.InvalidRequest,
+		RC:          400,
+		Action:      "Please verify that the start snapshot ID is correct and whether you have access to the snapshot ID.",
+	},
+	"FailedToDeleteSnapshot": {
+		Code:        "FailedToDeleteSnapshot",
+		Description: "Failed to delete '%d' snapshot ID",
+		Type:        util.DeletionFailed,
+		RC:          500,
+		Action:      "Check whether the snapshot ID exists. You may need to verify by using 'ibmcloud is share-snapshots' cli",
+	},
+	"SnapshotIDNotFound": {
+		Code:        "SnapshotIDNotFound",
+		Description: "A snapshot with the specified snapshot ID '%s' could not be found.",
+		Type:        util.RetrivalFailed,
+		RC:          404,
+		Action:      "Please check the snapshot ID once, You many need to verify by using 'ibmcloud is share-snapshot <share-id> <snapshot-id>' cli.",
+	},
+	"StorageFindFailedWithSnapshotName": {
+		Code:        "StorageFindFailedWithSnapshotName",
+		Description: "A snapshot with the specified snapshot name '%s' could not be found.",
+		Type:        util.RetrivalFailed,
+		RC:          404,
+		Action:      "Please check the snapshot name once, You many need to verify by using 'ibmcloud is share-snapshots' cli.",
+	},
 }
 
 // InitMessages ...
