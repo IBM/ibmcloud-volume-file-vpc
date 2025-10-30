@@ -313,6 +313,10 @@ func FromProviderToLibVolume(vpcVolume *models.Share, logger *zap.Logger) (libVo
 		CreationTime: createdDate,
 	}
 
+	if vpcVolume.SourceSnapshot != nil {
+		libVolume.SnapshotID = vpcVolume.SourceSnapshot.ID
+	}
+
 	// Zone can be nil for some profiles (e.g., RFS)
 	if vpcVolume.Zone != nil {
 		libVolume.Az = vpcVolume.Zone.Name
