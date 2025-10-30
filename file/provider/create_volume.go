@@ -122,6 +122,12 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		shareTemplate.SourceSnapshot = &models.Snapshot{ID: volumeRequest.SnapshotID}
 	}
 
+	// We dont need zone and AccessControlMode if sourceSnapshot is present
+	if shareTemplate.SourceSnapshot != nil {
+		shareTemplate.Zone = nil
+		shareTemplate.AccessControlMode = ""
+	}
+
 	vpcs.Logger.Info("Calling VPC provider for volume creation...")
 	var volume *models.Share
 
