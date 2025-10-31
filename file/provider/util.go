@@ -46,6 +46,7 @@ const (
 	EncryptionTrasitMode = "user_managed"
 	pageSize             = 50
 	SnapshotNotFound     = "shares_snapshot_not_found"
+	SharesNotFound       = "shares_not_found"
 )
 
 var volumeIDPartsCount = 5
@@ -60,7 +61,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_bad_request":                        true,
 	"shares_resource_group_bad_request":         true,
 	"shares_vpc_not_found":                      true,
-	"shares_not_found":                          true,
+	SharesNotFound:                              true,
 	"shares_target_not_found":                   true,
 	"shares_target_one_per_vpc":                 true,
 	"bad_field":                                 true,
