@@ -78,6 +78,8 @@ var skipErrorCodes = map[string]bool{
 	"targets_subnet_all_addresses_taken":        true,
 	"InvalidArgument":                           true,
 	SnapshotNotFound:                            true,
+	"share_snapshot_rate_too_high":              true,
+	"share_snapshot_name_duplicate":             true,
 	"shares_status_pending":                     false,
 	"internal_error":                            false,
 	"invalid_route":                             true,
