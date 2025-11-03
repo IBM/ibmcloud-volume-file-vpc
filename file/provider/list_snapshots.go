@@ -33,7 +33,7 @@ const startSnapshoIDNotFoundMsg = "start parameter is not valid"
 
 // ListSnapshots list all snapshots
 func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[string]string) (*provider.SnapshotList, error) {
-	vpcs.Logger.Info("Entry ListeSnapshots")
+	vpcs.Logger.Info("Entry ListSnapshots")
 	defer vpcs.Logger.Info("Exit ListSnapshots")
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "ListSnapshots", time.Now())
 
