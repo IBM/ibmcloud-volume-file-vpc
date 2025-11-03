@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// Package vpcvolume ...
+// Package vpcfilevolume ...
 package vpcfilevolume
 
 import (
