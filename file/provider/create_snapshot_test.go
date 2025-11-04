@@ -22,11 +22,10 @@ import (
 	"testing"
 	"time"
 
+	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	serviceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -35,6 +34,7 @@ func TestCreateSnapshot(t *testing.T) {
 	//var err error
 	logger, teardown := GetTestLogger(t)
 	defer teardown()
+	userError.MessagesEn = userError.InitMessages()
 
 	var (
 		snapshotService *serviceFakes.SnapshotManager
@@ -49,9 +49,9 @@ func TestCreateSnapshot(t *testing.T) {
 		providerSnapshot           *provider.Snapshot
 		setup                      func()
 
-		skipErrTest        bool
-		expectedErr        string
-		expectedReasonCode string
+		skipErrTest bool
+		expectedErr string
+		backendErr  string
 
 		verify func(t *testing.T, snapshotResponse *provider.Snapshot, err error)
 	}{
@@ -67,8 +67,8 @@ func TestCreateSnapshot(t *testing.T) {
 				Name:           "test snapshot name",
 				LifecycleState: snapshotReadyState,
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'SourceVolumeID is required to complete the operation.",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr: "{Code:ErrorRequiredFieldMissing, Description:[SourceVolumeID] is required to complete the operation., RC:400}",
+			backendErr:  "Code:ErrorRequiredFieldMissing, Description:[SourceVolumeID] is required to complete the operation., RC:400",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
 				assert.NotNil(t, err)
@@ -85,8 +85,8 @@ func TestCreateSnapshot(t *testing.T) {
 				Name:           "test snapshot name",
 				LifecycleState: snapshotReadyState,
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:RetrivalFailed, Description:'A volume with the specified volume ID '16f293bf-test-4bff-816f-e199c0c65db5' could not be found.",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_not_found, Description: Share does not exist.Snapshot space order failed for the given volume ID}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_not_found, Description: Share does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
 				assert.NotNil(t, err)
@@ -98,10 +98,10 @@ func TestCreateSnapshot(t *testing.T) {
 			providerSnapshotParameters: &provider.SnapshotParameters{
 				Name: "test snapshot",
 			},
-			providerSnapshot:   nil,
-			baseSnapshot:       nil,
-			expectedErr:        "{Code:ErrorUnclassified, Type:ProvisioningFailed, Description:'Snapshot creation failed",
-			expectedReasonCode: "ErrorUnclassified",
+			providerSnapshot: nil,
+			baseSnapshot:     nil,
+			expectedErr:      "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.Snapshot space order failed for the given volume ID}",
+			backendErr:       "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
 				assert.NotNil(t, err)
@@ -154,6 +154,7 @@ func TestCreateSnapshot(t *testing.T) {
 			},
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.NotNil(t, snapshotResponse)
+				assert.Equal(t, bool(false), snapshotResponse.ReadyToUse)
 				assert.Nil(t, err)
 			},
 		},
@@ -169,6 +170,9 @@ func TestCreateSnapshot(t *testing.T) {
 			sourceVolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
 			providerSnapshotParameters: &provider.SnapshotParameters{
 				Name: "test snapshot name",
+				SnapshotTags: map[string]string{
+					"name": "test snapshot name",
+				},
 			},
 			providerSnapshot: &provider.Snapshot{
 				VolumeID:             "16f293bf-test-4bff-816f-e199c0c65db6",
@@ -180,6 +184,7 @@ func TestCreateSnapshot(t *testing.T) {
 			},
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.NotNil(t, snapshotResponse)
+				assert.Equal(t, bool(true), snapshotResponse.ReadyToUse)
 				assert.Nil(t, err)
 			},
 		},
@@ -198,7 +203,7 @@ func TestCreateSnapshot(t *testing.T) {
 			uc.SnapshotServiceReturns(snapshotService)
 
 			if testcase.expectedErr != "" {
-				snapshotService.CreateSnapshotReturns(testcase.baseSnapshot, errors.New(testcase.expectedReasonCode))
+				snapshotService.CreateSnapshotReturns(testcase.baseSnapshot, errors.New(testcase.backendErr))
 			} else {
 				snapshotService.CreateSnapshotReturns(testcase.baseSnapshot, nil)
 			}
@@ -208,7 +213,7 @@ func TestCreateSnapshot(t *testing.T) {
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.Equal(t, testcase.expectedErr, err.Error())
 			}
 
 			if testcase.verify != nil {

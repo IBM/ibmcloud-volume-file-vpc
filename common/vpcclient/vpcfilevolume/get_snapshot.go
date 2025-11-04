@@ -63,7 +63,7 @@ func (ss *SnapshotService) GetSnapshotByName(shareID string, snapshotName string
 	defer util.TimeTracker("GetSnapshotByName", time.Now())
 
 	// Get the snapshot details for a single snapshot, ListSnapshotFilters will return only 1 snapshot in list
-	//filters := &models.LisSnapshotFilters{Name: snapshotName} //Rever this once VPC IaaS fix the issue
+	//filters := &models.LisSnapshotFilters{Name: snapshotName} //Revert this once VPC IaaS fix the issue https://ibm-iaas.atlassian.net/browse/DFS-3857
 	snapshots, err := ss.ListSnapshots(shareID, 1, "", nil, ctxLogger)
 	if err != nil {
 		return nil, err

@@ -33,7 +33,7 @@ func (vpcs *VPCSession) DeleteSnapshot(snapshot *provider.Snapshot) error {
 
 	var err error
 	if snapshot == nil {
-		err = userError.GetUserError("InvalidSnapshotID", nil, nil)
+		err = userError.GetUserError("ErrorRequiredFieldMissing", nil, "snapshotID")
 		return err
 	}
 
@@ -52,14 +52,14 @@ func (vpcs *VPCSession) DeleteSnapshot(snapshot *provider.Snapshot) error {
 			vpcs.Logger.Warn("Snapshot does not exist returning success", zap.Reflect("err", err))
 			return nil
 		}
-		return userError.GetUserError("FailedToDeleteSnapshot", err)
+		return userError.GetUserError("FailedToDeleteSnapshot", err, snapshot.SnapshotID)
 	}
 
 	err = WaitForSnapshotDeletion(vpcs, snapshot.VolumeID, snapshot.SnapshotID)
 	if err != nil {
 		return userError.GetUserError("FailedToDeleteSnapshot", err, snapshot.SnapshotID)
 	}
-	vpcs.Logger.Info("Successfully deleted the snapshot with backend (vpcclient) call)")
+	vpcs.Logger.Info("Successfully deleted the snapshot")
 	return err
 }
 

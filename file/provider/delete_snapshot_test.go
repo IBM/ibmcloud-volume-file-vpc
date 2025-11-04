@@ -22,11 +22,8 @@ import (
 	"testing"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	serviceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -35,6 +32,7 @@ func TestDeleteSnapshot(t *testing.T) {
 	//var err error
 	logger, teardown := GetTestLogger(t)
 	defer teardown()
+	userError.MessagesEn = userError.InitMessages()
 
 	var (
 		snapshotService *serviceFakes.SnapshotManager
@@ -45,10 +43,9 @@ func TestDeleteSnapshot(t *testing.T) {
 		providerSnapshot *provider.Snapshot
 		setup            func()
 
-		skipErrTest        bool
-		expectedErr        string
-		expectedReasonCode string
-		errorCode          *models.Error
+		skipErrTest bool
+		expectedErr string
+		backendErr  string
 
 		verify func(t *testing.T, err error)
 	}{
@@ -66,13 +63,13 @@ func TestDeleteSnapshot(t *testing.T) {
 			providerSnapshot: &provider.Snapshot{
 				SnapshotID: "",
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'Not a valid snapshot ID",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.Failed to delete '' snapshot ID}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, err error) {
 				assert.NotNil(t, err)
 			},
 		}, {
-			testCaseName: "Incorrect snapshot ID",
+			testCaseName: "NonExisting snapshot ID",
 			providerSnapshot: &provider.Snapshot{
 				VolumeID:   "16f293bf-test-4bff-816f-e199c0c65db5",
 				SnapshotID: "16f293bf-test-4bff-816f-e199c0c65db6",
@@ -96,23 +93,17 @@ func TestDeleteSnapshot(t *testing.T) {
 			assert.NotNil(t, snapshotService)
 			uc.SnapshotServiceReturns(snapshotService)
 
-			if testcase.errorCode != nil {
-				snapshotService.DeleteSnapshotReturns(testcase.errorCode)
-			} else if testcase.expectedErr != "" {
-				snapshotService.DeleteSnapshotReturns(errors.New(testcase.expectedReasonCode))
+			if testcase.expectedErr != "" {
+				snapshotService.DeleteSnapshotReturns(errors.New(testcase.backendErr))
 			} else {
 				snapshotService.DeleteSnapshotReturns(nil)
 			}
 			err = vpcs.DeleteSnapshot(testcase.providerSnapshot)
 
-			if testcase.expectedErr != "" && testcase.errorCode == nil {
+			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
-			} else if testcase.errorCode != nil {
-				assert.NotNil(t, err)
-				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, err.(util.Message).Code, testcase.expectedReasonCode)
+				assert.Equal(t, testcase.expectedErr, err.Error())
 			}
 
 			if testcase.verify != nil {

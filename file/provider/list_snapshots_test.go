@@ -27,8 +27,6 @@ import (
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	snapshotServiceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -54,9 +52,9 @@ func TestListSnapshots(t *testing.T) {
 
 		setup func()
 
-		skipErrTest        bool
-		expectedErr        string
-		expectedReasonCode string
+		skipErrTest bool
+		expectedErr string
+		backendErr  string
 
 		verify func(t *testing.T, next_token string, snapshots *provider.SnapshotList, err error)
 	}{
@@ -163,8 +161,19 @@ func TestListSnapshots(t *testing.T) {
 				"name":             "test-snapshot-name1",
 				"source_volume.id": "1234",
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:RetrivalFailed, Description: Unable to fetch list of snapshots. ",
-			expectedReasonCode: "ErrorUnclassified",
+			verify: func(t *testing.T, next_token string, snapshots *provider.SnapshotList, err error) {
+				assert.Nil(t, snapshots.Snapshots)
+				assert.Nil(t, err)
+			},
+		}, {
+			testCaseName: "List SnapShot fails",
+			tags: map[string]string{
+				"name":             "test-snapshot-name1",
+				"source_volume.id": "1234",
+			},
+			start:       "testID",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:bad_field, Description: The `start` parameter is invalid, item no longer found.The snapshot ID 'testID' specified in the start parameter of the list volume call could not be found.}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:bad_field, Description: The `start` parameter is invalid, item no longer found",
 			verify: func(t *testing.T, next_token string, snapshots *provider.SnapshotList, err error) {
 				assert.Nil(t, snapshots)
 				assert.NotNil(t, err)
@@ -248,7 +257,7 @@ func TestListSnapshots(t *testing.T) {
 			uc.SnapshotServiceReturns(snapshotService)
 
 			if testcase.expectedErr != "" {
-				snapshotService.ListSnapshotsReturns(testcase.snapshotList, errors.New(testcase.expectedErr))
+				snapshotService.ListSnapshotsReturns(testcase.snapshotList, errors.New(testcase.backendErr))
 			} else {
 				snapshotService.ListSnapshotsReturns(testcase.snapshotList, nil)
 			}
@@ -258,7 +267,7 @@ func TestListSnapshots(t *testing.T) {
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.Equal(t, testcase.expectedErr, err.Error())
 			}
 
 			if testcase.verify != nil {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const startSnapshoIDNotFoundMsg = "start parameter is not valid"
+const startSnapshoIDNotFoundMsg = "`start` parameter is invalid"
 
 // ListSnapshots list all snapshots
 func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[string]string) (*provider.SnapshotList, error) {
@@ -68,7 +68,7 @@ func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[strin
 		return nil, userError.GetUserError("ListSnapshotsFailed", err)
 	}
 
-	vpcs.Logger.Info("Successfully retrieved snapshot list from VPC backend", zap.Reflect("SnapshotList", snapshots))
+	vpcs.Logger.Info("Successfully retrieved snapshot list", zap.Reflect("SnapshotList", snapshots))
 
 	var respSnapshotList = &provider.SnapshotList{}
 	if snapshots != nil {
@@ -85,7 +85,6 @@ func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[strin
 		snapshotslist := snapshots.Snapshots
 		for _, snapItem := range snapshotslist {
 			snapshotResponse := FromProviderToLibSnapshot(sourceVolumeID, snapItem, vpcs.Logger)
-			snapshotResponse.VolumeID = sourceVolumeID
 			respSnapshotList.Snapshots = append(respSnapshotList.Snapshots, snapshotResponse)
 		}
 	}

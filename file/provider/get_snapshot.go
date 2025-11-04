@@ -63,7 +63,7 @@ func (vpcs *VPCSession) GetSnapshotByName(name string, sourceVolumeID ...string)
 
 	vpcs.Logger.Info("Basic validation for snapshot Name...", zap.Reflect("SnapshotName", name))
 	if len(name) <= 0 {
-		err = userError.GetUserError("InvalidSnapshotName", nil, name)
+		err = userError.GetUserError("ErrorRequiredFieldMissing", nil, "SnapshotName")
 		return
 	}
 
@@ -76,10 +76,10 @@ func (vpcs *VPCSession) GetSnapshotByName(name string, sourceVolumeID ...string)
 	})
 
 	if err != nil {
-		return nil, userError.GetUserError("StorageFindFailedWithSnapshotName", err, snapshot)
+		return nil, userError.GetUserError("StorageFindFailedWithSnapshotName", err, name)
 	}
 
-	vpcs.Logger.Info("Successfully retrieved snpashot details from VPC backend", zap.Reflect("snapshotDetails", snapshot))
+	vpcs.Logger.Info("Successfully retrieved snpashot details", zap.Reflect("snapshotDetails", snapshot))
 	snapshotResponse := FromProviderToLibSnapshot(sourceVolumeID[0], snapshot, vpcs.Logger)
 	vpcs.Logger.Info("SnapshotResponse", zap.Reflect("snapshotResponse", snapshotResponse))
 	return snapshotResponse, err

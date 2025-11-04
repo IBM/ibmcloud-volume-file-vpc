@@ -22,11 +22,10 @@ import (
 	"testing"
 	"time"
 
+	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	serviceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
-	"github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -35,6 +34,7 @@ func TestGetSnapshot(t *testing.T) {
 	//var err error
 	logger, teardown := GetTestLogger(t)
 	defer teardown()
+	userError.MessagesEn = userError.InitMessages()
 
 	var (
 		snapshotService *serviceFakes.SnapshotManager
@@ -48,9 +48,9 @@ func TestGetSnapshot(t *testing.T) {
 		baseSnapshot *models.Snapshot
 		setup        func()
 
-		skipErrTest        bool
-		expectedErr        string
-		expectedReasonCode string
+		skipErrTest bool
+		expectedErr string
+		backendErr  string
 
 		verify func(t *testing.T, snapshotResponse *provider.Snapshot, err error)
 	}{
@@ -76,8 +76,8 @@ func TestGetSnapshot(t *testing.T) {
 				LifecycleState: snapshotReadyState,
 				CreatedAt:      &timeNow,
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'Wrong snapshot ID' snapshot ID is not valid., RC:400}",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.A snapshot with the specified snapshot ID 'Wrong snapshot ID' could not be found.}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
 				assert.NotNil(t, err)
@@ -98,7 +98,7 @@ func TestGetSnapshot(t *testing.T) {
 			uc.SnapshotServiceReturns(snapshotService)
 
 			if testcase.expectedErr != "" {
-				snapshotService.GetSnapshotReturns(testcase.baseSnapshot, errors.New(testcase.expectedReasonCode))
+				snapshotService.GetSnapshotReturns(testcase.baseSnapshot, errors.New(testcase.backendErr))
 			} else {
 				snapshotService.GetSnapshotReturns(testcase.baseSnapshot, nil)
 			}
@@ -108,7 +108,7 @@ func TestGetSnapshot(t *testing.T) {
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.Equal(t, testcase.expectedErr, err.Error())
 			}
 
 			if testcase.verify != nil {
@@ -122,6 +122,7 @@ func TestGetSnapshotByName(t *testing.T) {
 	//var err error
 	logger, teardown := GetTestLogger(t)
 	defer teardown()
+	userError.MessagesEn = userError.InitMessages()
 
 	var (
 		snapshotService *serviceFakes.SnapshotManager
@@ -135,9 +136,9 @@ func TestGetSnapshotByName(t *testing.T) {
 
 		setup func()
 
-		skipErrTest        bool
-		expectedErr        string
-		expectedReasonCode string
+		skipErrTest bool
+		expectedErr string
+		backendErr  string
 
 		verify func(t *testing.T, snapshotResponse *provider.Snapshot, err error)
 	}{
@@ -163,17 +164,17 @@ func TestGetSnapshotByName(t *testing.T) {
 				LifecycleState: snapshotReadyState,
 				CreatedAt:      &timeNow,
 			},
-			expectedErr:        "{Code:ErrorUnclassified, Type:InvalidRequest, Description:'Wrong snapshot ID' snapshot ID is not valid., RC:400}",
-			expectedReasonCode: "ErrorUnclassified",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.A snapshot with the specified snapshot name 'Wrong snapshot name' could not be found.}",
+			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
 				assert.NotNil(t, err)
 			},
 		}, {
-			testCaseName:       "Empty volume name",
-			snapshotName:       "",
-			expectedErr:        "{Code:ErrorUnclassified, Type:RetrivalFailed, Description:Failed to find '16f293bf-test-4bff-816f-e199c0c65db5' snapshot ID., BackendError:SnapshotIDNotFound, RC:404}",
-			expectedReasonCode: "ErrorUnclassified",
+			testCaseName: "Empty snapshot name",
+			snapshotName: "",
+			expectedErr:  "{Code:ErrorRequiredFieldMissing, Description:[SnapshotName] is required to complete the operation., RC:400}",
+			backendErr:   "Code:ErrorRequiredFieldMissing, Description:[SnapshotName] is required to complete the operation., RC:400",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
 				assert.NotNil(t, err)
@@ -194,7 +195,7 @@ func TestGetSnapshotByName(t *testing.T) {
 			uc.SnapshotServiceReturns(snapshotService)
 
 			if testcase.expectedErr != "" {
-				snapshotService.GetSnapshotByNameReturns(testcase.baseSnapshot, errors.New(testcase.expectedReasonCode))
+				snapshotService.GetSnapshotByNameReturns(testcase.baseSnapshot, errors.New(testcase.backendErr))
 			} else {
 				snapshotService.GetSnapshotByNameReturns(testcase.baseSnapshot, nil)
 			}
@@ -204,7 +205,7 @@ func TestGetSnapshotByName(t *testing.T) {
 			if testcase.expectedErr != "" {
 				assert.NotNil(t, err)
 				logger.Info("Error details", zap.Reflect("Error details", err.Error()))
-				assert.Equal(t, reasoncode.ReasonCode(testcase.expectedReasonCode), util.ErrorReasonCode(err))
+				assert.Equal(t, testcase.expectedErr, err.Error())
 			}
 
 			if testcase.verify != nil {

@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"fmt"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -42,11 +43,15 @@ func (vpcs *VPCSession) CreateSnapshot(sourceVolumeID string, snapshotParameters
 	}
 	var snapshotResult *models.Snapshot
 
-	// Step 1- validate input which are required
+	//Convert SnapshotTags map to string[]
+	tags := make([]string, 0, len(snapshotParameters.SnapshotTags))
+	for key, value := range snapshotParameters.SnapshotTags {
+		tags = append(tags, fmt.Sprintf("%s:%s", key, value))
+	}
 
 	snapshotTemplate := &models.Snapshot{
-		Name:          snapshotParameters.Name,
-		ResourceGroup: &models.ResourceGroup{ID: vpcs.Config.VPCConfig.G2ResourceGroupID},
+		Name:     snapshotParameters.Name,
+		UserTags: tags,
 	}
 
 	err = retry(vpcs.Logger, func() error {
@@ -57,7 +62,7 @@ func (vpcs *VPCSession) CreateSnapshot(sourceVolumeID string, snapshotParameters
 		return nil, userError.GetUserError("SnapshotSpaceOrderFailed", err)
 	}
 
-	vpcs.Logger.Info("Successfully created snapshot with backend (vpcclient) call. Snapshot details", zap.Reflect("Snapshot", snapshotResult))
+	vpcs.Logger.Info("Successfully created snapshot. Snapshot details", zap.Reflect("Snapshot", snapshotResult))
 	// Converting volume to lib snapshot type
 	snapshotResponse := FromProviderToLibSnapshot(sourceVolumeID, snapshotResult, vpcs.Logger)
 	vpcs.Logger.Info("SnapshotResponse", zap.Reflect("snapshotResponse", snapshotResponse))

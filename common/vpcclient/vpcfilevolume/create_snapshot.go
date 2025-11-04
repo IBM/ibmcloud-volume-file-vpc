@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// CreateSnapshot POSTs to /snapshots
+// CreateSnapshot POSTs to shares/{share-id}/snapshots
 func (ss *SnapshotService) CreateSnapshot(shareID string, snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error) {
 	ctxLogger.Debug("Entry Backend CreateSpanShot")
 	defer ctxLogger.Debug("Exit Backend CreateSnapshot")

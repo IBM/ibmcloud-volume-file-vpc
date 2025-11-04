@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// DeleteSnapshot DELETEs to /snapshots
+// DeleteSnapshot DELETEs to shares/{share-id}/snapshots/{snapshot-id}
 func (ss *SnapshotService) DeleteSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) error {
 	ctxLogger.Debug("Entry Backend DeleteSpanshot")
 	defer ctxLogger.Debug("Exit Backend DeleteSnapshot")

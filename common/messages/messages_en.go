@@ -25,7 +25,7 @@ import (
 var messagesEn = map[string]util.Message{
 	"ErrorRequiredFieldMissing": {
 		Code:        "ErrorRequiredFieldMissing",
-		Description: "[%s] is required to complete the operation.",
+		Description: "[%s] is required to complete the operation",
 		Type:        util.InvalidRequest,
 		RC:          400,
 		Action:      "Review the error that is returned. Provide the missing information in your request and try again.",
@@ -220,7 +220,7 @@ var messagesEn = map[string]util.Message{
 	},
 	"ListSnapshotsFailed": {
 		Code:        "ListSnapshotsFailed",
-		Description: "Unable to fetch list of volumes.",
+		Description: "Unable to fetch list of snapshots.",
 		Type:        util.RetrivalFailed,
 		RC:          404,
 		Action:      "Run 'ibmcloud is share-snapshots' to list available snapshots in your account.",
@@ -237,11 +237,11 @@ var messagesEn = map[string]util.Message{
 		Description: "The snapshot ID '%s' specified in the start parameter of the list volume call could not be found.",
 		Type:        util.InvalidRequest,
 		RC:          400,
-		Action:      "Please verify that the start snapshot ID is correct and whether you have access to the snapshot ID.",
+		Action:      "Please verify that the start snapshot ID is correct and whether you have access to the snapshot ID.ibmcloud is <share-id> <snapshot-id>",
 	},
 	"FailedToDeleteSnapshot": {
 		Code:        "FailedToDeleteSnapshot",
-		Description: "Failed to delete '%d' snapshot ID",
+		Description: "Failed to delete '%s' snapshot ID",
 		Type:        util.DeletionFailed,
 		RC:          500,
 		Action:      "Check whether the snapshot ID exists. You may need to verify by using 'ibmcloud is share-snapshots' cli",
