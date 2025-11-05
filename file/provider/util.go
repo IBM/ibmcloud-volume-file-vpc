@@ -80,6 +80,7 @@ var skipErrorCodes = map[string]bool{
 	SnapshotNotFound:                            true,
 	"share_snapshot_rate_too_high":              true,
 	"share_snapshot_name_duplicate":             true,
+	"share_snapshots_quota_limit_exceeded":      true,
 	"shares_status_pending":                     false,
 	"internal_error":                            false,
 	"invalid_route":                             true,
