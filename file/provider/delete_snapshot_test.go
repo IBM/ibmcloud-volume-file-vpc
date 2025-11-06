@@ -61,9 +61,10 @@ func TestDeleteSnapshot(t *testing.T) {
 		}, {
 			testCaseName: "False positive: No Snapshot being sent",
 			providerSnapshot: &provider.Snapshot{
+				VolumeID:   "16f293bf-test-4bff-816f-e199c0c65db5",
 				SnapshotID: "",
 			},
-			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.Failed to delete '' snapshot ID}",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.Failed to delete '' snapshot ID from share ID '16f293bf-test-4bff-816f-e199c0c65db5'}",
 			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, err error) {
 				assert.NotNil(t, err)

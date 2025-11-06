@@ -44,9 +44,10 @@ func TestGetSnapshot(t *testing.T) {
 	testCases := []struct {
 		testCaseName string
 
-		snapshotID   string
-		baseSnapshot *models.Snapshot
-		setup        func()
+		snapshotID     string
+		sourceVolumeID string
+		baseSnapshot   *models.Snapshot
+		setup          func()
 
 		skipErrTest bool
 		expectedErr string
@@ -55,8 +56,9 @@ func TestGetSnapshot(t *testing.T) {
 		verify func(t *testing.T, snapshotResponse *provider.Snapshot, err error)
 	}{
 		{
-			testCaseName: "OK",
-			snapshotID:   "16f293bf-test-4bff-816f-e199c0c65db5",
+			testCaseName:   "OK",
+			sourceVolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+			snapshotID:     "16f293bf-test-4bff-816f-e199c0c65db5",
 			baseSnapshot: &models.Snapshot{
 				ID:             "16f293bf-test-4bff-816f-e199c0c65db5",
 				Name:           "test-snapshot-name",
@@ -68,15 +70,16 @@ func TestGetSnapshot(t *testing.T) {
 				assert.Nil(t, err)
 			},
 		}, {
-			testCaseName: "Wrong snapshot ID",
-			snapshotID:   "Wrong snapshot ID",
+			testCaseName:   "Wrong snapshot ID",
+			sourceVolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+			snapshotID:     "Wrong snapshot ID",
 			baseSnapshot: &models.Snapshot{
 				ID:             "wrong-wrong-id",
 				Name:           "test-snapshot-name",
 				LifecycleState: snapshotReadyState,
 				CreatedAt:      &timeNow,
 			},
-			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.A snapshot with the specified snapshot ID 'Wrong snapshot ID' could not be found.}",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.A snapshot with the specified snapshot ID 'Wrong snapshot ID' and share ID '[16f293bf-test-4bff-816f-e199c0c65db5]' could not be found.}",
 			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
@@ -102,7 +105,7 @@ func TestGetSnapshot(t *testing.T) {
 			} else {
 				snapshotService.GetSnapshotReturns(testcase.baseSnapshot, nil)
 			}
-			snapshot, err := vpcs.GetSnapshot(testcase.snapshotID, "16f293bf-test-4bff-816f-e199c0c65db5")
+			snapshot, err := vpcs.GetSnapshot(testcase.snapshotID, testcase.sourceVolumeID)
 			logger.Info("Snapshot details", zap.Reflect("snapshot", snapshot))
 
 			if testcase.expectedErr != "" {
@@ -130,9 +133,10 @@ func TestGetSnapshotByName(t *testing.T) {
 	timeNow := time.Now()
 
 	testCases := []struct {
-		testCaseName string
-		snapshotName string
-		baseSnapshot *models.Snapshot
+		testCaseName   string
+		snapshotName   string
+		sourceVolumeID string
+		baseSnapshot   *models.Snapshot
 
 		setup func()
 
@@ -143,8 +147,9 @@ func TestGetSnapshotByName(t *testing.T) {
 		verify func(t *testing.T, snapshotResponse *provider.Snapshot, err error)
 	}{
 		{
-			testCaseName: "OK",
-			snapshotName: "Test snapshot",
+			testCaseName:   "OK",
+			sourceVolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+			snapshotName:   "Test snapshot",
 			baseSnapshot: &models.Snapshot{
 				ID:             "wrong-wrong-id",
 				Name:           "test-snapshot-name",
@@ -156,15 +161,16 @@ func TestGetSnapshotByName(t *testing.T) {
 				assert.Nil(t, err)
 			},
 		}, {
-			testCaseName: "Wrong snapshot ID",
-			snapshotName: "Wrong snapshot name",
+			testCaseName:   "Wrong snapshot ID",
+			sourceVolumeID: "16f293bf-test-4bff-816f-e199c0c65db5",
+			snapshotName:   "Wrong snapshot name",
 			baseSnapshot: &models.Snapshot{
 				ID:             "wrong-wrong-id",
 				Name:           "test-snapshot-name",
 				LifecycleState: snapshotReadyState,
 				CreatedAt:      &timeNow,
 			},
-			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.A snapshot with the specified snapshot name 'Wrong snapshot name' could not be found.}",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.A snapshot with the specified snapshot name 'Wrong snapshot name' and share ID '[16f293bf-test-4bff-816f-e199c0c65db5]' could not be found.}",
 			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
@@ -199,7 +205,7 @@ func TestGetSnapshotByName(t *testing.T) {
 			} else {
 				snapshotService.GetSnapshotByNameReturns(testcase.baseSnapshot, nil)
 			}
-			snapshot, err := vpcs.GetSnapshotByName(testcase.snapshotName, "16f293bf-test-4bff-816f-e199c0c65db5")
+			snapshot, err := vpcs.GetSnapshotByName(testcase.snapshotName, testcase.sourceVolumeID)
 			logger.Info("Snapshot details", zap.Reflect("volume", snapshot))
 
 			if testcase.expectedErr != "" {

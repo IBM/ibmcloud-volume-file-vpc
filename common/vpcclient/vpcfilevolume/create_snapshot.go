@@ -28,7 +28,7 @@ import (
 
 // CreateSnapshot POSTs to shares/{share-id}/snapshots
 func (ss *SnapshotService) CreateSnapshot(shareID string, snapshotTemplate *models.Snapshot, ctxLogger *zap.Logger) (*models.Snapshot, error) {
-	ctxLogger.Debug("Entry Backend CreateSpanShot")
+	ctxLogger.Debug("Entry Backend CreateSnapshot")
 	defer ctxLogger.Debug("Exit Backend CreateSnapshot")
 
 	defer util.TimeTracker("CreateSnapshot", time.Now())

@@ -65,7 +65,7 @@ func (vpcs *VPCSession) ListSnapshots(limit int, start string, filters map[strin
 		if strings.Contains(err.Error(), startSnapshoIDNotFoundMsg) {
 			return nil, userError.GetUserError("StartSnapshotIDNotFound", err, start)
 		}
-		return nil, userError.GetUserError("ListSnapshotsFailed", err)
+		return nil, userError.GetUserError("ListSnapshotsFailed", err,sourceVolumeID)
 	}
 
 	vpcs.Logger.Info("Successfully retrieved snapshot list", zap.Reflect("SnapshotList", snapshots))

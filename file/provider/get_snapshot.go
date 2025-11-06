@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ func (vpcs *VPCSession) GetSnapshot(snapshotID string, sourceVolumeID ...string)
 	})
 
 	if err != nil {
-		return nil, userError.GetUserError("SnapshotIDNotFound", err, snapshotID)
+		return nil, userError.GetUserError("FailedToFindSnapshot", err, snapshotID, sourceVolumeID)
 	}
 
 	vpcs.Logger.Info("Successfully retrieved snpashot details from VPC backend", zap.Reflect("snapshotDetails", snapshot))
@@ -76,7 +76,7 @@ func (vpcs *VPCSession) GetSnapshotByName(name string, sourceVolumeID ...string)
 	})
 
 	if err != nil {
-		return nil, userError.GetUserError("StorageFindFailedWithSnapshotName", err, name)
+		return nil, userError.GetUserError("StorageFindFailedWithSnapshotName", err, name, sourceVolumeID)
 	}
 
 	vpcs.Logger.Info("Successfully retrieved snpashot details", zap.Reflect("snapshotDetails", snapshot))

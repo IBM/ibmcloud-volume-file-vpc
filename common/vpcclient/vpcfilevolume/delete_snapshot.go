@@ -28,7 +28,7 @@ import (
 
 // DeleteSnapshot DELETEs to shares/{share-id}/snapshots/{snapshot-id}
 func (ss *SnapshotService) DeleteSnapshot(shareID string, snapshotID string, ctxLogger *zap.Logger) error {
-	ctxLogger.Debug("Entry Backend DeleteSpanshot")
+	ctxLogger.Debug("Entry Backend DeleteSnapshot")
 	defer ctxLogger.Debug("Exit Backend DeleteSnapshot")
 
 	defer util.TimeTracker("DeleteSnapshot", time.Now())
