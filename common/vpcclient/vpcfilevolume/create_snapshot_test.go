@@ -65,8 +65,8 @@ func TestCreateSnapshot(t *testing.T) {
 			url:     vpcfilevolume.Version + dummyURL,
 			content: "{\"id\":\"snapshot1\",\"lifecycle_state\":\"pending\"}",
 			verify: func(t *testing.T, snapshot *models.Snapshot, err error) {
-				assert.Equal(t, snapshot.ID, "snapshot1")
 				assert.NotNil(t, snapshot)
+				assert.Equal(t, snapshot.ID, "snapshot1")
 			},
 		},
 	}

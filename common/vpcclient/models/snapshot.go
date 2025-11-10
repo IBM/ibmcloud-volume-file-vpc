@@ -40,14 +40,14 @@ type Snapshot struct {
 	Name             string            `json:"name,omitempty"`
 	CRN              string            `json:"crn,omitempty"`
 	FingerPrint      string            `json:"fingerprint,omitempty"`
+	CreatedAt        *time.Time        `json:"created_at,omitempty"`
+	CapturedAt       *time.Time        `json:"captured_at,omitempty"`
 	MinimumSize      int64             `json:"minimum_size,omitempty"`
 	ResourceGroup    *ResourceGroup    `json:"resource_group,omitempty"`
-	CreatedAt        *time.Time        `json:"created_at,omitempty"`
 	Status           string            `json:"status,omitempty"`
 	ResourceType     string            `json:"resource_type,omitempty"`
 	LifecycleState   string            `json:"lifecycle_state,omitempty"`
 	UserTags         []string          `json:"user_tags,omitempty"`
-	CapturedAt       *time.Time        `json:"captured_at,omitempty"`
 	BackupPolicyPlan *BackupPolicyPlan `json:"backup_policy_plan,omitempty"`
 	Zone             *Zone             `json:"zone,omitempty"`
 }

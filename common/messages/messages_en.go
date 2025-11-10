@@ -211,9 +211,9 @@ var messagesEn = map[string]util.Message{
 		Type:        util.DeletionFailed,
 		Action:      "User need to review all mount targets and delete them first before deleting file share. Run `ibmcloud is share-targets <SHARE_ID>` to get the mount target for the file share. ",
 	},
-	"SnapshotSpaceOrderFailed": {
-		Code:        "SnapshotSpaceOrderFailed",
-		Description: "Snapshot space order failed for the given share ID",
+	"SnapshotCreationFailed": {
+		Code:        "SnapshotCreationFailed",
+		Description: "Snapshot creation failed for the given share ID",
 		Type:        util.ProvisioningFailed,
 		RC:          500,
 		Action:      "Please check backend error for more details",

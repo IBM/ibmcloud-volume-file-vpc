@@ -49,7 +49,7 @@ func (vpcs *VPCSession) DeleteSnapshot(snapshot *provider.Snapshot) error {
 	if err != nil {
 		modelError, ok := err.(*models.Error)
 		if ok && len(modelError.Errors) > 0 && (string(modelError.Errors[0].Code) == SnapshotNotFound || string(modelError.Errors[0].Code) == SharesNotFound) {
-			vpcs.Logger.Warn("Snapshot does not exist returning success", zap.Reflect("err", err))
+			vpcs.Logger.Warn("Share or Snapshot does not exist returning success", zap.Reflect("err", err))
 			return nil
 		}
 		return userError.GetUserError("FailedToDeleteSnapshot", err, snapshot.SnapshotID, snapshot.VolumeID)

@@ -85,7 +85,7 @@ func TestCreateSnapshot(t *testing.T) {
 				Name:           "test snapshot name",
 				LifecycleState: snapshotReadyState,
 			},
-			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_not_found, Description: Share does not exist.Snapshot space order failed for the given share ID}",
+			expectedErr: "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_not_found, Description: Share does not exist.Snapshot creation failed for the given share ID}",
 			backendErr:  "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_not_found, Description: Share does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)
@@ -100,7 +100,7 @@ func TestCreateSnapshot(t *testing.T) {
 			},
 			providerSnapshot: nil,
 			baseSnapshot:     nil,
-			expectedErr:      "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.Snapshot space order failed for the given share ID}",
+			expectedErr:      "{Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist.Snapshot creation failed for the given share ID}",
 			backendErr:       "Trace Code:16f293bf-test-4bff-816f-e199c0c65db5, Code:share_snapshot_not_found, Description: Snapshot does not exist",
 			verify: func(t *testing.T, snapshotResponse *provider.Snapshot, err error) {
 				assert.Nil(t, snapshotResponse)

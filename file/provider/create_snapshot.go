@@ -59,7 +59,7 @@ func (vpcs *VPCSession) CreateSnapshot(sourceVolumeID string, snapshotParameters
 		return err
 	})
 	if err != nil {
-		return nil, userError.GetUserError("SnapshotSpaceOrderFailed", err)
+		return nil, userError.GetUserError("SnapshotCreationFailed", err)
 	}
 
 	vpcs.Logger.Info("Successfully created snapshot. Snapshot details", zap.Reflect("Snapshot", snapshotResult))
