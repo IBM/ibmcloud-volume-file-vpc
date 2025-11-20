@@ -253,6 +253,26 @@ else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
+#DP2 Profile Snapshot tests
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[dp2-snapshot\]" ./e2e -- -e2e-verify-service-account=false
+rc5=$?
+echo "Exit status for DP2 Snapshot test: $rc5"
+if [[ $rc5 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-DP2-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-DP2-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
+
+#RFS Profile Snapshot tests
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[rfs-snapshot\]" ./e2e -- -e2e-verify-service-account=false
+rc6=$?
+echo "Exit status for RFS Snapshot test: $rc5"
+if [[ $rc6 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
+
 # EIT based tests
 
 if [[ "$e2e_eit_test_case" == "true" && "$CLUSTER_KUBE_VER_TRIM=" != "4.15" ]]; then

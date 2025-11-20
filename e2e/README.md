@@ -40,3 +40,11 @@
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]"  ./e2e
    ```
+9. Test DP2 profile Snapshot test cases
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[dp2-snapshot\]"  ./e2e
+   ```
+   Test RFS profile Snapshot test cases
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[rfs-snapshot\]"  ./e2e
+   ```
