@@ -173,7 +173,7 @@
 				
 				<option value="file58">github.com/IBM/ibmcloud-volume-file-vpc/pkg/metadata/metadata.go (22.2%)</option>
 				
-				<option value="file59">github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher/pv_watcher.go (56.0%)</option>
+				<option value="file59">github.com/IBM/ibmcloud-volume-file-vpc/pkg/watcher/pv_watcher.go (26.4%)</option>
 				
 				</select>
 			</div>
@@ -6533,21 +6533,21 @@ func (pvw *PVWatcher) Start() <span class="cov0" title="0">{
 
 func (pvw *PVWatcher) updateVolume(oldobj, obj interface{}) <span class="cov8" title="1">{
         // Run as non-blocking thread to allow parallel processing of volumes
-        go func() </span><span class="cov8" title="1">{
+        go func() </span><span class="cov0" title="0">{
                 var oldStatus v1.PersistentVolumePhase
                 var newStatus v1.PersistentVolumePhase
                 ctxLogger, requestID := GetContextLogger(context.Background(), false)
                 // panic-recovery function that avoid watcher thread to stop because of unexexpected error
-                defer func() </span><span class="cov8" title="1">{
+                defer func() </span><span class="cov0" title="0">{
                         if r := recover(); r != nil </span><span class="cov0" title="0">{
                                 ctxLogger.Error("Recovered from panic in pvwatcher", zap.Stack("stack"), zap.String("requestID", requestID))
                         }</span>
                 }()
 
-                <span class="cov8" title="1">ctxLogger.Info("Entry updateVolume()", zap.Reflect("obj", obj), zap.Reflect("oldobj", oldobj))
+                <span class="cov0" title="0">ctxLogger.Info("Entry updateVolume()", zap.Reflect("obj", obj), zap.Reflect("oldobj", oldobj))
                 newpv, _ := obj.(*v1.PersistentVolume)
                 //If there is no change to status , capacity or iops we can skip the updateVolume call.
-                if oldobj != nil </span><span class="cov8" title="1">{
+                if oldobj != nil </span><span class="cov0" title="0">{
                         oldpv, _ := oldobj.(*v1.PersistentVolume)
                         oldCapacity := oldpv.Spec.Capacity[v1.ResourceStorage]
                         capacity := newpv.Spec.Capacity[v1.ResourceStorage]
@@ -6555,7 +6555,7 @@ func (pvw *PVWatcher) updateVolume(oldobj, obj interface{}) <span class="cov8" t
                         oldiops := oldpv.Spec.CSI.VolumeAttributes[IOPSLabel]
                         newStatus = newpv.Status.Phase
                         oldStatus = oldpv.Status.Phase
-                        if (newStatus == oldStatus) &amp;&amp; (oldCapacity.Value() == capacity.Value()) &amp;&amp; (oldiops == iops) </span><span class="cov8" title="1">{
+                        if (newStatus == oldStatus) &amp;&amp; (oldCapacity.Value() == capacity.Value()) &amp;&amp; (oldiops == iops) </span><span class="cov0" title="0">{
                                 ctxLogger.Info("Skipping update Volume as there is no change in status , capacity and iops")
                                 return
                         }</span>
@@ -6665,13 +6665,13 @@ func BytesToGiB(volumeSizeBytes int64) int <span class="cov8" title="1">{
 }</span>
 
 // GetContextLogger ...
-func GetContextLogger(ctx context.Context, isDebug bool) (*zap.Logger, string) <span class="cov8" title="1">{
+func GetContextLogger(ctx context.Context, isDebug bool) (*zap.Logger, string) <span class="cov0" title="0">{
         return GetContextLoggerWithRequestID(ctx, isDebug, nil)
 }</span>
 
 // GetContextLoggerWithRequestID  adds existing requestID in the logger
 // The Existing requestID might be coming from ControllerPublishVolume etc
-func GetContextLoggerWithRequestID(ctx context.Context, isDebug bool, requestIDIn *string) (*zap.Logger, string) <span class="cov8" title="1">{
+func GetContextLoggerWithRequestID(ctx context.Context, isDebug bool, requestIDIn *string) (*zap.Logger, string) <span class="cov0" title="0">{
         consoleDebugging := zapcore.Lock(os.Stdout)
         consoleErrors := zapcore.Lock(os.Stderr)
         encoderConfig := zap.NewProductionEncoderConfig()
@@ -6680,27 +6680,27 @@ func GetContextLoggerWithRequestID(ctx context.Context, isDebug bool, requestIDI
         traceLevel := zap.NewAtomicLevel()
         if isDebug </span><span class="cov0" title="0">{
                 traceLevel.SetLevel(zap.DebugLevel)
-        }</span> else<span class="cov8" title="1"> {
+        }</span> else<span class="cov0" title="0"> {
                 traceLevel.SetLevel(zap.InfoLevel)
         }</span>
 
-        <span class="cov8" title="1">core := zapcore.NewTee(
-                zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), consoleDebugging, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool </span><span class="cov8" title="1">{
+        <span class="cov0" title="0">core := zapcore.NewTee(
+                zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), consoleDebugging, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool </span><span class="cov0" title="0">{
                         return (lvl &gt;= traceLevel.Level()) &amp;&amp; (lvl &lt; zapcore.ErrorLevel)
                 }</span>)),
-                zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), consoleErrors, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool <span class="cov8" title="1">{
+                zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), consoleErrors, zap.LevelEnablerFunc(func(lvl zapcore.Level) bool <span class="cov0" title="0">{
                         return lvl &gt;= zapcore.ErrorLevel
                 }</span>)),
         )
-        <span class="cov8" title="1">logger := zap.New(core, zap.AddCaller())
+        <span class="cov0" title="0">logger := zap.New(core, zap.AddCaller())
         // generating a unique request ID so that logs can be filter
-        if requestIDIn == nil </span><span class="cov8" title="1">{
+        if requestIDIn == nil </span><span class="cov0" title="0">{
                 // Generate New RequestID if not provided
                 uuid, _ := uid.NewV4() // #nosec G104: Attempt to randomly generate uuid
                 requestID := uuid.String()
                 requestIDIn = &amp;requestID
         }</span>
-        <span class="cov8" title="1">logger = logger.With(zap.String("RequestID", *requestIDIn))
+        <span class="cov0" title="0">logger = logger.With(zap.String("RequestID", *requestIDIn))
         return logger, *requestIDIn + " "</span>
 }
 </pre>
