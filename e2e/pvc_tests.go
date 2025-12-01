@@ -25,18 +25,21 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
-
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
+	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
+	restclientset "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
 	admissionapi "k8s.io/pod-security-admission/api"
 )
@@ -125,6 +128,19 @@ func CreateRFSPVC(pvcName, sc, namespace string, throughput int, rfsPvcSize stri
 		}
 		return updatedPVC.Status.Phase == corev1.ClaimBound, nil
 	})
+}
+
+func restClient(group string, version string) (restclientset.Interface, error) {
+	// setup rest client
+	config, err := framework.LoadConfig()
+	if err != nil {
+		Fail(fmt.Sprintf("could not load config: %v", err))
+	}
+	gv := schema.GroupVersion{Group: group, Version: version}
+	config.GroupVersion = &gv
+	config.APIPath = "/apis"
+	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: serializer.NewCodecFactory(runtime.NewScheme())}
+	return restclientset.RESTClientFor(config)
 }
 
 var _ = BeforeSuite(func() {
@@ -508,6 +524,302 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC w
 		}
 		test.Run(cs, ns)
 		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+			panic(err)
+		}
+	})
+})
+
+var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 and rfs profile ", func() {
+	f := framework.NewDefaultFramework("ics-e2e-vpcfile-snap")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+
+	var (
+		cs          clientset.Interface
+		snapshotrcs restclientset.Interface
+		ns          *v1.Namespace
+	)
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+
+		var err error
+		snapshotrcs, err = restClient(testsuites.SnapshotAPIGroup, testsuites.APIVersionv1)
+		if err != nil {
+			Fail(fmt.Sprintf("could not get rest clientset: %v", err))
+		}
+	})
+
+	It("should run snapshot lifecycle tests for RFS VPC File", func() {
+
+		// ---- Set namespace privileged ----
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelErr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name,
+			types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelErr != nil {
+			panic(labelErr)
+		}
+
+		// ---- Result File ----
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		// ---- Reclaim ----
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+
+		// ---- BASE POD (Writer) ----
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-rfs-snap-",
+					VolumeType:    "ibmc-vpc-file-regional",
+					FSType:        "nfs",
+					ClaimSize:     "20Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		//SAME CLAIM SIZE
+		restoredPodSame := testsuites.PodDetails{
+			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-rfs-snap-",
+					VolumeType:    "ibmc-vpc-file-regional",
+					FSType:        "nfs",
+					ClaimSize:     "20Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test1 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod:         pod,
+			RestoredPod: restoredPodSame,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+		}
+
+		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE SAME SIZE")
+		test1.Run(cs, snapshotrcs, ns)
+
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
+			panic(err)
+		}
+
+		// TEST 2 — CLAIM SIZE LESS (should restore but delete snapshot after src deletion)
+		restoredPodLess := testsuites.PodDetails{
+			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-rfs-snap-",
+					VolumeType:    "ibmc-vpc-file-regional",
+					FSType:        "nfs",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test2 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod:         pod,
+			RestoredPod: restoredPodLess,
+			PodCheck:    test1.PodCheck,
+		}
+
+		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
+		test2.VolumeSizeLess(cs, snapshotrcs, ns)
+
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
+			panic(err)
+		}
+
+		// TEST 3 — CLAIM SIZE MORE
+		restoredPodMore := testsuites.PodDetails{
+			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-rfs-snap-",
+					VolumeType:    "ibmc-vpc-file-regional",
+					FSType:        "nfs",
+					ClaimSize:     "30Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test3 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod:         pod,
+			RestoredPod: restoredPodMore,
+			PodCheck:    test1.PodCheck,
+		}
+
+		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
+		test3.Run(cs, snapshotrcs, ns)
+
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
+			panic(err)
+		}
+	})
+
+	It("should run snapshot lifecycle tests for DP2 VPC File", func() {
+
+		// ---- Set namespace privileged ----
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelErr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name,
+			types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelErr != nil {
+			panic(labelErr)
+		}
+
+		// ---- Result File ----
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer fpointer.Close()
+
+		// ---- Reclaim ----
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+
+		// ---- BASE POD (Writer) ----
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-dp2-snap-",
+					VolumeType:    "ibmc-vpc-file-min-iops",
+					FSType:        "nfs",
+					ClaimSize:     "20Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		// //SAME CLAIM SIZE
+		restoredPodSame := testsuites.PodDetails{
+			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-dp2-snap-",
+					VolumeType:    "ibmc-vpc-file-min-iops",
+					FSType:        "nfs",
+					ClaimSize:     "20Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test1 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod:         pod,
+			RestoredPod: restoredPodSame,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+		}
+
+		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE SAME SIZE")
+		test1.Run(cs, snapshotrcs, ns)
+
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
+			panic(err)
+		}
+
+		// TEST 2 — CLAIM SIZE LESS (should restore but delete snapshot after src deletion)
+		restoredPodLess := testsuites.PodDetails{
+			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-dp2-snap-",
+					VolumeType:    "ibmc-vpc-file-min-iops",
+					FSType:        "nfs",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test2 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod:         pod,
+			RestoredPod: restoredPodLess,
+			PodCheck:    test1.PodCheck,
+		}
+
+		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
+		test2.VolumeSizeLess(cs, snapshotrcs, ns)
+
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
+			panic(err)
+		}
+
+		//TEST 3 — CLAIM SIZE MORE
+		restoredPodMore := testsuites.PodDetails{
+			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vpcfile-dp2-snap-",
+					VolumeType:    "ibmc-vpc-file-min-iops",
+					FSType:        "nfs",
+					ClaimSize:     "30Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test3 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod:         pod,
+			RestoredPod: restoredPodMore,
+			PodCheck:    test1.PodCheck,
+		}
+
+		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
+		test3.Run(cs, snapshotrcs, ns)
+
+		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
