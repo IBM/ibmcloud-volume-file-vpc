@@ -70,6 +70,11 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
+		--run-snapshot-test-cases)
+		e2e_snapshot_test_case="$2"
+		shift
+		shift
+		;;
     		*)
     		UNKOWNPARAM+=("$1")
     		shift
@@ -251,6 +256,21 @@ if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
 else
 	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
+
+# Snapshot tests
+if [[ "$e2e_snapshot_test_case" == "true" ]]; then
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./e2e -- -e2e-verify-service-account=false
+	rc5=$?
+	echo "Exit status for Snapshot test: $rc5"
+	
+	if [[ $rc5 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+	fi
+else
+	echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # EIT based tests
