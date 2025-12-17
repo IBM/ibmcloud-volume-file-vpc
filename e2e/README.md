@@ -13,10 +13,13 @@
    export TEST_ENV=<stage/prod>
    export IC_REGION=<us-south>
    export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
-   export e2e_addon_version=<1.2 or 2.0>
+   export e2e_addon_version=<2.0>
    export icrImage=<Give the image which will be used by pods>
    export SC=<storage-class-name-with-delete-reclaim-policy>
    export SC_RETAIN=<storage-class-name-with-retain-reclaim-policy>
+   export CUSTOM_SG=<create your custom security group and use here>
+	export CUSTOM_SUBNET=<create your custom subnet group and use here>
+	export RFS_KMS_KEY_CRN=<prod CRN key> | export RFS_KMS_KEY_CRN=<stage CRN key>
 
    # Optional
    export E2E_POD_COUNT="1"
@@ -25,11 +28,11 @@
 
 5. Test DP2 profile with deployment
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_dp2\]"  ./e2e
    ```
-6. Test volume expansion
+6. Test volume expansion for DP2 and RFS Profile
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\]"  ./e2e
    ```
 7. Test EIT enabled volume test cases
    ```
