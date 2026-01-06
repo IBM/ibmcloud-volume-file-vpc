@@ -99,9 +99,9 @@ require (
 	k8s.io/component-helpers v0.32.10 // indirect
 	k8s.io/controller-manager v0.32.10 // indirect
 	k8s.io/cri-api v0.32.10 // indirect
-	k8s.io/cri-client v0.0.0 // indirect
+	k8s.io/cri-client v0.32.10 // indirect
 	k8s.io/csi-translation-lib v0.32.10 // indirect
-	k8s.io/dynamic-resource-allocation v0.0.0 // indirect
+	k8s.io/dynamic-resource-allocation v0.32.10 // indirect
 	k8s.io/kms v0.32.10 // indirect
 	k8s.io/kube-scheduler v0.0.0 // indirect
 	k8s.io/kubectl v0.32.10 // indirect
