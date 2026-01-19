@@ -91,8 +91,17 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 			}
 		}
 
+<<<<<<< HEAD
 		// This is mandatory property to be set
 		shareTargetTemplate.AccessProtocol = "nfs4"
+=======
+		// if EIT enabled
+		if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == "dp2" {
+			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
+		} else {
+			shareTargetTemplate.TransitEncryption = "stunnel"
+		}
+>>>>>>> e67b741 (Stunnel support)
 
 		//Set transit_encryption to ipsec, none, stunnel
 		shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
