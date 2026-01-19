@@ -209,7 +209,6 @@ echo "Running E2E for region: [$TEST_ENV]"
 echo "                  Path: `pwd`"
 
 # Set storage class based on addon version
-# To be removed once 1.2 addon version is unsupoo
 version_ge() {
   [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
 }
@@ -217,9 +216,6 @@ version_ge() {
 if version_ge "$e2e_addon_version" "2.0"; then
 	export SC="ibmc-vpc-file-min-iops"
 	export SC_RETAIN="ibmc-vpc-file-retain-500-iops"
-else
-	export SC="ibmc-vpc-file-dp2"
-	export SC_RETAIN="ibmc-vpc-file-retain-dp2"
 fi
 
 # E2E Execution
