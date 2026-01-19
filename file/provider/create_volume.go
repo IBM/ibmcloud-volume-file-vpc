@@ -92,8 +92,10 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 
 		// if EIT enabled
-		if volumeRequest.TransitEncryption == EncryptionTrasitMode {
+		if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == "dp2" {
 			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
+		} else {
+			shareTargetTemplate.TransitEncryption = "stunnel"
 		}
 
 		// Set access_protocol and transit_encryption ONLY for 'rfs' profile
