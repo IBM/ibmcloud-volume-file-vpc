@@ -99,12 +99,14 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 
 		// if EIT enabled
-		if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == "dp2" {
-			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
-		} else if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile.Name == "rfs" {
-			shareTargetTemplate.TransitEncryption = "stunnel"
-		}
+		// if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == "dp2" {
+		// 	shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
+		// } else if volumeRequest.TransitEncryption == EncryptionTrasitMode && volumeRequest.VPCVolume.Profile.Name == "rfs" {
+		// 	vpcs.Logger.Info("RFS profile and EIT Enabled... ", zap.Reflect("RequestedVolumeDetails", volumeRequest))
+		// 	shareTargetTemplate.TransitEncryption = "stunnel"
+		// }
 
+		shareTargetTemplate.TransitEncryption = "stunnel"
 
 		volumeAccessPointList := make([]models.ShareTarget, 1)
 		volumeAccessPointList[0] = shareTargetTemplate
