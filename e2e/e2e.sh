@@ -218,8 +218,8 @@ if version_ge "$e2e_addon_version" "2.0"; then
 	export SC="ibmc-vpc-file-min-iops"
 	export SC_RETAIN="ibmc-vpc-file-retain-500-iops"
 else
-	export SC="ibmc-vpc-file-dp2"
-	export SC_RETAIN="ibmc-vpc-file-retain-dp2"
+       export SC="ibmc-vpc-file-dp2"
+       export SC_RETAIN="ibmc-vpc-file-retain-dp2"
 fi
 
 # E2E Execution
