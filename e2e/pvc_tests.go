@@ -234,527 +234,527 @@ var _ = Describe("[ics-e2e] [sc_dp2] Dynamic Provisioning for dp2 profile using 
 })
 
 // **RFS test cases**
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with default bandwidth", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with default bandwidth", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-// 		if labelerr != nil {
-// 			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
-// 		}
-// 		sc := "ibmc-vpc-file-regional"
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+	It("with rfs profile sc: should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
+		}
+		sc := "ibmc-vpc-file-regional"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
-// 		var replicaCount = int32(1)
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "15Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
-// 		test.Run(cs, ns)
-// 	})
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+	})
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with max bandwidth", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with max bandwidth", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc : should create a pvc, deployment resources, write and read to volume, delete the pod with max bandwidth ", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-// 		if labelerr != nil {
-// 			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
-// 		}
-// 		sc := "ibmc-vpc-file-regional-max-bandwidth"
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+	It("with rfs profile sc : should create a pvc, deployment resources, write and read to volume, delete the pod with max bandwidth ", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
+		}
+		sc := "ibmc-vpc-file-regional-max-bandwidth"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
-// 		var replicaCount = int32(1)
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "15Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n",
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
-// 		test.Run(cs, ns)
-// 	})
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with zero bandwidth", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with zero bandwidth", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should provide default throughput and should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-// 		if labelerr != nil {
-// 			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
-// 		}
-// 		params := map[string]string{
-// 			"profile":    "rfs",
-// 			"throughput": "0",
-// 		}
-// 		sc := "custom-rfs-sc"
-// 		createCustomSC(cs, "custom-rfs-sc", params)
-// 		defer deleteCustomSC(cs, sc)
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+	It("with rfs profile sc: should provide default throughput and should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
+		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "0",
+		}
+		sc := "custom-rfs-sc"
+		createCustomSC(cs, "custom-rfs-sc", params)
+		defer deleteCustomSC(cs, sc)
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
-// 		var replicaCount = int32(1)
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "15Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		var replicaCount = int32(1)
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "15Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n",
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
-// 		test.Run(cs, ns)
-// 	})
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
+		test.Run(cs, ns)
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with invalid high value (9000) of bandwidth", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with invalid high value (9000) of bandwidth", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should fail when bandwidth is set to an invalid high value (9000)", func() {
-// 		params := map[string]string{
-// 			"profile":    "rfs",
-// 			"throughput": "9000",
-// 		}
-// 		sc := "custom-rfs-sc-1"
-// 		createCustomSC(cs, sc, params)
-// 		defer deleteCustomSC(cs, sc)
+	It("with rfs profile sc: should fail when bandwidth is set to an invalid high value (9000)", func() {
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "9000",
+		}
+		sc := "custom-rfs-sc-1"
+		createCustomSC(cs, sc, params)
+		defer deleteCustomSC(cs, sc)
 
-// 		// Defer the deletion of the StorageClass object.
-// 		defer func() {
-// 			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-1", metav1.DeleteOptions{}); err != nil {
-// 				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
-// 			}
-// 		}()
+		// Defer the deletion of the StorageClass object.
+		defer func() {
+			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-1", metav1.DeleteOptions{}); err != nil {
+				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
+			}
+		}()
 
-// 		// create pvc
-// 		CreatePVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 9000, "10Gi", cs)
+		// create pvc
+		CreatePVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 9000, "10Gi", cs)
 
-// 		// Defer the deletion of the PVC object.
-// 		defer func() {
-// 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
-// 				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
-// 			}
-// 		}()
-// 	})
+		// Defer the deletion of the PVC object.
+		defer func() {
+			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
+				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
+			}
+		}()
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with iops param", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with iops param", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should fail when iops is provided for rfs profile", func() {
-// 		params := map[string]string{
-// 			"profile":    "rfs",
-// 			"throughput": "100",
-// 			"iops":       "36000",
-// 		}
-// 		sc := "custom-rfs-sc-2"
-// 		createCustomSC(cs, sc, params)
-// 		defer deleteCustomSC(cs, sc)
-// 		// Defer the deletion of the StorageClass object.
-// 		defer func() {
-// 			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-2", metav1.DeleteOptions{}); err != nil {
-// 				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
-// 			}
-// 		}()
-// 		// create pvc
-// 		CreatePVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
-// 		// Defer the deletion of the PVC object.
-// 		defer func() {
-// 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
-// 				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
-// 			}
-// 		}()
-// 	})
+	It("with rfs profile sc: should fail when iops is provided for rfs profile", func() {
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "100",
+			"iops":       "36000",
+		}
+		sc := "custom-rfs-sc-2"
+		createCustomSC(cs, sc, params)
+		defer deleteCustomSC(cs, sc)
+		// Defer the deletion of the StorageClass object.
+		defer func() {
+			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-2", metav1.DeleteOptions{}); err != nil {
+				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
+			}
+		}()
+		// create pvc
+		CreatePVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
+		// Defer the deletion of the PVC object.
+		defer func() {
+			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
+				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
+			}
+		}()
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with zone param", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with zone param", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should fail when zone is provided for rfs profile", func() {
-// 		params := map[string]string{
-// 			"profile":    "rfs",
-// 			"throughput": "100",
-// 			"zone":       "us-south-1",
-// 		}
-// 		sc := "custom-rfs-sc-3"
-// 		createCustomSC(cs, sc, params)
-// 		defer deleteCustomSC(cs, sc)
-// 		// Defer the deletion of the StorageClass object.
-// 		defer func() {
-// 			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-3", metav1.DeleteOptions{}); err != nil {
-// 				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
-// 			}
-// 		}()
-// 		// create pvc
-// 		CreatePVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
-// 		// Defer the deletion of the PVC object.
-// 		defer func() {
-// 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
-// 				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
-// 			}
-// 		}()
-// 	})
+	It("with rfs profile sc: should fail when zone is provided for rfs profile", func() {
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "100",
+			"zone":       "us-south-1",
+		}
+		sc := "custom-rfs-sc-3"
+		createCustomSC(cs, sc, params)
+		defer deleteCustomSC(cs, sc)
+		// Defer the deletion of the StorageClass object.
+		defer func() {
+			if err := cs.StorageV1().StorageClasses().Delete(context.Background(), "custom-rfs-sc-3", metav1.DeleteOptions{}); err != nil {
+				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
+			}
+		}()
+		// create pvc
+		CreatePVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
+		// Defer the deletion of the PVC object.
+		defer func() {
+			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
+				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
+			}
+		}()
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with 1Gi size", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with 1Gi size", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should allow PVC sizes 1Gi with pod read/write verification", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, labelerr := cs.CoreV1().Namespaces().Patch(
-// 			context.TODO(),
-// 			ns.Name,
-// 			types.StrategicMergePatchType,
-// 			[]byte(payload),
-// 			metav1.PatchOptions{},
-// 		)
-// 		if labelerr != nil {
-// 			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
-// 		}
+	It("with rfs profile sc: should allow PVC sizes 1Gi with pod read/write verification", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(
+			context.TODO(),
+			ns.Name,
+			types.StrategicMergePatchType,
+			[]byte(payload),
+			metav1.PatchOptions{},
+		)
+		if labelerr != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
+		}
 
-// 		sc := "ibmc-vpc-file-regional"
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-// 		var replicaCount int32 = 1
+		sc := "ibmc-vpc-file-regional"
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		var replicaCount int32 = 1
 
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "1Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "1Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n",
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
 
-// 		test.Run(cs, ns)
-// 	})
+		test.Run(cs, ns)
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
 
-// 		sc := "ibmc-vpc-file-regional"
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE FOR 1Gi SIZE FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE FOR 1Gi SIZE FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+		sc := "ibmc-vpc-file-regional"
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE FOR 1Gi SIZE FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE FOR 1Gi SIZE FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
 var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with 23GI size KMS + 1000MBPS throughput", func() {
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
@@ -891,285 +891,285 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC wit
 	})
 })
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with non-zero UID and GID", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with non-zero UID and GID", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should allow non-zero UID and GID with pod read/write verification", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, _ = cs.CoreV1().Namespaces().Patch(
-// 			context.TODO(), ns.Name,
-// 			types.StrategicMergePatchType, []byte(payload),
-// 			metav1.PatchOptions{},
-// 		)
+	It("with rfs profile sc: should allow non-zero UID and GID with pod read/write verification", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, _ = cs.CoreV1().Namespaces().Patch(
+			context.TODO(), ns.Name,
+			types.StrategicMergePatchType, []byte(payload),
+			metav1.PatchOptions{},
+		)
 
-// 		params := map[string]string{
-// 			"profile":    "rfs",
-// 			"throughput": "100",
-// 			"uid":        "100",
-// 			"gid":        "100",
-// 		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "100",
+			"uid":        "100",
+			"gid":        "100",
+		}
 
-// 		sc := "custom-rfs-uid-gid"
-// 		createCustomSC(cs, sc, params)
-// 		defer deleteCustomSC(cs, sc)
+		sc := "custom-rfs-uid-gid"
+		createCustomSC(cs, sc, params)
+		defer deleteCustomSC(cs, sc)
 
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-// 		var replicaCount int32 = 1
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		var replicaCount int32 = 1
 
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "10Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n",
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
 
-// 		test.Run(cs, ns)
-// 	})
+		test.Run(cs, ns)
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
 
-// 		sc := "custom-rfs-uid-gid"
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH NON-ZERO UID/GID FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH NON-ZERO UID/GID FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+		sc := "custom-rfs-uid-gid"
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH NON-ZERO UID/GID FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH NON-ZERO UID/GID FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with custom subnet", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with custom subnet", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should allow custom subnet-id with pod read/write verification", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, _ = cs.CoreV1().Namespaces().Patch(
-// 			context.TODO(), ns.Name,
-// 			types.StrategicMergePatchType, []byte(payload),
-// 			metav1.PatchOptions{},
-// 		)
+	It("with rfs profile sc: should allow custom subnet-id with pod read/write verification", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, _ = cs.CoreV1().Namespaces().Patch(
+			context.TODO(), ns.Name,
+			types.StrategicMergePatchType, []byte(payload),
+			metav1.PatchOptions{},
+		)
 
-// 		params := map[string]string{
-// 			"profile":    "rfs",
-// 			"throughput": "100",
-// 			"subnetID":   custom_subnet,
-// 		}
+		params := map[string]string{
+			"profile":    "rfs",
+			"throughput": "100",
+			"subnetID":   custom_subnet,
+		}
 
-// 		sc := "custom-rfs-subnet"
-// 		createCustomSC(cs, sc, params)
-// 		defer deleteCustomSC(cs, sc)
+		sc := "custom-rfs-subnet"
+		createCustomSC(cs, sc, params)
+		defer deleteCustomSC(cs, sc)
 
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-// 		var replicaCount int32 = 1
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		var replicaCount int32 = 1
 
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "10Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n",
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
 
-// 		test.Run(cs, ns)
-// 	})
+		test.Run(cs, ns)
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
 
-// 		sc := "custom-rfs-subnet"
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SUBNET FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SUBNET FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+		sc := "custom-rfs-subnet"
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SUBNET FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SUBNET FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
-// var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with custom security group", func() {
-// 	f := framework.NewDefaultFramework("ics-e2e-deploy")
-// 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
-// 	var (
-// 		cs clientset.Interface
-// 		ns *v1.Namespace
-// 	)
+var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS profile SC with custom security group", func() {
+	f := framework.NewDefaultFramework("ics-e2e-deploy")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
 
-// 	BeforeEach(func() {
-// 		cs = f.ClientSet
-// 		ns = f.Namespace
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
 
-// 		var err error
-// 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-// 		if err != nil {
-// 			Fail(fmt.Sprintf("could not open test result file: %v", err))
-// 		}
-// 	})
+		var err error
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			Fail(fmt.Sprintf("could not open test result file: %v", err))
+		}
+	})
 
-// 	It("with rfs profile sc: should allow custom security group with pod read/write verification", func() {
-// 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-// 		_, _ = cs.CoreV1().Namespaces().Patch(
-// 			context.TODO(), ns.Name,
-// 			types.StrategicMergePatchType, []byte(payload),
-// 			metav1.PatchOptions{},
-// 		)
+	It("with rfs profile sc: should allow custom security group with pod read/write verification", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, _ = cs.CoreV1().Namespaces().Patch(
+			context.TODO(), ns.Name,
+			types.StrategicMergePatchType, []byte(payload),
+			metav1.PatchOptions{},
+		)
 
-// 		params := map[string]string{
-// 			"profile":          "rfs",
-// 			"throughput":       "100",
-// 			"securityGroupIDs": custom_sg,
-// 		}
+		params := map[string]string{
+			"profile":          "rfs",
+			"throughput":       "100",
+			"securityGroupIDs": custom_sg,
+		}
 
-// 		sc := "custom-rfs-sg"
-// 		createCustomSC(cs, sc, params)
-// 		defer deleteCustomSC(cs, sc)
+		sc := "custom-rfs-sg"
+		createCustomSC(cs, sc, params)
+		defer deleteCustomSC(cs, sc)
 
-// 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-// 		var replicaCount int32 = 1
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		var replicaCount int32 = 1
 
-// 		pod := testsuites.PodDetails{
-// 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-// 			CmdExits: false,
-// 			Volumes: []testsuites.VolumeDetails{
-// 				{
-// 					PVCName:       "ics-vol-rfs-",
-// 					VolumeType:    sc,
-// 					FSType:        "nfs",
-// 					ClaimSize:     "10Gi",
-// 					ReclaimPolicy: &reclaimPolicy,
-// 					MountOptions:  []string{"rw"},
-// 					VolumeMount: testsuites.VolumeMountDetails{
-// 						NameGenerate:      "test-volume-",
-// 						MountPathGenerate: "/mnt/test-",
-// 					},
-// 				},
-// 			},
-// 		}
+		pod := testsuites.PodDetails{
+			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits: false,
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "ics-vol-rfs-",
+					VolumeType:    sc,
+					FSType:        "nfs",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
 
-// 		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
-// 			Pod: pod,
-// 			PodCheck: &testsuites.PodExecCheck{
-// 				Cmd:              []string{"cat", "/mnt/test-1/data"},
-// 				ExpectedString01: "hello world\n",
-// 				ExpectedString02: "hello world\nhello world\n",
-// 			},
-// 			ReplicaCount: replicaCount,
-// 		}
+		test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "hello world\n",
+				ExpectedString02: "hello world\nhello world\n",
+			},
+			ReplicaCount: replicaCount,
+		}
 
-// 		test.Run(cs, ns)
-// 	})
+		test.Run(cs, ns)
+	})
 
-// 	AfterEach(func() {
-// 		if fpointer == nil {
-// 			return
-// 		}
-// 		defer fpointer.Close()
+	AfterEach(func() {
+		if fpointer == nil {
+			return
+		}
+		defer fpointer.Close()
 
-// 		sc := "custom-rfs-sg"
-// 		if CurrentSpecReport().Failed() {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SECURITY GROUP FOR %s STORAGE CLASS : FAIL\n",
-// 				sc,
-// 			))
-// 		} else {
-// 			_, _ = fpointer.WriteString(fmt.Sprintf(
-// 				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SECURITY GROUP FOR %s STORAGE CLASS : PASS\n",
-// 				sc,
-// 			))
-// 		}
-// 	})
-// })
+		sc := "custom-rfs-sg"
+		if CurrentSpecReport().Failed() {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"❌ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SECURITY GROUP FOR %s STORAGE CLASS : FAIL\n",
+				sc,
+			))
+		} else {
+			_, _ = fpointer.WriteString(fmt.Sprintf(
+				"✅ VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/READ/WRITE WITH CUSTOM SECURITY GROUP FOR %s STORAGE CLASS : PASS\n",
+				sc,
+			))
+		}
+	})
+})
 
 // **DP2 test cases**
 var _ = Describe("[ics-e2e] [sc_dp2] Dynamic Provisioning for dp2 profile SC with Deployment", func() {
