@@ -270,7 +270,7 @@ fi
 
 # Snapshot tests
 if [[ "$e2e_snapshot_test_case" == "true" ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./e2e -- -e2e-verify-service-account=false
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\] \[dp2\]" ./e2e -- -e2e-verify-service-account=false
 	rc5=$?
 	echo "Exit status for Snapshot test: $rc5"
 	
