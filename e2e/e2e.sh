@@ -70,8 +70,13 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
-		--run-snapshot-test-cases)
-		e2e_snapshot_test_case="$2"
+		--run-dp2-snapshot-test-cases)
+		e2e_dp2_snapshot_test_case="$2"
+		shift
+		shift
+		;;
+		--run-rfs-snapshot-test-cases)
+		e2e_rfs_snapshot_test_case="$2"
 		shift
 		shift
 		;;
@@ -269,20 +274,33 @@ else
 fi
 
 # Snapshot tests
-if [[ "$e2e_snapshot_test_case" == "true" ]]; then
+if [[ "$e2e_rfs_snapshot_test_case" == "true" ]]; then
 	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\] \[dp2\]" ./e2e -- -e2e-verify-service-account=false
 	rc5=$?
-	echo "Exit status for Snapshot test: $rc5"
+	echo "Exit status for DP2 Snapshot test: $rc5"
 	
 	if [[ $rc5 -eq 0 ]]; then
-		echo -e "✅ VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "✅ VPC-FILE-CSI-TEST-DP2-SNAPSHOT: VPC-File-DP2-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "❌ VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "❌ VPC-FILE-CSI-TEST-DP2-SNAPSHOT: VPC-File-DP2-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-DP2-SNAPSHOT: VPC-File-DP2-Snapshot-Tests: SKIP" >> $E2E_TEST_RESULT
 fi
 
+if [[ "$e2e_dp2_snapshot_test_case" == "true" ]]; then
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\] \[rfs\]" ./e2e -- -e2e-verify-service-account=false
+	rc6=$?
+	echo "Exit status for RFS Snapshot test: $rc6"
+	
+	if [[ $rc6 -eq 0 ]]; then
+		echo -e "✅ VPC-FILE-CSI-TEST-RFS-SNAPSHOT: VPC-File-RFS-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "❌ VPC-FILE-CSI-TEST-RFS-SNAPSHOT: VPC-File-RFS-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+	fi
+else
+	echo -e "VPC-FILE-CSI-TEST-RFS-SNAPSHOT: VPC-File-RFS-Snapshot-Tests: SKIP" >> $E2E_TEST_RESULT
+fi
 # EIT based tests
 
 if [[ "$e2e_eit_test_case" == "true" && "$CLUSTER_KUBE_VER_TRIM=" != "4.15" ]]; then
