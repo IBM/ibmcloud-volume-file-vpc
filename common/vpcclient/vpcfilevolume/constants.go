@@ -20,6 +20,7 @@ package vpcfilevolume
 const (
 	// Version of the VPC backend service
 	RFSProfile         = "rfs"
+	DP2Profile         = "dp2"
 	Version            = "/v1"
 	sharesPath         = Version + "/shares"
 	shareIDParam       = "share-id"
