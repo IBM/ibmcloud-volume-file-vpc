@@ -845,9 +845,9 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 if [[ -z "$IC_API_KEY_PROD" && -z "$IC_API_KEY_STAG"  ]]; then echo -e "Error: E2ETEST_API_KEY not set!!!" >> $E2E_TEST_SETUP; exit 1;  fi
 
 E2ETEST_MZ="$e2e_mz"
-if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" ]]; then
-	echo -e "Error: Invalid option \"-e $e2e_env\"!!!" >> $E2E_TEST_SETUP
-	exit 1
+if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" ]]; then
+    echo -e "Error: Invalid option \"-e $e2e_env\"!!!" >> $E2E_TEST_SETUP
+    exit 1
 fi
 
 if [[ "$e2e_kube_ver" != "default" && "$e2e_kube_ver" != "latest" && "$e2e_kube_ver" != "base" && "$e2e_kube_ver" == "" ]]; then
@@ -874,6 +874,10 @@ if [[ "$e2e_env" = "stage" ]]; then
     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.test.cloud.ibm.com"
     E2ETEST_IC_RES_GRP="Default"
+elif [[ "$e2e_env" = "stage-us-south" ]]; then
+    E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+    [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://stage-us-south.containers.test.cloud.ibm.com"
+    E2ETEST_IC_RES_GRP="Default"
 else
     E2ETEST_IC_API_EP="https://cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.cloud.ibm.com"
@@ -892,7 +896,7 @@ fi
 # Login to IBM Cloud
 set +x
 if [[ -z "$E2ETEST_API_KEY" ]]; then
-    if [[ "$e2e_env" = "stage" ]]; then
+    if [[ "$e2e_env" = "stage" || "$e2e_env" = "stage-us-south" ]]; then
         ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_STAG} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
     else
         ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_PROD} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
@@ -907,14 +911,42 @@ if [[ $rc -ne 0 ]]; then
    echo -e "Error: Invalid option \"-r $e2e_ic_region\"!!!" >> $E2E_TEST_SETUP
    exit 1
 fi
+
 IC_REGION="$e2e_ic_region"
+
+# Resolve final region
+if [[ "$e2e_env" == "stage-us-south" ]]; then
+    IC_REGION="us-south-ngdc-test"
+    # Set default test flavor only if not explicitly set
+    WORKER_NODE_FLAVOR="bx3d.4x20"
+else
+    IC_REGION="$e2e_ic_region"
+fi
+
+# Validate the final region
+ibmcloud regions | grep -w "$IC_REGION" > /dev/null || {
+   echo -e "Error: Invalid region \"$IC_REGION\"!!!" >> $E2E_TEST_SETUP
+   exit 1
+}
+
 ibmcloud target -r "$IC_REGION"
 
+# Resolve KS API endpoint
 if [[ -n "$E2ETEST_CS_API_EP" ]]; then
-   ibmcloud ks init --host $E2ETEST_CS_API_EP
+    KS_HOST="$E2ETEST_CS_API_EP"
+elif [[ "$e2e_env" == "stage" || "$e2e_env" == "stage-us-south" ]]; then
+    KS_HOST="https://containers.test.cloud.ibm.com"
 else
-   ibmcloud ks init --host https://containers.cloud.ibm.com
+    KS_HOST="https://containers.cloud.ibm.com"
 fi
+
+if [[ -z "$KS_HOST" ]]; then
+    echo "ERROR: KS_HOST is empty" >> $E2E_TEST_SETUP
+    exit 1
+fi
+
+echo "KS endpoint : $KS_HOST"
+ibmcloud ks init --host "$KS_HOST"
 
 if [[ $IC_PROVIDER == "vpc-gen2" ]] ; then
    ibmcloud is target --gen 2
@@ -1004,10 +1036,16 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
 
     if [[ -n "$E2ETEST_NODE_FLAVOR" ]]; then
         WORKER_NODE_FLAVOR="$E2ETEST_NODE_FLAVOR"
+    elif [[ "$e2e_env" == "stage-us-south" ]]; then
+        # Force correct flavor for ngdc-test
+     WORKER_NODE_FLAVOR="bx3d.4x20"
     else
         var_flvr="FLAVOR_${IC_PROVIDER//-/_}"
         WORKER_NODE_FLAVOR=${!var_flvr}
     fi
+
+    echo "DEBUG: Final worker flavor = $WORKER_NODE_FLAVOR"
+    
 
     var_prim="ZONE_${IC_PROVIDER//-/_}_${PRIMARY_ZONE_ID}"
     var_secd="ZONE_${IC_PROVIDER//-/_}_${SECOND_ZONE_ID}"
@@ -1095,6 +1133,8 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
     # Create cluster
     random_string=$(date +%s | cksum | base64 | head -c 8 | awk '{print tolower($0)}')
     cluster_name="${CLUSTER_NAME_SUFFIX}-${random_string}"
+    cluster_name=${cluster_name:0:32}
+    echo "Info: Final cluster name: [$cluster_name]"
     if [[ -n "$e2e_var_exports" ]]; then
         echo "CLUSTER_NAME=$cluster_name" >> $e2e_var_exports
         echo "CLUSTER_KUBE_VER=$kube_vers" >> $e2e_var_exports
