@@ -216,6 +216,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 })
 
 var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deployment", func() {
+
 	f := framework.NewDefaultFramework("ics-e2e-deploy")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 
@@ -226,12 +227,13 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 
 	BeforeEach(func() {
 		cs = f.ClientSet
-		//ns = f.Namespace
 
-		// Create your own namespace (framework will not delete it)
+		// 🔴 UPDATED: Create your OWN namespace (NOT framework managed)
+		nsName := fmt.Sprintf("ics-e2e-debug-ns-%d", time.Now().Unix())
+
 		ns = &v1.Namespace{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "ics-e2e-debug-ns",
+				Name: nsName,
 			},
 		}
 
@@ -239,18 +241,20 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		if err != nil && !apierrors.IsAlreadyExists(err) {
 			framework.Failf("Failed to create namespace: %v", err)
 		}
+
+		fmt.Println("🔴 DEBUG: Using namespace:", ns.Name)
 	})
 
-	It("with rfs profile sc: should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
-		}
+	It("with rfs profile sc: should create pvc + deployment", func() {
+
+		// 🔴 Patch namespace (optional but useful)
+		payload := `{"metadata": {"labels": {"pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, _ = cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+
 		sc := "ibmc-vpc-file-regional"
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
-
 		var replicaCount = int32(1)
+
 		pod := testsuites.PodDetails{
 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
 			CmdExits: false,
@@ -275,16 +279,69 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			PodCheck: &testsuites.PodExecCheck{
 				Cmd:              []string{"cat", "/mnt/test-1/data"},
 				ExpectedString01: "hello world\n",
-				ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+				ExpectedString02: "hello world\nhello world\n",
 			},
 			ReplicaCount: replicaCount,
 		}
+
+		// 🔴 CRITICAL CHANGE:
+		// DO NOT allow test to cleanup namespace
+		// We will BLOCK cleanup by exiting early
+
 		test.Run(cs, ns)
 
-		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
+		// 🔴 DEBUG: Keep namespace alive
+		fmt.Println("🔴 Namespace retained:", ns.Name)
+		fmt.Println("👉 Run: kubectl get pods -n", ns.Name)
+
+		// 🔴 HARD STOP (prevents cleanup)
+		select {} // THIS LINE STOPS TEST FROM EXITING
 	})
+
+	// It("with rfs profile sc: should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
+	// 	payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+	// 	_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+	// 	if labelerr != nil {
+	// 		fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
+	// 	}
+	// 	sc := "ibmc-vpc-file-regional"
+	// 	reclaimPolicy := v1.PersistentVolumeReclaimDelete
+
+	// 	var replicaCount = int32(1)
+	// 	pod := testsuites.PodDetails{
+	// 		Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+	// 		CmdExits: false,
+	// 		Volumes: []testsuites.VolumeDetails{
+	// 			{
+	// 				PVCName:       "ics-vol-rfs-",
+	// 				VolumeType:    sc,
+	// 				FSType:        "nfs",
+	// 				ClaimSize:     "15Gi",
+	// 				ReclaimPolicy: &reclaimPolicy,
+	// 				MountOptions:  []string{"rw"},
+	// 				VolumeMount: testsuites.VolumeMountDetails{
+	// 					NameGenerate:      "test-volume-",
+	// 					MountPathGenerate: "/mnt/test-",
+	// 				},
+	// 			},
+	// 		},
+	// 	}
+
+	// 	test := testsuites.DynamicallyProvisioneDeployWithVolWRTest{
+	// 		Pod: pod,
+	// 		PodCheck: &testsuites.PodExecCheck{
+	// 			Cmd:              []string{"cat", "/mnt/test-1/data"},
+	// 			ExpectedString01: "hello world\n",
+	// 			ExpectedString02: "hello world\nhello world\n", // pod will be restarted so expect to see 2 instances of string
+	// 		},
+	// 		ReplicaCount: replicaCount,
+	// 	}
+	// 	test.Run(cs, ns)
+
+	// 	fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+	// 	defer fpointer.Close()
+	// 	_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
+	// })
 
 	// It("with rfs profile sc : should create a pvc, deployment resources, write and read to volume, delete the pod with max bandwidth ", func() {
 	// 	payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
