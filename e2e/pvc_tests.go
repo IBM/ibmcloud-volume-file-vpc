@@ -293,7 +293,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		// 🔴 DEBUG: Keep namespace alive
 		fmt.Println("🔴 Namespace retained:", ns.Name)
 		fmt.Println("👉 Run: kubectl get pods -n", ns.Name)
-
+		time.Sleep(600 * time.Second)
 		// 🔴 HARD STOP (prevents cleanup)
 		select {} // THIS LINE STOPS TEST FROM EXITING
 	})
