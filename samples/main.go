@@ -600,13 +600,34 @@ func main() {
 			fmt.Printf("\n\n")
 		} else if choiceN == 22 {
 			var capacity int64
+			var iops int64
+			var bandwidth int32
 			fmt.Println("You selected choice to expand volume")
 			share := &provider.ExpandVolumeRequest{}
 			fmt.Printf("Please enter volume ID to exand: ")
 			_, _ = fmt.Scanf("%s", &volumeID)
 			fmt.Printf("Please enter new capacity: ")
 			_, _ = fmt.Scanf("%d", &capacity)
+			fmt.Printf("Enter new IOPS (0 to skip): ")
+			_, _ = fmt.Scanf("%d", &iops)
+			fmt.Printf("Enter new Bandwidth (0 to skip): ")
+			_, _ = fmt.Scanf("%d", &bandwidth)
 			share.VolumeID = volumeID
+			if capacity > 0 {
+				share.Capacity = capacity
+			}
+			if iops > 0 {
+				share.Iops = iops
+			}
+			if bandwidth > 0 {
+				share.Bandwidth = bandwidth
+			}
+			ctxLogger.Info("Expand request",
+				zap.String("volumeID", share.VolumeID),
+				zap.Int64("capacity", share.Capacity),
+				zap.Int64("iops", share.Iops),
+				zap.Int32("bandwidth", share.Bandwidth),
+			)
 			share.Capacity = capacity
 			// Call ExpandVolume
 			expandedVolumeSize, er11 := sess.ExpandVolume(*share)

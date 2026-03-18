@@ -43,17 +43,36 @@ func (vpcs *VPCSession) ExpandVolume(expandVolumeRequest provider.ExpandVolumeRe
 		return -1, err
 	}
 	// Return existing Capacity if its greater or equal to expandable size
-	if existingVolume.Capacity != nil && int64(*existingVolume.Capacity) >= expandVolumeRequest.Capacity {
-		vpcs.Logger.Warn("Requested size is less than current size.", zap.Reflect("Current Size: ", existingVolume.VolumeID), zap.Reflect("Requested Size: ", expandVolumeRequest.Capacity))
+	// if existingVolume.Capacity != nil && int64(*existingVolume.Capacity) >= expandVolumeRequest.Capacity {
+	// 	vpcs.Logger.Warn("Requested size is less than current size.", zap.Reflect("Current Size: ", existingVolume.VolumeID), zap.Reflect("Requested Size: ", expandVolumeRequest.Capacity))
+	// 	return int64(*existingVolume.Capacity), nil
+	// }
+	isSizeUpdate := expandVolumeRequest.Capacity > int64(*existingVolume.Capacity)
+	isIopsUpdate := expandVolumeRequest.Iops > 0
+	isBandwidthUpdate := expandVolumeRequest.Bandwidth > 0
+
+	if !isSizeUpdate && !isIopsUpdate && !isBandwidthUpdate {
+		vpcs.Logger.Warn("No updates requested")
 		return int64(*existingVolume.Capacity), nil
 	}
 	vpcs.Logger.Info("Successfully validated inputs for ExpandVolume request... ")
 
 	newSize := roundUpSize(expandVolumeRequest.Capacity, GiB)
+	var newIops int64
+	var newBandwidth int32
 
+	if expandVolumeRequest.Iops > 0 {
+		newIops = expandVolumeRequest.Iops
+	}
+
+	if expandVolumeRequest.Bandwidth > 0 {
+		newBandwidth = expandVolumeRequest.Bandwidth
+	}
 	// Build the template to send to backend
 	shareTemplate := &models.Share{
-		Size: newSize,
+		Size:      newSize,
+		Iops:      newIops,
+		Bandwidth: newBandwidth,
 	}
 
 	vpcs.Logger.Info("Calling VPC provider for volume expand...")
