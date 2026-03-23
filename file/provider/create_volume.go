@@ -91,11 +91,8 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 			}
 		}
 
-		// Set access_protocol ONLY for 'rfs' profile
-		// Note: These are mandatory parameters for rfs profile
-		if volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile {
-			shareTargetTemplate.AccessProtocol = "nfs4"
-		}
+		// This is mandatory property to be set
+		shareTargetTemplate.AccessProtocol = "nfs4"	
 
 		//Set transit_encryption to ipsec, none, stunnel
 		shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
