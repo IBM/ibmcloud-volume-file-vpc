@@ -922,6 +922,10 @@ else
     IC_REGION="$e2e_ic_region"
 fi
 
+if [[ "$IC_REGION" == "in-che" ]]; then
+    WORKER_NODE_FLAVOR="bx2.2x8"
+fi
+
 # Validate the final region
 ibmcloud regions | grep -w "$IC_REGION" > /dev/null || {
    echo -e "Error: Invalid region \"$IC_REGION\"!!!" >> $E2E_TEST_SETUP
