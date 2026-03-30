@@ -923,9 +923,9 @@ else
 fi
 
 if [[ "$REGION" == "in-che" ]]; then
-  FLAVOR="bx3d.4x20"
+  WORKER_NODE_FLAVOR=="bx3d.4x20"
 else
-  FLAVOR="bx2.4x16"
+  IC_REGION="$e2e_ic_region"
 fi
 
 # Validate the final region
