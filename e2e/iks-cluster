@@ -918,14 +918,10 @@ if [[ "$e2e_env" == "stage-us-south" ]]; then
     IC_REGION="us-south-ngdc-test"
     # Set default test flavor only if not explicitly set
     WORKER_NODE_FLAVOR="bx3d.4x20"
+elif [[ "$REGION" == "in-che" ]]; then
+    WORKER_NODE_FLAVOR="bx3d.4x20"
 else
     IC_REGION="$e2e_ic_region"
-fi
-
-if [[ "$REGION" == "in-che" ]]; then
-  WORKER_NODE_FLAVOR="bx3d.4x20"
-else
-  IC_REGION="$e2e_ic_region"
 fi
 
 # Validate the final region
