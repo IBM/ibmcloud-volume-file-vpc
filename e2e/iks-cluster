@@ -913,37 +913,20 @@ if [[ $rc -ne 0 ]]; then
 fi
 IC_REGION="$e2e_ic_region"
 
+ibmcloud ks flavors --zone in-che-1 | grep -w "$WORKER_NODE_FLAVOR" > /dev/null || {
+  echo "Invalid flavor $WORKER_NODE_FLAVOR for zone in-che-1"
+  exit 1
+}
+
 # Resolve final region
 if [[ "$e2e_env" == "stage-us-south" ]]; then
     IC_REGION="us-south-ngdc-test"
+    WORKER_NODE_FLAVOR="bx3d.4x20"
+elif [[ "$IC_REGION" == "in-che" ]]; then
+    WORKER_NODE_FLAVOR="bx3d.4x20"
+else
+    IC_REGION="$e2e_ic_region"
 fi
-
-# Optional: special handling for Chennai region (if really needed)
-if [[ "$IC_REGION" == "in-che" ]]; then
-    echo "Info: Running in Chennai region"
-fi
-
-# ✅ Always resolve flavor dynamically (BEST PRACTICE)
-WORKER_NODE_FLAVOR=$(ibmcloud ks flavors --zone "${IC_REGION}-1" | awk 'NR>2 {print $1}' | head -1)
-
-if [[ -z "$WORKER_NODE_FLAVOR" ]]; then
-    echo "Error: No valid worker flavor found for region $IC_REGION"
-    exit 1
-fi
-
-echo "Info: Selected worker flavor: $WORKER_NODE_FLAVOR"
-
-# # Resolve final region
-# if [[ "$e2e_env" == "stage-us-south" ]]; then
-#     IC_REGION="us-south-ngdc-test"
-#     # Set default test flavor only if not explicitly set
-#     WORKER_NODE_FLAVOR="bx3d.4x20"
-# elif [[ "$REGION" == "in-che" ]]; then
-#     WORKER_NODE_FLAVOR="bx3d.4x20"
-# else
-#     IC_REGION="$e2e_ic_region"
-# fi
-
 # Validate the final region
 ibmcloud regions | grep -w "$IC_REGION" > /dev/null || {
    echo -e "Error: Invalid region \"$IC_REGION\"!!!" >> $E2E_TEST_SETUP
