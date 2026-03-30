@@ -1044,7 +1044,7 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
         # Force correct flavor for ngdc-test
         WORKER_NODE_FLAVOR="bx3d.4x20"
     elif [[ "$e2e_env" == "in-che" ]]; then
-         WORKER_NODE_FLAVOR="bx3d.4x20"
+        WORKER_NODE_FLAVOR="bx3d.4x20"
     else
         var_flvr="FLAVOR_${IC_PROVIDER//-/_}"
         WORKER_NODE_FLAVOR=${!var_flvr}
