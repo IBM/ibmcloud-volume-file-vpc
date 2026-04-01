@@ -845,7 +845,8 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 if [[ -z "$IC_API_KEY_PROD" && -z "$IC_API_KEY_STAG"  ]]; then echo -e "Error: E2ETEST_API_KEY not set!!!" >> $E2E_TEST_SETUP; exit 1;  fi
 
 E2ETEST_MZ="$e2e_mz"
-if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" && "$e2e_env" != "in-che" ]]; then
+#if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" && "$e2e_env" != "in-che" ]]; then
+if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" ]]; then
 	echo -e "Error: Invalid option \"-e $e2e_env\"!!!" >> $E2E_TEST_SETUP
 	exit 1
 fi
@@ -878,10 +879,10 @@ elif [[ "$e2e_env" = "stage-us-south" ]]; then
     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://stage-us-south.containers.test.cloud.ibm.com"
     E2ETEST_IC_RES_GRP="Default"
-elif [[ "$e2e_env" = "in-che" ]]; then
-    E2ETEST_IC_API_EP="https://cloud.ibm.com"
-    [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://in-che.containers.cloud.ibm.com"
-    E2ETEST_IC_RES_GRP="Default"
+# elif [[ "$e2e_env" = "in-che" ]]; then
+#     E2ETEST_IC_API_EP="https://cloud.ibm.com"
+#     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://in-che.containers.cloud.ibm.com"
+#     E2ETEST_IC_RES_GRP="Default"
 else
     E2ETEST_IC_API_EP="https://cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.cloud.ibm.com"
@@ -902,8 +903,8 @@ set +x
 if [[ -z "$E2ETEST_API_KEY" ]]; then
     if [[ "$e2e_env" = "stage" || "$e2e_env" = "stage-us-south" ]]; then
         ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_STAG} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
-    elif [[ "$e2e_env" = "in-che" ]]; then
-        ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_PROD} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
+    # elif [[ "$e2e_env" = "in-che" ]]; then
+    #     ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_PROD} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
     else
         ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_PROD} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
     fi
@@ -928,8 +929,8 @@ ibmcloud ks flavors --zone in-che-1 | grep -w "$WORKER_NODE_FLAVOR" > /dev/null 
 if [[ "$e2e_env" == "stage-us-south" ]]; then
     IC_REGION="us-south-ngdc-test"
     WORKER_NODE_FLAVOR="bx3d.4x20"
-elif [[ "$IC_REGION" == "in-che" ]]; then
-    WORKER_NODE_FLAVOR="bx3d.4x20"
+# elif [[ "$IC_REGION" == "in-che" ]]; then
+#     WORKER_NODE_FLAVOR="bx3d.4x20"
 else
     IC_REGION="$e2e_ic_region"
 fi
@@ -946,8 +947,8 @@ if [[ -n "$E2ETEST_CS_API_EP" ]]; then
     KS_HOST="$E2ETEST_CS_API_EP"
 elif [[ "$e2e_env" == "stage" || "$e2e_env" == "stage-us-south" ]]; then
     KS_HOST="https://containers.test.cloud.ibm.com"
-elif [[ "$e2e_env" == "in-che" ]]; then
-    KS_HOST="https://containers.cloud.ibm.com"
+# elif [[ "$e2e_env" == "in-che" ]]; then
+#     KS_HOST="https://containers.cloud.ibm.com"
 else
     KS_HOST="https://containers.cloud.ibm.com"
 fi
@@ -1050,9 +1051,9 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
     elif [[ "$e2e_env" == "stage-us-south" ]]; then
         # Force correct flavor for ngdc-test
         WORKER_NODE_FLAVOR="bx3d.4x20"
-    elif [[ "$IC_REGION" == "in-che" ]]; then
-        # India region specific flavor
-        WORKER_NODE_FLAVOR="bx3d.4x20"
+    # elif [[ "$IC_REGION" == "in-che" ]]; then
+    #     # India region specific flavor
+    #     WORKER_NODE_FLAVOR="bx3d.4x20"
     else
         var_flvr="FLAVOR_${IC_PROVIDER//-/_}"
         WORKER_NODE_FLAVOR=${!var_flvr}
