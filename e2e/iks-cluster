@@ -846,7 +846,6 @@ if [[ -z "$IC_API_KEY_PROD" && -z "$IC_API_KEY_STAG"  ]]; then echo -e "Error: E
 
 E2ETEST_MZ="$e2e_mz"
 if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" && "$e2e_env" != "in-che" ]]; then
-#if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" ]]; then
 	echo -e "Error: Invalid option \"-e $e2e_env\"!!!" >> $E2E_TEST_SETUP
 	exit 1
 fi
@@ -1045,10 +1044,8 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
     if [[ -n "$E2ETEST_NODE_FLAVOR" ]]; then
         WORKER_NODE_FLAVOR="$E2ETEST_NODE_FLAVOR"
     elif [[ "$e2e_env" == "stage-us-south" ]]; then
-        # Force correct flavor for ngdc-test
         WORKER_NODE_FLAVOR="bx3d.4x20"
     elif [[ "$IC_REGION" == "in-che" ]]; then
-        # India region specific flavor
         WORKER_NODE_FLAVOR="bx3d.4x20"
     else
         var_flvr="FLAVOR_${IC_PROVIDER//-/_}"
