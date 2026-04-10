@@ -123,7 +123,7 @@ func main() {
 
 	valid := true
 	for valid {
-		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshots \n 4- Get snapshot by snapshot name \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n 23 - Get Share Profile\n Your choice?:")
+		fmt.Println("\n\nSelect your choice\n 1- Get volume details \n 2- Create snapshot \n 3- list snapshots \n 4- Get snapshot by snapshot name \n 5- Snapshot details \n 6- Snapshot Order \n 7- Create volume from snapshot\n 8- Delete volume \n 9- Delete Snapshot \n 10- List all Snapshot \n 12- Authorize volume \n 13- Create VPC Volume \n 14- Create VPC Snapshot \n 15- Create VPC target \n 16- Delete VPC target \n 17- Get volume by name \n 18- List volumes \n 19- Get volume target \n 20 - Wait for create volume target \n 21 - Wait for delete volume target \n 22 - Expand Volume \n 23 - Get Share Profile \n 24 - Modify Volume \n Your choice?:")
 
 		var choiceN int
 		var volumeID, targetID string
@@ -629,6 +629,45 @@ func main() {
 			} else {
 				er11 = updateRequestID(er11, requestID)
 				ctxLogger.Info("failed to get Profile name================>", zap.Reflect("profileName", profileName), zap.Reflect("Error", er11))
+			}
+			fmt.Printf("\n\n")
+		} else if choiceN == 24 {
+			var iops int64
+			var bandwidth int32
+			fmt.Println("You selected choice to modify volume")
+			share := &provider.ModifyVolumeRequest{}
+			fmt.Printf("Please enter volume ID to modify: ")
+			_, _ = fmt.Scanf("%s", &volumeID)
+			share.VolumeID = volumeID
+			fmt.Printf("Enter new IOPS : ")
+			_, _ = fmt.Scanf("%d", &iops)
+			fmt.Printf("Enter new Bandwidth : ")
+			_, _ = fmt.Scanf("%d", &bandwidth)
+			if iops > 0 {
+				share.Iops = iops
+			}
+			if bandwidth > 0 {
+				share.Bandwidth = bandwidth
+			}
+			ctxLogger.Info("Expand request",
+				zap.String("volumeID", share.VolumeID),
+				zap.Int64("iops", share.Iops),
+				zap.Int32("bandwidth", share.Bandwidth),
+			)
+			//Call ModifyVolume
+			updatedIops, updatedBandwidth, er11 := sess.ModifyVolume(*share)
+			if er11 == nil {
+				ctxLogger.Info("Successfully modified volume ================>",
+					zap.String("Volume ID", volumeID),
+					zap.Int64("Updated IOPS", updatedIops),
+					zap.Int32("Updated Bandwidth", updatedBandwidth),
+				)
+			} else {
+				er11 = updateRequestID(er11, requestID)
+				ctxLogger.Info("Failed to modify =================>",
+					zap.String("Volume ID", volumeID),
+					zap.Reflect("Error", er11),
+				)
 			}
 			fmt.Printf("\n\n")
 		} else {
