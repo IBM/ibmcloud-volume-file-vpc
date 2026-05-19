@@ -1665,7 +1665,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 // Note: For RFS-EIT, stunnel is automatically enabled via storage class parameter.
 // No need to enable EIT in ConfigMap - it's handled by the storage class.
 
-var _ = Describe("[ics-e2e] [eit] [eit-rfs] [stunnel-verification] EIT Volume with Stunnel Tunnel Verification", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stunnel Tunnel Verification", func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-verify")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -1719,7 +1719,7 @@ var _ = Describe("[ics-e2e] [eit] [eit-rfs] [stunnel-verification] EIT Volume wi
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] [eit-rfs] [multi-volume] EIT Pod with Multiple Volumes and Tunnel Verification", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volumes and Tunnel Verification", func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-multi")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -1785,7 +1785,7 @@ var _ = Describe("[ics-e2e] [eit] [eit-rfs] [multi-volume] EIT Pod with Multiple
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Removal Verification", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Removal Verification", func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-cleanup")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -1840,7 +1840,7 @@ var _ = Describe("[ics-e2e] [eit] [eit-rfs] [cleanup] EIT Volume Cleanup and Tun
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit] [eit-rfs] [node-restart] EIT Volume with CSI Node Server Restart", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Server Restart", func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-restart")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
