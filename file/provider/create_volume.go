@@ -92,7 +92,7 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		}
 
 		// This is mandatory property to be set
-		shareTargetTemplate.AccessProtocol = "nfs4"	
+		shareTargetTemplate.AccessProtocol = "nfs4"
 
 		//Set transit_encryption to ipsec, none, stunnel
 		shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption

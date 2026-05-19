@@ -1660,3 +1660,389 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		time.Sleep(waitForPackageInstallation)
 	})
 })
+
+// **New EIT-RFS test cases using utility functions**
+// Note: For RFS-EIT, stunnel is automatically enabled via storage class parameter.
+// No need to enable EIT in ConfigMap - it's handled by the storage class.
+
+var _ = Describe("[ics-e2e] [eit] [eit-rfs] [stunnel-verification] EIT Volume with Stunnel Tunnel Verification", func() {
+	f := framework.NewDefaultFramework("ics-e2e-eit-verify")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs     clientset.Interface
+		ns     *v1.Namespace
+		config *restclientset.Config
+	)
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		config = f.ClientConfig()
+	})
+
+	It("should create EIT volume, verify stunnel tunnel exists, and verify mount uses tunnel", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		pod := testsuites.PodDetails{
+			Cmd: "echo 'stunnel test' > /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "eit-rfs-stunnel-verify-",
+					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisionedEITPodTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "stunnel test\n",
+			},
+			Config: config,
+		}
+
+		// Run the test - it handles all verification internally
+		test.Run(cs, ns)
+	})
+})
+
+var _ = Describe("[ics-e2e] [eit] [eit-rfs] [multi-volume] EIT Pod with Multiple Volumes and Tunnel Verification", func() {
+	f := framework.NewDefaultFramework("ics-e2e-eit-multi")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs     clientset.Interface
+		ns     *v1.Namespace
+		config *restclientset.Config
+	)
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		config = f.ClientConfig()
+	})
+
+	It("should create pod with 2 EIT volumes and verify both stunnel tunnels", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		pod := testsuites.PodDetails{
+			Cmd: "echo 'vol1' > /mnt/test-1/data && echo 'vol2' > /mnt/test-2/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       "eit-rfs-multi-vol1-",
+					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+				{
+					PVCName:       "eit-rfs-multi-vol2-",
+					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisionedEITMultiVolPodTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "vol1\n",
+			},
+			Config: config,
+		}
+
+		// Run the test - it handles multi-volume verification internally
+		test.Run(cs, ns)
+	})
+})
+
+var _ = Describe("[ics-e2e] [eit] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Removal Verification", func() {
+	f := framework.NewDefaultFramework("ics-e2e-eit-cleanup")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs     clientset.Interface
+		ns     *v1.Namespace
+		config *restclientset.Config
+	)
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		config = f.ClientConfig()
+	})
+
+	It("should create EIT volume, verify tunnel, delete pod, and verify tunnel cleanup", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		pvcName := "eit-rfs-cleanup-test-"
+		pod := testsuites.PodDetails{
+			Cmd: "echo 'cleanup test' > /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       pvcName,
+					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		test := testsuites.DynamicallyProvisionedEITPodTest{
+			Pod: pod,
+			PodCheck: &testsuites.PodExecCheck{
+				Cmd:              []string{"cat", "/mnt/test-1/data"},
+				ExpectedString01: "cleanup test\n",
+			},
+			Config: config,
+		}
+
+		// Run the test - it handles tunnel verification and cleanup internally
+		test.Run(cs, ns)
+	})
+})
+
+var _ = Describe("[ics-e2e] [eit] [eit-rfs] [node-restart] EIT Volume with CSI Node Server Restart", func() {
+	f := framework.NewDefaultFramework("ics-e2e-eit-restart")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+	var (
+		cs     clientset.Interface
+		ns     *v1.Namespace
+		config *restclientset.Config
+	)
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		config = f.ClientConfig()
+	})
+
+	It("should maintain EIT volume functionality after CSI node server restart", func() {
+		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
+		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
+		if labelerr != nil {
+			panic(labelerr)
+		}
+
+		reclaimPolicy := v1.PersistentVolumeReclaimDelete
+		pvcName := "eit-rfs-restart-test-"
+		pod := testsuites.PodDetails{
+			Cmd: "echo 'initial data' > /mnt/test-1/data && while true; do sleep 2; done",
+			Volumes: []testsuites.VolumeDetails{
+				{
+					PVCName:       pvcName,
+					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					FSType:        "ibmshare",
+					ClaimSize:     "10Gi",
+					ReclaimPolicy: &reclaimPolicy,
+					MountOptions:  []string{"rw"},
+					VolumeMount: testsuites.VolumeMountDetails{
+						NameGenerate:      "test-volume-",
+						MountPathGenerate: "/mnt/test-",
+					},
+				},
+			},
+		}
+
+		// Setup pod with volume
+		test := testsuites.DynamicallyProvisionedEITPodTest{
+			Pod:    pod,
+			Config: config,
+		}
+		tpod, cleanup := test.Pod.SetupWithDynamicVolumes(cs, ns)
+		for i := range cleanup {
+			defer cleanup[i]()
+		}
+
+		fmt.Println("Creating pod with EIT volume...")
+		tpod.Create()
+		defer tpod.Cleanup()
+
+		fmt.Println("Waiting for pod to be running...")
+		tpod.WaitForRunningSlow()
+
+		// Get pod and extract actual PVC name
+		podList, err := cs.CoreV1().Pods(ns.Name).List(context.TODO(), metav1.ListOptions{
+			LabelSelector: "app=ics-vol-e2e",
+		})
+		if err != nil || len(podList.Items) == 0 {
+			panic(fmt.Errorf("failed to find test pod: %w", err))
+		}
+		podObj := &podList.Items[0]
+		podName := podObj.Name
+		fmt.Printf("Test pod name: %s\n", podName)
+
+		// Get actual PVC name from pod spec (Kubernetes adds random suffix)
+		if len(podObj.Spec.Volumes) == 0 || podObj.Spec.Volumes[0].PersistentVolumeClaim == nil {
+			panic(fmt.Errorf("pod has no PVC volume"))
+		}
+		actualPVCName := podObj.Spec.Volumes[0].PersistentVolumeClaim.ClaimName
+		fmt.Printf("Actual PVC name: %s\n", actualPVCName)
+
+		// Get volume ID
+		volumeID, err := testsuites.GetVolumeIDFromPVC(cs, ns.Name, actualPVCName)
+		if err != nil {
+			panic(fmt.Errorf("failed to get volume ID: %w", err))
+		}
+		fmt.Printf("Volume ID: %s\n", volumeID)
+
+		// Get node name
+		if podObj.Spec.NodeName == "" {
+			err = fmt.Errorf("pod not scheduled to any node")
+			panic(fmt.Errorf("failed to get pod: %w", err))
+		}
+		nodeName := podObj.Spec.NodeName
+		fmt.Printf("Pod running on node: %s\n", nodeName)
+
+		// Verify initial tunnel and mount
+		fmt.Println("Verifying initial stunnel tunnel...")
+		port, err := testsuites.VerifyStunnelTunnel(config, cs, ns.Name, podName, volumeID)
+		if err != nil {
+			panic(fmt.Errorf("initial tunnel verification failed: %w", err))
+		}
+		fmt.Printf("Initial tunnel verified on port: %d\n", port)
+
+		err = testsuites.VerifyMountUsesStunnel(config, cs, ns.Name, podName, port)
+		if err != nil {
+			panic(fmt.Errorf("initial mount verification failed: %w", err))
+		}
+		fmt.Println("Initial mount verified to use stunnel")
+
+		// Verify initial data read
+		fmt.Println("Verifying initial data read...")
+		tpod.Exec([]string{"cat", "/mnt/test-1/data"}, "initial data\n")
+
+		// Find and restart CSI node server pod on the same node
+		fmt.Printf("Finding CSI node server pod on node %s...\n", nodeName)
+		csiPod, err := testsuites.GetCSIDriverPod(cs, nodeName)
+		if err != nil {
+			panic(fmt.Errorf("failed to find CSI node server pod: %w", err))
+		}
+		fmt.Printf("Found CSI node server pod: %s\n", csiPod.Name)
+
+		// Delete CSI node server pod to trigger restart
+		fmt.Println("Restarting CSI node server pod...")
+		err = cs.CoreV1().Pods("kube-system").Delete(context.TODO(), csiPod.Name, metav1.DeleteOptions{})
+		if err != nil {
+			panic(fmt.Errorf("failed to delete CSI node server pod: %w", err))
+		}
+
+		// Wait for new CSI node server pod to be ready
+		fmt.Println("Waiting for new CSI node server pod to be ready...")
+		err = wait.PollImmediate(5*time.Second, 3*time.Minute, func() (bool, error) {
+			newCSIPod, err := testsuites.GetCSIDriverPod(cs, nodeName)
+			if err != nil {
+				return false, nil
+			}
+			// Check if it's a different pod (new one)
+			if newCSIPod.Name == csiPod.Name {
+				return false, nil
+			}
+			// Check if new pod is ready
+			for _, condition := range newCSIPod.Status.Conditions {
+				if condition.Type == corev1.PodReady && condition.Status == corev1.ConditionTrue {
+					fmt.Printf("New CSI node server pod ready: %s\n", newCSIPod.Name)
+					return true, nil
+				}
+			}
+			return false, nil
+		})
+		if err != nil {
+			panic(fmt.Errorf("CSI node server pod did not become ready: %w", err))
+		}
+
+		// Wait a bit for stunnel to be fully operational
+		fmt.Println("Waiting for stunnel to be fully operational...")
+		time.Sleep(10 * time.Second)
+
+		// Verify tunnel still exists after restart
+		fmt.Println("Verifying stunnel tunnel after CSI restart...")
+		port, err = testsuites.VerifyStunnelTunnel(config, cs, ns.Name, podName, volumeID)
+		if err != nil {
+			panic(fmt.Errorf("tunnel verification failed after CSI restart: %w", err))
+		}
+		fmt.Printf("Tunnel verified after restart on port: %d\n", port)
+
+		// Verify mount still uses stunnel
+		err = testsuites.VerifyMountUsesStunnel(config, cs, ns.Name, podName, port)
+		if err != nil {
+			panic(fmt.Errorf("mount verification failed after CSI restart: %w", err))
+		}
+		fmt.Println("Mount still uses stunnel after restart")
+
+		// Verify can still read existing data
+		fmt.Println("Verifying can read existing data after restart...")
+		tpod.Exec([]string{"cat", "/mnt/test-1/data"}, "initial data\n")
+
+		// Verify can write new data after restart
+		fmt.Println("Writing new data after restart...")
+		tpod.Exec([]string{"sh", "-c", "echo 'post-restart data' >> /mnt/test-1/data"}, "")
+
+		// Verify can read new data
+		fmt.Println("Verifying can read new data after restart...")
+		tpod.Exec([]string{"cat", "/mnt/test-1/data"}, "initial data\npost-restart data\n")
+
+		fmt.Println("All operations successful after CSI node server restart!")
+
+		// Cleanup: Delete pod and verify unmount works
+		fmt.Println("Deleting pod to verify unmount works after restart...")
+		tpod.Cleanup()
+
+		// Wait for pod deletion
+		err = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+			_, err := cs.CoreV1().Pods(ns.Name).Get(context.TODO(), podName, metav1.GetOptions{})
+			if apierrors.IsNotFound(err) {
+				return true, nil
+			}
+			return false, err
+		})
+		if err != nil {
+			panic(fmt.Errorf("pod did not delete in time: %w", err))
+		}
+
+		// Verify tunnel cleanup works after restart
+		fmt.Println("Verifying tunnel cleanup after restart...")
+		err = testsuites.WaitForTunnelCleanup(config, cs, nodeName, volumeID)
+		if err != nil {
+			panic(fmt.Errorf("tunnel cleanup verification failed after restart: %w", err))
+		}
+		fmt.Printf("Tunnel cleanup successful after restart for volume %s\n", volumeID)
+	})
+})
