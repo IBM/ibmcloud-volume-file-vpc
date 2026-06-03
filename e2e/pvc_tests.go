@@ -244,7 +244,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc_retain)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("✅ VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc_retain)); err != nil {
 			panic(err)
 		}
 	})
@@ -305,7 +305,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 
 		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
+		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
 	It("with rfs profile sc : should create a pvc, deployment resources, write and read to volume, delete the pod with max bandwidth ", func() {
@@ -350,7 +350,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 
 		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
+		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
 	It("with rfs profile sc: should provide default throughput and should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
@@ -401,7 +401,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 
 		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
+		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
 	It("with rfs profile sc: should fail when bandwidth is set to an invalid high value (9000)", func() {
@@ -433,7 +433,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		fpointer, _ = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		defer fpointer.Close()
 
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc))
+		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
 	It("with rfs profile sc: should fail when iops is provided for rfs profile", func() {
@@ -463,7 +463,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		defer fpointer.Close()
 
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc))
+		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 
 	It("with rfs profile sc: should fail when zone is provided for rfs profile", func() {
@@ -492,7 +492,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 
 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST-RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc))
+		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR %s STORAGE CLASS : PASS\n", sc))
 	})
 })
 
@@ -558,7 +558,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC w
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("VPC-FILE-CSI-TEST: VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("✅ VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -655,7 +655,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE SAME SIZE")
 		test1.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
 			panic(err)
 		}
 
@@ -686,7 +686,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
 		test2.VolumeSizeLess(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
 			panic(err)
 		}
 
@@ -717,7 +717,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
 		test3.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -792,7 +792,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE SAME SIZE")
 		test1.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
 			panic(err)
 		}
 
@@ -823,7 +823,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
 		test2.VolumeSizeLess(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
 			panic(err)
 		}
 
@@ -854,7 +854,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
 		test3.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -921,7 +921,7 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ VERIFYING MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1033,7 +1033,7 @@ var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for dp
 		}
 
 		test.RunAsync(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING PVC WITH RWO MODE : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ VERIFYING PVC WITH RWO MODE : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1095,7 +1095,7 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 			ServiceName: service.Name,
 		}
 		test.Run(cs, ns, false)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1163,7 +1163,7 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 			ExpandedSize:   40,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST: VERIFYING PVC EXPANSION BY USING DEPLOYMENT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ VERIFYING PVC EXPANSION BY USING DEPLOYMENT: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1269,7 +1269,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 			ServiceName: service.Name,
 		}
 		test.Run(cs, ns, false)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ EIT: VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1399,7 +1399,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 			ExpandedSize:   40,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: VERIFYING PVC EXPANSION USING POD: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ EIT: VERIFYING PVC EXPANSION USING POD: PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1526,7 +1526,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning using EIT enabled volume 
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: VERIFYING PVC CREATE/DELETE RESTRICTED TO DEFAULT WORKER POOL : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ EIT: VERIFYING PVC CREATE/DELETE RESTRICTED TO DEFAULT WORKER POOL : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -1574,7 +1574,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		// Skip this if Multi-zone is disabled
 		secondary_wp := os.Getenv("cluster_worker_pool")
 		if secondary_wp == "" {
-			if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
+			if _, err = fpointer.WriteString("❌ EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : SKIP\n"); err != nil {
 				panic(err)
 			}
 			fpointer.Close()
@@ -1668,7 +1668,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 			ReplicaCount: replicaCount,
 		}
 		test.RunShouldFail(cs, ns)
-		if _, err = fpointer.WriteString("VPC-FILE-CSI-TEST-EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n"); err != nil {
 			panic(err)
 		}
 	})
