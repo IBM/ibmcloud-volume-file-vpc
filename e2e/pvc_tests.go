@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
@@ -46,7 +47,7 @@ import (
 
 const (
 	defaultSecret              = ""
-	waitForPackageInstallation = 2 * time.Minute
+	waitForPackageInstallation = 5 * time.Minute
 )
 
 var (
@@ -56,6 +57,40 @@ var (
 	sc             = os.Getenv("SC")
 	sc_retain      = os.Getenv("SC_RETAIN")
 )
+
+func rebootWorkersForRHCOS() {
+	if os.Getenv("WORKER_OS") != "RHCOS" {
+		return
+	}
+
+	execPath := os.Getenv("EXECPATH")
+	if execPath == "" {
+		execPath = "."
+	}
+
+	clusterName := os.Getenv("CLUSTER_NAME")
+	if clusterName == "" {
+		panic("cluster name is not set for worker reboot")
+	}
+
+	testEnv := os.Getenv("TEST_ENV")
+	if testEnv == "" {
+		testEnv = os.Getenv("CLUSTER_ENV")
+	}
+	if testEnv == "" {
+		panic("test environment is not set for worker reboot")
+	}
+
+	// Run iks-cluster to login and do worker reboot
+	cmd := exec.Command(execPath+"/e2e/iks-cluster", "-e", testEnv, "-c", clusterName, "--worker-reboot")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = os.Environ()
+
+	if err := cmd.Run(); err != nil {
+		panic(fmt.Sprintf("worker reboot command failed: %v", err))
+	}
+}
 
 func createCustomRfsSC(cs clientset.Interface, name string, params map[string]string) (*storagev1.StorageClass, error) {
 	sc := &storagev1.StorageClass{
@@ -1174,6 +1209,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		// Add wait for packages to be installed on the system
 		fmt.Printf("Sleep for %s to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		rebootWorkersForRHCOS()
 		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
 		if err != nil {
 			panic(err)
@@ -1304,6 +1340,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning OF EIT VOLUME AND RESIZE 
 		// Add wait for packages to be installed on the system
 		fmt.Printf("Sleep for %s to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		rebootWorkersForRHCOS()
 		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
 		if err != nil {
 			panic(err)
@@ -1428,6 +1465,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning using EIT enabled volume 
 		// Add wait for packages to be installed on the system
 		fmt.Printf("Sleep for %s to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		rebootWorkersForRHCOS()
 		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
 		if err != nil {
 			panic(err)
@@ -1568,6 +1606,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		// Add wait for packages to be installed on the system
 		fmt.Printf("Sleep for %s to install EIT packages...", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
+		rebootWorkersForRHCOS()
 		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
 		if err != nil {
 			panic(err)

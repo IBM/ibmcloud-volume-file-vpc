@@ -30,9 +30,9 @@ PUB_VLAN_NAME="e2etestpub"
 CUR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONF_DIR="$(dirname "$CUR_DIR")"/conf
 
-SLEEP_TIME=60 # Seconds
-CLUSTER_STATE_TIMEOUT=39  # 30Mins
-WORKER_STATE_TIMEOUT=90   # 90Mins
+SLEEP_TIME=120 # Seconds
+CLUSTER_STATE_TIMEOUT=60  # Mins
+WORKER_STATE_TIMEOUT=90   # Mins
 WORKER_PROVISION_TIMEOUT=30
 
 # kubernetes / openshift
@@ -53,6 +53,7 @@ addon_update=1
 # ibmcloud ks flavors --zone us-south-1
 # ibmcloud ks flavors --zone dal13
 FLAVOR_vpc_gen2="bx2.4x16"
+FLAVOR_vpc_gen2_ngdc="bx3d.4x20"
 FLAVOR_vpc_classic="b2.4x16"
 FLAVOR_classic="b3c.4x16"
 WORKER_NODE_FLAVOR="bx2.4x16"
@@ -79,6 +80,7 @@ function exportKubeConfig {
     fi
     local cluster_name=$1
     echo "Info: Exporting KUBECONFIG..."
+    export CLUSTER_NAME=$1
     configfile=$(ibmcloud ks cluster config --cluster $cluster_name --admin)
     context=$(kubectl config view | grep "client-certificate" | grep "$cluster_name" | awk -F ":" '{print $2}')
     CONFIG_DIR=$(dirname $context)
@@ -104,6 +106,51 @@ function updateCertPathInKubeConfig {
     done
     popd
     echo "Info: Updated cert paths in KUBECONFIG..."
+}
+
+function reboot_worker_pool {
+    if [[ $# -ne 2 ]]; then
+        echo "${FUNCNAME[0]}: Invalid parameters. Provide cluster name and worker pool name"
+        return 1
+    fi
+
+    local cluster_name=$1
+    local worker_pool_name=$2
+    local worker_ids=()
+
+    echo "Info: Listing workers for cluster [$cluster_name] worker pool [$worker_pool_name]..."
+    oldifs="$IFS"
+    IFS=$'\n'
+    workers=($(ibmcloud ks workers -c "$cluster_name" -p "$worker_pool_name" | tail -n +2))
+    IFS="$oldifs"
+
+    if [[ ${#workers[@]} -eq 0 ]]; then
+        echo "Error: No workers found for cluster [$cluster_name] worker pool [$worker_pool_name]"
+        return 1
+    fi
+
+    for worker in "${workers[@]}"; do
+        worker_id=$(echo "$worker" | awk '{print $1}')
+        if [[ -n "$worker_id" ]]; then
+            worker_ids+=("$worker_id")
+        fi
+    done
+
+    if [[ ${#worker_ids[@]} -eq 0 ]]; then
+        echo "Error: Unable to determine worker IDs for cluster [$cluster_name] worker pool [$worker_pool_name]"
+        return 1
+    fi
+
+    echo "Info: Rebooting workers for cluster [$cluster_name] worker pool [$worker_pool_name]: ${worker_ids[*]}"
+    for worker_id in "${worker_ids[@]}"; do
+        ibmcloud ks worker reboot -c "$cluster_name" --worker "$worker_id"; rc=$?
+        if [[ $rc -ne 0 ]]; then
+            echo "Error: Failed to reboot worker [$worker_id] in cluster [$cluster_name]"
+            return 1
+        fi
+    done
+
+    return 0
 }
 
 function create_vlan_cls {
@@ -396,48 +443,33 @@ function cluster_create_vpc {
     }
 
     if [[ "$K8S_PLATFORM" == "openshift" ]]; then
-        # OpenShift minimum 2 worker nodes are required
+        os_args=""
+        if [[ -n "$e2e_os" ]]; then
+            os_args="--operating-system $e2e_os"
+        fi
         worker_node_count=$WORKER_NODE_COUNT
         if [[ "$e2e_env" == "prod" ]]; then
             E2ETEST_IC_COS_INSTANCE=$(ibmcloud resource service-instance e2e-test-roks --output json | jq -r '.[].id')
         else
             E2ETEST_IC_COS_INSTANCE=$(ibmcloud resource service-instance "Cloud Object Storage-rz" --output json | jq -r '.[].id')
         fi
-        # Disable outbound traffic protection in case EIT test cases are to be executed
-        if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "4.16.0" && version_ge "$e2e_addon_version" "2.0"; then
-            if [[ "$WORKER_OS" == "RHCOS" ]]; then
-                ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
-                --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system $WORKER_OS --disable-outbound-traffic-protection; rc=$?
-            else
-                ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
-                --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection; rc=$?
-            fi
-        else
-            if [[ "$WORKER_OS" == "RHCOS" ]]; then
-                ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
-                --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --operating-system $WORKER_OS; rc=$?
-            else
-                ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
-                --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
-                --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count; rc=$?
-            fi
-        fi
+
+        ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
+        --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver --cos-instance "$E2ETEST_IC_COS_INSTANCE" \
+        --flavor $WORKER_NODE_FLAVOR --workers 2 ${os_args}; rc=$?
+
     else
-        # Disable outbound traffic protection in case EIT test cases are to be executed
-        if [[ "$e2e_eit_test_case" == "true" ]] && version_ge "$kube_ver" "1.30.0" && version_ge "$e2e_addon_version" "2.0"; then
-            ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
+        ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
             --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver \
-            --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count --disable-outbound-traffic-protection; rc=$?
-        else
-            ibmcloud ks cluster create $IC_PROVIDER --name $cluster_name --zone $PRIMARY_ZONE \
-            --vpc-id $VPC_ID --subnet-id $PRIM_SUBNET_ID --version $kube_ver \
-            --flavor $WORKER_NODE_FLAVOR --workers $worker_node_count; rc=$?
-        fi
+            --flavor $WORKER_NODE_FLAVOR --workers 2 ; rc=$?
     fi
-    if [[ $rc -ne 0 ]]; then set +x;  return 1; fi
+
+    # If cluster creation fails...
+    if [[ $rc -ne 0 ]]; then
+        set +x
+        echo -e "Warn: Cluster ($cluster_name) creation failed. Exiting" >> $E2E_TEST_SETUP
+        return 1
+    fi
 
     echo "Sleeping for 30 sec after cluster creation..."
     # TODO: Add iteration to check worker pool creation for 3 iteration every 10 sec
@@ -448,7 +480,7 @@ function cluster_create_vpc {
         cluster_worker_pool="e2etest-${random_string}"
         echo "cluster_worker_pool=\"$cluster_worker_pool\"" > /tmp/e2e_vars.sh
         ibmcloud ks worker-pool create $IC_PROVIDER --name ${cluster_worker_pool} --cluster $cluster_name \
-          --flavor $WORKER_NODE_FLAVOR --vpc-id $VPC_ID --size-per-zone $WORKER_NODE_COUNT_PERZONE; rc=$?
+        --flavor $WORKER_NODE_FLAVOR --vpc-id $VPC_ID --size-per-zone $WORKER_NODE_COUNT_PERZONE ${os_args}; rc=$?
         if [[ $rc -ne 0 ]]; then set +x;  return 1; fi
 
         ibmcloud ks zone add $IC_PROVIDER --cluster $cluster_name --worker-pool ${cluster_worker_pool} \
@@ -480,10 +512,10 @@ function check_cluster_state {
         attempts=$((attempts+1))
         echo "Info: [$cluster_name ($cluster_id)] state => [$state]...[$attempts/$CLUSTER_STATE_TIMEOUT]"
 
-        if [[ $state == "*_failed" ]]; then
+        if [[ $state == *_failed ]]; then
             echo -e "Error: [$cluster_name ($cluster_id)] entered in [$state] state. Exiting" >> $E2E_TEST_SETUP
             return 2
-        elif [[ ${state} =~ deployed$|normal$|warning$|critical$|pending$ ]]; then
+        elif [[ ${state} =~ deployed$|normal$ ]]; then
             # There are multiple states that equate to deployed if $state matches
             # any of them, then break out of the loop.  Without the $, normals would
             # be a valid match.
@@ -699,19 +731,21 @@ e2e_cluster_delete="false"
 e2e_cluster_reclaim="delete"
 e2e_ic_region="us-south"
 e2e_ic_provider="classic"
-e2e_k8s_platform="k8s"
+e2e_k8s_platform="IKS"
 e2e_kube_ver="default"
 e2e_mz="false"
 e2e_var_exports=""
 e2e_name_tag=""
+e2e_worker_reboot="false"
 e2e_addon_update="false"
 e2e_eit_test_case="false"
+addon_version=""
 
 cmd_name="$0"
 usage_str="$cmd_name: Options:-
-        -e <prod|stage> -d <cluster name> or
-        -e <prod|stage> -c <exiting cluster name> or
-        -e <prod|stage> --fresh [-n <name tag> ] -k default|latest|base -p classic|vpc-gen2 -t k8s|ocp -r <region> [--mz] [--retain] [--run-eit-test-cases]"
+        -e <prod|stage|prestage> -d <cluster name> or
+        -e <prod|stage|prestage> -c <exiting cluster name> or
+        -e <prod|stage|prestage> --fresh [-n <name tag> ] -k default|latest|base -p classic|vpc-gen2 -t k8s|ocp -r <region> [--mz] [--retain] [--worker-reboot]"
 
 if [[ $# -lt 1 ]]; then
 	echo "$usage_str"
@@ -751,6 +785,14 @@ key="$1"
         shift
         ;;
 
+        --cleanup)
+        # Cleanup existing clusters which are there for more than 24 hours
+        e2e_clusters_name="vpc-file" # Cleanup clusters with this prefix TODO
+        e2e_clusters_cleanup="true"
+        shift
+        shift
+        ;;
+
         --fresh)
         # Create new fresh cluster
         e2e_create_new_cluster="true"
@@ -770,11 +812,17 @@ key="$1"
 	shift
 	;;
 
-        --addon-version)
-        e2e_addon_version="$2"
-        shift
-	shift
-        ;;
+    --addon-version)
+    addon_version="$2"
+    shift
+    shift
+    ;;
+
+    --os)
+    e2e_os="$2"
+    shift
+    shift
+    ;;
 
 	-p|--provider)
 	e2e_ic_provider="$2"
@@ -820,7 +868,12 @@ key="$1"
     shift
     ;;
 
-	--exports)
+    --worker-reboot)
+    e2e_worker_reboot="true"
+    shift
+    ;;
+
+    --exports)
 	e2e_var_exports="$2"
 	shift
 	shift
@@ -842,46 +895,73 @@ key="$1"
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
+###################################################################################################
+############################# Validations ##################################
+
+if [[ -n "$e2e_var_exports" ]]; then
+	echo "CLUSTER_REGION=$IC_REGION"  >> $e2e_var_exports
+	echo "CLUSTER_ENV=$e2e_env" >> $e2e_var_exports
+fi
+
+# Check if the API Key is present in the environment variable or not
 if [[ -z "$IC_API_KEY_PROD" && -z "$IC_API_KEY_STAG"  ]]; then echo -e "Error: E2ETEST_API_KEY not set!!!" >> $E2E_TEST_SETUP; exit 1;  fi
 
 E2ETEST_MZ="$e2e_mz"
-if [[ "$e2e_env" != "prod" && "$e2e_env" != "stage" && "$e2e_env" != "stage-us-south" && "$e2e_env" != "in-che" ]]; then
-	echo -e "Error: Invalid option \"-e $e2e_env\"!!!" >> $E2E_TEST_SETUP
-	exit 1
-fi
 
-if [[ "$e2e_kube_ver" != "default" && "$e2e_kube_ver" != "latest" && "$e2e_kube_ver" != "base" && "$e2e_kube_ver" == "" ]]; then
-	echo -e "Error: Invalid option \"-k $e2e_kube_ver\"!!!" >> $E2E_TEST_SETUP
-	exit 1
+# Check if e2e_kube_ver is empty or not, if empty give error that kube version is required when creating new cluster
+if [[ "$e2e_create_new_cluster" == "true" && -z "$e2e_kube_ver" ]]; then
+    echo -e "Error: Kubernetes version is required when creating a new cluster!!!" >> $E2E_TEST_SETUP
+    exit 1
 fi
 PLATFORM_VERSION="$e2e_kube_ver"
 
+# Validate IC provider
 if [[ "$e2e_ic_provider" != "classic" && "$e2e_ic_provider" != "vpc-gen2" ]]; then
 	echo -e "Error: Invalid option \"-p $e2e_ic_provider\"!!!" >> $E2E_TEST_SETUP
 	exit 1
 fi
 IC_PROVIDER="$e2e_ic_provider"
 
-if [[ "$e2e_k8s_platform" != "k8s" && "$e2e_k8s_platform" != "ocp" ]]; then
+# Validate Kubernetes platform
+if [[ "$e2e_k8s_platform" != "IKS" && "$e2e_k8s_platform" != "ROKS" ]]; then
 	echo -e "Error: Invalid option \"-t $e2e_k8s_platform\"!!!" >> $E2E_TEST_SETUP
 fi
-if [[ "$e2e_k8s_platform" == "k8s" ]]; then  K8S_PLATFORM="kubernetes"; else K8S_PLATFORM="openshift"; fi
+if [[ "$e2e_k8s_platform" == "IKS" ]]; then  K8S_PLATFORM="kubernetes"; else K8S_PLATFORM="openshift"; fi
 
-WORKER_OS="$e2e_cluster_os"
+# If replatformed env is set (-us-south) then set these defaults
+if [[ "$e2e_env" == "stage-us-south" || "$e2e_env" == "prestage-us-south" || "$e2e_env" == "dev-us-south" ]]; then
+    E2ETEST_NODE_FLAVOR=$FLAVOR_vpc_gen2_ngdc
+fi
+# If new replatformed prod region, set these defaults
+if [[ "$e2e_ic_region" == "ca-mon" || "$e2e_ic_region" == "in-che" || "$e2e_ic_region" == "in-mum" ]]; then
+    E2ETEST_NODE_FLAVOR=$FLAVOR_vpc_gen2_ngdc
+fi
 
-# Set APIs
+# Step1: Set APIs according to the environment
 if [[ "$e2e_env" = "stage" ]]; then
     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.test.cloud.ibm.com"
     E2ETEST_IC_RES_GRP="Default"
+elif [[ "$e2e_env" = "prestage" ]]; then
+     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.pretest.cloud.ibm.com"
+     E2ETEST_IC_RES_GRP="Default"
+elif [[ "$e2e_env" = "dev" ]]; then
+     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.dev.cloud.ibm.com"
+     E2ETEST_IC_RES_GRP="Default"
 elif [[ "$e2e_env" = "stage-us-south" ]]; then
-    E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
-    [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://stage-us-south.containers.test.cloud.ibm.com"
-    E2ETEST_IC_RES_GRP="Default"
-elif [[ "$e2e_env" = "in-che" ]]; then
-    E2ETEST_IC_API_EP="https://cloud.ibm.com"
-    [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://in-che.containers.cloud.ibm.com"
-    E2ETEST_IC_RES_GRP="Default"
+     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://stage-us-south.containers.test.cloud.ibm.com"
+     E2ETEST_IC_RES_GRP="Default"
+elif [[ "$e2e_env" = "prestage-us-south" ]]; then
+     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://prestage-us-south.containers.pretest.cloud.ibm.com"
+     E2ETEST_IC_RES_GRP="Default"
+elif [[ "$e2e_env" = "dev-us-south" ]]; then
+     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://dev-us-south.containers.dev.cloud.ibm.com"
+     E2ETEST_IC_RES_GRP="Default"
 else
     E2ETEST_IC_API_EP="https://cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.cloud.ibm.com"
@@ -897,21 +977,20 @@ if [[ "$PRIMARY_ZONE_ID" == "$SECOND_ZONE_ID" ]]; then
    exit 1
 fi
 
-# Login to IBM Cloud
+# Step2: Login to IBM Cloud
 set +x
 if [[ -z "$E2ETEST_API_KEY" ]]; then
-    if [[ "$e2e_env" = "stage" || "$e2e_env" = "stage-us-south" ]]; then
-        ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_STAG} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
-    elif [[ "$e2e_env" = "in-che" ]]; then
+    if [[ "$e2e_env" = "prod" ]]; then
         ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_PROD} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
     else
-        ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_PROD} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
+        ibmcloud login -a $E2ETEST_IC_API_EP --apikey ${IC_API_KEY_STAG} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
     fi
 else
     ibmcloud login -a $E2ETEST_IC_API_EP --apikey @${E2ETEST_API_KEY} -r $IC_REGION -g $E2ETEST_IC_RES_GRP; rc=$?
 fi
 if [[ $rc -ne 0 ]]; then echo -e "Error: IBM Cloud Login failed!!!" >> $E2E_TEST_SETUP; exit 1; fi
 
+# Step3: Set region
 ibmcloud regions | grep -w "$e2e_ic_region" > /dev/null; rc=$?
 if [[ $rc -ne 0 ]]; then
    echo -e "Error: Invalid option \"-r $e2e_ic_region\"!!!" >> $E2E_TEST_SETUP
@@ -919,24 +998,9 @@ if [[ $rc -ne 0 ]]; then
 fi
 IC_REGION="$e2e_ic_region"
 
-# Resolve final region
-if [[ "$e2e_env" == "stage-us-south" ]]; then
-    IC_REGION="us-south-ngdc-test"
-    WORKER_NODE_FLAVOR="bx3d.4x20"
-elif [[ "$IC_REGION" == "in-che" ]]; then
-    WORKER_NODE_FLAVOR="bx3d.4x20"
-else
-    IC_REGION="$e2e_ic_region"
-fi
-# Validate the final region
-ibmcloud regions | grep -w "$IC_REGION" > /dev/null || {
-   echo -e "Error: Invalid region \"$IC_REGION\"!!!" >> $E2E_TEST_SETUP
-   exit 1
-}
-
 ibmcloud target -r "$IC_REGION"
 
-# Resolve KS API endpoint
+# Step4: Set API endpoint for ks plugin
 if [[ -n "$E2ETEST_CS_API_EP" ]]; then
     KS_HOST="$E2ETEST_CS_API_EP"
 elif [[ "$e2e_env" == "stage" || "$e2e_env" == "stage-us-south" ]]; then
@@ -959,7 +1023,7 @@ if [[ $IC_PROVIDER == "vpc-gen2" ]] ; then
    ibmcloud is target --gen 2
 fi
 
-
+## Delete cluster if --delete flag is passed
 if [[ "$e2e_cluster_delete" == "true" ]]; then
    ############## DELETE CLUSTER ######################
    if [[ -z "$e2e_cluster_name" ]]; then
@@ -982,10 +1046,71 @@ if [[ "$e2e_cluster_delete" == "true" ]]; then
    exit 0
 fi
 
+# Cleanup existing clusters if --cleanup flag is passed (use epoch to determine age)
+if [[ "$e2e_clusters_cleanup" == "true" ]]; then
+    set -x
+    cutoff_epoch=$(date -d '4 hours ago' +%s)
+
+    clusters=$(ibmcloud ks clusters -q)
+
+    echo "$clusters" | while read -r line; do
+        name=$(echo "$line" | awk '{print $1}')
+        if [[ "$name" != $e2e_clusters_name* ]]; then
+            continue
+        fi
+
+        cluster_json=$(ibmcloud ks cluster get --cluster "$name" --json 2>/dev/null)
+
+        if [[ -z "$cluster_json" ]]; then
+            echo "Failed to get details for $name. Skipping..."
+            continue
+        fi
+
+        created=$(echo "$cluster_json" | jq -r '.createdDate')
+
+        # Convert to epoch
+        created_epoch=$(date -d "$created" +%s 2>/dev/null)
+
+        if [[ -z "$created_epoch" ]]; then
+            echo "Could not parse creation date for $name. Skipping..."
+            continue
+        fi
+
+        if (( created_epoch < cutoff_epoch )); then
+            echo "Deleting cluster $name (created: $created)"
+            ibmcloud ks cluster rm --cluster "$name" --force-delete-storage -f
+        else
+            echo "Keeping cluster $name (created: $created)"
+        fi
+    done
+    set +x
+    echo "Cleanup completed."
+    exit 0
+fi
+
+# Reboot worker pool if --worker-reboot flag is passed
+WORKER_REBOOT="$e2e_worker_reboot"
+
+if [[ "$WORKER_REBOOT" == "true" ]]; then
+   if [[ -z "$e2e_cluster_name" ]]; then
+      echo -e "Error: Cluster name (e2e_cluster_name) not set, worker reboot failed!!!" >> $E2E_TEST_SETUP
+      exit 1
+   fi
+   cluster_name="$e2e_cluster_name"
+   worker_pool_name="default"
+   if [[ "$E2ETEST_MZ" == "true" ]]; then
+      random_string=${cluster_name%%-*}
+      worker_pool_name="e2etest-${random_string}"
+   fi
+   reboot_worker_pool "$cluster_name" "$worker_pool_name"; rc=$?
+   if [[ $rc -ne 0 ]]; then echo -e "Error: Cluster ($cluster_name) worker reboot failed!!!" >> $E2E_TEST_SETUP; exit 1; fi
+   exit 0
+fi
 
 if [[ -n "$e2e_var_exports" ]]; then
 	echo "CLUSTER_REGION=$IC_REGION"  > $e2e_var_exports
 	echo "CLUSTER_ENV=$e2e_env" >> $e2e_var_exports
+	echo "WORKER_OS=$WORKER_OS" >> $e2e_var_exports
 fi
 
 if [[ "$e2e_create_new_cluster" == "true" ]]; then
@@ -1031,9 +1156,13 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
             echo "Info: ibmcloud ks locations --provider classic | grep -e \"$metro\"..."
             zones=($(ibmcloud ks locations --provider classic | grep -e "$metro" | awk '{print $1}' | sort))
             count=${#zones[@]}
-            ZONE_classic_01="${zones[$count - 1]}"
-            ZONE_classic_02="${zones[$count - 2]}"
-            ZONE_classic_03="${zones[$count - 3]}"
+            if [[ $count -lt 3 ]]; then
+                echo -e "Error: Expected at least 3 classic zones for metro $metro, found $count" >> $E2E_TEST_SETUP
+                exit 1
+            fi
+            ZONE_classic_01="${zones[$((count - 1))]}"
+            ZONE_classic_02="${zones[$((count - 2))]}"
+            ZONE_classic_03="${zones[$((count - 3))]}"
         fi
         if [[ -z "$ZONE_classic_01" || -z "$ZONE_classic_02" || -z "$ZONE_classic_03" ]]; then
             echo -e "Error: Undefined zones for classic!!!" >> $E2E_TEST_SETUP
@@ -1099,6 +1228,7 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
         kube_vers=$version
     fi
     echo "Info: kube_version: [$kube_vers]"
+    echo "KUBE_VERSION=$kube_vers" >> $e2e_var_exports
 
     #############################
     var_tmp="PROVIDER_${IC_PROVIDER//-/_}"
@@ -1189,10 +1319,14 @@ fi
 
 
 # Check Cluster
+export CLUSTER_NAME=$cluster_name
 check_cluster_state $cluster_name; rc=$?
 if [[ $rc -ne 0 ]]; then echo -e "Error: Cluster ($cluster_name) status check failed!!!" >> $E2E_TEST_SETUP; exit 1; fi
 
 if [[ "$e2e_create_new_cluster" == "true" ]]; then
+   echo "Sleeping for 1min after cluster creation before checking worker status..."
+   sleep 60
+
    # For exiting cluster no need to check the worker node status
    # Sometimes in stage, node status is not displayed properly. #TODO
    # test-bskdul0202h4kna269og-otgynzq4e2e-default-00000167   10.240.0.18   bx2.4x16   -       -        us-south-1   1.19.0_1514
