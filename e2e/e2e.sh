@@ -19,10 +19,17 @@ GOPATH=$GOPATH
 VPC_FILE_CSI_HOME="$GOPATH/src/github.com/IBM/ibmcloud-volume-file-vpc"
 E2E_TEST_SETUP="$VPC_FILE_CSI_HOME/e2e-setup.out"
 E2E_TEST_RESULT="$VPC_FILE_CSI_HOME/e2e-test.out"
+
+export GOPATH=$GOPATH
 export E2E_TEST_RESULT=$E2E_TEST_RESULT
 export E2E_TEST_SETUP=$E2E_TEST_SETUP
 export cluster_worker_pool="e2etest-vpc"
 SECRET_CREATION_WAIT=600 #seconds
+
+echo "Test result files will be written to:"
+echo "  E2E_TEST_RESULT: $E2E_TEST_RESULT"
+echo "  E2E_TEST_SETUP: $E2E_TEST_SETUP"
+echo
 
 rm -f $E2E_TEST_RESULT
 rm -f $E2E_TEST_SETUP
@@ -217,7 +224,7 @@ export GO111MODULE=on
 go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.21.0
 set +e
 
-# Non EIT based tests
+# DP2 based tests
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
@@ -238,7 +245,7 @@ if [[ "$e2e_rfs_test_case" == "true" ]]; then
 		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
 fi
 
 if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
