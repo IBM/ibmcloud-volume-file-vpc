@@ -218,17 +218,17 @@ go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.21.0
 set +e
 
 # Non EIT based tests
-ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e -- -e2e-verify-service-account=false
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
 
-ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc2=$?
 echo "Exit status for resize volume test: $rc2"
 
 # RFS Profile tests
 if [[ "$e2e_rfs_test_case" == "true" ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]" ./e2e -- -e2e-verify-service-account=false
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 	rc4=$?
 	echo "Exit status for RFS Profile volume test: $rc4"
 	
@@ -249,7 +249,7 @@ fi
 
 # Snapshot tests
 if [[ "$e2e_snapshot_test_case" == "true" ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./e2e -- -e2e-verify-service-account=false
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 	rc5=$?
 	echo "Exit status for Snapshot test: $rc5"
 	
@@ -263,17 +263,11 @@ else
 fi
 
 # EIT based tests
-
-if [[ "$e2e_eit_test_case" == "true" && "$CLUSTER_KUBE_VER_TRIM=" != "4.15" ]]; then
+if [[ "$e2e_eit_test_case" == "true" ]]; then
 	# EIT based tests (To be run only for addon version >=2.0)
-	if version_ge "$e2e_addon_version" "2.0"; then
-		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
-		rc3=$?
-		echo "Exit status for EIT volume test: $rc3"
-	else
-		echo "Conditions to run EIT test cases did not pass..."
-		rc3=1
-	fi
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
+	rc3=$?
+	echo "Exit status for EIT volume test: $rc3"
 
 	if [[ $rc3 -eq 0 ]]; then
 		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
