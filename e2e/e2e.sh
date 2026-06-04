@@ -20,7 +20,10 @@ VPC_FILE_CSI_HOME="$GOPATH/src/github.com/IBM/ibmcloud-volume-file-vpc"
 E2E_TEST_SETUP="$VPC_FILE_CSI_HOME/e2e-setup.out"
 E2E_TEST_RESULT="$VPC_FILE_CSI_HOME/e2e-test.out"
 
-export GOPATH=$GOPATH
+rm -f $E2E_TEST_RESULT
+rm -f $E2E_TEST_SETUP
+
+export GOPATH =$GOPATH
 export E2E_TEST_RESULT=$E2E_TEST_RESULT
 export E2E_TEST_SETUP=$E2E_TEST_SETUP
 export cluster_worker_pool="e2etest-vpc"
@@ -228,10 +231,22 @@ set +e
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
+if [[ $rc1 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST-DP2: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST-DP2: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
 
+# Resize tests
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc2=$?
 echo "Exit status for resize volume test: $rc2"
+if [[ $rc2 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST-RESIZE: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST-RESIZE: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+fi
+
 
 # RFS Profile tests
 if [[ "$e2e_rfs_test_case" == "true" ]]; then
@@ -246,12 +261,6 @@ if [[ "$e2e_rfs_test_case" == "true" ]]; then
 	fi
 else
 	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
-fi
-
-if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
-else
-	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
 fi
 
 # Snapshot tests
