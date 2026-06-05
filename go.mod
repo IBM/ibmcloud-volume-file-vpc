@@ -4,7 +4,7 @@ go 1.25.10
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibmcloud-volume-interface v1.2.20
+	github.com/IBM/ibmcloud-volume-interface v1.2.21
 	github.com/IBM/secret-common-lib v1.1.15
 	github.com/IBM/secret-utils-lib v1.1.16
 	github.com/IBM/vpc-beta-go-sdk v0.8.0
@@ -144,7 +144,6 @@ require (
 )
 
 replace (
-	github.com/IBM/ibmcloud-volume-interface => github.com/MahanteshR12/ibmcloud-volume-interface v0.0.0-20260605050556-986eac2b9404
 	k8s.io/cri-client => k8s.io/cri-client v0.35.4
 	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.35.4
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.35.4
