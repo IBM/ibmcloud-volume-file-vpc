@@ -232,9 +232,9 @@ ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e/ginkgo_tests -- -e2e-verif
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
 if [[ $rc1 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST-DP2: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-DP2: PASS" >> $E2E_TEST_RESULT
 else
-	echo -e "VPC-FILE-CSI-TEST-DP2: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-DP2: FAILED" >> $E2E_TEST_RESULT
 fi
 
 # Resize tests
@@ -242,9 +242,9 @@ ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e/ginkgo_tests --
 rc2=$?
 echo "Exit status for resize volume test: $rc2"
 if [[ $rc2 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST-RESIZE: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-RESIZE: PASS" >> $E2E_TEST_RESULT
 else
-	echo -e "VPC-FILE-CSI-TEST-RESIZE: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-RESIZE: FAILED" >> $E2E_TEST_RESULT
 fi
 
 
@@ -255,12 +255,12 @@ if [[ "$e2e_rfs_test_case" == "true" ]]; then
 	echo "Exit status for RFS Profile volume test: $rc4"
 	
 	if [[ $rc4 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-RFS: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-RFS: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-RFS: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # Snapshot tests
@@ -270,12 +270,12 @@ if [[ "$e2e_snapshot_test_case" == "true" ]]; then
 	echo "Exit status for Snapshot test: $rc5"
 	
 	if [[ $rc5 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # EIT based tests
@@ -286,20 +286,25 @@ if [[ "$e2e_eit_test_case" == "true" ]]; then
 	echo "Exit status for EIT volume test: $rc3"
 
 	if [[ $rc3 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-EIT: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-EIT: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-EIT: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # Publish final reports
-grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex1=$?
-grep  'VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
+overall_rc=0
+for rcvar in ${rc1:-0} ${rc2:-0} ${rc3:-0} ${rc4:-0} ${rc5:-0}; do
+	if [[ "$rcvar" -ne 0 ]]; then
+		overall_rc=1
+	fi
+done
 
-if [[ $ex1 -eq 0 || $ex2 -eq 0 ]]; then
-	exit 1
-else
-	exit 0
+# If any FAILURE keywords are present in the aggregated result file, mark failure.
+if grep -qi 'FAILED' "$E2E_TEST_RESULT"; then
+	overall_rc=1
 fi
+
+exit $overall_rc
