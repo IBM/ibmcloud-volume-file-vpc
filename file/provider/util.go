@@ -41,12 +41,11 @@ var retryGap = 10
 
 // ConstantRetryGap ...
 const (
-	ConstantRetryGap     = 10 // seconds
-	SecurityGroup        = "security_group"
-	EncryptionTrasitMode = "user_managed"
-	pageSize             = 50
-	SnapshotNotFound     = "shares_snapshot_not_found"
-	SharesNotFound       = "shares_not_found"
+	ConstantRetryGap = 10 // seconds
+	SecurityGroup    = "security_group"
+	pageSize         = 50
+	SnapshotNotFound = "shares_snapshot_not_found"
+	SharesNotFound   = "shares_not_found"
 )
 
 var volumeIDPartsCount = 5
