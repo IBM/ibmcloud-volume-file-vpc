@@ -52,6 +52,9 @@ addon_update=1
 
 # ibmcloud ks flavors --zone us-south-1
 # ibmcloud ks flavors --zone dal13
+
+secondary_worker_pool="wp-test"
+
 FLAVOR_vpc_gen2="bx2.4x16"
 FLAVOR_vpc_gen2_ngdc="bx3d.4x20"
 FLAVOR_vpc_classic="b2.4x16"
@@ -476,8 +479,7 @@ function cluster_create_vpc {
     sleep 30 # Sometimes ks worker-pool create command fails with error 'Unable to find cluster'
 
     if [[ $E2ETEST_MZ == "true" ]]; then
-        random_string=${cluster_name%%-*}
-        cluster_worker_pool="e2etest-${random_string}"
+        cluster_worker_pool="${secondary_worker_pool}"
         echo "cluster_worker_pool=\"$cluster_worker_pool\"" > /tmp/e2e_vars.sh
         ibmcloud ks worker-pool create $IC_PROVIDER --name ${cluster_worker_pool} --cluster $cluster_name \
         --flavor $WORKER_NODE_FLAVOR --vpc-id $VPC_ID --size-per-zone $WORKER_NODE_COUNT_PERZONE ${os_args}; rc=$?
@@ -611,6 +613,26 @@ function check_worker_state {
     fi
 
     # All is good
+    return 0
+}
+
+# Responsbile to get the wp names and export to e2e_var_exports
+function get_worker_pool_name {
+    if [[ $# -ne 1 ]]; then
+        echo "${FUNCNAME[0]}: Invalid parameters. Provide cluster name"
+        return 1
+    fi
+    cluster_name="$1"
+    # Get the worker pool names (can be multiple) as comma-separated list
+    wp_names=$(ibmcloud ks worker-pools --cluster $cluster_name -q --output json | jq -r '.[].poolName' | tr '\n' ',' | sed 's/,$//')
+    if [[ $wp_names == "" ]]; then
+        echo "Error: No worker pool found for cluster $cluster_name"
+        return 1
+    fi
+    # Export as comma-separated list (e.g., "default,wp1,wp2")
+    echo "cluster_worker_pool=\"$wp_names\""  >> $e2e_var_exports
+    
+    echo "Worker pool names: $wp_names"
     return 0
 }
 
@@ -1330,6 +1352,11 @@ else
 fi
 
 exportKubeConfig $cluster_name; rc=$?
+
+# Store workerPool name in e2e_var_exports
+get_worker_pool_name $cluster_name; rc=$?
+if [[ $rc -ne 0 ]]; then echo -e "Error: Cluster ($cluster_name) worker pool name check failed!!!" >> $E2E_TEST_SETUP; exit 1; fi
+
 
 # From Jenkins there is option to mention addon version and by default FILE CSI driver is not enabled
 # Enable user specified version
