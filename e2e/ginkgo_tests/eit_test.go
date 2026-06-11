@@ -32,7 +32,7 @@ import (
 	admissionapi "k8s.io/pod-security-admission/api"
 )
 
-var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet and Resize", func() {
+var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC with DaemonSet and Resize", Ordered, func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
