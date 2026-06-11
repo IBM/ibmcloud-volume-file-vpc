@@ -224,7 +224,7 @@ export SC_RETAIN="ibmc-vpc-file-retain-500-iops"
 # E2E Execution
 go clean -modcache
 export GO111MODULE=on
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.21.0
+go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.27.2
 set +e
 
 # DP2 based tests
