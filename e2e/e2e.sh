@@ -19,10 +19,20 @@ GOPATH=$GOPATH
 VPC_FILE_CSI_HOME="$GOPATH/src/github.com/IBM/ibmcloud-volume-file-vpc"
 E2E_TEST_SETUP="$VPC_FILE_CSI_HOME/e2e-setup.out"
 E2E_TEST_RESULT="$VPC_FILE_CSI_HOME/e2e-test.out"
+
+rm -f $E2E_TEST_RESULT
+rm -f $E2E_TEST_SETUP
+
+export GOPATH =$GOPATH
 export E2E_TEST_RESULT=$E2E_TEST_RESULT
 export E2E_TEST_SETUP=$E2E_TEST_SETUP
 export cluster_worker_pool="e2etest-vpc"
 SECRET_CREATION_WAIT=600 #seconds
+
+echo "Test result files will be written to:"
+echo "  E2E_TEST_RESULT: $E2E_TEST_RESULT"
+echo "  E2E_TEST_SETUP: $E2E_TEST_SETUP"
+echo
 
 rm -f $E2E_TEST_RESULT
 rm -f $E2E_TEST_SETUP
@@ -214,82 +224,87 @@ export SC_RETAIN="ibmc-vpc-file-retain-500-iops"
 # E2E Execution
 go clean -modcache
 export GO111MODULE=on
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.21.0
+go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@v2.27.2
 set +e
 
-# Non EIT based tests
-ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e -- -e2e-verify-service-account=false
+# DP2 based tests
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
+if [[ $rc1 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST-DP2: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST-DP2: FAILED" >> $E2E_TEST_RESULT
+fi
 
-ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e -- -e2e-verify-service-account=false
+# Resize tests
+ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc2=$?
 echo "Exit status for resize volume test: $rc2"
+if [[ $rc2 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST-RESIZE: PASS" >> $E2E_TEST_RESULT
+else
+	echo -e "VPC-FILE-CSI-TEST-RESIZE: FAILED" >> $E2E_TEST_RESULT
+fi
+
 
 # RFS Profile tests
 if [[ "$e2e_rfs_test_case" == "true" ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]" ./e2e -- -e2e-verify-service-account=false
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 	rc4=$?
 	echo "Exit status for RFS Profile volume test: $rc4"
 	
 	if [[ $rc4 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-RFS: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-RFS-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-RFS: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-RFS: VPC-File-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
-fi
-
-if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: PASS" >> $E2E_TEST_RESULT
-else
-	echo -e "VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-RFS: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # Snapshot tests
 if [[ "$e2e_snapshot_test_case" == "true" ]]; then
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./e2e -- -e2e-verify-service-account=false
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 	rc5=$?
 	echo "Exit status for Snapshot test: $rc5"
 	
 	if [[ $rc5 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: VPC-File-Snapshot-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-SNAPSHOT: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # EIT based tests
-
-if [[ "$e2e_eit_test_case" == "true" && "$CLUSTER_KUBE_VER_TRIM=" != "4.15" ]]; then
+if [[ "$e2e_eit_test_case" == "true" ]]; then
 	# EIT based tests (To be run only for addon version >=2.0)
-	if version_ge "$e2e_addon_version" "2.0"; then
-		ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e -- -e2e-verify-service-account=false
-		rc3=$?
-		echo "Exit status for EIT volume test: $rc3"
-	else
-		echo "Conditions to run EIT test cases did not pass..."
-		rc3=1
-	fi
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
+	rc3=$?
+	echo "Exit status for EIT volume test: $rc3"
 
 	if [[ $rc3 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-EIT: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-EIT: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-EIT: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # Publish final reports
-grep  'VPC-FILE-CSI-TEST: VPC-File-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex1=$?
-grep  'VPC-FILE-CSI-TEST-EIT: VPC-File-EIT-Volume-Tests: FAILED' $E2E_TEST_RESULT; ex2=$?
+overall_rc=0
+for rcvar in ${rc1:-0} ${rc2:-0} ${rc3:-0} ${rc4:-0} ${rc5:-0}; do
+	if [[ "$rcvar" -ne 0 ]]; then
+		overall_rc=1
+	fi
+done
 
-if [[ $ex1 -eq 0 || $ex2 -eq 0 ]]; then
-	exit 1
-else
-	exit 0
+# If any FAILURE keywords are present in the aggregated result file, mark failure.
+if grep -qi 'FAILED' "$E2E_TEST_RESULT"; then
+	overall_rc=1
 fi
+
+exit $overall_rc
