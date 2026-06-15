@@ -1021,15 +1021,6 @@ else
    ibmcloud ks init --host https://containers.cloud.ibm.com
 fi
 
-if [[ -z "$KS_HOST" ]]; then
-    echo "ERROR: KS_HOST is empty" >> $E2E_TEST_SETUP
-    exit 1
-fi
-
-echo "KS endpoint : $KS_HOST"
-ibmcloud ks init --host "$KS_HOST"
-
-
 if [[ $IC_PROVIDER == "vpc-gen2" ]] ; then
    ibmcloud is target --gen 2; rc=$?
    if [[ $rc -ne 0 ]]; then
