@@ -47,7 +47,17 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 	}
 
 	BeforeAll(func() {
-		cs = f.ClientSet
+		// Initialize clientset - framework clientset may not be ready in BeforeAll
+		// so we need to create it directly
+		config, err := framework.LoadConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to load kubeconfig: %w", err))
+		}
+		cs, err = clientset.NewForConfig(config)
+		if err != nil {
+			panic(fmt.Errorf("failed to create clientset: %w", err))
+		}
+
 		wp_list := "default"
 		cmData := map[string]interface{}{
 			"data": map[string]string{
@@ -203,6 +213,18 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 	})
 
 	AfterAll(func() {
+		// Ensure clientset is initialized
+		if cs == nil {
+			config, err := framework.LoadConfig()
+			if err != nil {
+				panic(fmt.Errorf("failed to load kubeconfig in AfterAll: %w", err))
+			}
+			cs, err = clientset.NewForConfig(config)
+			if err != nil {
+				panic(fmt.Errorf("failed to create clientset in AfterAll: %w", err))
+			}
+		}
+
 		cmData := map[string]interface{}{
 			"data": map[string]string{
 				"ENABLE_EIT": "false",
