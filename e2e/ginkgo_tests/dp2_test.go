@@ -91,7 +91,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("✅ VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc_retain)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("✅ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc_retain)); err != nil {
 			panic(err)
 		}
 	})
@@ -159,7 +159,7 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC w
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("✅ VERIFYING PVC CREATE/DELETE WITH %s STORAGE CLASS : PASS\n", sc)); err != nil {
+		if _, err = fpointer.WriteString(fmt.Sprintf("✅ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc)); err != nil {
 			panic(err)
 		}
 	})
@@ -226,7 +226,7 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("✅ VERIFYING MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ DP2: MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -336,7 +336,7 @@ var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for dp
 		}
 
 		test.RunAsync(cs, ns)
-		if _, err = fpointer.WriteString("✅ VERIFYING PVC WITH RWO MODE : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ DP2: PVC WITH RWO MODE\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -398,7 +398,7 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 			ServiceName: service.Name,
 		}
 		test.Run(cs, ns, false)
-		if _, err = fpointer.WriteString("✅ VERIFYING MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ DP2: MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET\n"); err != nil {
 			panic(err)
 		}
 	})

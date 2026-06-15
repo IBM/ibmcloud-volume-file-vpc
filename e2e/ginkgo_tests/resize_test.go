@@ -90,7 +90,7 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 			ExpandedSize:   40,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("✅ VERIFYING PVC EXPANSION BY USING DEPLOYMENT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ RESIZE: PVC EXPANSION BY USING DEPLOYMENT\n"); err != nil {
 			panic(err)
 		}
 	})

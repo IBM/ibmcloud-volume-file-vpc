@@ -115,9 +115,9 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		DeferCleanup(func() {
 			if fpointer != nil {
 				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ EIT: VERIFYING DEPLOYMENT WITH 3 REPLICAS MULTI-POD ACCESS : FAIL\n")
+					fpointer.WriteString("❌ DP2 EIT: VERIFYING DEPLOYMENT WITH 3 REPLICAS MULTI-POD ACCESS\n")
 				} else {
-					fpointer.WriteString("✅ EIT: VERIFYING DEPLOYMENT WITH 3 REPLICAS MULTI-POD ACCESS : PASS\n")
+					fpointer.WriteString("✅ DP2 EIT: VERIFYING DEPLOYMENT WITH 3 REPLICAS MULTI-POD ACCESS\n")
 				}
 				fpointer.Close()
 			}
@@ -172,9 +172,9 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		DeferCleanup(func() {
 			if fpointer != nil {
 				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ EIT: VERIFYING PVC EXPANSION USING POD : FAIL\n")
+					fpointer.WriteString("❌ DP2 EIT: VERIFYING PVC EXPANSION USING POD\n")
 				} else {
-					fpointer.WriteString("✅ EIT: VERIFYING PVC EXPANSION USING POD : PASS\n")
+					fpointer.WriteString("✅ DP2 EIT: VERIFYING PVC EXPANSION USING POD\n")
 				}
 				fpointer.Close()
 			}
@@ -307,9 +307,9 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 		DeferCleanup(func() {
 			if fpointer != nil {
 				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : FAIL\n")
+					fpointer.WriteString("❌ DP2 EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL\n")
 				} else {
-					fpointer.WriteString("✅ EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL : PASS\n")
+					fpointer.WriteString("✅ DP2 EIT: PROVISIONING DEPLOYMENT ON WP WHERE EIT IS NOT ENABLED MUST FAIL\n")
 				}
 				fpointer.Close()
 			}

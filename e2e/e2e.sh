@@ -231,22 +231,15 @@ set +e
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc1=$?
 echo "Exit status for basic volume test: $rc1"
-if [[ $rc1 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST-DP2: PASS" >> $E2E_TEST_RESULT
-else
-	echo -e "VPC-FILE-CSI-TEST-DP2: FAILED" >> $E2E_TEST_RESULT
-fi
-
 # Resize tests
 ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 rc2=$?
 echo "Exit status for resize volume test: $rc2"
-if [[ $rc2 -eq 0 ]]; then
-	echo -e "VPC-FILE-CSI-TEST-RESIZE: PASS" >> $E2E_TEST_RESULT
+if [[ $rc1 -eq 0 && $rc2 -eq 0 ]]; then
+	echo -e "VPC-FILE-CSI-TEST-DP2: PASS" >> $E2E_TEST_RESULT
 else
-	echo -e "VPC-FILE-CSI-TEST-RESIZE: FAILED" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-DP2: FAILED" >> $E2E_TEST_RESULT
 fi
-
 
 # RFS Profile tests
 if [[ "$e2e_rfs_test_case" == "true" ]]; then
@@ -286,12 +279,12 @@ if [[ "$e2e_eit_test_case" == "true" ]]; then
 	echo "Exit status for EIT volume test: $rc3"
 
 	if [[ $rc3 -eq 0 ]]; then
-		echo -e "VPC-FILE-CSI-TEST-EIT: PASS" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-DP2-EIT: PASS" >> $E2E_TEST_RESULT
 	else
-		echo -e "VPC-FILE-CSI-TEST-EIT: FAILED" >> $E2E_TEST_RESULT
+		echo -e "VPC-FILE-CSI-TEST-DP2-EIT: FAILED" >> $E2E_TEST_RESULT
 	fi
 else
-	echo -e "VPC-FILE-CSI-TEST-EIT: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-DP2-EIT: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # Publish final reports

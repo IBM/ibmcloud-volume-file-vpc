@@ -116,7 +116,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE SAME SIZE")
 		test1.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n"); err != nil {
 			panic(err)
 		}
 
@@ -146,7 +146,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
 		test2.VolumeSizeLess(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n"); err != nil {
 			panic(err)
 		}
 
@@ -176,7 +176,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
 		test3.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n"); err != nil {
 			panic(err)
 		}
 	})
@@ -245,7 +245,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE SAME SIZE")
 		test1.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n"); err != nil {
 			panic(err)
 		}
 
@@ -275,7 +275,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
 		test2.VolumeSizeLess(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT : PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n"); err != nil {
 			panic(err)
 		}
 
@@ -305,7 +305,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
 		test3.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT: PASS\n"); err != nil {
+		if _, err = fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n"); err != nil {
 			panic(err)
 		}
 	})
