@@ -1016,13 +1016,9 @@ ibmcloud target -r "$IC_REGION"
 
 # Step4: Set API endpoint for ks plugin
 if [[ -n "$E2ETEST_CS_API_EP" ]]; then
-   ibmcloud ks init --host $E2ETEST_CS_API_EP; rc=$?
+   ibmcloud ks init --host $E2ETEST_CS_API_EP
 else
-   ibmcloud ks init --host https://containers.cloud.ibm.com; rc=$?
-fi
-if [[ $rc -ne 0 ]]; then
-    echo "ERROR: Failed to initialize KS with API endpoint" >> $E2E_TEST_SETUP
-    exit 1
+   ibmcloud ks init --host https://containers.cloud.ibm.com
 fi
 
 if [[ -z "$KS_HOST" ]]; then
@@ -1031,11 +1027,7 @@ if [[ -z "$KS_HOST" ]]; then
 fi
 
 echo "KS endpoint : $KS_HOST"
-ibmcloud ks init --host "$KS_HOST"; rc=$?
-if [[ $rc -ne 0 ]]; then
-    echo "ERROR: Failed to initialize KS with host $KS_HOST" >> $E2E_TEST_SETUP
-    exit 1
-fi
+ibmcloud ks init --host "$KS_HOST"
 
 
 if [[ $IC_PROVIDER == "vpc-gen2" ]] ; then
