@@ -50,6 +50,23 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
 		}
 		sc := "ibmc-vpc-file-regional"
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
+
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
 		var replicaCount = int32(1)
@@ -82,13 +99,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH DEFAULT BANDWIDTH FOR %s STORAGE CLASS\n", sc))
 	})
 
 	It("with rfs profile sc : should create a pvc, deployment resources, write and read to volume, delete the pod with max bandwidth ", func() {
@@ -98,6 +108,23 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			fmt.Fprintf(os.Stderr, "Warning: Failed to patch namespace %s: %v\n", ns.Name, labelerr)
 		}
 		sc := "ibmc-vpc-file-regional-max-bandwidth"
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
+
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
 		var replicaCount = int32(1)
@@ -130,13 +157,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH MAX BANDWIDTH FOR %s STORAGE CLASS\n", sc))
 	})
 
 	It("with rfs profile sc: should provide default throughput and should create a pvc, deployment resources, write and read to volume, delete the pod", func() {
@@ -152,6 +172,23 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		sc := "custom-rfs-sc"
 		createCustomRfsSC(cs, "custom-rfs-sc", params)
 		defer deleteCustomRfsSC(cs, sc)
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
+
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
 		var replicaCount = int32(1)
@@ -184,13 +221,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE/DELETE WITH ZERO BANDWIDTH FOR %s STORAGE CLASS\n", sc))
 	})
 
 	It("with rfs profile sc: should fail when bandwidth is set to an invalid high value (9000)", func() {
@@ -208,6 +238,22 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 			}
 		}()
 
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
+
 		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 9000, "10Gi", cs)
 
 		defer func() {
@@ -215,14 +261,6 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
 			}
 		}()
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer fpointer.Close()
-
-		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH INVALID BANDWIDTH (9000) FOR %s STORAGE CLASS\n", sc))
 	})
 
 	It("with rfs profile sc: should fail when iops is provided for rfs profile", func() {
@@ -239,17 +277,26 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
 			}
 		}()
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
+
 		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
 		defer func() {
 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
 				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
 			}
 		}()
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		defer fpointer.Close()
-
-		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH IOPS PARAM FOR %s STORAGE CLASS\n", sc))
 	})
 
 	It("with rfs profile sc: should fail when zone is provided for rfs profile", func() {
@@ -266,15 +313,25 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 				fmt.Printf("Warning: failed to delete StorageClass custom-rfs-sc-1: %v\n", err)
 			}
 		}()
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
+
 		CreateRFSPVC("rfs-test-pvc", "rfs-test-sc", ns.Name, 100, "10Gi", cs)
 		defer func() {
 			if err := cs.CoreV1().PersistentVolumeClaims(ns.Name).Delete(context.Background(), "rfs-test-pvc", metav1.DeleteOptions{}); err != nil {
 				fmt.Printf("Warning: failed to delete PVC rfs-test-pvc: %v\n", err)
 			}
 		}()
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		defer fpointer.Close()
-		_, _ = fpointer.WriteString(fmt.Sprintf("✅ RFS: VERIFYING PVC CREATE FAIL WITH ZONE PARAM FOR %s STORAGE CLASS\n", sc))
 	})
 })

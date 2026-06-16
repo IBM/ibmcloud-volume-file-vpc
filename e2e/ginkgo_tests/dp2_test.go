@@ -60,7 +60,17 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc_retain))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc_retain))
+				}
+				fpointer.Close()
+			}
+		})
 
 		var replicaCount = int32(1)
 		pod := testsuites.PodDetails{
@@ -91,9 +101,6 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("✅ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc_retain)); err != nil {
-			panic(err)
-		}
 	})
 })
 
@@ -128,7 +135,17 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC w
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString(fmt.Sprintf("❌ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc))
+				} else {
+					fpointer.WriteString(fmt.Sprintf("✅ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc))
+				}
+				fpointer.Close()
+			}
+		})
 
 		var replicaCount = int32(1)
 		pod := testsuites.PodDetails{
@@ -159,9 +176,6 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC w
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString(fmt.Sprintf("✅ DP2: PVC CREATE/DELETE WITH %s STORAGE CLASS\n", sc)); err != nil {
-			panic(err)
-		}
 	})
 })
 
@@ -195,7 +209,17 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ DP2: MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT\n")
+				} else {
+					fpointer.WriteString("✅ DP2: MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		var replicaCount = int32(4)
 		pod := testsuites.PodDetails{
@@ -226,9 +250,6 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 			ReplicaCount: replicaCount,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("✅ DP2: MULTI-POD READ/WRITE ON SAME NODE BY USING DEPLOYMENT\n"); err != nil {
-			panic(err)
-		}
 	})
 })
 
@@ -289,7 +310,17 @@ var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for dp
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ DP2: PVC WITH RWO MODE\n")
+				} else {
+					fpointer.WriteString("✅ DP2: PVC WITH RWO MODE\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		var execCmd string
 		var cmdExits bool
@@ -336,9 +367,6 @@ var _ = Describe("[ics-e2e] [sc] [rwo] [with-deploy] Dynamic Provisioning for dp
 		}
 
 		test.RunAsync(cs, ns)
-		if _, err = fpointer.WriteString("✅ DP2: PVC WITH RWO MODE\n"); err != nil {
-			panic(err)
-		}
 	})
 })
 
@@ -363,7 +391,17 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ DP2: MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET\n")
+				} else {
+					fpointer.WriteString("✅ DP2: MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		headlessService := testsuites.NewHeadlessService(cs, "ics-e2e-service-", ns.Name, "test")
 		service := headlessService.Create()
@@ -398,8 +436,5 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 			ServiceName: service.Name,
 		}
 		test.Run(cs, ns, false)
-		if _, err = fpointer.WriteString("✅ DP2: MULTI-ZONE/MULTI-NODE READ/WRITE BY USING DAEMONSET\n"); err != nil {
-			panic(err)
-		}
 	})
 })

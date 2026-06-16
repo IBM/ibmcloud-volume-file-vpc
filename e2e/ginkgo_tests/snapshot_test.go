@@ -64,7 +64,21 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n")
+					fpointer.WriteString("❌ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n")
+					fpointer.WriteString("❌ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n")
+				} else {
+					fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n")
+					fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n")
+					fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
@@ -116,10 +130,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE SAME SIZE")
 		test1.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n"); err != nil {
-			panic(err)
-		}
-
 		restoredPodLess := testsuites.PodDetails{
 			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
 			Volumes: []testsuites.VolumeDetails{
@@ -146,10 +156,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
 		test2.VolumeSizeLess(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n"); err != nil {
-			panic(err)
-		}
-
 		restoredPodMore := testsuites.PodDetails{
 			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
 			Volumes: []testsuites.VolumeDetails{
@@ -175,10 +181,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 
 		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
 		test3.Run(cs, snapshotrcs, ns)
-
-		if _, err = fpointer.WriteString("✅ SNAPSHOT: RFS PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n"); err != nil {
-			panic(err)
-		}
 	})
 
 	It("should run snapshot lifecycle tests for DP2 VPC File", func() {
@@ -193,7 +195,21 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n")
+					fpointer.WriteString("❌ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n")
+					fpointer.WriteString("❌ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n")
+				} else {
+					fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n")
+					fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n")
+					fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
@@ -245,10 +261,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE SAME SIZE")
 		test1.Run(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME SAME CLAIM SIZE | DELETE SNAPSHOT\n"); err != nil {
-			panic(err)
-		}
-
 		restoredPodLess := testsuites.PodDetails{
 			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
 			Volumes: []testsuites.VolumeDetails{
@@ -275,10 +287,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
 		test2.VolumeSizeLess(cs, snapshotrcs, ns)
 
-		if _, err = fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE LESS | DELETE SNAPSHOT \n"); err != nil {
-			panic(err)
-		}
-
 		restoredPodMore := testsuites.PodDetails{
 			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
 			Volumes: []testsuites.VolumeDetails{
@@ -304,9 +312,5 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 
 		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
 		test3.Run(cs, snapshotrcs, ns)
-
-		if _, err = fpointer.WriteString("✅ SNAPSHOT: DP2 PROFILE | VOLUME CREATION | SNAPSHOT CREATION | RESTORE VOLUME CLAIM SIZE MORE | DELETE SNAPSHOT\n"); err != nil {
-			panic(err)
-		}
 	})
 })

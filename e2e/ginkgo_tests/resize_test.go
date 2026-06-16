@@ -59,7 +59,17 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 		if err != nil {
 			panic(err)
 		}
-		defer fpointer.Close()
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ RESIZE: PVC EXPANSION BY USING DEPLOYMENT\n")
+				} else {
+					fpointer.WriteString("✅ RESIZE: PVC EXPANSION BY USING DEPLOYMENT\n")
+				}
+				fpointer.Close()
+			}
+		})
 		pods := []testsuites.PodDetails{
 			{
 				Cmd:      "echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done",
@@ -90,8 +100,5 @@ var _ = Describe("[ics-e2e] [resize] [pv] Dynamic Provisioning and resize pv", f
 			ExpandedSize:   40,
 		}
 		test.Run(cs, ns)
-		if _, err = fpointer.WriteString("✅ RESIZE: PVC EXPANSION BY USING DEPLOYMENT\n"); err != nil {
-			panic(err)
-		}
 	})
 })
