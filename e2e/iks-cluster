@@ -1116,7 +1116,7 @@ fi
 if [[ -n "$e2e_var_exports" ]]; then
 	echo "CLUSTER_REGION=$IC_REGION"  > $e2e_var_exports
 	echo "CLUSTER_ENV=$e2e_env" >> $e2e_var_exports
-	echo "WORKER_OS=$WORKER_OS" >> $e2e_var_exports
+	echo "WORKER_OS=$e2e_os" >> $e2e_var_exports
 fi
 
 if [[ "$e2e_create_new_cluster" == "true" ]]; then

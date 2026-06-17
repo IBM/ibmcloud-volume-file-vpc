@@ -57,6 +57,7 @@ var (
 
 func rebootWorkersForRHCOS() {
 	if os.Getenv("WORKER_OS") != "RHCOS" {
+		log.Print("os is not RHCOS")
 		return
 	}
 
