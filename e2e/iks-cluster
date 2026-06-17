@@ -146,7 +146,7 @@ function reboot_worker_pool {
 
     echo "Info: Rebooting workers for cluster [$cluster_name] worker pool [$worker_pool_name]: ${worker_ids[*]}"
     for worker_id in "${worker_ids[@]}"; do
-        ibmcloud ks worker reboot -c "$cluster_name" --worker "$worker_id"; rc=$?
+        ibmcloud ks worker reboot -c "$cluster_name" --worker "$worker_id" -f; rc=$?
         if [[ $rc -ne 0 ]]; then
             echo "Error: Failed to reboot worker [$worker_id] in cluster [$cluster_name]"
             return 1
