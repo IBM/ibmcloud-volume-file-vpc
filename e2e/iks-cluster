@@ -124,7 +124,7 @@ function reboot_worker_pool {
     echo "Info: Listing workers for cluster [$cluster_name] worker pool [$worker_pool_name]..."
     oldifs="$IFS"
     IFS=$'\n'
-    workers=($(ibmcloud ks workers -c "$cluster_name" -p "$worker_pool_name" | tail -n +2))
+    workers=($(ibmcloud ks workers -c "$cluster_name" -p "$worker_pool_name" -q))
     IFS="$oldifs"
 
     if [[ ${#workers[@]} -eq 0 ]]; then
