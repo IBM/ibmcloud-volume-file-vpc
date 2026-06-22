@@ -60,7 +60,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_bad_request":                        true,
 	"shares_resource_group_bad_request":         true,
 	"shares_vpc_not_found":                      true,
-	SharesNotFound:                              true,
+	"SharesNotFound":                            true,
 	"shares_target_not_found":                   true,
 	"shares_target_one_per_vpc":                 true,
 	"bad_field":                                 true,
@@ -76,7 +76,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_subnet_not_found":                   true,
 	"targets_subnet_all_addresses_taken":        true,
 	"InvalidArgument":                           true,
-	SnapshotNotFound:                            true,
+	"SnapshotNotFound":                            true,
 	"share_snapshot_rate_too_high":              true,
 	"share_snapshot_name_duplicate":             true,
 	"share_snapshots_quota_limit_exceeded":      true,
@@ -88,6 +88,8 @@ var skipErrorCodes = map[string]bool{
 	"shares_profile_bandwidth_not_allowed":      true,
 	"shares_bandwidth_invalid":                  true,
 	"shares_not_implemented":                    true,
+	"snapshots_service_unavailable":             true,
+	"snapshots_source_volume_busy":              true,
 }
 
 // retry ...
