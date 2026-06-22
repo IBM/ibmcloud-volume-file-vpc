@@ -76,7 +76,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_subnet_not_found":                   true,
 	"targets_subnet_all_addresses_taken":        true,
 	"InvalidArgument":                           true,
-	"SnapshotNotFound":                            true,
+	"SnapshotNotFound":                          true,
 	"share_snapshot_rate_too_high":              true,
 	"share_snapshot_name_duplicate":             true,
 	"share_snapshots_quota_limit_exceeded":      true,
