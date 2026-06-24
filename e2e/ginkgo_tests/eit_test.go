@@ -129,6 +129,9 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		pod := testsuites.PodDetails{
 			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
 			CmdExits: false,
+			NodeSelector: map[string]string{
+				"ibm-cloud.kubernetes.io/worker-pool-name": "default",
+			},
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-scale-",
