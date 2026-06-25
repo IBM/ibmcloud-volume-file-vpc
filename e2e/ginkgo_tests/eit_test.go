@@ -20,10 +20,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -99,6 +102,67 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
+	})
+
+	It("should verify EIT installation: all default worker-pool nodes must appear in EIT_ENABLED_WORKER_NODES", func() {
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ DP2 EIT: VERIFYING EIT INSTALLATION ON DEFAULT WORKER POOL\n")
+				} else {
+					fpointer.WriteString("✅ DP2 EIT: VERIFYING EIT INSTALLATION ON DEFAULT WORKER POOL\n")
+				}
+				fpointer.Close()
+			}
+		})
+
+		// Step 1 : Fetch nodes in the "default" worker pool
+		nodeList, err := cs.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{
+			LabelSelector: "ibm-cloud.kubernetes.io/worker-pool-name=default",
+		})
+		Expect(err).NotTo(HaveOccurred(), "failed to list nodes in default worker pool")
+		Expect(nodeList.Items).NotTo(BeEmpty(), "no nodes found in default worker pool")
+		defaultPoolNodeNames := []string{}
+		for _, node := range nodeList.Items {
+			defaultPoolNodeNames = append(defaultPoolNodeNames, node.Name)
+		}
+		fmt.Printf("Nodes in default worker pool (%d): %v\n", len(defaultPoolNodeNames), defaultPoolNodeNames)
+
+		// Step 2: Read EIT_ENABLED_WORKER_NODES from the status ConfigMap
+		cmStatus, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
+		Expect(err).NotTo(HaveOccurred(), "failed to get file-csi-driver-status ConfigMap")
+
+		eitEnabledWorkerNodes, exists := cmStatus.Data["EIT_ENABLED_WORKER_NODES"]
+		Expect(exists).To(BeTrue(), "EIT_ENABLED_WORKER_NODES key not found in file-csi-driver-status ConfigMap")
+
+		fmt.Println("EIT_ENABLED_WORKER_NODES:")
+		fmt.Println(eitEnabledWorkerNodes)
+
+		// Parse the YAML value: map of worker-pool-name -> []string of node names
+		var eitNodes map[string][]string
+		Expect(yaml.Unmarshal([]byte(eitEnabledWorkerNodes), &eitNodes)).To(Succeed(), "failed to parse EIT_ENABLED_WORKER_NODES as YAML")
+
+		defaultEITNodeNames, ok := eitNodes["default"]
+		Expect(ok).To(BeTrue(), "key 'default' not found in EIT_ENABLED_WORKER_NODES")
+
+		eitNodeNameSet := map[string]struct{}{}
+		for _, name := range defaultEITNodeNames {
+			eitNodeNameSet[strings.TrimSpace(name)] = struct{}{}
+		}
+
+		// Assert every node in the default pool is present in EIT_ENABLED_WORKER_NODES
+		missingNodes := []string{}
+		for _, name := range defaultPoolNodeNames {
+			if _, found := eitNodeNameSet[name]; !found {
+				missingNodes = append(missingNodes, name)
+			}
+		}
+		Expect(missingNodes).To(BeEmpty(),
+			"the following default worker-pool nodes are missing from EIT_ENABLED_WORKER_NODES: %v", missingNodes)
 	})
 
 	It("should scale deployment to 3 replicas and verify multi-pod access to EIT volume", func() {
