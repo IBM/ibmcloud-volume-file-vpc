@@ -68,10 +68,9 @@ func (t *DynamicallyProvisionedVolumeSnapshotTest) Run(client clientset.Interfac
 	// --- Step 2: Create Snapshot-1 ---
 	By("Taking snapshots")
 	tvsc, cleanup := CreateVolumeSnapshotClass(restclient, namespace)
-	defer cleanup() // snapshot class cleanup (runs after snapshot deletion)
+	defer cleanup() // snapshot class cleanup (runs last among snapshot/PVC-2 defers)
 
 	snapshot := tvsc.CreateSnapshot(tpvc.persistentVolumeClaim)
-	defer tvsc.DeleteSnapshot(snapshot) // snapshot-1 deletion
 
 	tvsc.ReadyToUse(snapshot, false)
 	By("Snapshot Creation Completed")
@@ -84,10 +83,12 @@ func (t *DynamicallyProvisionedVolumeSnapshotTest) Run(client clientset.Interfac
 	By("Creating PersistentVolumeClaim from a Volume Snapshot")
 	trpvc, rpvcCleanup := rvolume.SetupDynamicPersistentVolumeClaim(client, namespace, false)
 
-	// Defer PVC-2 cleanup before snapshot deletion
+	// Defer PVC-2 cleanup before snapshot deletion (LIFO: snapshot deletion registered
+	// after PVC-2 cleanup so it executes first, allowing the restored PV to be deleted).
 	for i := len(rpvcCleanup) - 1; i >= 0; i-- {
 		defer rpvcCleanup[i]()
 	}
+	defer tvsc.DeleteSnapshot(snapshot) // snapshot-1 deletion (runs before PVC-2 cleanup)
 
 	trpod.SetupVolume(trpvc.persistentVolumeClaim, rvolume.VolumeMount.NameGenerate+"1", rvolume.VolumeMount.MountPathGenerate+"1", rvolume.VolumeMount.ReadOnly)
 
@@ -134,28 +135,22 @@ func (t *DynamicallyProvisionedVolumeSnapshotTest) VolumeSizeLess(client clients
 	tvsc.ReadyToUse(snapshot, false)
 	By("Snapshot-1 is ready")
 
-	// 4. Attempt restore to smaller PVC-2 (expected failure)
-	By("Attempting restore to PVC-2 with smaller size (should fail)")
+	// 4. Attempt restore to smaller PVC-2 — expected to stay Pending (VPC rejects smaller restore).
+	// SetupDynamicPersistentVolumeClaim with pvcErrExpected=true calls WaitForPending() internally,
+	// which confirms the PVC never bound. The returned tpvc has no backing PV, so we must NOT call
+	// tpvc.Cleanup() (it would panic on a nil persistentVolume). Delete the PVC directly instead.
+	By("Attempting restore to PVC-2 with smaller size (should stay Pending)")
 
 	t.RestoredPod.Volumes[0].DataSource = &DataSource{Name: snapshot.Name}
 	rvolume := t.RestoredPod.Volumes[0]
 
-	restoredPVC, errList := rvolume.SetupDynamicPersistentVolumeClaim(client, namespace, true)
+	restoredPVC, _ := rvolume.SetupDynamicPersistentVolumeClaim(client, namespace, true)
 
-	// EXPECTED FAIL
-	if errList == nil || len(errList) == 0 {
-		Fail("Expected PVC restore with smaller size to fail, but it succeeded")
-	}
-
-	By("Restore FAILED as expected — marking test as PASS")
-
-	// cleanup partially created PVC if any
+	By("PVC-2 stayed Pending as expected — cleaning up and marking test as PASS")
 	if restoredPVC != nil {
-		By("Cleaning up partially created PVC-2")
 		_ = client.CoreV1().PersistentVolumeClaims(namespace.Name).
 			Delete(context.TODO(), restoredPVC.persistentVolumeClaim.Name, metav1.DeleteOptions{})
 	}
-	return
 
-	// Cleanup of POD-1, snapshot-1, PVC-1 handled by defer
+	// Cleanup of POD-1, snapshot-1, PVC-1 handled by defers above
 }
