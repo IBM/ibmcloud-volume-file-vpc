@@ -700,7 +700,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	}
 
 	By(fmt.Sprintf("Logging volumeHandle: %s", volumeHandle))
-	By(fmt.Sprintf("Verifying if file share mount target is created"))
+	By("Verifying if file share mount target is created")
 	shareMountTarget, response, err := VPCService.GetShareMountTarget(getShareMountTargetOptions)
 	if err != nil {
 		panic(err)
@@ -711,7 +711,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	Expect(response.StatusCode).To(Equal(200))
 	Expect(shareMountTarget).ToNot(BeNil())
 
-	By(fmt.Sprintf("Verifying if VNI is created"))
+	By("Verifying if VNI is created")
 	if *(shareMountTarget.AccessControlMode) == "security_group" {
 
 		getVirtualNetworkInterfaceOptions := &vpcbetav1.GetVirtualNetworkInterfaceOptions{
@@ -761,13 +761,13 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 			ID:      &volumeHandle[1],
 		}
 
-		By(fmt.Sprintf("Deleting file share target"))
+		By("Deleting file share target")
 		shareMountTarget, response, err := VPCService.DeleteShareMountTarget(deleteShareMountTargetOptions)
 		if err != nil {
 			panic(err)
 		}
 
-		By(fmt.Sprintf("Wating for file share target to be deleted"))
+		By("Wating for file share target to be deleted")
 		// end-delete_share_mount_target
 		time.Sleep(1 * time.Minute)
 
@@ -779,7 +779,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 			ID: &volumeHandle[0],
 		}
 
-		By(fmt.Sprintf("Deleting file share"))
+		By("Deleting file share")
 		share, response, err := VPCService.DeleteShare(deleteShareOptions)
 		if err != nil {
 			panic(err)
@@ -792,11 +792,11 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 		Expect(share).ToNot(BeNil())
 	}
 
-	By(fmt.Sprintf("Wating for file share to be deleted"))
+	By("Wating for file share to be deleted")
 	// end-delete_share_mount_target
 	time.Sleep(30 * time.Second)
 
-	By(fmt.Sprintf("Verying if VNI is deleted"))
+	By("Verying if VNI is deleted")
 	//Verifying if VNI is deleted
 	if *(shareMountTarget.AccessControlMode) == "security_group" {
 
@@ -812,7 +812,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 		Expect(virtualNetworkInterface).To(BeNil())
 	}
 
-	By(fmt.Sprintf("Verying if shareMountTarget is deleted"))
+	By("Verying if shareMountTarget is deleted")
 	//Verifying if shareMountTarget is deleted
 	shareMountTarget, response, err = VPCService.GetShareMountTarget(getShareMountTargetOptions)
 	// end-get_share_mount_target
@@ -821,7 +821,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	Expect(response.StatusCode).To(Equal(404))
 	Expect(shareMountTarget).To(BeNil())
 
-	By(fmt.Sprintf("Verying if share is deleted"))
+	By("Verying if share is deleted")
 	//Verifying if share is deleted
 	getShareOptions := &vpcbetav1.GetShareOptions{
 		ID: &volumeHandle[1],
