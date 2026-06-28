@@ -167,6 +167,9 @@ func (pod *PodDetails) SetupWithDynamicVolumes(client clientset.Interface, names
 
 	By("setting up POD")
 	tpod := NewTestPod(client, namespace, pod.Cmd)
+	if len(pod.NodeSelector) > 0 {
+		tpod.SetNodeSelector(pod.NodeSelector)
+	}
 	By("setting up the PVC for POD")
 	for n, v := range pod.Volumes {
 		tpvc, funcs := v.SetupDynamicPersistentVolumeClaim(client, namespace, false)
