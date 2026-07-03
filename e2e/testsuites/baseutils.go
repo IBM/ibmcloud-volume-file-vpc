@@ -54,6 +54,8 @@ const (
 	VolumeIDSeperator = "#"
 	//DeprecatedVolumeIDSeperator ...
 	DeprecatedVolumeIDSeperator = ":"
+	// ClaimProvisionTimeout is how long to wait for a PVC to reach Bound state.
+	ClaimProvisionTimeout = 10 * time.Minute
 )
 
 var (
@@ -619,7 +621,7 @@ func (t *TestPersistentVolumeClaim) WaitForBound() v1.PersistentVolumeClaim {
 	var err error
 
 	By(fmt.Sprintf("waiting for PVC to be in phase %q", v1.ClaimBound))
-	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimBound, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, framework.ClaimProvisionTimeout)
+	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimBound, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, ClaimProvisionTimeout)
 	if err != nil {
 		By(fmt.Sprintf("PVC %q failed to reach Bound state, describing PVC for diagnostics", t.persistentVolumeClaim.Name))
 		out, descErr := exec.Command("kubectl", "describe", "pvc", t.persistentVolumeClaim.Name, "-n", t.namespace.Name).CombinedOutput()
@@ -644,7 +646,7 @@ func (t *TestPersistentVolumeClaim) WaitForPending() v1.PersistentVolumeClaim {
 
 	By(fmt.Sprintf("waiting for PVC to be in phase %q", v1.ClaimPending))
 	time.Sleep(5 * time.Minute)
-	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimPending, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, framework.ClaimProvisionTimeout)
+	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimPending, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, ClaimProvisionTimeout)
 	framework.ExpectNoError(err)
 
 	By("checking the PVC")
