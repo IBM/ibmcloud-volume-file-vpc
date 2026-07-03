@@ -153,6 +153,8 @@ function reboot_worker_pool {
         fi
     done
 
+    echo "Sleeping for 120sec..."
+    sleep 120
     return 0
 }
 

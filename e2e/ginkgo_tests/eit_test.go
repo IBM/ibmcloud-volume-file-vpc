@@ -84,7 +84,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 		fmt.Printf("Sleep for %s to install EIT packages...\n", waitForPackageInstallation)
 		time.Sleep(waitForPackageInstallation)
 		fmt.Println("Os: ", os.Getenv("WORKER_OS"))
-		rebootWorkersForRHCOS()
+		rebootWorkersForRHCOS(cs)
 		cm_status, err := cs.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), "file-csi-driver-status", metav1.GetOptions{})
 		if err != nil {
 			panic(err)

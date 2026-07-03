@@ -45,6 +45,8 @@ import (
 const (
 	defaultSecret              = ""
 	waitForPackageInstallation = 5 * time.Minute
+	waitForNodeReadyTimeout    = 15 * time.Minute
+	waitForNodeReadyInterval   = 15 * time.Second
 )
 
 var (
@@ -55,7 +57,7 @@ var (
 	sc_retain      = os.Getenv("SC_RETAIN")
 )
 
-func rebootWorkersForRHCOS() {
+func rebootWorkersForRHCOS(cs clientset.Interface) {
 	if os.Getenv("WORKER_OS") != "RHCOS" {
 		log.Print("os is not RHCOS")
 		return
@@ -87,6 +89,39 @@ func rebootWorkersForRHCOS() {
 	if err := cmd.Run(); err != nil {
 		panic(fmt.Sprintf("worker reboot command failed: %v", err))
 	}
+
+	fmt.Printf("Workers rebooted, waiting up to %s for all nodes to be Ready...\n", waitForNodeReadyTimeout)
+	if err := waitForAllNodesReady(cs); err != nil {
+		panic(fmt.Sprintf("nodes did not become Ready after reboot: %v", err))
+	}
+	fmt.Println("All nodes are Ready.")
+}
+
+// waitForAllNodesReady polls until every node in the cluster reports Ready=True.
+func waitForAllNodesReady(cs clientset.Interface) error {
+	return wait.PollImmediate(waitForNodeReadyInterval, waitForNodeReadyTimeout, func() (bool, error) {
+		nodes, err := cs.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			return false, err
+		}
+		for _, node := range nodes.Items {
+			if !isNodeReady(&node) {
+				fmt.Printf("Node %s is not Ready yet\n", node.Name)
+				return false, nil
+			}
+		}
+		return true, nil
+	})
+}
+
+// isNodeReady returns true if the node has a Ready condition with status True.
+func isNodeReady(node *corev1.Node) bool {
+	for _, condition := range node.Status.Conditions {
+		if condition.Type == corev1.NodeReady {
+			return condition.Status == corev1.ConditionTrue
+		}
+	}
+	return false
 }
 
 func createCustomRfsSC(cs clientset.Interface, name string, params map[string]string) (*storagev1.StorageClass, error) {
