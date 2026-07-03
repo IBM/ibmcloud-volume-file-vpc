@@ -80,7 +80,6 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] [retain] Dynamic Provisioning usi
 				{
 					PVCName:       "ics-vol-dp2-",
 					VolumeType:    sc_retain,
-					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -155,7 +154,6 @@ var _ = Describe("[ics-e2e] [sc] [with-deploy] Dynamic Provisioning for dp2 SC w
 				{
 					PVCName:       "ics-vol-dp2-",
 					VolumeType:    sc,
-					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -229,7 +227,6 @@ var _ = Describe("[ics-e2e] [sc] [same-node] [with-deploy] Dynamic Provisioning 
 				{
 					PVCName:       "ics-vol-dp2-",
 					VolumeType:    sc,
-					FSType:        "ext4",
 					ClaimSize:     "15Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -414,7 +411,6 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 				{
 					PVCName:       "ics-vol-dp2-",
 					VolumeType:    sc,
-					FSType:        "ext4",
 					ClaimSize:     "20Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},

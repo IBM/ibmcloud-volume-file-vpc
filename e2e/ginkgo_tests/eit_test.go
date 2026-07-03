@@ -200,7 +200,6 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning for ibmc-vpc-file-eit SC 
 				{
 					PVCName:       "ics-vol-scale-",
 					VolumeType:    "ibmc-vpc-file-eit",
-					FSType:        "ibmshare",
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -394,7 +393,6 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 				{
 					PVCName:       "ics-vol-dp2-",
 					VolumeType:    "ibmc-vpc-file-eit",
-					FSType:        "ibmshare",
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},

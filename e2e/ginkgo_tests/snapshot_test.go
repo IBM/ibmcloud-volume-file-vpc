@@ -89,7 +89,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-rfs-snap-",
 					VolumeType:    "ibmc-vpc-file-regional",
-					FSType:        "nfs",
 					ClaimSize:     "20Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -106,7 +105,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-rfs-snap-",
 					VolumeType:    "ibmc-vpc-file-regional",
-					FSType:        "nfs",
 					ClaimSize:     "20Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -136,7 +134,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-rfs-snap-",
 					VolumeType:    "ibmc-vpc-file-regional",
-					FSType:        "nfs",
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -162,7 +159,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-rfs-snap-",
 					VolumeType:    "ibmc-vpc-file-regional",
-					FSType:        "nfs",
 					ClaimSize:     "30Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -220,7 +216,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-dp2-snap-",
 					VolumeType:    "ibmc-vpc-file-min-iops",
-					FSType:        "nfs",
 					ClaimSize:     "20Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -237,7 +232,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-dp2-snap-",
 					VolumeType:    "ibmc-vpc-file-min-iops",
-					FSType:        "nfs",
 					ClaimSize:     "20Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -267,7 +261,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-dp2-snap-",
 					VolumeType:    "ibmc-vpc-file-min-iops",
-					FSType:        "nfs",
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{
@@ -293,7 +286,6 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 				{
 					PVCName:       "ics-vpcfile-dp2-snap-",
 					VolumeType:    "ibmc-vpc-file-min-iops",
-					FSType:        "nfs",
 					ClaimSize:     "30Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					VolumeMount: testsuites.VolumeMountDetails{

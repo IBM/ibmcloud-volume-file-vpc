@@ -860,7 +860,7 @@ type TestDeployment struct {
 	podName    string
 }
 
-func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32, nodeSelector map[string]string) *TestDeployment {
+func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32, nodeSelector map[string]string, securityContext *v1.PodSecurityContext) *TestDeployment {
 	generateName := "ics-e2e-tester-"
 	selectorValue := fmt.Sprintf("%s%d", generateName, rand.Int())
 	return &TestDeployment{
@@ -880,7 +880,8 @@ func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, 
 						Labels: map[string]string{"app": selectorValue},
 					},
 					Spec: v1.PodSpec{
-						NodeSelector: nodeSelector,
+						NodeSelector:    nodeSelector,
+						SecurityContext: securityContext,
 						Containers: []v1.Container{
 							{
 								Name:    "ics-e2e-tester",
