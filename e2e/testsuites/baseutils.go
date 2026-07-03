@@ -620,7 +620,16 @@ func (t *TestPersistentVolumeClaim) WaitForBound() v1.PersistentVolumeClaim {
 
 	By(fmt.Sprintf("waiting for PVC to be in phase %q", v1.ClaimBound))
 	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimBound, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, framework.ClaimProvisionTimeout)
-	framework.ExpectNoError(err)
+	if err != nil {
+		By(fmt.Sprintf("PVC %q failed to reach Bound state, describing PVC for diagnostics", t.persistentVolumeClaim.Name))
+		out, descErr := exec.Command("kubectl", "describe", "pvc", t.persistentVolumeClaim.Name, "-n", t.namespace.Name).CombinedOutput()
+		if descErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to describe PVC %s: %v\n", t.persistentVolumeClaim.Name, descErr)
+		} else {
+			fmt.Printf("kubectl describe pvc %s:\n%s\n", t.persistentVolumeClaim.Name, string(out))
+		}
+		framework.ExpectNoError(err)
+	}
 
 	By("checking the PVC")
 	// Get new copy of the claim
