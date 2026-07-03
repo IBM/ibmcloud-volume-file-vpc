@@ -1334,6 +1334,15 @@ func (t *TestVolumeSnapshotClass) ReadyToUse(snapshot *volumesnapshotv1.VolumeSn
 	if snapFail == true {
 		Expect(err).To(HaveOccurred())
 	} else {
+		if err != nil {
+			By(fmt.Sprintf("VolumeSnapshot %q did not become ready, describing for diagnostics", snapshot.Name))
+			out, descErr := exec.Command("kubectl", "describe", "volumesnapshot", snapshot.Name, "-n", t.namespace.Name).CombinedOutput()
+			if descErr != nil {
+				fmt.Fprintf(os.Stderr, "failed to describe VolumeSnapshot %s: %v\n", snapshot.Name, descErr)
+			} else {
+				fmt.Printf("kubectl describe volumesnapshot %s:\n%s\n", snapshot.Name, string(out))
+			}
+		}
 		framework.ExpectNoError(err)
 	}
 }
