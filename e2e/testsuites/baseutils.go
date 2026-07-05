@@ -1010,8 +1010,12 @@ func (t *TestDeployment) CreateWithoutWaitingForDeploymemtStatus() {
 	t.deployment, err = t.client.AppsV1().Deployments(t.namespace.Name).Create(context.Background(), t.deployment, metav1.CreateOptions{})
 	framework.ExpectNoError(err)
 
-	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
-	framework.ExpectNoError(err)
+	// Wait for the ReplicaSet to be created by the deployment controller before fetching pods.
+	var pods *v1.PodList
+	gomega.Eventually(func() error {
+		pods, err = k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
+		return err
+	}, 2*time.Minute, 5*time.Second).Should(gomega.Succeed(), "waiting for ReplicaSet to be created for deployment %q", t.deployment.Name)
 	// always get first pod as there should only be one
 	t.podName = pods.Items[0].Name
 
