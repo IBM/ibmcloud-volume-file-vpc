@@ -70,9 +70,11 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
 		var replicaCount = int32(1)
+		fsGroup := int64(0)
 		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-			CmdExits: false,
+			Cmd:             "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits:        false,
+			SecurityContext: &v1.PodSecurityContext{FSGroup: &fsGroup},
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-rfs-",
@@ -127,9 +129,11 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
 		var replicaCount = int32(1)
+		fsGroup := int64(0)
 		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-			CmdExits: false,
+			Cmd:             "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits:        false,
+			SecurityContext: &v1.PodSecurityContext{FSGroup: &fsGroup},
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-rfs-",
@@ -190,9 +194,11 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
 		var replicaCount = int32(1)
+		fsGroup := int64(0)
 		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
-			CmdExits: false,
+			Cmd:             "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done",
+			CmdExits:        false,
+			SecurityContext: &v1.PodSecurityContext{FSGroup: &fsGroup},
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "ics-vol-rfs-",
