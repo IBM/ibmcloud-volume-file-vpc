@@ -32,7 +32,7 @@ const (
 	// that contains its capacity-to-IOPS validation bands.
 	DefaultCatalogEndpoint = "https://globalcatalog.cloud.ibm.com/api/v1/dp2?include=metadata.other"
 	// 30-second fallback timeout
-	defaultCatalogTimeout  = 60 * time.Second
+	defaultCatalogTimeout = 60 * time.Second
 	// 4 MiB maximum response size
 	maxCatalogResponseSize = 4 << 20
 )
