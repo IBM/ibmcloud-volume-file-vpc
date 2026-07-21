@@ -27,15 +27,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// catalogResponse is a representative dp2 band fixture in Global Catalog JSON format.
 const catalogResponse = `{
   "metadata": {
     "other": {
       "profile": {
         "config_validation": [
           {"capacity":{"min":100,"max":499},"iops":{"min":100,"max":6000}},
-          {"capacity":{"min":10,"max":39},"iops":{"min":100,"max":1000}},
-          {"capacity":{"min":40,"max":79},"iops":{"min":100,"max":2000}},
-          {"capacity":{"min":80,"max":99},"iops":{"min":100,"max":4000}},
+          {"capacity":{"min":10,"max":39}, "iops":{"min":100,"max":1000}},
+          {"capacity":{"min":40,"max":79}, "iops":{"min":100,"max":2000}},
+          {"capacity":{"min":80,"max":99}, "iops":{"min":100,"max":4000}},
           {"capacity":{"min":500,"max":999},"iops":{"min":100,"max":10000}},
           {"capacity":{"min":1000,"max":1999},"iops":{"min":100,"max":20000}},
           {"capacity":{"min":16000,"max":32000},"iops":{"min":2000,"max":96000}}
@@ -45,193 +46,124 @@ const catalogResponse = `{
   }
 }`
 
-func TestCatalogClientGetMinimumCapacityForIOPS(t *testing.T) {
-	testCases := []struct {
-		name             string
-		requestedIOPS    int64
-		expectedCapacity int64
-		expectedError    string
-	}{
-		{
-			name:             "first band",
-			requestedIOPS:    100,
-			expectedCapacity: 10,
-		}, {
-			name:             "first band maximum",
-			requestedIOPS:    1000,
-			expectedCapacity: 10,
-		}, {
-			name:             "second band",
-			requestedIOPS:    1001,
-			expectedCapacity: 40,
-		}, {
-			name:             "3000 IOPS",
-			requestedIOPS:    3000,
-			expectedCapacity: 80,
-		}, {
-			name:             "above 6000 IOPS",
-			requestedIOPS:    6001,
-			expectedCapacity: 500,
-		}, {
-			name:             "maximum supported IOPS",
-			requestedIOPS:    96000,
-			expectedCapacity: 16000,
-		}, {
-			name:          "below catalog minimum",
-			requestedIOPS: 99,
-			expectedError: "no dp2 catalog band covers iops=99",
-		}, {
-			name:          "above catalog maximum",
-			requestedIOPS: 999999,
-			expectedError: "no dp2 catalog band covers iops=999999",
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			// Each subtest gets its own server+client; CatalogClient is stateless
-			// (no cache) — caching is the driver's responsibility.
-			server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-				assert.Equal(t, http.MethodGet, request.Method)
-				assert.Equal(t, "application/json", request.Header.Get("Accept"))
-				response.Header().Set("Content-Type", "application/json")
-				_, _ = response.Write([]byte(catalogResponse))
-			}))
-			defer server.Close()
-			client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
-
-			capacity, err := client.GetMinimumCapacityForIOPS(context.Background(), testCase.requestedIOPS)
-			if testCase.expectedError != "" {
-				require.EqualError(t, err, testCase.expectedError)
-				return
-			}
-			require.NoError(t, err)
-			assert.Equal(t, testCase.expectedCapacity, capacity)
-		})
-	}
-}
-
-func TestCatalogClientRoundUpCapacityForIOPS(t *testing.T) {
-	testCases := []struct {
-		name             string
-		requestedGiB     int64
-		requestedIOPS    int64
-		expectedCapacity int64
-	}{
-		{
-			name:             "round up below minimum",
-			requestedGiB:     20,
-			requestedIOPS:    3000,
-			expectedCapacity: 80,
-		}, {
-			name:             "keep exact minimum",
-			requestedGiB:     80,
-			requestedIOPS:    3000,
-			expectedCapacity: 80,
-		}, {
-			name:             "keep capacity above minimum",
-			requestedGiB:     200,
-			requestedIOPS:    3000,
-			expectedCapacity: 200,
-		}, {
-			name:             "round up high IOPS",
-			requestedGiB:     50,
-			requestedIOPS:    20000,
-			expectedCapacity: 1000,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, _ *http.Request) {
-				response.Header().Set("Content-Type", "application/json")
-				_, _ = response.Write([]byte(catalogResponse))
-			}))
-			defer server.Close()
-			client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
-
-			capacity, err := client.RoundUpCapacityForIOPS(context.Background(), testCase.requestedGiB, testCase.requestedIOPS)
-			require.NoError(t, err)
-			assert.Equal(t, testCase.expectedCapacity, capacity)
-		})
-	}
-}
-
-func TestCatalogClientErrors(t *testing.T) {
-	testCases := []struct {
-		name          string
-		status        int
-		body          string
-		expectedError string
-	}{
-		{
-			name:          "catalog unavailable",
-			status:        http.StatusServiceUnavailable,
-			expectedError: "unexpected HTTP status 503 Service Unavailable",
-		}, {
-			name:          "malformed response",
-			status:        http.StatusOK,
-			body:          `{`,
-			expectedError: "failed to decode dp2 catalog response",
-		}, {
-			name:          "empty bands",
-			status:        http.StatusOK,
-			body:          `{}`,
-			expectedError: "contains no capacity-to-IOPS validation bands",
-		}, {
-			name:          "invalid band",
-			status:        http.StatusOK,
-			body:          `{"metadata":{"other":{"profile":{"config_validation":[{"capacity":{"min":100,"max":10},"iops":{"min":100,"max":1000}}]}}}}`,
-			expectedError: "contains an invalid capacity range",
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-				response.WriteHeader(testCase.status)
-				_, _ = response.Write([]byte(testCase.body))
-			}))
-			defer server.Close()
-
-			client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
-			_, err := client.GetMinimumCapacityForIOPS(context.Background(), 1000)
-			require.Error(t, err)
-			assert.True(t, strings.Contains(err.Error(), testCase.expectedError), "unexpected error: %v", err)
-		})
-	}
-}
-
-func TestCatalogClientFetchBands(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, _ *http.Request) {
-		response.Header().Set("Content-Type", "application/json")
-		_, _ = response.Write([]byte(catalogResponse))
+// newTestServer returns an httptest.Server that always responds with body and
+// a Client pointed at it.
+func newTestServer(t *testing.T, status int, body string) (*httptest.Server, *Client) {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		assert.Equal(t, "application/json", r.Header.Get("Accept"))
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_, _ = w.Write([]byte(body))
 	}))
-	defer server.Close()
-	client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
+	t.Cleanup(srv.Close)
+	return srv, NewClientWithEndpoint(srv.Client(), srv.URL)
+}
+
+// ---------------------------------------------------------------------------
+// FetchBands — happy path
+// ---------------------------------------------------------------------------
+
+func TestFetchBands_ReturnsSortedBands(t *testing.T) {
+	_, client := newTestServer(t, http.StatusOK, catalogResponse)
 
 	bands, err := client.FetchBands(context.Background())
 	require.NoError(t, err)
+	require.Len(t, bands, 7, "fixture has 7 bands")
 
-	// The catalog fixture has 7 bands; verify they come back sorted by Capacity.Min.
-	require.Len(t, bands, 7)
 	for i := 1; i < len(bands); i++ {
 		assert.LessOrEqual(t, bands[i-1].Capacity.Min, bands[i].Capacity.Min,
 			"bands must be sorted ascending by Capacity.Min")
 	}
-	// Spot-check first and last band values.
-	assert.Equal(t, int64(10), bands[0].Capacity.Min)
-	assert.Equal(t, int64(32000), bands[len(bands)-1].Capacity.Max)
 }
 
-func TestCatalogClientRejectsInvalidInputsBeforeFetching(t *testing.T) {
-	// Validation errors must be returned before any network call is made.
-	// We deliberately pass a URL that would fail if contacted to verify
-	// that invalid inputs are rejected eagerly without an HTTP round-trip.
-	client := NewCatalogClientWithEndpoint(nil, "http://127.0.0.1:0") // port 0 → always refused
+func TestFetchBands_SpotCheckValues(t *testing.T) {
+	_, client := newTestServer(t, http.StatusOK, catalogResponse)
 
-	_, err := client.GetMinimumCapacityForIOPS(context.Background(), 0)
-	require.EqualError(t, err, "requested IOPS must be greater than zero: 0")
-	_, err = client.RoundUpCapacityForIOPS(context.Background(), 0, 1000)
-	require.EqualError(t, err, "requested capacity must be greater than zero: 0 GiB")
+	bands, err := client.FetchBands(context.Background())
+	require.NoError(t, err)
+
+	assert.Equal(t, int64(10), bands[0].Capacity.Min, "smallest band starts at 10 GiB")
+	assert.Equal(t, int64(32000), bands[len(bands)-1].Capacity.Max, "largest band ends at 32000 GiB")
+}
+
+func TestFetchBands_SetsAcceptHeader(t *testing.T) {
+	var capturedAccept string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedAccept = r.Header.Get("Accept")
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(catalogResponse))
+	}))
+	defer srv.Close()
+
+	_, err := NewClientWithEndpoint(srv.Client(), srv.URL).FetchBands(context.Background())
+	require.NoError(t, err)
+	assert.Equal(t, "application/json", capturedAccept)
+}
+
+// ---------------------------------------------------------------------------
+// FetchBands — error cases
+// ---------------------------------------------------------------------------
+
+func TestFetchBands_HTTPError(t *testing.T) {
+	_, client := newTestServer(t, http.StatusServiceUnavailable, "")
+
+	_, err := client.FetchBands(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "unexpected HTTP status 503 Service Unavailable")
+}
+
+func TestFetchBands_MalformedJSON(t *testing.T) {
+	_, client := newTestServer(t, http.StatusOK, `{`)
+
+	_, err := client.FetchBands(context.Background())
+	require.Error(t, err)
+	assert.True(t, strings.Contains(err.Error(), "failed to decode dp2 catalog response"),
+		"unexpected error: %v", err)
+}
+
+func TestFetchBands_EmptyBands(t *testing.T) {
+	_, client := newTestServer(t, http.StatusOK, `{}`)
+
+	_, err := client.FetchBands(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "contains no capacity-to-IOPS validation bands")
+}
+
+func TestFetchBands_InvalidCapacityRange(t *testing.T) {
+	body := `{"metadata":{"other":{"profile":{"config_validation":[
+		{"capacity":{"min":100,"max":10},"iops":{"min":100,"max":1000}}
+	]}}}}`
+	_, client := newTestServer(t, http.StatusOK, body)
+
+	_, err := client.FetchBands(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "contains an invalid capacity range")
+}
+
+func TestFetchBands_InvalidIOPSRange(t *testing.T) {
+	body := `{"metadata":{"other":{"profile":{"config_validation":[
+		{"capacity":{"min":10,"max":39},"iops":{"min":1000,"max":100}}
+	]}}}}`
+	_, client := newTestServer(t, http.StatusOK, body)
+
+	_, err := client.FetchBands(context.Background())
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "contains an invalid IOPS range")
+}
+
+// ---------------------------------------------------------------------------
+// NewClient / NewClientWithEndpoint
+// ---------------------------------------------------------------------------
+
+func TestNewClient_NilHTTPClient(t *testing.T) {
+	c := NewClient(nil)
+	assert.NotNil(t, c)
+	assert.Equal(t, DefaultCatalogEndpoint, c.endpoint)
+}
+
+func TestNewClientWithEndpoint_EmptyEndpointFallsBackToDefault(t *testing.T) {
+	c := NewClientWithEndpoint(nil, "")
+	assert.Equal(t, DefaultCatalogEndpoint, c.endpoint)
 }
