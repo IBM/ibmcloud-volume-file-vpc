@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package client
+// Package catalog provides a client for the IBM Global Catalog API used to
+// resolve dp2 capacity-to-IOPS validation bands for fixed-IOPS file shares.
+package catalog
 
 import (
 	"context"
@@ -23,7 +25,6 @@ import (
 	"io"
 	"net/http"
 	"sort"
-	"sync"
 	"time"
 )
 
@@ -44,13 +45,12 @@ type CapacityRoundoffService interface {
 }
 
 // CatalogClient fetches the dp2 validation bands from the IBM Global Catalog.
-// The first successful response is cached for the lifetime of the client.
+// Each call to GetMinimumCapacityForIOPS or RoundUpCapacityForIOPS performs a
+// fresh HTTP request; callers that need caching should wrap this client with
+// their own caching layer (see CachingCatalogClient in the CSI driver).
 type CatalogClient struct {
 	httpClient *http.Client
 	endpoint   string
-
-	mu    sync.Mutex
-	bands []catalogBand
 }
 
 type catalogEntry struct {
@@ -100,12 +100,14 @@ func NewCatalogClientWithEndpoint(httpClient *http.Client, endpoint string) *Cat
 
 // GetMinimumCapacityForIOPS returns the smallest dp2 capacity, in GiB, whose
 // catalog band supports the requested IOPS value.
+// A fresh HTTP request is made on every call; wrap with CachingCatalogClient
+// in the CSI driver to avoid repeated fetches.
 func (c *CatalogClient) GetMinimumCapacityForIOPS(ctx context.Context, requestedIOPS int64) (int64, error) {
 	if requestedIOPS <= 0 {
 		return 0, fmt.Errorf("requested IOPS must be greater than zero: %d", requestedIOPS)
 	}
 
-	bands, err := c.getBands(ctx)
+	bands, err := c.fetchBands(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -134,22 +136,6 @@ func (c *CatalogClient) RoundUpCapacityForIOPS(ctx context.Context, requestedCap
 		return minimumCapacityGiB, nil
 	}
 	return requestedCapacityGiB, nil
-}
-
-func (c *CatalogClient) getBands(ctx context.Context) ([]catalogBand, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if len(c.bands) > 0 {
-		return c.bands, nil
-	}
-
-	bands, err := c.fetchBands(ctx)
-	if err != nil {
-		return nil, err
-	}
-	c.bands = bands
-	return c.bands, nil
 }
 
 func (c *CatalogClient) fetchBands(ctx context.Context) ([]catalogBand, error) {

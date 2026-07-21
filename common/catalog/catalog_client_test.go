@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package client
+package catalog
 
 import (
 	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,17 +46,6 @@ const catalogResponse = `{
 }`
 
 func TestCatalogClientGetMinimumCapacityForIOPS(t *testing.T) {
-	var requestCount atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		requestCount.Add(1)
-		assert.Equal(t, http.MethodGet, request.Method)
-		assert.Equal(t, "application/json", request.Header.Get("Accept"))
-		response.Header().Set("Content-Type", "application/json")
-		_, _ = response.Write([]byte(catalogResponse))
-	}))
-	defer server.Close()
-
-	client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
 	testCases := []struct {
 		name             string
 		requestedIOPS    int64
@@ -101,6 +89,17 @@ func TestCatalogClientGetMinimumCapacityForIOPS(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
+			// Each subtest gets its own server+client; CatalogClient is stateless
+			// (no cache) — caching is the driver's responsibility.
+			server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+				assert.Equal(t, http.MethodGet, request.Method)
+				assert.Equal(t, "application/json", request.Header.Get("Accept"))
+				response.Header().Set("Content-Type", "application/json")
+				_, _ = response.Write([]byte(catalogResponse))
+			}))
+			defer server.Close()
+			client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
+
 			capacity, err := client.GetMinimumCapacityForIOPS(context.Background(), testCase.requestedIOPS)
 			if testCase.expectedError != "" {
 				require.EqualError(t, err, testCase.expectedError)
@@ -110,18 +109,9 @@ func TestCatalogClientGetMinimumCapacityForIOPS(t *testing.T) {
 			assert.Equal(t, testCase.expectedCapacity, capacity)
 		})
 	}
-
-	assert.Equal(t, int32(1), requestCount.Load(), "the successful catalog response must be cached")
 }
 
 func TestCatalogClientRoundUpCapacityForIOPS(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		response.Header().Set("Content-Type", "application/json")
-		_, _ = response.Write([]byte(catalogResponse))
-	}))
-	defer server.Close()
-
-	client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
 	testCases := []struct {
 		name             string
 		requestedGiB     int64
@@ -153,6 +143,13 @@ func TestCatalogClientRoundUpCapacityForIOPS(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, _ *http.Request) {
+				response.Header().Set("Content-Type", "application/json")
+				_, _ = response.Write([]byte(catalogResponse))
+			}))
+			defer server.Close()
+			client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
+
 			capacity, err := client.RoundUpCapacityForIOPS(context.Background(), testCase.requestedGiB, testCase.requestedIOPS)
 			require.NoError(t, err)
 			assert.Equal(t, testCase.expectedCapacity, capacity)
@@ -206,17 +203,13 @@ func TestCatalogClientErrors(t *testing.T) {
 }
 
 func TestCatalogClientRejectsInvalidInputsBeforeFetching(t *testing.T) {
-	var requestCount atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		requestCount.Add(1)
-	}))
-	defer server.Close()
-
-	client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
+	// Validation errors must be returned before any network call is made.
+	// We deliberately pass a URL that would fail if contacted to verify
+	// that invalid inputs are rejected eagerly without an HTTP round-trip.
+	client := NewCatalogClientWithEndpoint(nil, "http://127.0.0.1:0") // port 0 → always refused
 
 	_, err := client.GetMinimumCapacityForIOPS(context.Background(), 0)
 	require.EqualError(t, err, "requested IOPS must be greater than zero: 0")
 	_, err = client.RoundUpCapacityForIOPS(context.Background(), 0, 1000)
 	require.EqualError(t, err, "requested capacity must be greater than zero: 0 GiB")
-	assert.Equal(t, int32(0), requestCount.Load())
 }
