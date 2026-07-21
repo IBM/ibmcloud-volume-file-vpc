@@ -38,16 +38,28 @@ const (
 	maxCatalogResponseSize = 4 << 20
 )
 
+// BandRange is an inclusive [Min, Max] integer interval used inside a Band.
+type BandRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
+
+// Band is one row of the dp2 capacity-to-IOPS validation table published by
+// the IBM Global Catalog. A share whose IOPS falls in [IOPS.Min, IOPS.Max]
+// must have at least Capacity.Min GiB of storage.
+type Band struct {
+	Capacity BandRange `json:"capacity"`
+	IOPS     BandRange `json:"iops"`
+}
+
 // CapacityRoundoffService resolves and applies dp2 capacity-to-IOPS constraints.
 type CapacityRoundoffService interface {
+	FetchBands(ctx context.Context) ([]Band, error)
 	GetMinimumCapacityForIOPS(ctx context.Context, requestedIOPS int64) (int64, error)
 	RoundUpCapacityForIOPS(ctx context.Context, requestedCapacityGiB, requestedIOPS int64) (int64, error)
 }
 
 // CatalogClient fetches the dp2 validation bands from the IBM Global Catalog.
-// Each call to GetMinimumCapacityForIOPS or RoundUpCapacityForIOPS performs a
-// fresh HTTP request; callers that need caching should wrap this client with
-// their own caching layer (see CachingCatalogClient in the CSI driver).
 type CatalogClient struct {
 	httpClient *http.Client
 	endpoint   string
@@ -57,27 +69,20 @@ type catalogEntry struct {
 	Metadata struct {
 		Other struct {
 			Profile struct {
-				ConfigValidation []catalogBand `json:"config_validation"`
+				ConfigValidation []Band `json:"config_validation"`
 			} `json:"profile"`
 		} `json:"other"`
 	} `json:"metadata"`
 }
 
-type catalogBand struct {
-	Capacity catalogRange `json:"capacity"`
-	IOPS     catalogRange `json:"iops"`
-}
-
-type catalogRange struct {
-	Min int64 `json:"min"`
-	Max int64 `json:"max"`
-}
-
 var _ CapacityRoundoffService = &CatalogClient{}
 
+// FetchBands fetches the full dp2 capacity-to-IOPS band table from the IBM
+func (c *CatalogClient) FetchBands(ctx context.Context) ([]Band, error) {
+	return c.fetchBands(ctx)
+}
+
 // NewCatalogClient creates a client for the public IBM Global Catalog dp2
-// entry. A nil HTTP client is replaced with a client that has a bounded
-// timeout.
 func NewCatalogClient(httpClient *http.Client) *CatalogClient {
 	return NewCatalogClientWithEndpoint(httpClient, DefaultCatalogEndpoint)
 }
@@ -107,18 +112,12 @@ func (c *CatalogClient) GetMinimumCapacityForIOPS(ctx context.Context, requested
 		return 0, fmt.Errorf("requested IOPS must be greater than zero: %d", requestedIOPS)
 	}
 
-	bands, err := c.fetchBands(ctx)
+	bands, err := c.FetchBands(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	for _, band := range bands {
-		if requestedIOPS >= band.IOPS.Min && requestedIOPS <= band.IOPS.Max {
-			return band.Capacity.Min, nil
-		}
-	}
-
-	return 0, fmt.Errorf("no dp2 catalog band covers iops=%d", requestedIOPS)
+	return minimumCapacityFromBands(bands, requestedIOPS)
 }
 
 // RoundUpCapacityForIOPS returns the requested capacity unchanged when it is
@@ -138,7 +137,18 @@ func (c *CatalogClient) RoundUpCapacityForIOPS(ctx context.Context, requestedCap
 	return requestedCapacityGiB, nil
 }
 
-func (c *CatalogClient) fetchBands(ctx context.Context) ([]catalogBand, error) {
+// minimumCapacityFromBands is a pure helper shared by CatalogClient and the
+// driver's CachingCatalogClient to scan a sorted band slice.
+func minimumCapacityFromBands(bands []Band, requestedIOPS int64) (int64, error) {
+	for _, band := range bands {
+		if requestedIOPS >= band.IOPS.Min && requestedIOPS <= band.IOPS.Max {
+			return band.Capacity.Min, nil
+		}
+	}
+	return 0, fmt.Errorf("no dp2 catalog band covers iops=%d", requestedIOPS)
+}
+
+func (c *CatalogClient) fetchBands(ctx context.Context) ([]Band, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create dp2 catalog request: %w", err)

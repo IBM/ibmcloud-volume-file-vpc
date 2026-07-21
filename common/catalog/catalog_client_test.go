@@ -202,6 +202,28 @@ func TestCatalogClientErrors(t *testing.T) {
 	}
 }
 
+func TestCatalogClientFetchBands(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, _ *http.Request) {
+		response.Header().Set("Content-Type", "application/json")
+		_, _ = response.Write([]byte(catalogResponse))
+	}))
+	defer server.Close()
+	client := NewCatalogClientWithEndpoint(server.Client(), server.URL)
+
+	bands, err := client.FetchBands(context.Background())
+	require.NoError(t, err)
+
+	// The catalog fixture has 7 bands; verify they come back sorted by Capacity.Min.
+	require.Len(t, bands, 7)
+	for i := 1; i < len(bands); i++ {
+		assert.LessOrEqual(t, bands[i-1].Capacity.Min, bands[i].Capacity.Min,
+			"bands must be sorted ascending by Capacity.Min")
+	}
+	// Spot-check first and last band values.
+	assert.Equal(t, int64(10), bands[0].Capacity.Min)
+	assert.Equal(t, int64(32000), bands[len(bands)-1].Capacity.Max)
+}
+
 func TestCatalogClientRejectsInvalidInputsBeforeFetching(t *testing.T) {
 	// Validation errors must be returned before any network call is made.
 	// We deliberately pass a URL that would fail if contacted to verify
