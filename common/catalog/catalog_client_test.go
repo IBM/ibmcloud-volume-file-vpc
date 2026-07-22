@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@
 package catalog
 
 import (
-	"context"
+	"io"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -27,143 +26,135 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// catalogResponse is a representative dp2 band fixture in Global Catalog JSON format.
-const catalogResponse = `{
+// dp2BandsJSON is a minimal representation of the IBM Global Catalog dp2 API
+// response containing the config_validation bands used across tests.
+const dp2BandsJSON = `{
   "metadata": {
     "other": {
       "profile": {
         "config_validation": [
-          {"capacity":{"min":100,"max":499},"iops":{"min":100,"max":6000}},
-          {"capacity":{"min":10,"max":39}, "iops":{"min":100,"max":1000}},
-          {"capacity":{"min":40,"max":79}, "iops":{"min":100,"max":2000}},
-          {"capacity":{"min":80,"max":99}, "iops":{"min":100,"max":4000}},
-          {"capacity":{"min":500,"max":999},"iops":{"min":100,"max":10000}},
-          {"capacity":{"min":1000,"max":1999},"iops":{"min":100,"max":20000}},
-          {"capacity":{"min":16000,"max":32000},"iops":{"min":2000,"max":96000}}
+          {"capacity": {"min": 10,    "max": 39,    "units": "gb"}, "iops": {"min": 100, "max": 1000,  "unit": "iops"}},
+          {"capacity": {"min": 40,    "max": 79,    "units": "gb"}, "iops": {"min": 100, "max": 2000,  "unit": "iops"}},
+          {"capacity": {"min": 80,    "max": 99,    "units": "gb"}, "iops": {"min": 100, "max": 4000,  "unit": "iops"}},
+          {"capacity": {"min": 100,   "max": 499,   "units": "gb"}, "iops": {"min": 100, "max": 6000,  "unit": "iops"}},
+          {"capacity": {"min": 500,   "max": 999,   "units": "gb"}, "iops": {"min": 100, "max": 10000, "unit": "iops"}},
+          {"capacity": {"min": 1000,  "max": 1999,  "units": "gb"}, "iops": {"min": 100, "max": 20000, "unit": "iops"}},
+          {"capacity": {"min": 2000,  "max": 3999,  "units": "gb"}, "iops": {"min": 200, "max": 40000, "unit": "iops"}},
+          {"capacity": {"min": 4000,  "max": 7999,  "units": "gb"}, "iops": {"min": 300, "max": 40000, "unit": "iops"}},
+          {"capacity": {"min": 8000,  "max": 15999, "units": "gb"}, "iops": {"min": 500, "max": 64000, "unit": "iops"}},
+          {"capacity": {"min": 16000, "max": 32000, "units": "gb"}, "iops": {"min": 2000,"max": 96000, "unit": "iops"}}
         ]
       }
     }
   }
 }`
 
-// newTestServer returns an httptest.Server that always responds with body and
-// a Client pointed at it.
-func newTestServer(t *testing.T, status int, body string) (*httptest.Server, *Client) {
-	t.Helper()
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, http.MethodGet, r.Method)
-		assert.Equal(t, "application/json", r.Header.Get("Accept"))
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-		_, _ = w.Write([]byte(body))
-	}))
-	t.Cleanup(srv.Close)
-	return srv, NewClientWithEndpoint(srv.Client(), srv.URL)
+// fakeHTTPClient is an HTTPDoer that returns the configured response without
+// making any actual network calls.
+type fakeHTTPClient struct {
+	statusCode int
+	body       string
+	err        error
 }
 
-// ---------------------------------------------------------------------------
-// FetchBands — happy path
-// ---------------------------------------------------------------------------
-
-func TestFetchBands_ReturnsSortedBands(t *testing.T) {
-	_, client := newTestServer(t, http.StatusOK, catalogResponse)
-
-	bands, err := client.FetchBands(context.Background())
-	require.NoError(t, err)
-	require.Len(t, bands, 7, "fixture has 7 bands")
-
-	for i := 1; i < len(bands); i++ {
-		assert.LessOrEqual(t, bands[i-1].Capacity.Min, bands[i].Capacity.Min,
-			"bands must be sorted ascending by Capacity.Min")
+func (f *fakeHTTPClient) Do(_ *http.Request) (*http.Response, error) {
+	if f.err != nil {
+		return nil, f.err
 	}
+	return &http.Response{
+		StatusCode: f.statusCode,
+		Body:       io.NopCloser(strings.NewReader(f.body)),
+	}, nil
 }
 
-func TestFetchBands_SpotCheckValues(t *testing.T) {
-	_, client := newTestServer(t, http.StatusOK, catalogResponse)
+// expectedBands mirrors what FetchCatalogBandsDP2 should return for dp2BandsJSON.
+var expectedBands = []CatalogBand{
+	{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000},
+	{CapMin: 40, CapMax: 79, IOPSMin: 100, IOPSMax: 2000},
+	{CapMin: 80, CapMax: 99, IOPSMin: 100, IOPSMax: 4000},
+	{CapMin: 100, CapMax: 499, IOPSMin: 100, IOPSMax: 6000},
+	{CapMin: 500, CapMax: 999, IOPSMin: 100, IOPSMax: 10000},
+	{CapMin: 1000, CapMax: 1999, IOPSMin: 100, IOPSMax: 20000},
+	{CapMin: 2000, CapMax: 3999, IOPSMin: 200, IOPSMax: 40000},
+	{CapMin: 4000, CapMax: 7999, IOPSMin: 300, IOPSMax: 40000},
+	{CapMin: 8000, CapMax: 15999, IOPSMin: 500, IOPSMax: 64000},
+	{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000},
+}
 
-	bands, err := client.FetchBands(context.Background())
+// ---- FetchCatalogBandsDP2 ----------------------------------------------------
+
+func TestFetchCatalogBandsDP2_Success(t *testing.T) {
+	client := NewCatalogClientWithURL(&fakeHTTPClient{
+		statusCode: http.StatusOK,
+		body:       dp2BandsJSON,
+	}, "http://fake")
+
+	bands, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
-
-	assert.Equal(t, int64(10), bands[0].Capacity.Min, "smallest band starts at 10 GiB")
-	assert.Equal(t, int64(32000), bands[len(bands)-1].Capacity.Max, "largest band ends at 32000 GiB")
+	require.Len(t, bands, 10)
+	assert.Equal(t, CatalogBand{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000}, bands[0])
+	assert.Equal(t, CatalogBand{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000}, bands[9])
 }
 
-func TestFetchBands_SetsAcceptHeader(t *testing.T) {
-	var capturedAccept string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		capturedAccept = r.Header.Get("Accept")
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(catalogResponse))
-	}))
-	defer srv.Close()
+func TestFetchCatalogBandsDP2_ParsesAllBands(t *testing.T) {
+	client := NewCatalogClientWithURL(&fakeHTTPClient{
+		statusCode: http.StatusOK,
+		body:       dp2BandsJSON,
+	}, "http://fake")
 
-	_, err := NewClientWithEndpoint(srv.Client(), srv.URL).FetchBands(context.Background())
+	bands, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
-	assert.Equal(t, "application/json", capturedAccept)
+	require.Equal(t, expectedBands, bands)
 }
 
-// ---------------------------------------------------------------------------
-// FetchBands — error cases
-// ---------------------------------------------------------------------------
-
-func TestFetchBands_HTTPError(t *testing.T) {
-	_, client := newTestServer(t, http.StatusServiceUnavailable, "")
-
-	_, err := client.FetchBands(context.Background())
+func TestFetchCatalogBandsDP2_HTTPError(t *testing.T) {
+	client := NewCatalogClientWithURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake")
+	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "unexpected HTTP status 503 Service Unavailable")
+	assert.Contains(t, err.Error(), "HTTP request")
 }
 
-func TestFetchBands_MalformedJSON(t *testing.T) {
-	_, client := newTestServer(t, http.StatusOK, `{`)
-
-	_, err := client.FetchBands(context.Background())
+func TestFetchCatalogBandsDP2_Non2xxStatus(t *testing.T) {
+	client := NewCatalogClientWithURL(&fakeHTTPClient{
+		statusCode: http.StatusServiceUnavailable,
+		body:       `{"error":"unavailable"}`,
+	}, "http://fake")
+	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.True(t, strings.Contains(err.Error(), "failed to decode dp2 catalog response"),
-		"unexpected error: %v", err)
+	assert.Contains(t, err.Error(), "503")
 }
 
-func TestFetchBands_EmptyBands(t *testing.T) {
-	_, client := newTestServer(t, http.StatusOK, `{}`)
-
-	_, err := client.FetchBands(context.Background())
+func TestFetchCatalogBandsDP2_InvalidJSON(t *testing.T) {
+	client := NewCatalogClientWithURL(&fakeHTTPClient{
+		statusCode: http.StatusOK,
+		body:       `not-json`,
+	}, "http://fake")
+	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "contains no capacity-to-IOPS validation bands")
+	assert.Contains(t, err.Error(), "decode response")
 }
 
-func TestFetchBands_InvalidCapacityRange(t *testing.T) {
-	body := `{"metadata":{"other":{"profile":{"config_validation":[
-		{"capacity":{"min":100,"max":10},"iops":{"min":100,"max":1000}}
-	]}}}}`
-	_, client := newTestServer(t, http.StatusOK, body)
-
-	_, err := client.FetchBands(context.Background())
+func TestFetchCatalogBandsDP2_EmptyBands(t *testing.T) {
+	client := NewCatalogClientWithURL(&fakeHTTPClient{
+		statusCode: http.StatusOK,
+		body:       `{"metadata":{"other":{"profile":{"config_validation":[]}}}}`,
+	}, "http://fake")
+	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "contains an invalid capacity range")
+	assert.Contains(t, err.Error(), "no config_validation bands")
 }
 
-func TestFetchBands_InvalidIOPSRange(t *testing.T) {
-	body := `{"metadata":{"other":{"profile":{"config_validation":[
-		{"capacity":{"min":10,"max":39},"iops":{"min":1000,"max":100}}
-	]}}}}`
-	_, client := newTestServer(t, http.StatusOK, body)
-
-	_, err := client.FetchBands(context.Background())
+func TestFetchCatalogBandsDP2_MalformedEntry(t *testing.T) {
+	// An entry with capacity.min=0 must be rejected.
+	const malformedJSON = `{
+  "metadata":{"other":{"profile":{"config_validation":[
+    {"capacity":{"min":0,"max":39,"units":"gb"},"iops":{"min":100,"max":1000,"unit":"iops"}}
+  ]}}}}`
+	client := NewCatalogClientWithURL(&fakeHTTPClient{
+		statusCode: http.StatusOK,
+		body:       malformedJSON,
+	}, "http://fake")
+	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "contains an invalid IOPS range")
-}
-
-// ---------------------------------------------------------------------------
-// NewClient / NewClientWithEndpoint
-// ---------------------------------------------------------------------------
-
-func TestNewClient_NilHTTPClient(t *testing.T) {
-	c := NewClient(nil)
-	assert.NotNil(t, c)
-	assert.Equal(t, DefaultCatalogEndpoint, c.endpoint)
-}
-
-func TestNewClientWithEndpoint_EmptyEndpointFallsBackToDefault(t *testing.T) {
-	c := NewClientWithEndpoint(nil, "")
-	assert.Equal(t, DefaultCatalogEndpoint, c.endpoint)
+	assert.Contains(t, err.Error(), "invalid config_validation entry")
 }

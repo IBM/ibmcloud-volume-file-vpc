@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,9 @@
 package provider
 
 import (
-	"context"
+	"io"
 	"net/http"
-	"net/http/httptest"
 	"strings"
-	"sync"
 	"testing"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/catalog"
@@ -30,308 +28,198 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// catalogFixture matches the IBM Global Catalog JSON shape. Bands are
-// deliberately out of order to verify that sorting inside FetchBands works.
-//
-//	Band 0 (after sort): capacity 10–39 GiB,    iops 100–1 000
-//	Band 1:              capacity 40–79 GiB,    iops 100–2 000
-//	Band 2:              capacity 80–99 GiB,    iops 100–4 000
-//	Band 3:              capacity 100–499 GiB,  iops 100–6 000
-//	Band 4:              capacity 500–999 GiB,  iops 100–10 000
-//	Band 5:              capacity 1 000–1 999 GiB, iops 100–20 000
-//	Band 6:              capacity 16 000–32 000 GiB, iops 2 000–96 000
-const catalogFixture = `{
+// ---- shared fixtures ----------------------------------------------------------
+
+// dp2BandsJSON is a minimal but complete IBM Global Catalog dp2 API response.
+const dp2BandsJSON = `{
   "metadata": {
     "other": {
       "profile": {
         "config_validation": [
-          {"capacity":{"min":100,"max":499},  "iops":{"min":100,"max":6000}},
-          {"capacity":{"min":10,"max":39},    "iops":{"min":100,"max":1000}},
-          {"capacity":{"min":40,"max":79},    "iops":{"min":100,"max":2000}},
-          {"capacity":{"min":80,"max":99},    "iops":{"min":100,"max":4000}},
-          {"capacity":{"min":500,"max":999},  "iops":{"min":100,"max":10000}},
-          {"capacity":{"min":1000,"max":1999},"iops":{"min":100,"max":20000}},
-          {"capacity":{"min":16000,"max":32000},"iops":{"min":2000,"max":96000}}
+          {"capacity":{"min":10,   "max":39,   "units":"gb"},"iops":{"min":100,"max":1000, "unit":"iops"}},
+          {"capacity":{"min":40,   "max":79,   "units":"gb"},"iops":{"min":100,"max":2000, "unit":"iops"}},
+          {"capacity":{"min":80,   "max":99,   "units":"gb"},"iops":{"min":100,"max":4000, "unit":"iops"}},
+          {"capacity":{"min":100,  "max":499,  "units":"gb"},"iops":{"min":100,"max":6000, "unit":"iops"}},
+          {"capacity":{"min":500,  "max":999,  "units":"gb"},"iops":{"min":100,"max":10000,"unit":"iops"}},
+          {"capacity":{"min":1000, "max":1999, "units":"gb"},"iops":{"min":100,"max":20000,"unit":"iops"}},
+          {"capacity":{"min":2000, "max":3999, "units":"gb"},"iops":{"min":200,"max":40000,"unit":"iops"}},
+          {"capacity":{"min":4000, "max":7999, "units":"gb"},"iops":{"min":300,"max":40000,"unit":"iops"}},
+          {"capacity":{"min":8000, "max":15999,"units":"gb"},"iops":{"min":500,"max":64000,"unit":"iops"}},
+          {"capacity":{"min":16000,"max":32000,"units":"gb"},"iops":{"min":2000,"max":96000,"unit":"iops"}}
         ]
       }
     }
   }
 }`
 
-// newCatalogServer returns an httptest.Server and a catalog.Client pointed at
-// it. The server always replies with the given status and body.
-func newCatalogServer(t *testing.T, status int, body string) (*httptest.Server, *catalog.Client) {
-	t.Helper()
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(status)
-		_, _ = w.Write([]byte(body))
-	}))
-	t.Cleanup(srv.Close)
-	return srv, catalog.NewClientWithEndpoint(srv.Client(), srv.URL)
+// knownBands is the parsed form of dp2BandsJSON, used wherever a pre-built
+// band slice is needed.
+var knownBands = []catalog.CatalogBand{
+	{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000},
+	{CapMin: 40, CapMax: 79, IOPSMin: 100, IOPSMax: 2000},
+	{CapMin: 80, CapMax: 99, IOPSMin: 100, IOPSMax: 4000},
+	{CapMin: 100, CapMax: 499, IOPSMin: 100, IOPSMax: 6000},
+	{CapMin: 500, CapMax: 999, IOPSMin: 100, IOPSMax: 10000},
+	{CapMin: 1000, CapMax: 1999, IOPSMin: 100, IOPSMax: 20000},
+	{CapMin: 2000, CapMax: 3999, IOPSMin: 200, IOPSMax: 40000},
+	{CapMin: 4000, CapMax: 7999, IOPSMin: 300, IOPSMax: 40000},
+	{CapMin: 8000, CapMax: 15999, IOPSMin: 500, IOPSMax: 64000},
+	{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000},
 }
 
-// newService is a convenience helper that builds a CapacityRoundoffService
-// backed by a test catalog server.
-func newService(t *testing.T, status int, body string) (CapacityRoundoffService, *httptest.Server) {
-	t.Helper()
-	logger, teardown := GetTestLogger(t)
-	t.Cleanup(teardown)
-	srv, client := newCatalogServer(t, status, body)
-	return NewCapacityRoundoffService(client, logger), srv
+// fakeHTTP returns the configured response without making any network call.
+type fakeHTTP struct {
+	statusCode int
+	body       string
+	err        error
 }
 
-// ---------------------------------------------------------------------------
-// NewCapacityRoundoffService constructor
-// ---------------------------------------------------------------------------
-
-func TestNewCapacityRoundoffService_NotNil(t *testing.T) {
-	logger, teardown := GetTestLogger(t)
-	defer teardown()
-
-	_, client := newCatalogServer(t, http.StatusOK, catalogFixture)
-	svc := NewCapacityRoundoffService(client, logger)
-	assert.NotNil(t, svc)
+func (f *fakeHTTP) Do(_ *http.Request) (*http.Response, error) {
+	if f.err != nil {
+		return nil, f.err
+	}
+	return &http.Response{
+		StatusCode: f.statusCode,
+		Body:       io.NopCloser(strings.NewReader(f.body)),
+	}, nil
 }
 
-// ---------------------------------------------------------------------------
-// RoundUpCapacityForIOPS — input validation
-// ---------------------------------------------------------------------------
+// ---- FetchCapacityBandsDP2 ---------------------------------------------------
 
-func TestRoundUpCapacityForIOPS_ZeroCapacityReturnsError(t *testing.T) {
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 0, 1000)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "requested capacity must be greater than zero")
-}
-
-func TestRoundUpCapacityForIOPS_NegativeCapacityReturnsError(t *testing.T) {
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), -5, 1000)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "requested capacity must be greater than zero")
-}
-
-func TestRoundUpCapacityForIOPS_ZeroIOPSReturnsError(t *testing.T) {
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 0)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "requested IOPS must be greater than zero")
-}
-
-// ---------------------------------------------------------------------------
-// RoundUpCapacityForIOPS — round-up logic
-// ---------------------------------------------------------------------------
-
-func TestRoundUpCapacityForIOPS_CapacityAlreadySufficient(t *testing.T) {
-	// Band: iops 100–1000 requires capacity >= 10 GiB. Requesting 20 GiB is fine.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 20, 500)
+func TestFetchCapacityBandsDP2_Success(t *testing.T) {
+	bands, err := FetchCapacityBandsDP2(&fakeHTTP{
+		statusCode: http.StatusOK,
+		body:       dp2BandsJSON,
+	})
 	require.NoError(t, err)
-	assert.Equal(t, int64(20), got, "capacity should not be changed when already sufficient")
+	require.Equal(t, knownBands, bands)
 }
 
-func TestRoundUpCapacityForIOPS_CapacityExactlyAtMinimum(t *testing.T) {
-	// Band: iops 100–1000 requires capacity >= 10 GiB. Requesting exactly 10 GiB.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 10, 500)
-	require.NoError(t, err)
-	assert.Equal(t, int64(10), got, "capacity exactly at minimum should not be rounded up")
+func TestFetchCapacityBandsDP2_NilHTTPClient_UsesDefault(t *testing.T) {
+	// Passing nil must not panic (no nil-pointer dereference). The
+	// implementation substitutes http.DefaultClient before widening to the
+	// HTTPDoer interface. Depending on network access, the call may succeed
+	// or return a network error — both are acceptable. We only assert that
+	// the call completes without panicking.
+	require.NotPanics(t, func() {
+		_, _ = FetchCapacityBandsDP2(nil)
+	})
 }
 
-func TestRoundUpCapacityForIOPS_IOPSRequiresHigherCapacity(t *testing.T) {
-	// iops=7000 falls into band capacity 500–999 (iops 100–10000, capacity.min=500).
-	// Requesting 100 GiB should be rounded up to 500 GiB.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 7000)
-	require.NoError(t, err)
-	assert.Equal(t, int64(500), got, "capacity should be rounded up to band minimum")
-}
-
-func TestRoundUpCapacityForIOPS_IOPSAtBandBoundary_Min(t *testing.T) {
-	// iops=100 (the minimum across all bands) matches the first band (cap.min=10).
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 5, 100)
-	require.NoError(t, err)
-	assert.Equal(t, int64(10), got, "capacity should be rounded up to 10 GiB (first band minimum)")
-}
-
-func TestRoundUpCapacityForIOPS_IOPSAtBandBoundary_Max(t *testing.T) {
-	// iops=10000 (max of band capacity 500–999). Requesting 100 GiB → round up to 500 GiB.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 10000)
-	require.NoError(t, err)
-	assert.Equal(t, int64(500), got, "capacity should be rounded up to 500 GiB (band max boundary)")
-}
-
-func TestRoundUpCapacityForIOPS_HighIOPS_LargeCapacityBand(t *testing.T) {
-	// iops=50000 falls in band capacity 16000–32000 (iops 2000–96000). cap.min=16000.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 1000, 50000)
-	require.NoError(t, err)
-	assert.Equal(t, int64(16000), got, "capacity should be rounded up to 16000 GiB for high-IOPS band")
-}
-
-// ---------------------------------------------------------------------------
-// RoundUpCapacityForIOPS — IOPS outside all bands
-// ---------------------------------------------------------------------------
-
-func TestRoundUpCapacityForIOPS_IOPSBelowAllBands(t *testing.T) {
-	// iops=50 is below the minimum (100) of all bands.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 50)
+func TestFetchCapacityBandsDP2_HTTPError(t *testing.T) {
+	_, err := FetchCapacityBandsDP2(&fakeHTTP{err: io.ErrUnexpectedEOF})
 	require.Error(t, err)
-	assert.True(t, strings.Contains(err.Error(), "no dp2 catalog band covers iops=50"),
-		"unexpected error: %v", err)
+	assert.Contains(t, err.Error(), "HTTP request")
 }
 
-func TestRoundUpCapacityForIOPS_IOPSAboveAllBands(t *testing.T) {
-	// iops=200000 is above the maximum (96000) of all bands.
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 200000)
+func TestFetchCapacityBandsDP2_Non2xxStatus(t *testing.T) {
+	_, err := FetchCapacityBandsDP2(&fakeHTTP{
+		statusCode: http.StatusServiceUnavailable,
+		body:       `{"error":"unavailable"}`,
+	})
 	require.Error(t, err)
-	assert.True(t, strings.Contains(err.Error(), "no dp2 catalog band covers iops=200000"),
-		"unexpected error: %v", err)
+	assert.Contains(t, err.Error(), "503")
 }
 
-// ---------------------------------------------------------------------------
-// RoundUpCapacityForIOPS — catalog fetch failure
-// ---------------------------------------------------------------------------
-
-func TestRoundUpCapacityForIOPS_CatalogFetchHTTPError(t *testing.T) {
-	svc, _ := newService(t, http.StatusServiceUnavailable, "")
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 1000)
+func TestFetchCapacityBandsDP2_InvalidJSON(t *testing.T) {
+	_, err := FetchCapacityBandsDP2(&fakeHTTP{
+		statusCode: http.StatusOK,
+		body:       `not-json`,
+	})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to fetch dp2 capacity bands")
+	assert.Contains(t, err.Error(), "decode response")
 }
 
-func TestRoundUpCapacityForIOPS_CatalogFetchMalformedJSON(t *testing.T) {
-	svc, _ := newService(t, http.StatusOK, `{bad json}`)
-
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 1000)
+func TestFetchCapacityBandsDP2_EmptyBands(t *testing.T) {
+	_, err := FetchCapacityBandsDP2(&fakeHTTP{
+		statusCode: http.StatusOK,
+		body:       `{"metadata":{"other":{"profile":{"config_validation":[]}}}}`,
+	})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to fetch dp2 capacity bands")
+	assert.Contains(t, err.Error(), "no config_validation bands")
 }
 
-// ---------------------------------------------------------------------------
-// Caching — catalog is only fetched once
-// ---------------------------------------------------------------------------
+// ---- NewCapacityRoundoff -----------------------------------------------------
 
-func TestRoundUpCapacityForIOPS_BandsCachedAfterFirstCall(t *testing.T) {
-	callCount := 0
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		callCount++
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(catalogFixture))
-	}))
-	defer srv.Close()
+func TestNewCapacityRoundoff_Success(t *testing.T) {
+	svc, err := NewCapacityRoundoff(knownBands)
+	require.NoError(t, err)
+	require.NotNil(t, svc)
+}
 
-	logger, teardown := GetTestLogger(t)
-	defer teardown()
+func TestNewCapacityRoundoff_EmptyBands_ReturnsError(t *testing.T) {
+	_, err := NewCapacityRoundoff([]catalog.CatalogBand{})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "empty bands slice")
+}
 
-	client := catalog.NewClientWithEndpoint(srv.Client(), srv.URL)
-	svc := NewCapacityRoundoffService(client, logger)
+// ---- GetMinCapacityForIops ---------------------------------------------------
 
-	// Three consecutive calls — all should succeed and only one HTTP fetch occurs.
-	for i := 0; i < 3; i++ {
-		_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 1000)
-		require.NoError(t, err, "call %d failed", i)
+func TestGetMinCapacityForIops(t *testing.T) {
+	svc, err := NewCapacityRoundoff(knownBands)
+	require.NoError(t, err)
+
+	testCases := []struct {
+		name          string
+		requestedIops int
+		expectedMin   int
+		expectError   bool
+		errorContains string
+	}{
+		// First band covers up to 1000 IOPS; min capacity is 10 GiB.
+		{name: "iops=100 (lowest) -> minCap=10", requestedIops: 100, expectedMin: 10},
+		{name: "iops=1000 (exact band-1 max) -> minCap=10", requestedIops: 1000, expectedMin: 10},
+		// 1001 exceeds band-1 max; first matching band is 40-79 GiB (max=2000).
+		{name: "iops=1001 -> minCap=40", requestedIops: 1001, expectedMin: 40},
+		// 3000 fits in 80-99 GiB band (IOPSMax=4000).
+		{name: "iops=3000 -> minCap=80", requestedIops: 3000, expectedMin: 80},
+		// 6001 exceeds band-4 max (6000); next band is 500-999 GiB (max=10000).
+		{name: "iops=6001 -> minCap=500", requestedIops: 6001, expectedMin: 500},
+		// 20000 fits in 1000-1999 GiB band exactly.
+		{name: "iops=20000 (exact band-6 max) -> minCap=1000", requestedIops: 20000, expectedMin: 1000},
+		// Last band covers up to 96000 IOPS.
+		{name: "iops=96000 (last band max) -> minCap=16000", requestedIops: 96000, expectedMin: 16000},
+		// Above all bands.
+		{
+			name:          "iops=999999 (above all bands) -> error",
+			requestedIops: 999999,
+			expectError:   true,
+			errorContains: "no dp2 catalog band covers iops=999999",
+		},
 	}
 
-	assert.Equal(t, 1, callCount, "catalog HTTP endpoint should be called only once (bands are cached)")
-}
-
-func TestRoundUpCapacityForIOPS_CacheNotPopulatedOnFetchError(t *testing.T) {
-	// First call → catalog returns 503 (fetch fails, bands NOT cached).
-	// Second call → catalog returns 200 (should succeed because errors are not cached).
-	calls := 0
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		calls++
-		if calls == 1 {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(catalogFixture))
-	}))
-	defer srv.Close()
-
-	logger, teardown := GetTestLogger(t)
-	defer teardown()
-
-	client := catalog.NewClientWithEndpoint(srv.Client(), srv.URL)
-	svc := NewCapacityRoundoffService(client, logger)
-
-	// First call: should fail.
-	_, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 1000)
-	require.Error(t, err, "expected error on first call (503)")
-
-	// Second call: should succeed (self-heal after transient error).
-	got, err := svc.RoundUpCapacityForIOPS(context.Background(), 100, 1000)
-	require.NoError(t, err, "expected success on second call")
-	assert.Equal(t, int64(100), got)
-}
-
-// ---------------------------------------------------------------------------
-// Concurrency — no data race under parallel calls
-// ---------------------------------------------------------------------------
-
-func TestRoundUpCapacityForIOPS_ConcurrentCallsNoPanic(t *testing.T) {
-	svc, _ := newService(t, http.StatusOK, catalogFixture)
-
-	const goroutines = 20
-	var wg sync.WaitGroup
-	wg.Add(goroutines)
-
-	for i := 0; i < goroutines; i++ {
-		go func() {
-			defer wg.Done()
-			_, _ = svc.RoundUpCapacityForIOPS(context.Background(), 100, 1000)
-		}()
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := svc.GetMinCapacityForIops(tc.requestedIops)
+			if tc.expectError {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.errorContains)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tc.expectedMin, got)
+			}
+		})
 	}
-	wg.Wait()
 }
 
-// ---------------------------------------------------------------------------
-// minimumCapacityForIOPS (package-internal unit tests)
-// ---------------------------------------------------------------------------
+// ---- round-trip: FetchCapacityBandsDP2 -> NewCapacityRoundoff ---------------
 
-func TestMinimumCapacityForIOPS_MatchesFirstContainingBand(t *testing.T) {
-	bands := []catalog.Band{
-		{Capacity: catalog.BandRange{Min: 10, Max: 39}, IOPS: catalog.BandRange{Min: 100, Max: 1000}},
-		{Capacity: catalog.BandRange{Min: 40, Max: 79}, IOPS: catalog.BandRange{Min: 100, Max: 2000}},
-	}
-
-	// iops=1500 falls only in the second band.
-	min, err := minimumCapacityForIOPS(bands, 1500)
+func TestRoundTrip_FetchThenLookup(t *testing.T) {
+	bands, err := FetchCapacityBandsDP2(&fakeHTTP{
+		statusCode: http.StatusOK,
+		body:       dp2BandsJSON,
+	})
 	require.NoError(t, err)
-	assert.Equal(t, int64(40), min)
-}
 
-func TestMinimumCapacityForIOPS_NoBandCoversIOPS(t *testing.T) {
-	bands := []catalog.Band{
-		{Capacity: catalog.BandRange{Min: 10, Max: 39}, IOPS: catalog.BandRange{Min: 100, Max: 1000}},
-	}
+	svc, err := NewCapacityRoundoff(bands)
+	require.NoError(t, err)
 
-	_, err := minimumCapacityForIOPS(bands, 99999)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no dp2 catalog band covers iops=99999")
-}
+	// Spot-check a couple of values using the freshly fetched bands.
+	min, err := svc.GetMinCapacityForIops(3000)
+	require.NoError(t, err)
+	assert.Equal(t, 80, min)
 
-func TestMinimumCapacityForIOPS_EmptyBands(t *testing.T) {
-	_, err := minimumCapacityForIOPS(nil, 500)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no dp2 catalog band covers iops=500")
+	min, err = svc.GetMinCapacityForIops(20000)
+	require.NoError(t, err)
+	assert.Equal(t, 1000, min)
 }

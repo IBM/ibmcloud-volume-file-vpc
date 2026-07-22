@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,130 +14,142 @@
  * limitations under the License.
  */
 
-// Package catalog provides a thin HTTP client for the IBM Global Catalog API
-// that fetches the dp2 capacity-to-IOPS validation bands.
-// Business logic (round-off, caching) belongs in the provider layer; only the
-// raw fetch and the shared data types are defined here.
+// Package catalog provides a minimal HTTP client for fetching dp2 profile
+// capacity-to-IOPS bands from the IBM Global Catalog API.
+// No authentication is required — the endpoint is public.
+// This package has no business logic and no caching; it only fetches and
+// parses raw band data. Higher-level logic lives in common/file.
 package catalog
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"sort"
-	"time"
 )
 
 const (
-	// DefaultCatalogEndpoint is the IBM Global Catalog URL for the dp2
-	// file-share profile, including the metadata needed to read validation bands.
-	DefaultCatalogEndpoint = "https://globalcatalog.cloud.ibm.com/api/v1/dp2?include=metadata.other"
-
-	defaultCatalogTimeout  = 60 * time.Second
-	maxCatalogResponseSize = 4 << 20 // 4 MiB
+	// CatalogDP2URL is the public IBM Global Catalog endpoint for the dp2
+	// file-share profile. No authentication is required.
+	CatalogDP2URL = "https://globalcatalog.cloud.ibm.com/api/v1/dp2"
 )
 
-// BandRange is an inclusive [Min, Max] integer interval used inside a Band.
-type BandRange struct {
-	Min int64 `json:"min"`
-	Max int64 `json:"max"`
+// CatalogBand represents a single capacity/IOPS band from the IBM Global
+// Catalog dp2 config_validation array. Each band defines the inclusive GiB
+// capacity range and the inclusive IOPS range that are valid together.
+type CatalogBand struct {
+	// CapMin is the minimum share size (GiB) for this band.
+	CapMin int
+	// CapMax is the maximum share size (GiB) for this band.
+	CapMax int
+	// IOPSMin is the minimum IOPS value allowed for this band.
+	IOPSMin int
+	// IOPSMax is the maximum IOPS value allowed for this band.
+	IOPSMax int
 }
 
-// Band is one row of the dp2 capacity-to-IOPS validation table published by
-// the IBM Global Catalog. A share whose IOPS falls within [IOPS.Min, IOPS.Max]
-// must have at least Capacity.Min GiB of storage.
-type Band struct {
-	Capacity BandRange `json:"capacity"`
-	IOPS     BandRange `json:"iops"`
-}
-
-// catalogEntry mirrors the JSON structure returned by the Global Catalog API.
-type catalogEntry struct {
+// dp2Response is the minimal subset of the IBM Global Catalog JSON document
+// required to extract the config_validation bands.
+type dp2Response struct {
 	Metadata struct {
 		Other struct {
 			Profile struct {
-				ConfigValidation []Band `json:"config_validation"`
+				ConfigValidation []struct {
+					Capacity struct {
+						Min   int    `json:"min"`
+						Max   int    `json:"max"`
+						Units string `json:"units"`
+					} `json:"capacity"`
+					Iops struct {
+						Min  int    `json:"min"`
+						Max  int    `json:"max"`
+						Unit string `json:"unit"`
+					} `json:"iops"`
+				} `json:"config_validation"`
 			} `json:"profile"`
 		} `json:"other"`
 	} `json:"metadata"`
 }
 
-// Client is a stateless HTTP client for the IBM Global Catalog dp2 endpoint.
-// It performs a fresh network call on every FetchBands invocation; callers
-// that need caching should wrap it (e.g. the provider layer).
-type Client struct {
-	httpClient *http.Client
-	endpoint   string
+// HTTPDoer is the minimal interface required from an HTTP client so it can be
+// replaced with a test double in unit tests.
+type HTTPDoer interface {
+	Do(req *http.Request) (*http.Response, error)
 }
 
-// NewClient creates a Client that talks to DefaultCatalogEndpoint.
-// A nil httpClient is replaced with a default that has a 60-second timeout.
-func NewClient(httpClient *http.Client) *Client {
-	return NewClientWithEndpoint(httpClient, DefaultCatalogEndpoint)
+// CatalogClient fetches and parses dp2 capacity/IOPS bands from the IBM Global
+// Catalog API. Construct one via NewCatalogClient or NewCatalogClientWithURL.
+type CatalogClient struct {
+	url        string
+	httpClient HTTPDoer
 }
 
-// NewClientWithEndpoint creates a Client with a custom endpoint.
-// Useful for private endpoints and unit tests.
-func NewClientWithEndpoint(httpClient *http.Client, endpoint string) *Client {
+// NewCatalogClient returns a CatalogClient that calls the IBM Global Catalog
+// dp2 endpoint. Pass nil to use http.DefaultClient.
+func NewCatalogClient(httpClient HTTPDoer) *CatalogClient {
 	if httpClient == nil {
-		httpClient = &http.Client{Timeout: defaultCatalogTimeout}
+		httpClient = http.DefaultClient
 	}
-	if endpoint == "" {
-		endpoint = DefaultCatalogEndpoint
-	}
-	return &Client{httpClient: httpClient, endpoint: endpoint}
+	return NewCatalogClientWithURL(httpClient, CatalogDP2URL)
 }
 
-// FetchBands performs a single HTTP GET to the catalog endpoint, validates the
-// response, and returns the bands sorted ascending by Capacity.Min.
-// A fresh HTTP request is made on every call.
-func (c *Client) FetchBands(ctx context.Context) ([]Band, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.endpoint, nil)
+// NewCatalogClientWithURL returns a CatalogClient that calls the supplied
+// catalog URL. Pass nil to use http.DefaultClient. Intended for unit testing.
+func NewCatalogClientWithURL(httpClient HTTPDoer, url string) *CatalogClient {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &CatalogClient{
+		url:        url,
+		httpClient: httpClient,
+	}
+}
+
+// FetchCatalogBandsDP2 retrieves the dp2 config_validation bands from the IBM
+// Global Catalog API and returns them ordered from the smallest capacity band
+// to the largest (as they appear in the catalog response).
+//
+// Returns a non-nil error if the HTTP request fails, the response status is
+// not 2xx, the body cannot be decoded, any entry is malformed, or the catalog
+// returns no bands.
+func (c *CatalogClient) FetchCatalogBandsDP2() ([]CatalogBand, error) {
+	req, err := http.NewRequest(http.MethodGet, c.url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create dp2 catalog request: %w", err)
+		return nil, fmt.Errorf("catalog: build request: %w", err)
 	}
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch dp2 catalog: %w", err)
+		return nil, fmt.Errorf("catalog: HTTP request to %s: %w", c.url, err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to fetch dp2 catalog: unexpected HTTP status %s", resp.Status)
-	}
-
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxCatalogResponseSize+1))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read dp2 catalog response: %w", err)
-	}
-	if len(body) > maxCatalogResponseSize {
-		return nil, fmt.Errorf("dp2 catalog response exceeds %d bytes", maxCatalogResponseSize)
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("catalog: unexpected status %d from %s", resp.StatusCode, c.url)
 	}
 
-	var entry catalogEntry
-	if err := json.Unmarshal(body, &entry); err != nil {
-		return nil, fmt.Errorf("failed to decode dp2 catalog response: %w", err)
+	var parsed dp2Response
+	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+		return nil, fmt.Errorf("catalog: decode response: %w", err)
 	}
 
-	bands := entry.Metadata.Other.Profile.ConfigValidation
-	if len(bands) == 0 {
-		return nil, fmt.Errorf("dp2 catalog response contains no capacity-to-IOPS validation bands")
+	raw := parsed.Metadata.Other.Profile.ConfigValidation
+	if len(raw) == 0 {
+		return nil, fmt.Errorf("catalog: dp2 catalog returned no config_validation bands")
 	}
-	for i, b := range bands {
-		if b.Capacity.Min <= 0 || b.Capacity.Max < b.Capacity.Min {
-			return nil, fmt.Errorf("dp2 catalog band %d contains an invalid capacity range", i)
+
+	bands := make([]CatalogBand, 0, len(raw))
+	for i, entry := range raw {
+		if entry.Capacity.Min <= 0 || entry.Capacity.Max <= 0 || entry.Iops.Max <= 0 {
+			return nil, fmt.Errorf("catalog: invalid config_validation entry at index %d: capacity=[%d,%d] iops.max=%d",
+				i, entry.Capacity.Min, entry.Capacity.Max, entry.Iops.Max)
 		}
-		if b.IOPS.Min <= 0 || b.IOPS.Max < b.IOPS.Min {
-			return nil, fmt.Errorf("dp2 catalog band %d contains an invalid IOPS range", i)
-		}
+		bands = append(bands, CatalogBand{
+			CapMin:  entry.Capacity.Min,
+			CapMax:  entry.Capacity.Max,
+			IOPSMin: entry.Iops.Min,
+			IOPSMax: entry.Iops.Max,
+		})
 	}
-
-	sort.Slice(bands, func(i, j int) bool {
-		return bands[i].Capacity.Min < bands[j].Capacity.Min
-	})
 	return bands, nil
 }

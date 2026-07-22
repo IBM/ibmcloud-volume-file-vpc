@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 IBM Corp.
+ * Copyright 2025 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,117 +18,86 @@
 package provider
 
 import (
-	"context"
 	"fmt"
-	"sync"
+	"net/http"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/catalog"
-	"go.uber.org/zap"
 )
 
-// CapacityRoundoffService is the interface the CSI driver uses to resolve the
-// minimum valid capacity for a given IOPS value and to adjust a user-requested
-// capacity upwards when it is too small for the requested IOPS.
+// HTTPDoer is the minimal interface required from an HTTP client so that it
+// can be replaced with a test double. *http.Client satisfies this interface.
+// Re-exported here so callers of this package need not import common/catalog.
+type HTTPDoer = catalog.HTTPDoer
+
+// CatalogBand is a type alias for catalog.CatalogBand, re-exported so callers
+// of this package need not import common/catalog directly.
+type CatalogBand = catalog.CatalogBand
+
+// CapacityRoundoff is the interface the CSI driver uses to determine the
+// minimum capacity (GiB) that satisfies a requested IOPS value for the dp2
+// profile.
 //
-// The interface is defined here (in the provider layer) so that the driver
-// imports only this package and never reaches into common/catalog directly.
+// Implementations must be safe for concurrent use after construction.
+type CapacityRoundoff interface {
+	// GetMinCapacityForIops returns the minimum share capacity in GiB that
+	// satisfies the requested IOPS according to the dp2 catalog bands.
+	//
+	// It scans the bands (ordered from the smallest capacity band to the
+	// largest) and returns the CapMin of the first band whose IOPSMax is >=
+	// requestedIops.
+	//
+	// Returns an error if no band covers the requested IOPS.
+	GetMinCapacityForIops(requestedIops int) (int, error)
+}
+
+// capacityRoundoff is the production implementation of CapacityRoundoff.
+// It is a pure algorithm over a fixed band slice; it never touches the network.
+type capacityRoundoff struct {
+	bands []catalog.CatalogBand
+}
+
+// FetchCapacityBandsDP2 fetches the dp2 capacity/IOPS bands from the IBM
+// Global Catalog API using the supplied HTTP client and returns them as a
+// slice ordered from the smallest capacity band to the largest.
 //
-//go:generate counterfeiter -o fakes/capacity_roundoff_service.go --fake-name CapacityRoundoffService . CapacityRoundoffService
-type CapacityRoundoffService interface {
-	// RoundUpCapacityForIOPS returns requestedCapacityGiB unchanged when it is
-	// already sufficient for requestedIOPS, or the catalog-derived minimum when
-	// it is too small. Returns an error when requestedIOPS is outside all
-	// catalog bands or the catalog is temporarily unavailable.
-	RoundUpCapacityForIOPS(ctx context.Context, requestedCapacityGiB, requestedIOPS int64) (int64, error)
-}
-
-// capacityRoundoffService is the production implementation of
-// CapacityRoundoffService. It wraps a catalog.Client and caches the full band
-// table after the first successful HTTP fetch so that all subsequent calls
-// scan in memory with no additional network I/O.
-type capacityRoundoffService struct {
-	client *catalog.Client
-	logger *zap.Logger
-
-	mu    sync.Mutex
-	bands []catalog.Band // nil until first successful fetch
-}
-
-// NewCapacityRoundoffService creates a CapacityRoundoffService backed by the
-// supplied catalog.Client. Pass nil for httpClient to use a default HTTP client
-// with a 60-second timeout, and an empty endpoint to use the IBM production
-// Global Catalog URL.
+// Pass nil or http.DefaultClient for production use.
+// This is the only function in this package that performs network I/O.
+// The caller decides when to call it and is responsible for caching the
+// returned slice (e.g. once at driver startup).
 //
-// The service is safe for concurrent use. Band data is fetched lazily on the
-// first RoundUpCapacityForIOPS call and cached for the lifetime of the object.
-func NewCapacityRoundoffService(client *catalog.Client, logger *zap.Logger) CapacityRoundoffService {
-	return &capacityRoundoffService{
-		client: client,
-		logger: logger,
+// Returns an error if the catalog is unreachable, returns a non-2xx status,
+// or contains no valid bands.
+func FetchCapacityBandsDP2(httpClient HTTPDoer) ([]catalog.CatalogBand, error) {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
 	}
+	return catalog.NewCatalogClient(httpClient).FetchCatalogBandsDP2()
 }
 
-// RoundUpCapacityForIOPS implements CapacityRoundoffService.
-func (s *capacityRoundoffService) RoundUpCapacityForIOPS(ctx context.Context, requestedCapacityGiB, requestedIOPS int64) (int64, error) {
-	if requestedCapacityGiB <= 0 {
-		return 0, fmt.Errorf("requested capacity must be greater than zero: %d GiB", requestedCapacityGiB)
+// NewCapacityRoundoff constructs a CapacityRoundoff from a pre-fetched slice
+// of dp2 catalog bands.
+//
+// The caller is responsible for fetching the bands (via FetchCapacityBandsDP2)
+// and for deciding when to refresh them. This keeps the service a pure
+// algorithm with no I/O — the driver can re-create it on any refresh cycle
+// without this function ever making an HTTP call.
+//
+// Returns an error if bands is empty.
+func NewCapacityRoundoff(bands []catalog.CatalogBand) (CapacityRoundoff, error) {
+	if len(bands) == 0 {
+		return nil, fmt.Errorf("provider: cannot create CapacityRoundoff with empty bands slice")
 	}
-	if requestedIOPS <= 0 {
-		return 0, fmt.Errorf("requested IOPS must be greater than zero: %d", requestedIOPS)
-	}
-
-	bands, err := s.getBands(ctx)
-	if err != nil {
-		return 0, err
-	}
-
-	minCap, err := minimumCapacityForIOPS(bands, requestedIOPS)
-	if err != nil {
-		return 0, err
-	}
-
-	if requestedCapacityGiB < minCap {
-		if s.logger != nil {
-			s.logger.Info("RoundUpCapacityForIOPS: rounding up capacity to meet IOPS requirement",
-				zap.Int64("requestedCapacityGiB", requestedCapacityGiB),
-				zap.Int64("adjustedCapacityGiB", minCap),
-				zap.Int64("requestedIOPS", requestedIOPS),
-			)
-		}
-		return minCap, nil
-	}
-	return requestedCapacityGiB, nil
+	return &capacityRoundoff{bands: bands}, nil
 }
 
-// getBands returns the cached band table, fetching from the catalog on the
-// first call. Errors are not cached so transient outages self-heal.
-func (s *capacityRoundoffService) getBands(ctx context.Context) ([]catalog.Band, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if len(s.bands) > 0 {
-		return s.bands, nil
-	}
-
-	bands, err := s.client.FetchBands(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch dp2 capacity bands: %w", err)
-	}
-
-	s.bands = bands
-	if s.logger != nil {
-		s.logger.Info("RoundUpCapacityForIOPS: dp2 capacity bands cached", zap.Int("bandCount", len(bands)))
-	}
-	return s.bands, nil
-}
-
-// minimumCapacityForIOPS returns the Capacity.Min of the first band in bands
-// whose IOPS range contains requestedIOPS.
-func minimumCapacityForIOPS(bands []catalog.Band, requestedIOPS int64) (int64, error) {
-	for _, b := range bands {
-		if requestedIOPS >= b.IOPS.Min && requestedIOPS <= b.IOPS.Max {
-			return b.Capacity.Min, nil
+// GetMinCapacityForIops satisfies CapacityRoundoff.
+// It scans the band slice and returns the CapMin of the first band whose
+// IOPSMax >= requestedIops.
+func (s *capacityRoundoff) GetMinCapacityForIops(requestedIops int) (int, error) {
+	for _, band := range s.bands {
+		if band.IOPSMax >= requestedIops {
+			return band.CapMin, nil
 		}
 	}
-	return 0, fmt.Errorf("no dp2 catalog band covers iops=%d", requestedIOPS)
+	return 0, fmt.Errorf("provider: no dp2 catalog band covers iops=%d", requestedIops)
 }
