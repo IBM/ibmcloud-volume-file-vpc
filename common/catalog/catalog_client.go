@@ -30,7 +30,7 @@ import (
 const (
 	// CatalogDP2URL is the public IBM Global Catalog endpoint for the dp2
 	// file-share profile. No authentication is required.
-	CatalogDP2URL = "https://globalcatalog.cloud.ibm.com/api/v1/dp2"
+	CatalogDP2URL = "https://private.globalcatalog.cloud.ibm.com/api/v1/dp2"
 )
 
 // CatalogBand represents a single capacity/IOPS band from the IBM Global
