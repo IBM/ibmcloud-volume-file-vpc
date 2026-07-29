@@ -90,7 +90,7 @@ func TestFetchCapacityBandsDP2_Success(t *testing.T) {
 	bands, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       dp2BandsJSON,
-	})
+	}, "https://us-south.iaas.cloud.ibm.com")
 	require.NoError(t, err)
 	require.Equal(t, knownBands, bands)
 }
@@ -102,12 +102,12 @@ func TestFetchCapacityBandsDP2_NilHTTPClient_UsesDefault(t *testing.T) {
 	// or return a network error — both are acceptable. We only assert that
 	// the call completes without panicking.
 	require.NotPanics(t, func() {
-		_, _ = FetchCapacityBandsDP2(nil)
+		_, _ = FetchCapacityBandsDP2(nil, "https://us-south.iaas.cloud.ibm.com")
 	})
 }
 
 func TestFetchCapacityBandsDP2_HTTPError(t *testing.T) {
-	_, err := FetchCapacityBandsDP2(&fakeHTTP{err: io.ErrUnexpectedEOF})
+	_, err := FetchCapacityBandsDP2(&fakeHTTP{err: io.ErrUnexpectedEOF}, "https://us-south.iaas.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
 }
@@ -116,7 +116,7 @@ func TestFetchCapacityBandsDP2_Non2xxStatus(t *testing.T) {
 	_, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
-	})
+	}, "https://us-south.iaas.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
 }
@@ -125,7 +125,7 @@ func TestFetchCapacityBandsDP2_InvalidJSON(t *testing.T) {
 	_, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
-	})
+	}, "https://us-south.iaas.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
 }
@@ -134,7 +134,7 @@ func TestFetchCapacityBandsDP2_EmptyBands(t *testing.T) {
 	_, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       `{"metadata":{"other":{"profile":{"config_validation":[]}}}}`,
-	})
+	}, "https://us-south.iaas.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no config_validation bands")
 }
@@ -208,7 +208,7 @@ func TestRoundTrip_FetchThenLookup(t *testing.T) {
 	bands, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       dp2BandsJSON,
-	})
+	}, "https://us-south.iaas.cloud.ibm.com")
 	require.NoError(t, err)
 
 	svc, err := NewCapacityRoundoff(bands)

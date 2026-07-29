@@ -60,18 +60,24 @@ type capacityRoundoff struct {
 // Global Catalog API using the supplied HTTP client and returns them as a
 // slice ordered from the smallest capacity band to the largest.
 //
-// Pass nil or http.DefaultClient for production use.
+// referenceURL is any IBM Cloud endpoint URL already in use by the caller
+// (e.g. conf.VPCConfig.G2TokenExchangeURL). It is passed to
+// catalog.EndpointForEnv to select the correct stage or production Global
+// Catalog endpoint: URLs containing "test" or "stage" resolve to the staging
+// catalog, all others resolve to the production catalog.
+//
+// Pass nil for httpClient to use http.DefaultClient.
 // This is the only function in this package that performs network I/O.
 // The caller decides when to call it and is responsible for caching the
 // returned slice (e.g. once at driver startup).
 //
 // Returns an error if the catalog is unreachable, returns a non-2xx status,
 // or contains no valid bands.
-func FetchCapacityBandsDP2(httpClient HTTPDoer) ([]catalog.CatalogBand, error) {
+func FetchCapacityBandsDP2(httpClient HTTPDoer, referenceURL string) ([]catalog.CatalogBand, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return catalog.NewCatalogClient(httpClient).FetchCatalogBandsDP2()
+	return catalog.NewCatalogClient(httpClient, referenceURL).FetchCatalogBandsDP2()
 }
 
 // NewCapacityRoundoff constructs a CapacityRoundoff from a pre-fetched slice

@@ -81,6 +81,33 @@ var expectedBands = []CatalogBand{
 	{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000},
 }
 
+// ---- EndpointForEnv ----------------------------------------------------------
+
+func TestEndpointForEnv_ProdURL(t *testing.T) {
+	assert.Equal(t, CatalogDP2ProdURL, EndpointForEnv("https://us-south.iaas.cloud.ibm.com"))
+}
+
+func TestEndpointForEnv_ProdIAMURL(t *testing.T) {
+	assert.Equal(t, CatalogDP2ProdURL, EndpointForEnv("https://private.iam.cloud.ibm.com"))
+}
+
+func TestEndpointForEnv_StageURLContainsTest(t *testing.T) {
+	assert.Equal(t, CatalogDP2StageURL, EndpointForEnv("https://us-south.iaas.test.cloud.ibm.com"))
+}
+
+func TestEndpointForEnv_StageURLContainsStage(t *testing.T) {
+	assert.Equal(t, CatalogDP2StageURL, EndpointForEnv("https://us-south.iaas.stage.cloud.ibm.com"))
+}
+
+func TestEndpointForEnv_StageIAMURL(t *testing.T) {
+	assert.Equal(t, CatalogDP2StageURL, EndpointForEnv("https://private.iam.test.cloud.ibm.com"))
+}
+
+func TestEndpointForEnv_EmptyURL_ReturnsProd(t *testing.T) {
+	// An empty or unrecognised URL has no stage/test marker → defaults to prod.
+	assert.Equal(t, CatalogDP2ProdURL, EndpointForEnv(""))
+}
+
 // ---- FetchCatalogBandsDP2 ----------------------------------------------------
 
 func TestFetchCatalogBandsDP2_Success(t *testing.T) {

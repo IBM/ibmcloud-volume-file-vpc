@@ -25,13 +25,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 const (
-	// CatalogDP2URL is the public IBM Global Catalog endpoint for the dp2
-	// file-share profile. No authentication is required.
-	CatalogDP2URL = "https://private.globalcatalog.test.cloud.ibm.com/api/v1/dp2"
+	// CatalogDP2ProdURL is the private IBM Global Catalog endpoint for the dp2
+	// file-share profile used on production clusters.
+	CatalogDP2ProdURL = "https://private.globalcatalog.cloud.ibm.com/api/v1/dp2"
+
+	// CatalogDP2StageURL is the private IBM Global Catalog endpoint for the dp2
+	// file-share profile used on staging (test) clusters.
+	CatalogDP2StageURL = "https://private.globalcatalog.test.cloud.ibm.com/api/v1/dp2"
 )
+
+// EndpointForEnv returns the correct Global Catalog dp2 endpoint URL for the environment inferred from referenceURL. 
+func EndpointForEnv(referenceURL string) string {
+	if strings.Contains(referenceURL, "test") || strings.Contains(referenceURL, "stage") {
+		return CatalogDP2StageURL
+	}
+	return CatalogDP2ProdURL
+}
 
 // CatalogBand represents a single capacity/IOPS band from the IBM Global
 // Catalog dp2 config_validation array. Each band defines the inclusive GiB
@@ -84,12 +97,13 @@ type CatalogClient struct {
 }
 
 // NewCatalogClient returns a CatalogClient that calls the IBM Global Catalog
-// dp2 endpoint. Pass nil to use http.DefaultClient.
-func NewCatalogClient(httpClient HTTPDoer) *CatalogClient {
+// dp2 endpoint selected for the given environment reference URL (see
+// EndpointForEnv). Pass nil to use http.DefaultClient.
+func NewCatalogClient(httpClient HTTPDoer, referenceURL string) *CatalogClient {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return NewCatalogClientWithURL(httpClient, CatalogDP2URL)
+	return NewCatalogClientWithURL(httpClient, EndpointForEnv(referenceURL))
 }
 
 // NewCatalogClientWithURL returns a CatalogClient that calls the supplied
