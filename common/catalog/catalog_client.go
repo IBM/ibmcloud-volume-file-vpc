@@ -38,7 +38,8 @@ const (
 	CatalogDP2StageURL = "https://private.globalcatalog.test.cloud.ibm.com/api/v1/dp2"
 )
 
-// EndpointForEnv returns the correct Global Catalog dp2 endpoint URL for the environment inferred from referenceURL. 
+// EndpointForEnv returns the correct Global Catalog dp2 endpoint URL for the
+// environment inferred from referenceURL.
 func EndpointForEnv(referenceURL string) string {
 	if strings.Contains(referenceURL, "test") || strings.Contains(referenceURL, "stage") {
 		return CatalogDP2StageURL
