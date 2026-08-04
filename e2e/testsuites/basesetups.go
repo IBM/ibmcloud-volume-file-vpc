@@ -34,10 +34,11 @@ import (
 )
 
 type PodDetails struct {
-	Cmd          string
-	CmdExits     bool
-	Volumes      []VolumeDetails
-	NodeSelector map[string]string
+	Cmd             string
+	CmdExits        bool
+	Volumes         []VolumeDetails
+	NodeSelector    map[string]string
+	SecurityContext *v1.PodSecurityContext
 }
 
 type VolumeMode int
@@ -45,7 +46,6 @@ type VolumeMode int
 type VolumeDetails struct {
 	PVCName               string //PVC Name
 	VolumeType            string //PVC SC
-	FSType                string //Ext3 / XFS / EXT4
 	Encrypted             bool
 	MountOptions          []string
 	ClaimSize             string //PVC Capacity
@@ -167,6 +167,9 @@ func (pod *PodDetails) SetupWithDynamicVolumes(client clientset.Interface, names
 
 	By("setting up POD")
 	tpod := NewTestPod(client, namespace, pod.Cmd)
+	if len(pod.NodeSelector) > 0 {
+		tpod.SetNodeSelector(pod.NodeSelector)
+	}
 	By("setting up the PVC for POD")
 	for n, v := range pod.Volumes {
 		tpvc, funcs := v.SetupDynamicPersistentVolumeClaim(client, namespace, false)
@@ -226,7 +229,7 @@ func (pod *PodDetails) SetupDeployment(client clientset.Interface, namespace *v1
 		tpvc.persistentVolumeClaim,
 		fmt.Sprintf("%s%d", volume.VolumeMount.NameGenerate, 1),
 		fmt.Sprintf("%s%d", volume.VolumeMount.MountPathGenerate, 1),
-		volume.VolumeMount.ReadOnly, replicaCount, pod.NodeSelector)
+		volume.VolumeMount.ReadOnly, replicaCount, pod.NodeSelector, pod.SecurityContext)
 
 	cleanupFuncs = append(cleanupFuncs, tDeployment.Cleanup)
 	return tDeployment, cleanupFuncs
