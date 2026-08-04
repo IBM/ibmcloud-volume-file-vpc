@@ -41,6 +41,7 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
+		DeferCleanup(grantSCCToServiceAccount(cs, ns.Name))
 	})
 
 	It("with rfs profile sc: should create a pvc, deployment resources, write and read to volume, delete the pod", func() {

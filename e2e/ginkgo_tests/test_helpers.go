@@ -27,6 +27,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -202,6 +203,61 @@ func restClient(group string, version string) (restclientset.Interface, error) {
 	config.APIPath = "/apis"
 	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: serializer.NewCodecFactory(runtime.NewScheme())}
 	return restclientset.RESTClientFor(config)
+}
+
+// isOpenShiftCluster returns true when the cluster exposes the OpenShift
+// security.openshift.io API group (present on ROKS/OCP, absent on IKS).
+func isOpenShiftCluster(cs clientset.Interface) bool {
+	groups, err := cs.Discovery().ServerGroups()
+	if err != nil {
+		return false
+	}
+	for _, g := range groups.Groups {
+		if g.Name == "security.openshift.io" {
+			return true
+		}
+	}
+	return false
+}
+
+// grantSCCToServiceAccount binds the OpenShift "anyuid" SCC ClusterRole to the
+// "default" ServiceAccount in the given namespace so that deployment pods can
+// run as uid=0 (required because RFS shares are owned root:root mode 755 and
+// OpenShift's restricted SCC only grants a non-zero UID by default).
+// On non-OpenShift clusters (e.g. IKS) the call is a no-op.
+// It returns a cleanup function that removes the ClusterRoleBinding.
+func grantSCCToServiceAccount(cs clientset.Interface, namespace string) func() {
+	if !isOpenShiftCluster(cs) {
+		return func() {} // no-op on IKS
+	}
+
+	crbName := fmt.Sprintf("rfs-e2e-anyuid-%s", namespace)
+	crb := &rbacv1.ClusterRoleBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: crbName,
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     "system:openshift:scc:anyuid",
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      "default",
+				Namespace: namespace,
+			},
+		},
+	}
+	_, err := cs.RbacV1().ClusterRoleBindings().Create(context.TODO(), crb, metav1.CreateOptions{})
+	if err != nil && !apierrors.IsAlreadyExists(err) {
+		panic(fmt.Sprintf("failed to create ClusterRoleBinding %q: %v", crbName, err))
+	}
+	return func() {
+		if err := cs.RbacV1().ClusterRoleBindings().Delete(context.TODO(), crbName, metav1.DeleteOptions{}); err != nil && !apierrors.IsNotFound(err) {
+			fmt.Printf("Warning: failed to delete ClusterRoleBinding %q: %v\n", crbName, err)
+		}
+	}
 }
 
 var _ = BeforeSuite(func() {
