@@ -1184,7 +1184,7 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
 
     if [[ -n "$E2ETEST_NODE_FLAVOR" ]]; then
         WORKER_NODE_FLAVOR="$E2ETEST_NODE_FLAVOR"
-    elif [[ "$e2e_env" == "stage-us-south"]]; then
+    elif [[ "$e2e_env" == "stage-us-south" ]]; then
         WORKER_NODE_FLAVOR="bx3d.4x20"
     else
         var_flvr="FLAVOR_${IC_PROVIDER//-/_}"
