@@ -759,9 +759,9 @@ addon_version=""
 
 cmd_name="$0"
 usage_str="$cmd_name: Options:-
-        -e <prod|stage|prestage> -d <cluster name> or
-        -e <prod|stage|prestage> -c <exiting cluster name> or
-        -e <prod|stage|prestage> --fresh [-n <name tag> ] -k default|latest|base -p classic|vpc-gen2 -t k8s|ocp -r <region> [--mz] [--retain] [--worker-reboot]"
+        -e <prod|stage|stage4-south|prestage> -d <cluster name> or
+        -e <prod|stage|stage4-south|prestage> -c <exiting cluster name> or
+        -e <prod|stage|stage4-south|prestage> --fresh [-n <name tag> ] -k default|latest|base -p classic|vpc-gen2 -t k8s|ocp -r <region> [--mz] [--retain] [--worker-reboot]"
 
 if [[ $# -lt 1 ]]; then
 	echo "$usage_str"
@@ -945,7 +945,7 @@ fi
 if [[ "$e2e_k8s_platform" == "IKS" ]]; then  K8S_PLATFORM="kubernetes"; else K8S_PLATFORM="openshift"; fi
 
 # If replatformed env is set (-us-south) then set these defaults
-if [[ "$e2e_env" == "stage-us-south" || "$e2e_env" == "prestage-us-south" || "$e2e_env" == "dev-us-south" ]]; then
+if [[ "$e2e_env" == "stage-us-south" || "$e2e_env" == "stage4-south" || "$e2e_env" == "prestage-us-south" || "$e2e_env" == "dev-us-south" ]]; then
     E2ETEST_NODE_FLAVOR=$FLAVOR_vpc_gen2_ngdc
 fi
 # If new replatformed prod region, set these defaults
@@ -958,6 +958,10 @@ if [[ "$e2e_env" = "stage" ]]; then
     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.test.cloud.ibm.com"
     E2ETEST_IC_RES_GRP="Default"
+elif [[ "$e2e_env" = "stage4-south" ]]; then
+     E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
+     [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://stage4-south.containers.test.cloud.ibm.com"
+     E2ETEST_IC_RES_GRP="Default"
 elif [[ "$e2e_env" = "prestage" ]]; then
      E2ETEST_IC_API_EP="https://test.cloud.ibm.com"
      [[ -z "$E2ETEST_CS_API_EP" ]] && E2ETEST_CS_API_EP="https://containers.pretest.cloud.ibm.com"
@@ -1180,7 +1184,7 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
 
     if [[ -n "$E2ETEST_NODE_FLAVOR" ]]; then
         WORKER_NODE_FLAVOR="$E2ETEST_NODE_FLAVOR"
-    elif [[ "$e2e_env" == "stage-us-south" ]]; then
+    elif [[ "$e2e_env" == "stage-us-south" || "$e2e_env" == "stage4-south" ]]; then
         WORKER_NODE_FLAVOR="bx3d.4x20"
     elif [[ "$IC_REGION" == "in-che" ]]; then
         WORKER_NODE_FLAVOR="bx3d.4x20"
