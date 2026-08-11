@@ -134,7 +134,7 @@ func isNodeReady(node *corev1.Node) bool {
 // existing object is returned.
 func createEITRfsSC(cs clientset.Interface) (*storagev1.StorageClass, error) {
 	reclaimPolicy := v1.PersistentVolumeReclaimDelete
-	volumeBindingMode := storagev1.VolumeBindingWaitForFirstConsumer
+	volumeBindingMode := storagev1.VolumeBindingImmediate
 	allowVolumeExpansion := true
 
 	sc := &storagev1.StorageClass{
@@ -146,23 +146,23 @@ func createEITRfsSC(cs clientset.Interface) (*storagev1.StorageClass, error) {
 		},
 		Provisioner: "vpc.file.csi.ibm.io",
 		Parameters: map[string]string{
-			"profile":        "rfs",
-			"billingType":    "hourly",
-			"throughput":     "1000",
-			"encrypted":      "false",
-			"encryptionKey":  "",
-			"resourceGroup":  "",
-			"isENIEnabled":   "true",
-			"isEITEnabled":   "true",
+			"profile":          "rfs",
+			"billingType":      "hourly",
+			"throughput":       "1000",
+			"encrypted":        "false",
+			"encryptionKey":    "",
+			"resourceGroup":    "",
+			"isENIEnabled":     "true",
+			"isEITEnabled":     "true",
 			"securityGroupIDs": "",
-			"subnetID":       "",
-			"region":         "",
-			"primaryIPID":    "",
+			"subnetID":         "",
+			"region":           "",
+			"primaryIPID":      "",
 			"primaryIPAddress": "",
-			"tags":           "",
-			"uid":            "0",
-			"gid":            "0",
-			"classVersion":   "1",
+			"tags":             "",
+			"uid":              "0",
+			"gid":              "0",
+			"classVersion":     "1",
 		},
 		MountOptions: []string{
 			"hard",
