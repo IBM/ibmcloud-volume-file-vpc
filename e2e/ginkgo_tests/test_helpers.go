@@ -48,6 +48,10 @@ const (
 	waitForPackageInstallation = 5 * time.Minute
 	waitForNodeReadyTimeout    = 15 * time.Minute
 	waitForNodeReadyInterval   = 15 * time.Second
+
+	// EITRfsSCName is the custom storage class created by the EIT-RFS e2e tests.
+	// It is not pre-installed on the cluster; the tests create and delete it themselves.
+	EITRfsSCName = "ibmc-vpc-file-rfs-eit-custom"
 )
 
 var (
@@ -123,6 +127,64 @@ func isNodeReady(node *corev1.Node) bool {
 		}
 	}
 	return false
+}
+
+// createEITRfsSC creates the ibmc-vpc-file-rfs-eit-custom StorageClass used by
+// all EIT-RFS e2e tests. It is idempotent: if the class already exists the
+// existing object is returned.
+func createEITRfsSC(cs clientset.Interface) (*storagev1.StorageClass, error) {
+	reclaimPolicy := v1.PersistentVolumeReclaimDelete
+	volumeBindingMode := storagev1.VolumeBindingWaitForFirstConsumer
+	allowVolumeExpansion := true
+
+	sc := &storagev1.StorageClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: EITRfsSCName,
+			Labels: map[string]string{
+				"app.kubernetes.io/name": "ibm-vpc-file-csi-driver",
+			},
+		},
+		Provisioner: "vpc.file.csi.ibm.io",
+		Parameters: map[string]string{
+			"profile":        "rfs",
+			"billingType":    "hourly",
+			"throughput":     "1000",
+			"encrypted":      "false",
+			"encryptionKey":  "",
+			"resourceGroup":  "",
+			"isENIEnabled":   "true",
+			"isEITEnabled":   "true",
+			"securityGroupIDs": "",
+			"subnetID":       "",
+			"region":         "",
+			"primaryIPID":    "",
+			"primaryIPAddress": "",
+			"tags":           "",
+			"uid":            "0",
+			"gid":            "0",
+			"classVersion":   "1",
+		},
+		MountOptions: []string{
+			"hard",
+			"nfsvers=4.1",
+			"sec=sys",
+			"proto=tcp",
+		},
+		ReclaimPolicy:        &reclaimPolicy,
+		VolumeBindingMode:    &volumeBindingMode,
+		AllowVolumeExpansion: &allowVolumeExpansion,
+	}
+
+	created, err := cs.StorageV1().StorageClasses().Create(context.TODO(), sc, metav1.CreateOptions{})
+	if err != nil && apierrors.IsAlreadyExists(err) {
+		return cs.StorageV1().StorageClasses().Get(context.TODO(), EITRfsSCName, metav1.GetOptions{})
+	}
+	return created, err
+}
+
+// deleteEITRfsSC deletes the ibmc-vpc-file-rfs-eit-custom StorageClass.
+func deleteEITRfsSC(cs clientset.Interface) error {
+	return deleteCustomRfsSC(cs, EITRfsSCName)
 }
 
 func createCustomRfsSC(cs clientset.Interface, name string, params map[string]string) (*storagev1.StorageClass, error) {

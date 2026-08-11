@@ -430,6 +430,31 @@ var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stu
 		ns     *v1.Namespace
 		config *restclientset.Config
 	)
+
+	BeforeAll(func() {
+		config, err := framework.LoadConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to load kubeconfig: %w", err))
+		}
+		cs, err = clientset.NewForConfig(config)
+		if err != nil {
+			panic(fmt.Errorf("failed to create clientset: %w", err))
+		}
+		if _, err := createEITRfsSC(cs); err != nil {
+			panic(fmt.Errorf("failed to create EIT-RFS storage class: %w", err))
+		}
+		fmt.Printf("Created storage class %s\n", EITRfsSCName)
+	})
+
+	AfterAll(func() {
+		if cs == nil {
+			return
+		}
+		if err := deleteEITRfsSC(cs); err != nil {
+			fmt.Printf("Warning: failed to delete storage class %s: %v\n", EITRfsSCName, err)
+		}
+	})
+
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
@@ -449,7 +474,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stu
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "eit-rfs-stunnel-verify-",
-					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					VolumeType:    EITRfsSCName,
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -483,6 +508,31 @@ var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volum
 		ns     *v1.Namespace
 		config *restclientset.Config
 	)
+
+	BeforeAll(func() {
+		config, err := framework.LoadConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to load kubeconfig: %w", err))
+		}
+		cs, err = clientset.NewForConfig(config)
+		if err != nil {
+			panic(fmt.Errorf("failed to create clientset: %w", err))
+		}
+		if _, err := createEITRfsSC(cs); err != nil {
+			panic(fmt.Errorf("failed to create EIT-RFS storage class: %w", err))
+		}
+		fmt.Printf("Created storage class %s\n", EITRfsSCName)
+	})
+
+	AfterAll(func() {
+		if cs == nil {
+			return
+		}
+		if err := deleteEITRfsSC(cs); err != nil {
+			fmt.Printf("Warning: failed to delete storage class %s: %v\n", EITRfsSCName, err)
+		}
+	})
+
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
@@ -502,7 +552,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volum
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       "eit-rfs-multi-vol1-",
-					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					VolumeType:    EITRfsSCName,
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -513,7 +563,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volum
 				},
 				{
 					PVCName:       "eit-rfs-multi-vol2-",
-					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					VolumeType:    EITRfsSCName,
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -547,6 +597,31 @@ var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Re
 		ns     *v1.Namespace
 		config *restclientset.Config
 	)
+
+	BeforeAll(func() {
+		config, err := framework.LoadConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to load kubeconfig: %w", err))
+		}
+		cs, err = clientset.NewForConfig(config)
+		if err != nil {
+			panic(fmt.Errorf("failed to create clientset: %w", err))
+		}
+		if _, err := createEITRfsSC(cs); err != nil {
+			panic(fmt.Errorf("failed to create EIT-RFS storage class: %w", err))
+		}
+		fmt.Printf("Created storage class %s\n", EITRfsSCName)
+	})
+
+	AfterAll(func() {
+		if cs == nil {
+			return
+		}
+		if err := deleteEITRfsSC(cs); err != nil {
+			fmt.Printf("Warning: failed to delete storage class %s: %v\n", EITRfsSCName, err)
+		}
+	})
+
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
@@ -567,7 +642,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Re
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       pvcName,
-					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					VolumeType:    EITRfsSCName,
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
@@ -601,6 +676,31 @@ var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Se
 		ns     *v1.Namespace
 		config *restclientset.Config
 	)
+
+	BeforeAll(func() {
+		config, err := framework.LoadConfig()
+		if err != nil {
+			panic(fmt.Errorf("failed to load kubeconfig: %w", err))
+		}
+		cs, err = clientset.NewForConfig(config)
+		if err != nil {
+			panic(fmt.Errorf("failed to create clientset: %w", err))
+		}
+		if _, err := createEITRfsSC(cs); err != nil {
+			panic(fmt.Errorf("failed to create EIT-RFS storage class: %w", err))
+		}
+		fmt.Printf("Created storage class %s\n", EITRfsSCName)
+	})
+
+	AfterAll(func() {
+		if cs == nil {
+			return
+		}
+		if err := deleteEITRfsSC(cs); err != nil {
+			fmt.Printf("Warning: failed to delete storage class %s: %v\n", EITRfsSCName, err)
+		}
+	})
+
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
@@ -621,7 +721,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Se
 			Volumes: []testsuites.VolumeDetails{
 				{
 					PVCName:       pvcName,
-					VolumeType:    "ibmc-vpc-file-rfs-eit",
+					VolumeType:    EITRfsSCName,
 					ClaimSize:     "10Gi",
 					ReclaimPolicy: &reclaimPolicy,
 					MountOptions:  []string{"rw"},
