@@ -33,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	clientset "k8s.io/client-go/kubernetes"
+	restclientset "k8s.io/client-go/rest"
 	"k8s.io/kubernetes/test/e2e/framework"
 	admissionapi "k8s.io/pod-security-admission/api"
 )
@@ -422,7 +423,7 @@ var _ = Describe("[ics-e2e] [eit] Dynamic Provisioning on worker-pool where EIT 
 // Note: For RFS-EIT, stunnel is automatically enabled via storage class parameter.
 // No need to enable EIT in ConfigMap - it's handled by the storage class.
 
-var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stunnel Tunnel Verification", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stunnel Tunnel Verification", Ordered, func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-verify")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -500,7 +501,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stu
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volumes and Tunnel Verification", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volumes and Tunnel Verification", Ordered, func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-multi")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -589,7 +590,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volum
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Removal Verification", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Removal Verification", Ordered, func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-cleanup")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -668,7 +669,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Re
 	})
 })
 
-var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Server Restart", func() {
+var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Server Restart", Ordered, func() {
 	f := framework.NewDefaultFramework("ics-e2e-eit-restart")
 	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
 	var (
@@ -829,7 +830,7 @@ var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Se
 			}
 			// Check if new pod is ready
 			for _, condition := range newCSIPod.Status.Conditions {
-				if condition.Type == corev1.PodReady && condition.Status == corev1.ConditionTrue {
+				if condition.Type == v1.PodReady && condition.Status == v1.ConditionTrue {
 					fmt.Printf("New CSI node server pod ready: %s\n", newCSIPod.Name)
 					return true, nil
 				}

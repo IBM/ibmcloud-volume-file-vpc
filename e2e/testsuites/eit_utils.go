@@ -43,7 +43,7 @@ const (
 	CSIDriverLabelSelector = "app=ibm-vpc-file-csi-node"
 
 	// StunnelContainerName is the name of the denali-stunnel sidecar container
-	StunnelContainerName = "denali-stunnel"
+	StunnelContainerName = "stunnel"
 
 	// StunnelServicesDir is the directory where stunnel service configs are stored
 	StunnelServicesDir = "/etc/stunnel/services"
