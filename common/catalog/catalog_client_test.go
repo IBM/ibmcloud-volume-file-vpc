@@ -26,38 +26,34 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// dp2BandsJSON is a minimal representation of the IBM Global Catalog dp2 API
-// response containing the config_validation bands used across tests.
-const dp2BandsJSON = `{
-  "metadata": {
-    "other": {
-      "profile": {
-        "config_validation": [
-          {"capacity": {"min": 10,    "max": 39,    "units": "gb"}, "iops": {"min": 100, "max": 1000,  "unit": "iops"}},
-          {"capacity": {"min": 40,    "max": 79,    "units": "gb"}, "iops": {"min": 100, "max": 2000,  "unit": "iops"}},
-          {"capacity": {"min": 80,    "max": 99,    "units": "gb"}, "iops": {"min": 100, "max": 4000,  "unit": "iops"}},
-          {"capacity": {"min": 100,   "max": 499,   "units": "gb"}, "iops": {"min": 100, "max": 6000,  "unit": "iops"}},
-          {"capacity": {"min": 500,   "max": 999,   "units": "gb"}, "iops": {"min": 100, "max": 10000, "unit": "iops"}},
-          {"capacity": {"min": 1000,  "max": 1999,  "units": "gb"}, "iops": {"min": 100, "max": 20000, "unit": "iops"}},
-          {"capacity": {"min": 2000,  "max": 3999,  "units": "gb"}, "iops": {"min": 200, "max": 40000, "unit": "iops"}},
-          {"capacity": {"min": 4000,  "max": 7999,  "units": "gb"}, "iops": {"min": 300, "max": 40000, "unit": "iops"}},
-          {"capacity": {"min": 8000,  "max": 15999, "units": "gb"}, "iops": {"min": 500, "max": 64000, "unit": "iops"}},
-          {"capacity": {"min": 16000, "max": 32000, "units": "gb"}, "iops": {"min": 2000,"max": 96000, "unit": "iops"}}
-        ]
-      }
-    }
-  }
+// armadaCatalogJSON is a minimal armada-storage-api GET /v2/storage/vpc/getVolumeProfiles/dp2
+// response containing the bands used across tests.
+const armadaCatalogJSON = `{
+  "bands": [
+    {"capacityMin": 10,    "capacityMax": 39,    "iopsMin": 100,  "iopsMax": 1000},
+    {"capacityMin": 40,    "capacityMax": 79,    "iopsMin": 100,  "iopsMax": 2000},
+    {"capacityMin": 80,    "capacityMax": 99,    "iopsMin": 100,  "iopsMax": 4000},
+    {"capacityMin": 100,   "capacityMax": 499,   "iopsMin": 100,  "iopsMax": 6000},
+    {"capacityMin": 500,   "capacityMax": 999,   "iopsMin": 100,  "iopsMax": 10000},
+    {"capacityMin": 1000,  "capacityMax": 1999,  "iopsMin": 100,  "iopsMax": 20000},
+    {"capacityMin": 2000,  "capacityMax": 3999,  "iopsMin": 200,  "iopsMax": 40000},
+    {"capacityMin": 4000,  "capacityMax": 7999,  "iopsMin": 300,  "iopsMax": 40000},
+    {"capacityMin": 8000,  "capacityMax": 15999, "iopsMin": 500,  "iopsMax": 64000},
+    {"capacityMin": 16000, "capacityMax": 32000, "iopsMin": 2000, "iopsMax": 96000}
+  ]
 }`
 
 // fakeHTTPClient is an HTTPDoer that returns the configured response without
 // making any actual network calls.
 type fakeHTTPClient struct {
-	statusCode int
-	body       string
-	err        error
+	statusCode  int
+	body        string
+	err         error
+	capturedURL string
 }
 
-func (f *fakeHTTPClient) Do(_ *http.Request) (*http.Response, error) {
+func (f *fakeHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	f.capturedURL = req.URL.String()
 	if f.err != nil {
 		return nil, f.err
 	}
@@ -67,7 +63,7 @@ func (f *fakeHTTPClient) Do(_ *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// expectedBands mirrors what FetchCatalogBandsDP2 should return for dp2BandsJSON.
+// expectedBands mirrors what FetchCatalogBandsDP2 should return for armadaCatalogJSON.
 var expectedBands = []CatalogBand{
 	{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000},
 	{CapMin: 40, CapMax: 79, IOPSMin: 100, IOPSMax: 2000},
@@ -81,40 +77,32 @@ var expectedBands = []CatalogBand{
 	{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000},
 }
 
-// ---- EndpointForEnv ----------------------------------------------------------
+// ---- URL construction --------------------------------------------------------
 
-func TestEndpointForEnv_ProdURL(t *testing.T) {
-	assert.Equal(t, CatalogDP2ProdURL, EndpointForEnv("https://us-south.iaas.cloud.ibm.com"))
+func TestFetchCatalogBandsDP2_URLAppendsCatalogPath(t *testing.T) {
+	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
+	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	_, err := client.FetchCatalogBandsDP2()
+	require.NoError(t, err)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles/dp2", fake.capturedURL)
 }
 
-func TestEndpointForEnv_ProdIAMURL(t *testing.T) {
-	assert.Equal(t, CatalogDP2ProdURL, EndpointForEnv("https://private.iam.cloud.ibm.com"))
+func TestFetchCatalogBandsDP2_TrailingSlashStripped(t *testing.T) {
+	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
+	// Base URL has a trailing slash; it must be stripped before appending the path.
+	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/v2/storage/")
+	_, err := client.FetchCatalogBandsDP2()
+	require.NoError(t, err)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles/dp2", fake.capturedURL)
 }
 
-func TestEndpointForEnv_StageURLContainsTest(t *testing.T) {
-	assert.Equal(t, CatalogDP2StageURL, EndpointForEnv("https://us-south.iaas.test.cloud.ibm.com"))
-}
-
-func TestEndpointForEnv_StageURLContainsStage(t *testing.T) {
-	assert.Equal(t, CatalogDP2StageURL, EndpointForEnv("https://us-south.iaas.stage.cloud.ibm.com"))
-}
-
-func TestEndpointForEnv_StageIAMURL(t *testing.T) {
-	assert.Equal(t, CatalogDP2StageURL, EndpointForEnv("https://private.iam.test.cloud.ibm.com"))
-}
-
-func TestEndpointForEnv_EmptyURL_ReturnsProd(t *testing.T) {
-	// An empty or unrecognised URL has no stage/test marker → defaults to prod.
-	assert.Equal(t, CatalogDP2ProdURL, EndpointForEnv(""))
-}
-
-// ---- FetchCatalogBandsDP2 ----------------------------------------------------
+// ---- Success -----------------------------------------------------------------
 
 func TestFetchCatalogBandsDP2_Success(t *testing.T) {
-	client := NewCatalogClientWithURL(&fakeHTTPClient{
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       dp2BandsJSON,
-	}, "http://fake")
+		body:       armadaCatalogJSON,
+	}, "http://fake/v2/storage")
 
 	bands, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
@@ -124,64 +112,61 @@ func TestFetchCatalogBandsDP2_Success(t *testing.T) {
 }
 
 func TestFetchCatalogBandsDP2_ParsesAllBands(t *testing.T) {
-	client := NewCatalogClientWithURL(&fakeHTTPClient{
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       dp2BandsJSON,
-	}, "http://fake")
+		body:       armadaCatalogJSON,
+	}, "http://fake/v2/storage")
 
 	bands, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
 	require.Equal(t, expectedBands, bands)
 }
 
+// ---- Error paths -------------------------------------------------------------
+
 func TestFetchCatalogBandsDP2_HTTPError(t *testing.T) {
-	client := NewCatalogClientWithURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake")
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake/v2/storage")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
 }
 
 func TestFetchCatalogBandsDP2_Non2xxStatus(t *testing.T) {
-	client := NewCatalogClientWithURL(&fakeHTTPClient{
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
-	}, "http://fake")
+	}, "http://fake/v2/storage")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
 }
 
 func TestFetchCatalogBandsDP2_InvalidJSON(t *testing.T) {
-	client := NewCatalogClientWithURL(&fakeHTTPClient{
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
-	}, "http://fake")
+	}, "http://fake/v2/storage")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
 }
 
 func TestFetchCatalogBandsDP2_EmptyBands(t *testing.T) {
-	client := NewCatalogClientWithURL(&fakeHTTPClient{
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       `{"metadata":{"other":{"profile":{"config_validation":[]}}}}`,
-	}, "http://fake")
+		body:       `{"bands":[]}`,
+	}, "http://fake/v2/storage")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "no config_validation bands")
+	assert.Contains(t, err.Error(), "no bands")
 }
 
-func TestFetchCatalogBandsDP2_MalformedEntry(t *testing.T) {
-	// An entry with capacity.min=0 must be rejected.
-	const malformedJSON = `{
-  "metadata":{"other":{"profile":{"config_validation":[
-    {"capacity":{"min":0,"max":39,"units":"gb"},"iops":{"min":100,"max":1000,"unit":"iops"}}
-  ]}}}}`
-	client := NewCatalogClientWithURL(&fakeHTTPClient{
+func TestFetchCatalogBandsDP2_NullBands(t *testing.T) {
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       malformedJSON,
-	}, "http://fake")
+		body:       `{}`,
+	}, "http://fake/v2/storage")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid config_validation entry")
+	assert.Contains(t, err.Error(), "no bands")
 }

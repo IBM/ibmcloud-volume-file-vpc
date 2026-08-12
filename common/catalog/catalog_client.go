@@ -15,41 +15,26 @@
  */
 
 // Package catalog provides a minimal HTTP client for fetching dp2 profile
-// capacity-to-IOPS bands from the IBM Global Catalog API.
-// No authentication is required — the endpoint is public.
-// This package has no business logic and no caching; it only fetches and
-// parses raw band data. Higher-level logic lives in common/file.
+// capacity-to-IOPS bands from the armada-storage-api proxy endpoint.
+// Authentication is handled by armada-storage-api itself; the library only
+// needs network reachability to the IKS private endpoint.
 package catalog
 
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
 
-const (
-	// CatalogDP2ProdURL is the private IBM Global Catalog endpoint for the dp2
-	// file-share profile used on production clusters.
-	CatalogDP2ProdURL = "https://private.globalcatalog.cloud.ibm.com/api/v1/dp2"
+// dp2CatalogPath is the path appended to the armada-storage-api base URL that
+// reaches the DP2 catalog proxy endpoint registered under /v2/storage/vpc/.
+const dp2CatalogPath = "/vpc/getVolumeProfiles/dp2"
 
-	// CatalogDP2StageURL is the private IBM Global Catalog endpoint for the dp2
-	// file-share profile used on staging (test) clusters.
-	CatalogDP2StageURL = "https://private.globalcatalog.test.cloud.ibm.com/api/v1/dp2"
-)
-
-// EndpointForEnv returns the correct Global Catalog dp2 endpoint URL for the
-// environment inferred from referenceURL.
-func EndpointForEnv(referenceURL string) string {
-	if strings.Contains(referenceURL, "test") || strings.Contains(referenceURL, "stage") {
-		return CatalogDP2StageURL
-	}
-	return CatalogDP2ProdURL
-}
-
-// CatalogBand represents a single capacity/IOPS band from the IBM Global
-// Catalog dp2 config_validation array. Each band defines the inclusive GiB
-// capacity range and the inclusive IOPS range that are valid together.
+// CatalogBand represents a single capacity/IOPS band from the DP2 profile.
+// Each band defines the inclusive GiB capacity range and the inclusive IOPS
+// range that are valid together.
 type CatalogBand struct {
 	// CapMin is the minimum share size (GiB) for this band.
 	CapMin int
@@ -61,27 +46,19 @@ type CatalogBand struct {
 	IOPSMax int
 }
 
-// dp2Response is the minimal subset of the IBM Global Catalog JSON document
-// required to extract the config_validation bands.
-type dp2Response struct {
-	Metadata struct {
-		Other struct {
-			Profile struct {
-				ConfigValidation []struct {
-					Capacity struct {
-						Min   int    `json:"min"`
-						Max   int    `json:"max"`
-						Units string `json:"units"`
-					} `json:"capacity"`
-					Iops struct {
-						Min  int    `json:"min"`
-						Max  int    `json:"max"`
-						Unit string `json:"unit"`
-					} `json:"iops"`
-				} `json:"config_validation"`
-			} `json:"profile"`
-		} `json:"other"`
-	} `json:"metadata"`
+// dp2CatalogResponse mirrors the JSON returned by armada-storage-api
+// GET /v2/storage/vpc/getCatalog/dp2.
+type dp2CatalogResponse struct {
+	Bands []dp2CatalogBand `json:"bands"`
+}
+
+// dp2CatalogBand is one element in the bands array returned by armada-storage-api.
+// Field names match the JSON tags used by armada-storage-api globalcatalog.CatalogBand.
+type dp2CatalogBand struct {
+	CapacityMin int64 `json:"capacityMin"`
+	CapacityMax int64 `json:"capacityMax"`
+	IOPSMin     int64 `json:"iopsMin"`
+	IOPSMax     int64 `json:"iopsMax"`
 }
 
 // HTTPDoer is the minimal interface required from an HTTP client so it can be
@@ -90,44 +67,52 @@ type HTTPDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// CatalogClient fetches and parses dp2 capacity/IOPS bands from the IBM Global
-// Catalog API. Construct one via NewCatalogClient or NewCatalogClientWithURL.
+// CatalogClient fetches and parses dp2 capacity/IOPS bands from the
+// armada-storage-api catalog proxy endpoint.
+// Construct one via NewCatalogClient or NewCatalogClientWithBaseURL.
 type CatalogClient struct {
-	url        string
+	// baseURL is the armada-storage-api base URL including /v2/storage,
+	// e.g. "https://us-south.containers.cloud.ibm.com/v2/storage".
+	baseURL    string
 	httpClient HTTPDoer
 }
 
-// NewCatalogClient returns a CatalogClient that calls the IBM Global Catalog
-// dp2 endpoint selected for the given environment reference URL (see
-// EndpointForEnv). Pass nil to use http.DefaultClient.
-func NewCatalogClient(httpClient HTTPDoer, referenceURL string) *CatalogClient {
-	if httpClient == nil {
-		httpClient = http.DefaultClient
-	}
-	return NewCatalogClientWithURL(httpClient, EndpointForEnv(referenceURL))
-}
-
-// NewCatalogClientWithURL returns a CatalogClient that calls the supplied
-// catalog URL. Pass nil to use http.DefaultClient. Intended for unit testing.
-func NewCatalogClientWithURL(httpClient HTTPDoer, url string) *CatalogClient {
+// NewCatalogClient returns a CatalogClient that calls armada-storage-api using
+// iksBaseURL as the base. iksBaseURL is the IKS private token-exchange URL
+// (conf.VPCConfig.IKSTokenExchangePrivateURL) which points at the correct
+// armada-storage-api endpoint for the cluster's environment (stage/prod).
+// Pass nil for httpClient to use http.DefaultClient.
+func NewCatalogClient(httpClient HTTPDoer, iksBaseURL string) *CatalogClient {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 	return &CatalogClient{
-		url:        url,
+		baseURL:    strings.TrimRight(iksBaseURL, "/"),
 		httpClient: httpClient,
 	}
 }
 
-// FetchCatalogBandsDP2 retrieves the dp2 config_validation bands from the IBM
-// Global Catalog API and returns them ordered from the smallest capacity band
-// to the largest (as they appear in the catalog response).
+// NewCatalogClientWithBaseURL constructs a CatalogClient with an explicit base
+// URL. Intended for unit testing where the caller controls the full URL.
+func NewCatalogClientWithBaseURL(httpClient HTTPDoer, baseURL string) *CatalogClient {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &CatalogClient{
+		baseURL:    strings.TrimRight(baseURL, "/"),
+		httpClient: httpClient,
+	}
+}
+
+// FetchCatalogBandsDP2 retrieves the dp2 capacity/IOPS bands from
+// armada-storage-api and returns them ordered from the smallest capacity band
+// to the largest (as returned by the API).
 //
 // Returns a non-nil error if the HTTP request fails, the response status is
-// not 2xx, the body cannot be decoded, any entry is malformed, or the catalog
-// returns no bands.
+// not 2xx, the body cannot be decoded, or the API returns no bands.
 func (c *CatalogClient) FetchCatalogBandsDP2() ([]CatalogBand, error) {
-	req, err := http.NewRequest(http.MethodGet, c.url, nil)
+	url := c.baseURL + dp2CatalogPath
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("catalog: build request: %w", err)
 	}
@@ -135,36 +120,36 @@ func (c *CatalogClient) FetchCatalogBandsDP2() ([]CatalogBand, error) {
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("catalog: HTTP request to %s: %w", c.url, err)
+		return nil, fmt.Errorf("catalog: HTTP request to %s: %w", url, err)
 	}
 	defer resp.Body.Close() //nolint:errcheck
 
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return nil, fmt.Errorf("catalog: unexpected status %d from %s", resp.StatusCode, c.url)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("catalog: read response body: %w", err)
 	}
 
-	var parsed dp2Response
-	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("catalog: unexpected status %d from %s: %s", resp.StatusCode, url, string(body))
+	}
+
+	var parsed dp2CatalogResponse
+	if err := json.Unmarshal(body, &parsed); err != nil {
 		return nil, fmt.Errorf("catalog: decode response: %w", err)
 	}
 
-	raw := parsed.Metadata.Other.Profile.ConfigValidation
-	if len(raw) == 0 {
-		return nil, fmt.Errorf("catalog: dp2 catalog returned no config_validation bands")
+	if len(parsed.Bands) == 0 {
+		return nil, fmt.Errorf("catalog: dp2 catalog returned no bands")
 	}
 
-	bands := make([]CatalogBand, 0, len(raw))
-	for i, entry := range raw {
-		if entry.Capacity.Min <= 0 || entry.Capacity.Max <= 0 || entry.Iops.Max <= 0 {
-			return nil, fmt.Errorf("catalog: invalid config_validation entry at index %d: capacity=[%d,%d] iops.max=%d",
-				i, entry.Capacity.Min, entry.Capacity.Max, entry.Iops.Max)
+	bands := make([]CatalogBand, len(parsed.Bands))
+	for i, b := range parsed.Bands {
+		bands[i] = CatalogBand{
+			CapMin:  int(b.CapacityMin),
+			CapMax:  int(b.CapacityMax),
+			IOPSMin: int(b.IOPSMin),
+			IOPSMax: int(b.IOPSMax),
 		}
-		bands = append(bands, CatalogBand{
-			CapMin:  entry.Capacity.Min,
-			CapMax:  entry.Capacity.Max,
-			IOPSMin: entry.Iops.Min,
-			IOPSMax: entry.Iops.Max,
-		})
 	}
 	return bands, nil
 }
