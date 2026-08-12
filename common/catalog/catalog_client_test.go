@@ -80,8 +80,10 @@ var expectedBands = []CatalogBand{
 // ---- URL construction --------------------------------------------------------
 
 func TestFetchCatalogBandsDP2_URLAppendsCatalogPath(t *testing.T) {
+	// IKSTokenExchangePrivateURL is a bare host — the client must assemble
+	// the full /v2/storage/vpc/getVolumeProfiles/dp2 path itself.
 	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
-	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com")
 	_, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
 	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles/dp2", fake.capturedURL)
@@ -90,7 +92,7 @@ func TestFetchCatalogBandsDP2_URLAppendsCatalogPath(t *testing.T) {
 func TestFetchCatalogBandsDP2_TrailingSlashStripped(t *testing.T) {
 	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
 	// Base URL has a trailing slash; it must be stripped before appending the path.
-	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/v2/storage/")
+	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/")
 	_, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
 	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles/dp2", fake.capturedURL)
@@ -102,7 +104,7 @@ func TestFetchCatalogBandsDP2_Success(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       armadaCatalogJSON,
-	}, "http://fake/v2/storage")
+	}, "http://fake")
 
 	bands, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
@@ -115,7 +117,7 @@ func TestFetchCatalogBandsDP2_ParsesAllBands(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       armadaCatalogJSON,
-	}, "http://fake/v2/storage")
+	}, "http://fake")
 
 	bands, err := client.FetchCatalogBandsDP2()
 	require.NoError(t, err)
@@ -125,7 +127,7 @@ func TestFetchCatalogBandsDP2_ParsesAllBands(t *testing.T) {
 // ---- Error paths -------------------------------------------------------------
 
 func TestFetchCatalogBandsDP2_HTTPError(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake/v2/storage")
+	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
@@ -135,7 +137,7 @@ func TestFetchCatalogBandsDP2_Non2xxStatus(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
-	}, "http://fake/v2/storage")
+	}, "http://fake")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
@@ -145,7 +147,7 @@ func TestFetchCatalogBandsDP2_InvalidJSON(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
-	}, "http://fake/v2/storage")
+	}, "http://fake")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
@@ -155,7 +157,7 @@ func TestFetchCatalogBandsDP2_EmptyBands(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `{"bands":[]}`,
-	}, "http://fake/v2/storage")
+	}, "http://fake")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
@@ -165,7 +167,7 @@ func TestFetchCatalogBandsDP2_NullBands(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `{}`,
-	}, "http://fake/v2/storage")
+	}, "http://fake")
 	_, err := client.FetchCatalogBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")

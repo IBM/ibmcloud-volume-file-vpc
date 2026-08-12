@@ -29,8 +29,10 @@ import (
 )
 
 // dp2CatalogPath is the path appended to the armada-storage-api base URL that
-// reaches the DP2 catalog proxy endpoint registered under /v2/storage/vpc/.
-const dp2CatalogPath = "/vpc/getVolumeProfiles/dp2"
+// reaches the DP2 catalog proxy endpoint. The full path includes /v2/storage
+// because IKSTokenExchangePrivateURL is a bare host
+// (e.g. "https://us-south.containers.cloud.ibm.com") with no path prefix.
+const dp2CatalogPath = "/v2/storage/vpc/getVolumeProfiles/dp2"
 
 // CatalogBand represents a single capacity/IOPS band from the DP2 profile.
 // Each band defines the inclusive GiB capacity range and the inclusive IOPS
@@ -71,16 +73,16 @@ type HTTPDoer interface {
 // armada-storage-api catalog proxy endpoint.
 // Construct one via NewCatalogClient or NewCatalogClientWithBaseURL.
 type CatalogClient struct {
-	// baseURL is the armada-storage-api base URL including /v2/storage,
-	// e.g. "https://us-south.containers.cloud.ibm.com/v2/storage".
+	// baseURL is the bare host base URL, e.g. "https://us-south.containers.cloud.ibm.com".
+	// dp2CatalogPath already includes the /v2/storage prefix.
 	baseURL    string
 	httpClient HTTPDoer
 }
 
 // NewCatalogClient returns a CatalogClient that calls armada-storage-api using
-// iksBaseURL as the base. iksBaseURL is the IKS private token-exchange URL
-// (conf.VPCConfig.IKSTokenExchangePrivateURL) which points at the correct
-// armada-storage-api endpoint for the cluster's environment (stage/prod).
+// iksBaseURL as the base. iksBaseURL is the IKS private token-exchange bare host URL
+// (conf.VPCConfig.IKSTokenExchangePrivateURL), e.g. "https://us-south.containers.cloud.ibm.com".
+// dp2CatalogPath provides the full /v2/storage/vpc/... suffix.
 // Pass nil for httpClient to use http.DefaultClient.
 func NewCatalogClient(httpClient HTTPDoer, iksBaseURL string) *CatalogClient {
 	if httpClient == nil {

@@ -84,7 +84,7 @@ func TestFetchCapacityBandsDP2_Success(t *testing.T) {
 	bands, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       armadaCatalogJSON,
-	}, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	}, "https://us-south.containers.cloud.ibm.com")
 	require.NoError(t, err)
 	require.Equal(t, knownBands, bands)
 }
@@ -93,12 +93,12 @@ func TestFetchCapacityBandsDP2_NilHTTPClient_UsesDefault(t *testing.T) {
 	// Passing nil must not panic (no nil-pointer dereference). The
 	// implementation substitutes http.DefaultClient before use.
 	require.NotPanics(t, func() {
-		_, _ = FetchCapacityBandsDP2(nil, "https://us-south.containers.cloud.ibm.com/v2/storage")
+		_, _ = FetchCapacityBandsDP2(nil, "https://us-south.containers.cloud.ibm.com")
 	})
 }
 
 func TestFetchCapacityBandsDP2_HTTPError(t *testing.T) {
-	_, err := FetchCapacityBandsDP2(&fakeHTTP{err: io.ErrUnexpectedEOF}, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	_, err := FetchCapacityBandsDP2(&fakeHTTP{err: io.ErrUnexpectedEOF}, "https://us-south.containers.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
 }
@@ -107,7 +107,7 @@ func TestFetchCapacityBandsDP2_Non2xxStatus(t *testing.T) {
 	_, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
-	}, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	}, "https://us-south.containers.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
 }
@@ -116,7 +116,7 @@ func TestFetchCapacityBandsDP2_InvalidJSON(t *testing.T) {
 	_, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
-	}, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	}, "https://us-south.containers.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
 }
@@ -125,7 +125,7 @@ func TestFetchCapacityBandsDP2_EmptyBands(t *testing.T) {
 	_, err := FetchCapacityBandsDP2(&fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       `{"bands":[]}`,
-	}, "https://us-south.containers.cloud.ibm.com/v2/storage")
+	}, "https://us-south.containers.cloud.ibm.com")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
 }
