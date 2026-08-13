@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// armadaCatalogJSON is a minimal armada-storage-api GET /v2/storage/vpc/getVolumeProfiles/dp2
+// armadaCatalogJSON is a minimal armada-storage-api GET /v2/storage/vpc/getVolumeProfiles?profile=dp2
 // response containing the bands used across tests.
 const armadaCatalogJSON = `{
   "bands": [
@@ -79,96 +79,96 @@ var expectedBands = []CatalogBand{
 
 // ---- URL construction --------------------------------------------------------
 
-func TestFetchCatalogBandsDP2_URLAppendsCatalogPath(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_URLAppendsVolumeProfilePath(t *testing.T) {
 	// IKSTokenExchangePrivateURL is a bare host — the client must assemble
 	// the full /v2/storage/vpc/getVolumeProfiles/dp2 path itself.
 	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
 	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.NoError(t, err)
-	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles/dp2", fake.capturedURL)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles?profile=dp2", fake.capturedURL)
 }
 
-func TestFetchCatalogBandsDP2_TrailingSlashStripped(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_TrailingSlashStripped(t *testing.T) {
 	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
 	// Base URL has a trailing slash; it must be stripped before appending the path.
 	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.NoError(t, err)
-	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles/dp2", fake.capturedURL)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles?profile=dp2", fake.capturedURL)
 }
 
 // ---- Success -----------------------------------------------------------------
 
-func TestFetchCatalogBandsDP2_Success(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_Success(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       armadaCatalogJSON,
 	}, "http://fake")
 
-	bands, err := client.FetchCatalogBandsDP2()
+	bands, err := client.FetchVolumeProfileBandsDP2()
 	require.NoError(t, err)
 	require.Len(t, bands, 10)
 	assert.Equal(t, CatalogBand{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000}, bands[0])
 	assert.Equal(t, CatalogBand{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000}, bands[9])
 }
 
-func TestFetchCatalogBandsDP2_ParsesAllBands(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_ParsesAllBands(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       armadaCatalogJSON,
 	}, "http://fake")
 
-	bands, err := client.FetchCatalogBandsDP2()
+	bands, err := client.FetchVolumeProfileBandsDP2()
 	require.NoError(t, err)
 	require.Equal(t, expectedBands, bands)
 }
 
 // ---- Error paths -------------------------------------------------------------
 
-func TestFetchCatalogBandsDP2_HTTPError(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_HTTPError(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
 }
 
-func TestFetchCatalogBandsDP2_Non2xxStatus(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_Non2xxStatus(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
 	}, "http://fake")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
 }
 
-func TestFetchCatalogBandsDP2_InvalidJSON(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_InvalidJSON(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
 	}, "http://fake")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
 }
 
-func TestFetchCatalogBandsDP2_EmptyBands(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_EmptyBands(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `{"bands":[]}`,
 	}, "http://fake")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
 }
 
-func TestFetchCatalogBandsDP2_NullBands(t *testing.T) {
+func TestFetchVolumeProfileBandsDP2_NullBands(t *testing.T) {
 	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `{}`,
 	}, "http://fake")
-	_, err := client.FetchCatalogBandsDP2()
+	_, err := client.FetchVolumeProfileBandsDP2()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
 }

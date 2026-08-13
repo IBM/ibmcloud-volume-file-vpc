@@ -32,15 +32,14 @@ type HTTPDoer = catalog.HTTPDoer
 // of this package need not import common/catalog directly.
 type CatalogBand = catalog.CatalogBand
 
-// FetchCapacityBandsDP2 fetches the dp2 capacity/IOPS bands from the
-// armada-storage-api catalog proxy endpoint and returns them as a slice ordered
-// from the smallest capacity band to the largest.
+// FetchCapacityBandsDP2 fetches the dp2 volume profile capacity/IOPS bands from
+// the armada-storage-api volume profile proxy endpoint and returns them as a
+// slice ordered from the smallest capacity band to the largest.
 //
 // iksBaseURL is the IKS private token-exchange base URL already configured for
 // this cluster (conf.VPCConfig.IKSTokenExchangePrivateURL). It contains the
-// correct host for the cluster's environment (stage/prod) and includes the
-// /v2/storage path prefix that armada-storage-api serves under, e.g.
-// "https://us-south.containers.cloud.ibm.com/v2/storage".
+// correct host for the cluster's environment (stage/prod), e.g.
+// "https://us-south.containers.cloud.ibm.com".
 //
 // Pass nil for httpClient to use http.DefaultClient.
 // This is the only function in this package that performs network I/O.
@@ -53,5 +52,5 @@ func FetchCapacityBandsDP2(httpClient HTTPDoer, iksBaseURL string) ([]catalog.Ca
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return catalog.NewCatalogClient(httpClient, iksBaseURL).FetchCatalogBandsDP2()
+	return catalog.NewCatalogClient(httpClient, iksBaseURL).FetchVolumeProfileBandsDP2()
 }

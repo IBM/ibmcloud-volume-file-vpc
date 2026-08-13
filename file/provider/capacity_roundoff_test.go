@@ -30,8 +30,8 @@ import (
 
 // ---- shared fixtures ----------------------------------------------------------
 
-// armadaCatalogJSON is a minimal armada-storage-api catalog response.
-// This is the shape returned by GET /v2/storage/vpc/getVolumeProfiles/dp2.
+// armadaCatalogJSON is a minimal armada-storage-api volume profile response.
+// This is the shape returned by GET /v2/storage/vpc/getVolumeProfiles?profile=dp2.
 const armadaCatalogJSON = `{
   "bands": [
     {"capacityMin": 10,    "capacityMax": 39,    "iopsMin": 100,  "iopsMax": 1000},

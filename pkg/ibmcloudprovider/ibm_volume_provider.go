@@ -29,4 +29,7 @@ type CloudProviderInterface interface {
 	GetProviderSession(ctx context.Context, logger *zap.Logger) (provider.Session, error)
 	GetConfig() *config.Config
 	GetClusterID() string
+	// GetIAMToken returns a fresh IAM bearer token for the cluster's service
+	// account. Used by the catalog fetch at driver startup.
+	GetIAMToken() (string, error)
 }
