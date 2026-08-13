@@ -69,8 +69,8 @@ type HTTPDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// CatalogClient fetches and parses dp2 capacity/IOPS bands from the
-// armada-storage-api catalog proxy endpoint.
+// CatalogClient fetches and parses dp2 volume profile capacity/IOPS bands from
+// armada-storage-api.
 // Construct one via NewCatalogClient or NewCatalogClientWithBaseURL.
 type CatalogClient struct {
 	// baseURL is the bare host base URL, e.g. "https://us-south.containers.cloud.ibm.com".

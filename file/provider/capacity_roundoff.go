@@ -37,8 +37,7 @@ type CatalogBand = catalog.CatalogBand
 // slice ordered from the smallest capacity band to the largest.
 //
 // iksBaseURL is the IKS private token-exchange base URL already configured for
-// this cluster (conf.VPCConfig.IKSTokenExchangePrivateURL). It contains the
-// correct host for the cluster's environment (stage/prod), e.g.
+// this cluster (conf.VPCConfig.IKSTokenExchangePrivateURL), e.g.
 // "https://us-south.containers.cloud.ibm.com".
 //
 // Pass nil for httpClient to use http.DefaultClient.
