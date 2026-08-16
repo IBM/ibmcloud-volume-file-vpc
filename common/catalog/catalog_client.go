@@ -48,19 +48,28 @@ type CatalogBand struct {
 	IOPSMax int
 }
 
-// dp2VolumeProfileResponse mirrors the JSON returned by armada-storage-api
-// GET /v2/storage/vpc/getVolumeProfiles?profile=dp2.
-type dp2VolumeProfileResponse struct {
-	Bands []dp2VolumeProfileBand `json:"bands"`
-}
-
-// dp2VolumeProfileBand is one element in the bands array returned by armada-storage-api.
-// Field names match the JSON tags used by armada-storage-api globalcatalog.CatalogBand.
-type dp2VolumeProfileBand struct {
+// VolumeProfileBand is one element in the bands array returned by armada-storage-api.
+// It is the canonical shared type for the JSON wire format used by the
+// GET /v2/storage/vpc/getVolumeProfiles endpoint.
+//
+// Field names and JSON tags are identical to armada-storage-api's
+// globalcatalog.CatalogBand so that JSON unmarshal works without a conversion step.
+//
+// This type is re-exported by vpcfilevolume.VolumeProfileBand (and in turn by
+// file/provider.VolumeProfileBand) so that IksVpcSession.GetVolumeProfileBands
+// and the CSI driver's VolumeProfileBandsFetcher interface share exactly the
+// same Go type, allowing the type assertion to succeed at runtime.
+type VolumeProfileBand struct {
 	CapacityMin int64 `json:"capacityMin"`
 	CapacityMax int64 `json:"capacityMax"`
 	IOPSMin     int64 `json:"iopsMin"`
 	IOPSMax     int64 `json:"iopsMax"`
+}
+
+// dp2VolumeProfileResponse mirrors the JSON returned by armada-storage-api
+// GET /v2/storage/vpc/getVolumeProfiles?profile=dp2.
+type dp2VolumeProfileResponse struct {
+	Bands []VolumeProfileBand `json:"bands"`
 }
 
 // HTTPDoer is the minimal interface required from an HTTP client so it can be

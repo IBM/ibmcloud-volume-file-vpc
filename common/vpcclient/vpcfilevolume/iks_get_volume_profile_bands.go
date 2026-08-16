@@ -20,19 +20,18 @@ package vpcfilevolume
 import (
 	"time"
 
+	"github.com/IBM/ibmcloud-volume-file-vpc/common/catalog"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"go.uber.org/zap"
 )
 
-// VolumeProfileBand represents one capacity-to-IOPS band returned by the
-// armada-storage-api GET /v2/storage/vpc/getVolumeProfiles endpoint.
-type VolumeProfileBand struct {
-	CapacityMin int64 `json:"capacityMin"`
-	CapacityMax int64 `json:"capacityMax"`
-	IOPSMin     int64 `json:"iopsMin"`
-	IOPSMax     int64 `json:"iopsMax"`
-}
+// VolumeProfileBand is a type alias for catalog.VolumeProfileBand.
+// Using a type alias (not a redefinition) ensures that every package in the
+// call chain — IKSVolumeService, IksVpcSession, file/provider, and the CSI
+// driver's VolumeProfileBandsFetcher interface — all refer to the exact same
+// Go type, so the interface type assertion succeeds at runtime.
+type VolumeProfileBand = catalog.VolumeProfileBand
 
 // volumeProfileBandsResponse is the JSON envelope returned by armada-storage-api.
 type volumeProfileBandsResponse struct {
