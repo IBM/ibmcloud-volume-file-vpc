@@ -469,6 +469,22 @@ var _ = Describe("[ics-e2e] [eit-rfs] [stunnel-verification] EIT Volume with Stu
 			panic(labelerr)
 		}
 
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ RFS EIT: VERIFY STUNNEL TUNNEL EXISTS AND VERIFY MOUNT USES TUNNEL MUST PASS\n")
+				} else {
+					fpointer.WriteString("✅ RFS EIT: VERIFY STUNNEL TUNNEL EXISTS AND VERIFY MOUNT USES TUNNEL MUST PASS\n")
+				}
+				fpointer.Close()
+			}
+		})
+
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 		pod := testsuites.PodDetails{
 			Cmd: "echo 'stunnel test' > /mnt/test-1/data && while true; do sleep 2; done",
@@ -546,6 +562,22 @@ var _ = Describe("[ics-e2e] [eit-rfs] [multi-volume] EIT Pod with Multiple Volum
 		if labelerr != nil {
 			panic(labelerr)
 		}
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ RFS EIT: VERIFY CREATE POD WITH 2 EIT VOLUMES and VERIFY BOTH STUNNEL TUNNELS MUST PASS\n")
+				} else {
+					fpointer.WriteString("✅ RFS EIT: VERIFY CREATE POD WITH 2 EIT VOLUMES and VERIFY BOTH STUNNEL TUNNELS MUST PASS\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 		pod := testsuites.PodDetails{
@@ -636,6 +668,22 @@ var _ = Describe("[ics-e2e] [eit-rfs] [cleanup] EIT Volume Cleanup and Tunnel Re
 			panic(labelerr)
 		}
 
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ RFS EIT: VERIFY CREATE POD EIT VOLUME,VERIFY TUNNEL, DELETE POD and VERIFY TUNNEL CLEANUP MUST PASS\n")
+				} else {
+					fpointer.WriteString("✅ RFS EIT: VERIFY CREATE POD EIT VOLUME,VERIFY TUNNEL, DELETE POD and VERIFY TUNNEL CLEANUP MUST PASS\n")
+				}
+				fpointer.Close()
+			}
+		})
+
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 		pvcName := "eit-rfs-cleanup-test-"
 		pod := testsuites.PodDetails{
@@ -714,6 +762,22 @@ var _ = Describe("[ics-e2e] [eit-rfs] [node-restart] EIT Volume with CSI Node Se
 		if labelerr != nil {
 			panic(labelerr)
 		}
+
+		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
+		if err != nil {
+			panic(err)
+		}
+
+		DeferCleanup(func() {
+			if fpointer != nil {
+				if CurrentSpecReport().Failed() {
+					fpointer.WriteString("❌ RFS EIT: VERIFY EIT VOLUME FUNCTIONALITY AFTER CSI NODE SERVER RESTART MUST PASS\n")
+				} else {
+					fpointer.WriteString("✅ RFS EIT: VERIFY EIT VOLUME FUNCTIONALITY AFTER CSI NODE SERVER RESTART MUST PASS\n")
+				}
+				fpointer.Close()
+			}
+		})
 
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 		pvcName := "eit-rfs-restart-test-"
