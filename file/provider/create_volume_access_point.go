@@ -83,6 +83,23 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			}
 		}
 
+		// access_protocol and transit_encryption are mandatory (VPC API requirement).
+		// Both dp2 and rfs require access_protocol="nfs4".
+		// transit_encryption defaults to "none" unless EIT is explicitly enabled (user_managed).
+		// rfs forces transit_encryption="none" regardless of EIT setting.
+		volumeAccessPoint.AccessProtocol = "nfs4"
+		if volumeAccessPointRequest.TransitEncryption != "" {
+			volumeAccessPoint.TransitEncryption = volumeAccessPointRequest.TransitEncryption
+		} else {
+			volumeAccessPoint.TransitEncryption = "none"
+		}
+
+		if existingVolume, getVolErr := vpcs.GetVolume(volumeAccessPointRequest.VolumeID); getVolErr == nil && existingVolume != nil {
+			if existingVolume.Profile != nil && existingVolume.Profile.Name == "rfs" {
+				volumeAccessPoint.TransitEncryption = "none"
+			}
+		}
+
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
 		vpcs.Logger.Info("Creating volume accessPoint from VPC provider...")
 		volumeAccessPointResult, err = vpcs.Apiclient.FileShareService().CreateFileShareTarget(&volumeAccessPoint, vpcs.Logger)

@@ -86,6 +86,7 @@ var skipErrorCodes = map[string]bool{
 	"invalid_route":                             true,
 	"service_error":                             false,
 	"shares_bad_field_for_rfs_profile":          true,
+	"shares_bad_field_update_for_rfs_profile":   true,
 	"shares_profile_bandwidth_not_allowed":      true,
 	"shares_bandwidth_invalid":                  true,
 	"shares_not_implemented":                    true,

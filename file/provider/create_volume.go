@@ -96,11 +96,17 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 			shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
 		}
 
-		// Set access_protocol and transit_encryption ONLY for 'rfs' profile
-		// Note: These are mandatory parameters for rfs profile
-		if volumeRequest.VPCVolume.Profile != nil && volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile {
+		// access_protocol and transit_encryption are mandatory for all profiles (VPC API requirement).
+		// Both dp2 and rfs require access_protocol="nfs4".
+		// transit_encryption defaults to "none" unless EIT is explicitly enabled (user_managed).
+		// rfs forces transit_encryption="none" regardless of EIT setting.
+		if volumeRequest.VPCVolume.Profile != nil {
 			shareTargetTemplate.AccessProtocol = "nfs4"
-			shareTargetTemplate.TransitEncryption = "none"
+			if volumeRequest.VPCVolume.Profile.Name == vpcfile.RFSProfile {
+				shareTargetTemplate.TransitEncryption = "none"
+			} else if shareTargetTemplate.TransitEncryption == "" {
+				shareTargetTemplate.TransitEncryption = "none"
+			}
 		}
 
 		volumeAccessPointList := make([]models.ShareTarget, 1)
