@@ -49,6 +49,18 @@ jobs:
         env:
           GOPATH: ${{ runner.temp }}/go
 
+      - name: Debug Go dependencies
+        run: |
+          go version
+          go env GOWORK
+          go list -m golang.org/x/net
+          go list -m google.golang.org/grpc
+
+      - name: Clean Go module cache
+        run: |
+          go clean -modcache
+          go mod download
+
       - name: Run go vet
         run: make vet
 
