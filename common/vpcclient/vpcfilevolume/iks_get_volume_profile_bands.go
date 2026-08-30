@@ -55,6 +55,12 @@ func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap
 	apiErr := vs.receiverError
 
 	request := vs.client.NewRequest(operation)
+	// This endpoint is an armada-storage-api proxy, not a VPC RIAAS endpoint.
+	// The IKS session client injects "generation" and "version" into every
+	// request by default; strip them here so armada-storage-api does not reject
+	// the call with ST0020 ("unsupported query parameter").
+	request.DeleteQueryValue("generation")
+	request.DeleteQueryValue("version")
 	// profile is passed as a query parameter, not a path segment
 	request.SetQueryValue("profile", profile)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
