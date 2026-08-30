@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"strings"
@@ -30,25 +31,26 @@ import (
 
 // ---- shared fixtures ----------------------------------------------------------
 
-// armadaCatalogJSON is a minimal armada-storage-api volume profile response.
-// This is the shape returned by GET /v2/storage/vpc/getVolumeProfiles?profile=dp2.
-const armadaCatalogJSON = `{
-  "bands": [
-    {"capacityMin": 10,    "capacityMax": 39,    "iopsMin": 100,  "iopsMax": 1000},
-    {"capacityMin": 40,    "capacityMax": 79,    "iopsMin": 100,  "iopsMax": 2000},
-    {"capacityMin": 80,    "capacityMax": 99,    "iopsMin": 100,  "iopsMax": 4000},
-    {"capacityMin": 100,   "capacityMax": 499,   "iopsMin": 100,  "iopsMax": 6000},
-    {"capacityMin": 500,   "capacityMax": 999,   "iopsMin": 100,  "iopsMax": 10000},
-    {"capacityMin": 1000,  "capacityMax": 1999,  "iopsMin": 100,  "iopsMax": 20000},
-    {"capacityMin": 2000,  "capacityMax": 3999,  "iopsMin": 200,  "iopsMax": 40000},
-    {"capacityMin": 4000,  "capacityMax": 7999,  "iopsMin": 300,  "iopsMax": 40000},
-    {"capacityMin": 8000,  "capacityMax": 15999, "iopsMin": 500,  "iopsMax": 64000},
-    {"capacityMin": 16000, "capacityMax": 32000, "iopsMin": 2000, "iopsMax": 96000}
+// dp2CatalogJSON is a minimal armada-storage-api volume profile response.
+// This is the shape returned by GET /v2/storage/vpc/volumeProfile?profile=dp2.
+const dp2CatalogJSON = `{
+  "id": "dp2",
+  "config_validation": [
+    {"capacity": {"min": 10,    "max": 39},    "iops": {"min": 100,  "max": 1000}},
+    {"capacity": {"min": 40,    "max": 79},    "iops": {"min": 100,  "max": 2000}},
+    {"capacity": {"min": 80,    "max": 99},    "iops": {"min": 100,  "max": 4000}},
+    {"capacity": {"min": 100,   "max": 499},   "iops": {"min": 100,  "max": 6000}},
+    {"capacity": {"min": 500,   "max": 999},   "iops": {"min": 100,  "max": 10000}},
+    {"capacity": {"min": 1000,  "max": 1999},  "iops": {"min": 100,  "max": 20000}},
+    {"capacity": {"min": 2000,  "max": 3999},  "iops": {"min": 200,  "max": 40000}},
+    {"capacity": {"min": 4000,  "max": 7999},  "iops": {"min": 300,  "max": 40000}},
+    {"capacity": {"min": 8000,  "max": 15999}, "iops": {"min": 500,  "max": 64000}},
+    {"capacity": {"min": 16000, "max": 32000}, "iops": {"min": 2000, "max": 96000}}
   ]
 }`
 
-// knownBands is the parsed form of armadaCatalogJSON.
-var knownBands = []catalog.CatalogBand{
+// knownDP2Bands is the parsed form of dp2CatalogJSON.
+var knownDP2Bands = []catalog.CatalogBand{
 	{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000},
 	{CapMin: 40, CapMax: 79, IOPSMin: 100, IOPSMax: 2000},
 	{CapMin: 80, CapMax: 99, IOPSMin: 100, IOPSMax: 4000},
@@ -78,54 +80,54 @@ func (f *fakeHTTP) Do(_ *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// ---- FetchCapacityBandsDP2 ---------------------------------------------------
+// ---- FetchCapacityBands ------------------------------------------------------
 
-func TestFetchCapacityBandsDP2_Success(t *testing.T) {
-	bands, err := FetchCapacityBandsDP2(&fakeHTTP{
+func TestFetchCapacityBands_Success(t *testing.T) {
+	bands, err := FetchCapacityBands(context.Background(), &fakeHTTP{
 		statusCode: http.StatusOK,
-		body:       armadaCatalogJSON,
-	}, "https://us-south.containers.cloud.ibm.com")
+		body:       dp2CatalogJSON,
+	}, "https://us-south.containers.cloud.ibm.com", "dp2")
 	require.NoError(t, err)
-	require.Equal(t, knownBands, bands)
+	require.Equal(t, knownDP2Bands, bands)
 }
 
-func TestFetchCapacityBandsDP2_NilHTTPClient_UsesDefault(t *testing.T) {
+func TestFetchCapacityBands_NilHTTPClient_UsesDefault(t *testing.T) {
 	// Passing nil must not panic (no nil-pointer dereference). The
 	// implementation substitutes http.DefaultClient before use.
 	require.NotPanics(t, func() {
-		_, _ = FetchCapacityBandsDP2(nil, "https://us-south.containers.cloud.ibm.com")
+		_, _ = FetchCapacityBands(context.Background(), nil, "https://us-south.containers.cloud.ibm.com", "dp2")
 	})
 }
 
-func TestFetchCapacityBandsDP2_HTTPError(t *testing.T) {
-	_, err := FetchCapacityBandsDP2(&fakeHTTP{err: io.ErrUnexpectedEOF}, "https://us-south.containers.cloud.ibm.com")
+func TestFetchCapacityBands_HTTPError(t *testing.T) {
+	_, err := FetchCapacityBands(context.Background(), &fakeHTTP{err: io.ErrUnexpectedEOF}, "https://us-south.containers.cloud.ibm.com", "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
 }
 
-func TestFetchCapacityBandsDP2_Non2xxStatus(t *testing.T) {
-	_, err := FetchCapacityBandsDP2(&fakeHTTP{
+func TestFetchCapacityBands_Non2xxStatus(t *testing.T) {
+	_, err := FetchCapacityBands(context.Background(), &fakeHTTP{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
-	}, "https://us-south.containers.cloud.ibm.com")
+	}, "https://us-south.containers.cloud.ibm.com", "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
 }
 
-func TestFetchCapacityBandsDP2_InvalidJSON(t *testing.T) {
-	_, err := FetchCapacityBandsDP2(&fakeHTTP{
+func TestFetchCapacityBands_InvalidJSON(t *testing.T) {
+	_, err := FetchCapacityBands(context.Background(), &fakeHTTP{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
-	}, "https://us-south.containers.cloud.ibm.com")
+	}, "https://us-south.containers.cloud.ibm.com", "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
 }
 
-func TestFetchCapacityBandsDP2_EmptyBands(t *testing.T) {
-	_, err := FetchCapacityBandsDP2(&fakeHTTP{
+func TestFetchCapacityBands_EmptyBands(t *testing.T) {
+	_, err := FetchCapacityBands(context.Background(), &fakeHTTP{
 		statusCode: http.StatusOK,
-		body:       `{"bands":[]}`,
-	}, "https://us-south.containers.cloud.ibm.com")
+		body:       `{"id":"dp2","config_validation":[]}`,
+	}, "https://us-south.containers.cloud.ibm.com", "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
 }

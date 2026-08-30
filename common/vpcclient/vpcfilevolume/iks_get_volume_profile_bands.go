@@ -18,6 +18,7 @@
 package vpcfilevolume
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/catalog"
@@ -33,15 +34,12 @@ import (
 // Go type, so the interface type assertion succeeds at runtime.
 type VolumeProfileBand = catalog.VolumeProfileBand
 
-// volumeProfileBandsResponse is the JSON envelope returned by armada-storage-api.
-type volumeProfileBandsResponse struct {
-	Profile string              `json:"profile"`
-	Bands   []VolumeProfileBand `json:"bands"`
-}
-
-// GetVolumeProfileBands GETs /v2/storage/vpc/getVolumeProfiles?profile=<name> via
-// armada-storage-api. The IKS session client already carries the IAM bearer token
-// set during Login(), so no additional token management is needed here.
+// GetVolumeProfileBands GETs /v2/storage/vpc/volumeProfile?profile=<name> via
+// armada-storage-api and converts the response to []VolumeProfileBand.
+// JSON parsing is delegated to catalog.ParseVolumeProfileBands to avoid
+// duplicating the wire-format struct definitions.
+// The IKS session client already carries the IAM bearer token set during
+// Login(), so no additional token management is needed here.
 func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap.Logger) ([]VolumeProfileBand, error) {
 	ctxLogger.Debug("Entry Backend IKSVolumeService.GetVolumeProfileBands")
 	defer ctxLogger.Debug("Exit Backend IKSVolumeService.GetVolumeProfileBands")
@@ -51,10 +49,9 @@ func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap
 	operation := &client.Operation{
 		Name:        "GetVolumeProfileBands",
 		Method:      "GET",
-		PathPattern: vs.pathPrefix + vpcGetVolumeProfiles,
+		PathPattern: vs.pathPrefix + vpcVolumeProfile,
 	}
 
-	var result volumeProfileBandsResponse
 	apiErr := vs.receiverError
 
 	request := vs.client.NewRequest(operation)
@@ -62,14 +59,23 @@ func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap
 	request.SetQueryValue("profile", profile)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
-	_, err := request.JSONSuccess(&result).JSONError(apiErr).Invoke()
+	// Capture the raw JSON so that catalog.ParseVolumeProfileBands can decode
+	// it — this avoids duplicating the wire-format struct definitions here.
+	var raw json.RawMessage
+	_, err := request.JSONSuccess(&raw).JSONError(apiErr).Invoke()
 	if err != nil {
 		ctxLogger.Error("GetVolumeProfileBands failed", zap.String("profile", profile), zap.Error(err))
 		return nil, err
 	}
 
+	bands, err := catalog.ParseVolumeProfileBands([]byte(raw), profile)
+	if err != nil {
+		ctxLogger.Error("GetVolumeProfileBands: parse failed", zap.String("profile", profile), zap.Error(err))
+		return nil, err
+	}
+
 	ctxLogger.Info("GetVolumeProfileBands succeeded",
 		zap.String("profile", profile),
-		zap.Int("bands", len(result.Bands)))
-	return result.Bands, nil
+		zap.Int("bands", len(bands)))
+	return bands, nil
 }

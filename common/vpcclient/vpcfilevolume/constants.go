@@ -30,7 +30,7 @@ const (
 	subnets              = Version + "/subnets"
 	securityGroups       = Version + "/security_groups"
 	updateVolume         = "updateVolume"
-	vpcGetVolumeProfiles = "vpc/getVolumeProfiles"
+	vpcVolumeProfile = "vpc/volumeProfile"
 	profileName          = "profile-name"
 	shareProfiles        = Version + "/share/profiles"
 	shareProfileName     = shareProfiles + "/{" + profileName + "}"

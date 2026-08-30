@@ -17,6 +17,7 @@
 package catalog
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"strings"
@@ -26,20 +27,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// armadaCatalogJSON is a minimal armada-storage-api GET /v2/storage/vpc/getVolumeProfiles?profile=dp2
-// response containing the bands used across tests.
-const armadaCatalogJSON = `{
-  "bands": [
-    {"capacityMin": 10,    "capacityMax": 39,    "iopsMin": 100,  "iopsMax": 1000},
-    {"capacityMin": 40,    "capacityMax": 79,    "iopsMin": 100,  "iopsMax": 2000},
-    {"capacityMin": 80,    "capacityMax": 99,    "iopsMin": 100,  "iopsMax": 4000},
-    {"capacityMin": 100,   "capacityMax": 499,   "iopsMin": 100,  "iopsMax": 6000},
-    {"capacityMin": 500,   "capacityMax": 999,   "iopsMin": 100,  "iopsMax": 10000},
-    {"capacityMin": 1000,  "capacityMax": 1999,  "iopsMin": 100,  "iopsMax": 20000},
-    {"capacityMin": 2000,  "capacityMax": 3999,  "iopsMin": 200,  "iopsMax": 40000},
-    {"capacityMin": 4000,  "capacityMax": 7999,  "iopsMin": 300,  "iopsMax": 40000},
-    {"capacityMin": 8000,  "capacityMax": 15999, "iopsMin": 500,  "iopsMax": 64000},
-    {"capacityMin": 16000, "capacityMax": 32000, "iopsMin": 2000, "iopsMax": 96000}
+// dp2CatalogJSON is a minimal armada-storage-api GET /v2/storage/vpc/volumeProfile?profile=dp2
+// response in the config_validation format.
+const dp2CatalogJSON = `{
+  "id": "dp2",
+  "config_validation": [
+    {"capacity": {"min": 10,    "max": 39},    "iops": {"min": 100,  "max": 1000}},
+    {"capacity": {"min": 40,    "max": 79},    "iops": {"min": 100,  "max": 2000}},
+    {"capacity": {"min": 80,    "max": 99},    "iops": {"min": 100,  "max": 4000}},
+    {"capacity": {"min": 100,   "max": 499},   "iops": {"min": 100,  "max": 6000}},
+    {"capacity": {"min": 500,   "max": 999},   "iops": {"min": 100,  "max": 10000}},
+    {"capacity": {"min": 1000,  "max": 1999},  "iops": {"min": 100,  "max": 20000}},
+    {"capacity": {"min": 2000,  "max": 3999},  "iops": {"min": 200,  "max": 40000}},
+    {"capacity": {"min": 4000,  "max": 7999},  "iops": {"min": 300,  "max": 40000}},
+    {"capacity": {"min": 8000,  "max": 15999}, "iops": {"min": 500,  "max": 64000}},
+    {"capacity": {"min": 16000, "max": 32000}, "iops": {"min": 2000, "max": 96000}}
   ]
 }`
 
@@ -63,8 +65,8 @@ func (f *fakeHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-// expectedBands mirrors what FetchCatalogBandsDP2 should return for armadaCatalogJSON.
-var expectedBands = []CatalogBand{
+// expectedDP2Bands mirrors what FetchVolumeProfileBands("dp2") should return for dp2CatalogJSON.
+var expectedDP2Bands = []CatalogBand{
 	{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000},
 	{CapMin: 40, CapMax: 79, IOPSMin: 100, IOPSMax: 2000},
 	{CapMin: 80, CapMax: 99, IOPSMin: 100, IOPSMax: 4000},
@@ -79,96 +81,117 @@ var expectedBands = []CatalogBand{
 
 // ---- URL construction --------------------------------------------------------
 
-func TestFetchVolumeProfileBandsDP2_URLAppendsVolumeProfilePath(t *testing.T) {
+func TestFetchVolumeProfileBands_URLAppendsProfileParam(t *testing.T) {
 	// IKSTokenExchangePrivateURL is a bare host — the client must assemble
-	// the full /v2/storage/vpc/getVolumeProfiles/dp2 path itself.
-	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
-	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com")
-	_, err := client.FetchVolumeProfileBandsDP2()
+	// the full /v2/storage/vpc/volumeProfile?profile=dp2 path itself.
+	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: dp2CatalogJSON}
+	client := NewCatalogClient(fake, "https://us-south.containers.cloud.ibm.com")
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.NoError(t, err)
-	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles?profile=dp2", fake.capturedURL)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/volumeProfile?profile=dp2", fake.capturedURL)
 }
 
-func TestFetchVolumeProfileBandsDP2_TrailingSlashStripped(t *testing.T) {
-	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: armadaCatalogJSON}
+func TestFetchVolumeProfileBands_TrailingSlashStripped(t *testing.T) {
+	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: dp2CatalogJSON}
 	// Base URL has a trailing slash; it must be stripped before appending the path.
-	client := NewCatalogClientWithBaseURL(fake, "https://us-south.containers.cloud.ibm.com/")
-	_, err := client.FetchVolumeProfileBandsDP2()
+	client := NewCatalogClient(fake, "https://us-south.containers.cloud.ibm.com/")
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.NoError(t, err)
-	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/getVolumeProfiles?profile=dp2", fake.capturedURL)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/volumeProfile?profile=dp2", fake.capturedURL)
+}
+
+func TestFetchVolumeProfileBands_ProfileNameInURL(t *testing.T) {
+	// Confirm the profile name is correctly appended for a different profile.
+	fake := &fakeHTTPClient{statusCode: http.StatusOK, body: `{"id":"rfs","config_validation":[{"capacity":{"min":1,"max":32000},"iops":{"min":100,"max":48000}}]}`}
+	client := NewCatalogClient(fake, "https://us-south.containers.cloud.ibm.com")
+	_, err := client.FetchVolumeProfileBands(context.Background(), "rfs")
+	require.NoError(t, err)
+	assert.Equal(t, "https://us-south.containers.cloud.ibm.com/v2/storage/vpc/volumeProfile?profile=rfs", fake.capturedURL)
 }
 
 // ---- Success -----------------------------------------------------------------
 
-func TestFetchVolumeProfileBandsDP2_Success(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
+func TestFetchVolumeProfileBands_Success(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       armadaCatalogJSON,
+		body:       dp2CatalogJSON,
 	}, "http://fake")
 
-	bands, err := client.FetchVolumeProfileBandsDP2()
+	bands, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.NoError(t, err)
 	require.Len(t, bands, 10)
 	assert.Equal(t, CatalogBand{CapMin: 10, CapMax: 39, IOPSMin: 100, IOPSMax: 1000}, bands[0])
 	assert.Equal(t, CatalogBand{CapMin: 16000, CapMax: 32000, IOPSMin: 2000, IOPSMax: 96000}, bands[9])
 }
 
-func TestFetchVolumeProfileBandsDP2_ParsesAllBands(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
+func TestFetchVolumeProfileBands_ParsesAllBands(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       armadaCatalogJSON,
+		body:       dp2CatalogJSON,
 	}, "http://fake")
 
-	bands, err := client.FetchVolumeProfileBandsDP2()
+	bands, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.NoError(t, err)
-	require.Equal(t, expectedBands, bands)
+	require.Equal(t, expectedDP2Bands, bands)
 }
 
 // ---- Error paths -------------------------------------------------------------
 
-func TestFetchVolumeProfileBandsDP2_HTTPError(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake")
-	_, err := client.FetchVolumeProfileBandsDP2()
+func TestFetchVolumeProfileBands_HTTPError(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{err: io.ErrUnexpectedEOF}, "http://fake")
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "HTTP request")
 }
 
-func TestFetchVolumeProfileBandsDP2_Non2xxStatus(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
+func TestFetchVolumeProfileBands_Non2xxStatus(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{
 		statusCode: http.StatusServiceUnavailable,
 		body:       `{"error":"unavailable"}`,
 	}, "http://fake")
-	_, err := client.FetchVolumeProfileBandsDP2()
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "503")
 }
 
-func TestFetchVolumeProfileBandsDP2_InvalidJSON(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
+func TestFetchVolumeProfileBands_InvalidJSON(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `not-json`,
 	}, "http://fake")
-	_, err := client.FetchVolumeProfileBandsDP2()
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "decode response")
 }
 
-func TestFetchVolumeProfileBandsDP2_EmptyBands(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
+func TestFetchVolumeProfileBands_EmptyBands(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{
 		statusCode: http.StatusOK,
-		body:       `{"bands":[]}`,
+		body:       `{"id":"dp2","config_validation":[]}`,
 	}, "http://fake")
-	_, err := client.FetchVolumeProfileBandsDP2()
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
 }
 
-func TestFetchVolumeProfileBandsDP2_NullBands(t *testing.T) {
-	client := NewCatalogClientWithBaseURL(&fakeHTTPClient{
+func TestFetchVolumeProfileBands_NullBands(t *testing.T) {
+	client := NewCatalogClient(&fakeHTTPClient{
 		statusCode: http.StatusOK,
 		body:       `{}`,
 	}, "http://fake")
-	_, err := client.FetchVolumeProfileBandsDP2()
+	_, err := client.FetchVolumeProfileBands(context.Background(), "dp2")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "no bands")
+}
+
+func TestFetchVolumeProfileBands_EntriesWithoutIopsSkipped(t *testing.T) {
+	// Entries without an "iops" field are skipped; if ALL entries lack iops
+	// the function must return an error rather than an empty slice.
+	client := NewCatalogClient(&fakeHTTPClient{
+		statusCode: http.StatusOK,
+		body:       `{"id":"rfs","config_validation":[{"capacity":{"min":1,"max":32000}}]}`,
+	}, "http://fake")
+	_, err := client.FetchVolumeProfileBands(context.Background(), "rfs")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "no bands")
 }

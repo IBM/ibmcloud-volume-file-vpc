@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/catalog"
@@ -32,9 +33,11 @@ type HTTPDoer = catalog.HTTPDoer
 // of this package need not import common/catalog directly.
 type CatalogBand = catalog.CatalogBand
 
-// FetchCapacityBandsDP2 fetches the dp2 volume profile capacity/IOPS bands from
-// the armada-storage-api volume profile proxy endpoint and returns them as a
-// slice ordered from the smallest capacity band to the largest.
+// FetchCapacityBands fetches the capacity/IOPS bands for the named VPC file
+// volume profile (e.g. "dp2") from the armada-storage-api proxy endpoint,
+// returning them ordered from the smallest capacity band to the largest.
+//
+// profile is the profile name to query (e.g. "dp2", "rfs").
 //
 // iksBaseURL is the IKS private token-exchange base URL already configured for
 // this cluster (conf.VPCConfig.IKSTokenExchangePrivateURL), e.g.
@@ -47,9 +50,9 @@ type CatalogBand = catalog.CatalogBand
 //
 // Returns an error if the endpoint is unreachable, returns a non-2xx status,
 // or the response contains no valid bands.
-func FetchCapacityBandsDP2(httpClient HTTPDoer, iksBaseURL string) ([]catalog.CatalogBand, error) {
+func FetchCapacityBands(ctx context.Context, httpClient HTTPDoer, iksBaseURL string, profile string) ([]catalog.CatalogBand, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	return catalog.NewCatalogClient(httpClient, iksBaseURL).FetchVolumeProfileBandsDP2()
+	return catalog.NewCatalogClient(httpClient, iksBaseURL).FetchVolumeProfileBands(ctx, profile)
 }
