@@ -31,23 +31,19 @@ import (
 // the IKS session. The IKS session client already carries the IAM bearer token
 // set during OpenSession → Login(), so no additional token handling is needed.
 //
-// This follows the same pattern as UpdateVolume: the IKS-specific session
-// method delegates to IksSession.Apiclient.FileShareService(), which sends the
-// request to armada-storage-api at /v2/storage/vpc/getVolumeProfiles?profile=<name>
-// with the Authorization header injected automatically by authenticationHandler.
+// No retry is performed: this call is used once at driver startup to warm the
+// capacity-round-off cache. A transient failure is non-fatal — the driver logs
+// a warning and continues without the cache; any StorageClass that sets
+// allowCapacityRoundoffForIops=true will return a clear error at PVC creation
+// time. Retrying here would block SetupIBMCSIDriver() for minutes and cause
+// the liveness probe to kill the container before startup completes.
 func (vpcIks *IksVpcSession) GetVolumeProfileBands(profile string) ([]vpc_provider.VolumeProfileBand, error) {
 	vpcIks.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
 	defer vpcIks.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
 
 	defer metrics.UpdateDurationFromStart(vpcIks.Logger, "GetVolumeProfileBands", time.Now())
 
-	var bands []vpc_provider.VolumeProfileBand
-	err := vpcIks.APIRetry.FlexyRetry(vpcIks.Logger, func() (error, bool) {
-		var callErr error
-		bands, callErr = vpcIks.IksSession.Apiclient.FileShareService().GetVolumeProfileBands(profile, vpcIks.Logger)
-		return callErr, callErr == nil || vpc_provider.SkipRetryForIKS(callErr)
-	})
-
+	bands, err := vpcIks.IksSession.Apiclient.FileShareService().GetVolumeProfileBands(profile, vpcIks.Logger)
 	if err != nil {
 		vpcIks.Logger.Error("Failed to fetch volume profile bands",
 			zap.String("profile", profile),
