@@ -27,8 +27,6 @@ require (
 	k8s.io/pod-security-admission v0.35.4
 )
 
-replace github.com/IBM/ibmcloud-volume-interface => ../../interface/ibmcloud-volume-interface
-
 require (
 	cel.dev/expr v0.25.1 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
