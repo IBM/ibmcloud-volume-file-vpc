@@ -655,12 +655,12 @@ func main() {
 				zap.Int32("bandwidth", share.Bandwidth),
 			)
 			//Call ModifyVolume
-			updatedIops, updatedBandwidth, er11 := sess.ModifyVolume(*share)
+			modifyResp, er11 := sess.ModifyVolume(*share)
 			if er11 == nil {
 				ctxLogger.Info("Successfully modified volume ================>",
 					zap.String("Volume ID", volumeID),
-					zap.Int64("Updated IOPS", updatedIops),
-					zap.Int32("Updated Bandwidth", updatedBandwidth),
+					zap.Int64("Updated IOPS", modifyResp.Iops),
+					zap.Int32("Updated Bandwidth", modifyResp.Bandwidth),
 				)
 			} else {
 				er11 = updateRequestID(er11, requestID)

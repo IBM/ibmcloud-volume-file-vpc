@@ -1,10 +1,10 @@
 module github.com/IBM/ibmcloud-volume-file-vpc
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/IBM-Cloud/ibm-cloud-cli-sdk v0.6.7
-	github.com/IBM/ibmcloud-volume-interface v1.2.22-0.20260831065925-754bec02ca30
+	github.com/IBM/ibmcloud-volume-interface v1.2.22-0.20260831085440-6dec7a5b0281
 	github.com/IBM/secret-common-lib v1.1.15
 	github.com/IBM/secret-utils-lib v1.1.16
 	github.com/IBM/vpc-beta-go-sdk v0.8.0
@@ -23,6 +23,8 @@ require (
 	k8s.io/kubernetes v1.35.4
 	k8s.io/pod-security-admission v0.35.4
 )
+
+replace github.com/IBM/ibmcloud-volume-interface => ../../interface/ibmcloud-volume-interface
 
 require (
 	cel.dev/expr v0.25.1 // indirect

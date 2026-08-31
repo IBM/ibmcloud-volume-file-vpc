@@ -28,7 +28,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRequest) (Iops int64, Bandwidth int32, err error) {
+func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRequest) (*provider.ModifyVolumeResponse, error) {
 	vpcs.Logger.Debug("Entry of ModifyVolume method...")
 	defer vpcs.Logger.Debug("Exit from ModifyVolume method...")
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "ModifyVolume", time.Now())
@@ -36,7 +36,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	// Get volume details
 	existingVolume, err := vpcs.GetVolume(modifyVolumeRequest.VolumeID)
 	if err != nil {
-		return -1, -1, err
+		return nil, err
 	}
 
 	isIopsUpdate := modifyVolumeRequest.Iops > 0
@@ -50,9 +50,10 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 			currIops, _ = strconv.ParseInt(*existingVolume.Iops, 10, 64)
 		}
 
-		currBandwidth := existingVolume.Bandwidth
-
-		return currIops, currBandwidth, nil
+		return &provider.ModifyVolumeResponse{
+			Iops:      currIops,
+			Bandwidth: existingVolume.Bandwidth,
+		}, nil
 	}
 
 	vpcs.Logger.Info("Successfully validated inputs for ModifyVolume request... ")
@@ -88,19 +89,19 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 
 	if err != nil {
 		vpcs.Logger.Debug("Failed to modify volume from VPC provider", zap.Reflect("BackendError", err))
-		return -1, -1, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
+		return nil, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
 	}
 
 	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable")
 	err = WaitForValidVolumeState(vpcs, share.ID)
 	if err != nil {
-		return -1, -1, userError.GetUserError("VolumeNotInValidState", err, share.ID)
+		return nil, userError.GetUserError("VolumeNotInValidState", err, share.ID)
 	}
 
 	vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", share))
 
-	updatedIops := share.Iops
-	updatedBandwidth := share.Bandwidth
-
-	return updatedIops, updatedBandwidth, nil
+	return &provider.ModifyVolumeResponse{
+		Iops:      share.Iops,
+		Bandwidth: share.Bandwidth,
+	}, nil
 }
