@@ -20,21 +20,15 @@ package provider
 import (
 	"fmt"
 
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
-// VolumeProfileBand re-exports the band type so callers of this package
-// do not need to import common/vpcclient/vpcfilevolume directly.
-type VolumeProfileBand = vpcfilevolume.VolumeProfileBand
-
-// GetVolumeProfileBands retrieves the capacity-to-IOPS bands for the named
-// VPC file volume profile (e.g. "dp2") via the session's API client.
-//
-// On a VPC (RIAAS) session this always returns an error because the profile
-// band data is only available via the armada-storage-api IKS proxy.
-// On an IKS session the call is routed through IksVpcSession.GetVolumeProfileBands.
-func (vpcs *VPCSession) GetVolumeProfileBands(profile string) ([]VolumeProfileBand, error) {
+// GetVolumeProfileBands is not supported on the direct VPC (RIAAS) session
+// because the profile band data is only available via the armada-storage-api
+// IKS proxy. IksVpcSession overrides this with the real implementation.
+// This satisfies the provider.VolumeManager interface.
+func (vpcs *VPCSession) GetVolumeProfileBands(profile string) ([]provider.VolumeProfileBand, error) {
 	vpcs.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
 	defer vpcs.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
 

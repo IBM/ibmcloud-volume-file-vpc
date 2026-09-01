@@ -21,15 +21,19 @@ import (
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
-	vpc_provider "github.com/IBM/ibmcloud-volume-file-vpc/file/provider"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
 // GetVolumeProfileBands retrieves the capacity-to-IOPS bands for the named
 // VPC file volume profile (e.g. "dp2") by calling armada-storage-api through
-// the IKS session. The IKS session client already carries the IAM bearer token
-// set during OpenSession → Login(), so no additional token handling is needed.
+// the IKS session. This overrides the VPCSession stub promoted via embedding,
+// providing the real implementation for IKS clusters.
+// Satisfies the provider.VolumeManager interface.
+//
+// The IKS session client already carries the IAM bearer token set during
+// OpenSession → Login(), so no additional token handling is needed.
 //
 // No retry is performed: this call is used once at driver startup to warm the
 // capacity-round-off cache. A transient failure is non-fatal — the driver logs
@@ -37,7 +41,7 @@ import (
 // allowCapacityRoundoffForIops=true will return a clear error at PVC creation
 // time. Retrying here would block SetupIBMCSIDriver() for minutes and cause
 // the liveness probe to kill the container before startup completes.
-func (vpcIks *IksVpcSession) GetVolumeProfileBands(profile string) ([]vpc_provider.VolumeProfileBand, error) {
+func (vpcIks *IksVpcSession) GetVolumeProfileBands(profile string) ([]provider.VolumeProfileBand, error) {
 	vpcIks.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
 	defer vpcIks.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
 

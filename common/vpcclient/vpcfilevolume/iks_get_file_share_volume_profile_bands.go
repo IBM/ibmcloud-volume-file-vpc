@@ -19,25 +19,80 @@ package vpcfilevolume
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
-	"github.com/IBM/ibmcloud-volume-file-vpc/common/catalog"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"go.uber.org/zap"
 )
 
-// VolumeProfileBand is a type alias for catalog.VolumeProfileBand.
-// Using a type alias (not a redefinition) ensures that every package in the
-// call chain — IKSVolumeService, IksVpcSession, file/provider, and the CSI
-// driver's VolumeProfileBandsFetcher interface — all refer to the exact same
-// Go type, so the interface type assertion succeeds at runtime.
-type VolumeProfileBand = catalog.VolumeProfileBand
+// VolumeProfileBand is a type alias for provider.VolumeProfileBand.
+// The canonical struct is defined in ibmcloud-volume-interface so it is
+// shared across all session implementations without duplication.
+type VolumeProfileBand = provider.VolumeProfileBand
+
+// volumeProfileResponse mirrors the JSON envelope returned by armada-storage-api
+// GET /v2/storage/vpc/volumeProfile?profile=<name>.
+type volumeProfileResponse struct {
+	ID               string                  `json:"id"`
+	ConfigValidation []configValidationEntry `json:"config_validation"`
+}
+
+// configValidationEntry is one entry in the config_validation array.
+type configValidationEntry struct {
+	Capacity capacityRange `json:"capacity"`
+	IOPS     *metricRange  `json:"iops,omitempty"`
+}
+
+type capacityRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
+
+type metricRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
+
+// ParseVolumeProfileBands decodes a raw armada-storage-api
+// GET /v2/storage/vpc/volumeProfile response body and returns the
+// capacity/IOPS bands as []VolumeProfileBand.
+//
+// Entries without an "iops" field (e.g. throughput-only bands) are skipped.
+// Returns an error if the body cannot be decoded or no IOPS bands are found.
+func ParseVolumeProfileBands(body []byte, profile string) ([]VolumeProfileBand, error) {
+	var parsed volumeProfileResponse
+	if err := json.Unmarshal(body, &parsed); err != nil {
+		return nil, fmt.Errorf("volume profile: decode response: %w", err)
+	}
+
+	if len(parsed.ConfigValidation) == 0 {
+		return nil, fmt.Errorf("GetVolumeProfileBands: no bands returned for profile %q", profile)
+	}
+
+	bands := make([]VolumeProfileBand, 0, len(parsed.ConfigValidation))
+	for _, entry := range parsed.ConfigValidation {
+		if entry.IOPS == nil {
+			continue
+		}
+		bands = append(bands, VolumeProfileBand{
+			CapacityMin: entry.Capacity.Min,
+			CapacityMax: entry.Capacity.Max,
+			IOPSMin:     entry.IOPS.Min,
+			IOPSMax:     entry.IOPS.Max,
+		})
+	}
+
+	if len(bands) == 0 {
+		return nil, fmt.Errorf("GetVolumeProfileBands: no iops bands found for profile %q", profile)
+	}
+	return bands, nil
+}
 
 // GetVolumeProfileBands GETs /v2/storage/vpc/volumeProfile?profile=<name> via
 // armada-storage-api and converts the response to []VolumeProfileBand.
-// JSON parsing is delegated to catalog.ParseVolumeProfileBands to avoid
-// duplicating the wire-format struct definitions.
 // The IKS session client already carries the IAM bearer token set during
 // Login(), so no additional token management is needed here.
 func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap.Logger) ([]VolumeProfileBand, error) {
@@ -65,8 +120,7 @@ func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap
 	request.SetQueryValue("profile", profile)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
-	// Capture the raw JSON so that catalog.ParseVolumeProfileBands can decode
-	// it — this avoids duplicating the wire-format struct definitions here.
+	// Capture the raw JSON so that ParseVolumeProfileBands can decode it.
 	var raw json.RawMessage
 	_, err := request.JSONSuccess(&raw).JSONError(apiErr).Invoke()
 	if err != nil {
@@ -74,7 +128,7 @@ func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap
 		return nil, err
 	}
 
-	bands, err := catalog.ParseVolumeProfileBands([]byte(raw), profile)
+	bands, err := ParseVolumeProfileBands([]byte(raw), profile)
 	if err != nil {
 		ctxLogger.Error("GetVolumeProfileBands: parse failed", zap.String("profile", profile), zap.Error(err))
 		return nil, err
