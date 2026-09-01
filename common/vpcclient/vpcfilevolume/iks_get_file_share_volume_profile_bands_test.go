@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestGetVolumeProfileBands(t *testing.T) {
+func TestGetShareProfileBands(t *testing.T) {
 	// Setup new style zap logger
 	logger, _ := GetTestContextLogger()
 	defer logger.Sync()
@@ -40,7 +40,7 @@ func TestGetVolumeProfileBands(t *testing.T) {
 
 		// Expected return
 		expectErr string
-		verify    func(*testing.T, []vpcfilevolume.VolumeProfileBand, error)
+		verify    func(*testing.T, []vpcfilevolume.ShareProfileBand, error)
 	}{
 		{
 			name:   "Verify that the correct endpoint is invoked",
@@ -48,7 +48,7 @@ func TestGetVolumeProfileBands(t *testing.T) {
 			content: `{"id":"dp2","config_validation":[` +
 				`{"capacity":{"min":10,"max":39},"iops":{"min":100,"max":1000}}` +
 				`]}`,
-			verify: func(t *testing.T, bands []vpcfilevolume.VolumeProfileBand, err error) {
+			verify: func(t *testing.T, bands []vpcfilevolume.ShareProfileBand, err error) {
 				assert.NoError(t, err)
 				assert.Len(t, bands, 1)
 			},
@@ -74,7 +74,7 @@ func TestGetVolumeProfileBands(t *testing.T) {
 
 			volumeService := vpcfilevolume.NewIKSVolumeService(client)
 
-			bands, err := volumeService.GetVolumeProfileBands("dp2", logger)
+			bands, err := volumeService.GetShareProfileBands("dp2", logger)
 
 			if testcase.expectErr != "" && assert.Error(t, err) {
 				assert.Equal(t, testcase.expectErr, err.Error())

@@ -40,9 +40,9 @@ type FileShareManager interface {
 	// UpdateVolume updates the volume with authorisation by passing required information in the volume object
 	UpdateVolume(pvcTemplate *provider.UpdatePVC, ctxLogger *zap.Logger) error
 
-	// GetVolumeProfileBands retrieves the capacity-to-IOPS bands for the named
+	// GetShareProfileBands retrieves the capacity-to-IOPS bands for the named
 	// VPC file volume profile (e.g. "dp2") from the armada-storage-api proxy.
-	GetVolumeProfileBands(profileName string, ctxLogger *zap.Logger) ([]VolumeProfileBand, error)
+	GetShareProfileBands(profileName string, ctxLogger *zap.Logger) ([]ShareProfileBand, error)
 
 	// Get all file shares lists by using filter options
 	ListFileShares(limit int, start string, filters *models.ListShareFilters, ctxLogger *zap.Logger) (*models.ShareList, error)

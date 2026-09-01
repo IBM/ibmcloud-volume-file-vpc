@@ -23,11 +23,11 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetVolumeProfileBands is not supported on the direct VPC (RIAAS) session.
+// GetShareProfileBands is not supported on the direct VPC (RIAAS) session.
 // Volume profile band data is only available via the armada-storage-api proxy
-// (IKS session). Callers on IKS clusters use IKSVolumeService.GetVolumeProfileBands.
-func (vs *FileShareService) GetVolumeProfileBands(profile string, ctxLogger *zap.Logger) ([]VolumeProfileBand, error) {
-	ctxLogger.Warn("GetVolumeProfileBands is not supported on the VPC RIAAS session; use the IKS session",
+// (IKS session). Callers on IKS clusters use IKSVolumeService.GetShareProfileBands.
+func (vs *FileShareService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]ShareProfileBand, error) {
+	ctxLogger.Warn("GetShareProfileBands is not supported on the VPC RIAAS session; use the IKS session",
 		zap.String("profile", profile))
-	return nil, fmt.Errorf("GetVolumeProfileBands is only available via the IKS session (armada-storage-api proxy)")
+	return nil, fmt.Errorf("GetShareProfileBands is only available via the IKS session (armada-storage-api proxy)")
 }

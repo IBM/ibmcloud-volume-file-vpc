@@ -28,10 +28,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// VolumeProfileBand is a type alias for provider.VolumeProfileBand.
+// ShareProfileBand is a type alias for provider.ShareProfileBand.
 // The canonical struct is defined in ibmcloud-volume-interface so it is
 // shared across all session implementations without duplication.
-type VolumeProfileBand = provider.VolumeProfileBand
+type ShareProfileBand = provider.ShareProfileBand
 
 // volumeProfileResponse mirrors the JSON envelope returned by armada-storage-api
 // GET /v2/storage/vpc/volumeProfile?profile=<name>.
@@ -56,28 +56,28 @@ type metricRange struct {
 	Max int64 `json:"max"`
 }
 
-// ParseVolumeProfileBands decodes a raw armada-storage-api
+// ParseShareProfileBands decodes a raw armada-storage-api
 // GET /v2/storage/vpc/volumeProfile response body and returns the
-// capacity/IOPS bands as []VolumeProfileBand.
+// capacity/IOPS bands as []ShareProfileBand.
 //
 // Entries without an "iops" field (e.g. throughput-only bands) are skipped.
 // Returns an error if the body cannot be decoded or no IOPS bands are found.
-func ParseVolumeProfileBands(body []byte, profile string) ([]VolumeProfileBand, error) {
+func ParseShareProfileBands(body []byte, profile string) ([]ShareProfileBand, error) {
 	var parsed volumeProfileResponse
 	if err := json.Unmarshal(body, &parsed); err != nil {
 		return nil, fmt.Errorf("volume profile: decode response: %w", err)
 	}
 
 	if len(parsed.ConfigValidation) == 0 {
-		return nil, fmt.Errorf("GetVolumeProfileBands: no bands returned for profile %q", profile)
+		return nil, fmt.Errorf("GetShareProfileBands: no bands returned for profile %q", profile)
 	}
 
-	bands := make([]VolumeProfileBand, 0, len(parsed.ConfigValidation))
+	bands := make([]ShareProfileBand, 0, len(parsed.ConfigValidation))
 	for _, entry := range parsed.ConfigValidation {
 		if entry.IOPS == nil {
 			continue
 		}
-		bands = append(bands, VolumeProfileBand{
+		bands = append(bands, ShareProfileBand{
 			CapacityMin: entry.Capacity.Min,
 			CapacityMax: entry.Capacity.Max,
 			IOPSMin:     entry.IOPS.Min,
@@ -86,23 +86,23 @@ func ParseVolumeProfileBands(body []byte, profile string) ([]VolumeProfileBand, 
 	}
 
 	if len(bands) == 0 {
-		return nil, fmt.Errorf("GetVolumeProfileBands: no iops bands found for profile %q", profile)
+		return nil, fmt.Errorf("GetShareProfileBands: no iops bands found for profile %q", profile)
 	}
 	return bands, nil
 }
 
-// GetVolumeProfileBands GETs /v2/storage/vpc/volumeProfile?profile=<name> via
-// armada-storage-api and converts the response to []VolumeProfileBand.
+// GetShareProfileBands GETs /v2/storage/vpc/volumeProfile?profile=<name> via
+// armada-storage-api and converts the response to []ShareProfileBand.
 // The IKS session client already carries the IAM bearer token set during
 // Login(), so no additional token management is needed here.
-func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap.Logger) ([]VolumeProfileBand, error) {
-	ctxLogger.Debug("Entry Backend IKSVolumeService.GetVolumeProfileBands")
-	defer ctxLogger.Debug("Exit Backend IKSVolumeService.GetVolumeProfileBands")
+func (vs *IKSVolumeService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]ShareProfileBand, error) {
+	ctxLogger.Debug("Entry Backend IKSVolumeService.GetShareProfileBands")
+	defer ctxLogger.Debug("Exit Backend IKSVolumeService.GetShareProfileBands")
 
-	defer util.TimeTracker("IKSVolumeService.GetVolumeProfileBands", time.Now())
+	defer util.TimeTracker("IKSVolumeService.GetShareProfileBands", time.Now())
 
 	operation := &client.Operation{
-		Name:        "GetVolumeProfileBands",
+		Name:        "GetShareProfileBands",
 		Method:      "GET",
 		PathPattern: vs.pathPrefix + vpcVolumeProfile,
 	}
@@ -120,21 +120,21 @@ func (vs *IKSVolumeService) GetVolumeProfileBands(profile string, ctxLogger *zap
 	request.SetQueryValue("profile", profile)
 	ctxLogger.Info("Equivalent curl command", zap.Reflect("URL", request.URL()), zap.Reflect("Operation", operation))
 
-	// Capture the raw JSON so that ParseVolumeProfileBands can decode it.
+	// Capture the raw JSON so that ParseShareProfileBands can decode it.
 	var raw json.RawMessage
 	_, err := request.JSONSuccess(&raw).JSONError(apiErr).Invoke()
 	if err != nil {
-		ctxLogger.Error("GetVolumeProfileBands failed", zap.String("profile", profile), zap.Error(err))
+		ctxLogger.Error("GetShareProfileBands failed", zap.String("profile", profile), zap.Error(err))
 		return nil, err
 	}
 
-	bands, err := ParseVolumeProfileBands([]byte(raw), profile)
+	bands, err := ParseShareProfileBands([]byte(raw), profile)
 	if err != nil {
-		ctxLogger.Error("GetVolumeProfileBands: parse failed", zap.String("profile", profile), zap.Error(err))
+		ctxLogger.Error("GetShareProfileBands: parse failed", zap.String("profile", profile), zap.Error(err))
 		return nil, err
 	}
 
-	ctxLogger.Info("GetVolumeProfileBands succeeded",
+	ctxLogger.Info("GetShareProfileBands succeeded",
 		zap.String("profile", profile),
 		zap.Int("bands", len(bands)))
 	return bands, nil

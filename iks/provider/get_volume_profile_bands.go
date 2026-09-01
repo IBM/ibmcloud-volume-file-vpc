@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetVolumeProfileBands retrieves the capacity-to-IOPS bands for the named
+// GetShareProfileBands retrieves the capacity-to-IOPS bands for the named
 // VPC file volume profile (e.g. "dp2") by calling armada-storage-api through
 // the IKS session. This overrides the VPCSession stub promoted via embedding,
 // providing the real implementation for IKS clusters.
@@ -41,21 +41,21 @@ import (
 // allowCapacityRoundoffForIops=true will return a clear error at PVC creation
 // time. Retrying here would block SetupIBMCSIDriver() for minutes and cause
 // the liveness probe to kill the container before startup completes.
-func (vpcIks *IksVpcSession) GetVolumeProfileBands(profile string) ([]provider.VolumeProfileBand, error) {
-	vpcIks.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
-	defer vpcIks.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
+func (vpcIks *IksVpcSession) GetShareProfileBands(profile string) ([]provider.ShareProfileBand, error) {
+	vpcIks.Logger.Debug("Entry of GetShareProfileBands method...", zap.String("profile", profile))
+	defer vpcIks.Logger.Debug("Exit from GetShareProfileBands method...", zap.String("profile", profile))
 
-	defer metrics.UpdateDurationFromStart(vpcIks.Logger, "GetVolumeProfileBands", time.Now())
+	defer metrics.UpdateDurationFromStart(vpcIks.Logger, "GetShareProfileBands", time.Now())
 
-	bands, err := vpcIks.IksSession.Apiclient.FileShareService().GetVolumeProfileBands(profile, vpcIks.Logger)
+	bands, err := vpcIks.IksSession.Apiclient.FileShareService().GetShareProfileBands(profile, vpcIks.Logger)
 	if err != nil {
-		vpcIks.Logger.Error("Failed to fetch volume profile bands",
+		vpcIks.Logger.Error("Failed to fetch share profile bands",
 			zap.String("profile", profile),
 			zap.Error(err))
 		return nil, userError.GetUserError("StorageFindFailed", err)
 	}
 
-	vpcIks.Logger.Info("Successfully fetched volume profile bands",
+	vpcIks.Logger.Info("Successfully fetched share profile bands",
 		zap.String("profile", profile),
 		zap.Int("count", len(bands)))
 	return bands, nil
