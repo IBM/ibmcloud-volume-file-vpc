@@ -54,6 +54,8 @@ const (
 	VolumeIDSeperator = "#"
 	//DeprecatedVolumeIDSeperator ...
 	DeprecatedVolumeIDSeperator = ":"
+	// ClaimProvisionTimeout is how long to wait for a PVC to reach Bound state.
+	ClaimProvisionTimeout = 10 * time.Minute
 )
 
 var (
@@ -619,8 +621,17 @@ func (t *TestPersistentVolumeClaim) WaitForBound() v1.PersistentVolumeClaim {
 	var err error
 
 	By(fmt.Sprintf("waiting for PVC to be in phase %q", v1.ClaimBound))
-	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimBound, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, framework.ClaimProvisionTimeout)
-	framework.ExpectNoError(err)
+	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimBound, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, ClaimProvisionTimeout)
+	if err != nil {
+		By(fmt.Sprintf("PVC %q failed to reach Bound state, describing PVC for diagnostics", t.persistentVolumeClaim.Name))
+		out, descErr := exec.Command("kubectl", "describe", "pvc", t.persistentVolumeClaim.Name, "-n", t.namespace.Name).CombinedOutput()
+		if descErr != nil {
+			fmt.Fprintf(os.Stderr, "failed to describe PVC %s: %v\n", t.persistentVolumeClaim.Name, descErr)
+		} else {
+			fmt.Printf("kubectl describe pvc %s:\n%s\n", t.persistentVolumeClaim.Name, string(out))
+		}
+		framework.ExpectNoError(err)
+	}
 
 	By("checking the PVC")
 	// Get new copy of the claim
@@ -634,8 +645,7 @@ func (t *TestPersistentVolumeClaim) WaitForPending() v1.PersistentVolumeClaim {
 	var err error
 
 	By(fmt.Sprintf("waiting for PVC to be in phase %q", v1.ClaimPending))
-	time.Sleep(5 * time.Minute)
-	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimPending, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, framework.ClaimProvisionTimeout)
+	err = k8sDevPV.WaitForPersistentVolumeClaimPhase(context.TODO(), v1.ClaimPending, t.client, t.namespace.Name, t.persistentVolumeClaim.Name, framework.Poll, ClaimProvisionTimeout)
 	framework.ExpectNoError(err)
 
 	By("checking the PVC")
@@ -700,7 +710,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	}
 
 	By(fmt.Sprintf("Logging volumeHandle: %s", volumeHandle))
-	By(fmt.Sprintf("Verifying if file share mount target is created"))
+	By("Verifying if file share mount target is created")
 	shareMountTarget, response, err := VPCService.GetShareMountTarget(getShareMountTargetOptions)
 	if err != nil {
 		panic(err)
@@ -711,7 +721,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	Expect(response.StatusCode).To(Equal(200))
 	Expect(shareMountTarget).ToNot(BeNil())
 
-	By(fmt.Sprintf("Verifying if VNI is created"))
+	By("Verifying if VNI is created")
 	if *(shareMountTarget.AccessControlMode) == "security_group" {
 
 		getVirtualNetworkInterfaceOptions := &vpcbetav1.GetVirtualNetworkInterfaceOptions{
@@ -761,13 +771,13 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 			ID:      &volumeHandle[1],
 		}
 
-		By(fmt.Sprintf("Deleting file share target"))
+		By("Deleting file share target")
 		shareMountTarget, response, err := VPCService.DeleteShareMountTarget(deleteShareMountTargetOptions)
 		if err != nil {
 			panic(err)
 		}
 
-		By(fmt.Sprintf("Wating for file share target to be deleted"))
+		By("Wating for file share target to be deleted")
 		// end-delete_share_mount_target
 		time.Sleep(1 * time.Minute)
 
@@ -779,7 +789,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 			ID: &volumeHandle[0],
 		}
 
-		By(fmt.Sprintf("Deleting file share"))
+		By("Deleting file share")
 		share, response, err := VPCService.DeleteShare(deleteShareOptions)
 		if err != nil {
 			panic(err)
@@ -792,11 +802,11 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 		Expect(share).ToNot(BeNil())
 	}
 
-	By(fmt.Sprintf("Wating for file share to be deleted"))
+	By("Wating for file share to be deleted")
 	// end-delete_share_mount_target
 	time.Sleep(30 * time.Second)
 
-	By(fmt.Sprintf("Verying if VNI is deleted"))
+	By("Verying if VNI is deleted")
 	//Verifying if VNI is deleted
 	if *(shareMountTarget.AccessControlMode) == "security_group" {
 
@@ -812,7 +822,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 		Expect(virtualNetworkInterface).To(BeNil())
 	}
 
-	By(fmt.Sprintf("Verying if shareMountTarget is deleted"))
+	By("Verying if shareMountTarget is deleted")
 	//Verifying if shareMountTarget is deleted
 	shareMountTarget, response, err = VPCService.GetShareMountTarget(getShareMountTargetOptions)
 	// end-get_share_mount_target
@@ -821,7 +831,7 @@ func (t *TestPersistentVolumeClaim) Cleanup() {
 	Expect(response.StatusCode).To(Equal(404))
 	Expect(shareMountTarget).To(BeNil())
 
-	By(fmt.Sprintf("Verying if share is deleted"))
+	By("Verying if share is deleted")
 	//Verifying if share is deleted
 	getShareOptions := &vpcbetav1.GetShareOptions{
 		ID: &volumeHandle[1],
@@ -860,7 +870,7 @@ type TestDeployment struct {
 	podName    string
 }
 
-func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32, nodeSelector map[string]string) *TestDeployment {
+func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, pvc *v1.PersistentVolumeClaim, volumeName, mountPath string, readOnly bool, replicaCount int32, nodeSelector map[string]string, securityContext *v1.PodSecurityContext) *TestDeployment {
 	generateName := "ics-e2e-tester-"
 	selectorValue := fmt.Sprintf("%s%d", generateName, rand.Int())
 	return &TestDeployment{
@@ -880,7 +890,8 @@ func NewTestDeployment(c clientset.Interface, ns *v1.Namespace, command string, 
 						Labels: map[string]string{"app": selectorValue},
 					},
 					Spec: v1.PodSpec{
-						NodeSelector: nodeSelector,
+						NodeSelector:    nodeSelector,
+						SecurityContext: securityContext,
 						Containers: []v1.Container{
 							{
 								Name:    "ics-e2e-tester",
@@ -998,8 +1009,12 @@ func (t *TestDeployment) CreateWithoutWaitingForDeploymemtStatus() {
 	t.deployment, err = t.client.AppsV1().Deployments(t.namespace.Name).Create(context.Background(), t.deployment, metav1.CreateOptions{})
 	framework.ExpectNoError(err)
 
-	pods, err := k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
-	framework.ExpectNoError(err)
+	// Wait for the ReplicaSet to be created by the deployment controller before fetching pods.
+	var pods *v1.PodList
+	gomega.Eventually(func() error {
+		pods, err = k8sDevDep.GetPodsForDeployment(context.TODO(), t.client, t.deployment)
+		return err
+	}, 2*time.Minute, 5*time.Second).Should(gomega.Succeed(), "waiting for ReplicaSet to be created for deployment %q", t.deployment.Name)
 	// always get first pod as there should only be one
 	t.podName = pods.Items[0].Name
 
@@ -1324,6 +1339,15 @@ func (t *TestVolumeSnapshotClass) ReadyToUse(snapshot *volumesnapshotv1.VolumeSn
 	if snapFail == true {
 		Expect(err).To(HaveOccurred())
 	} else {
+		if err != nil {
+			By(fmt.Sprintf("VolumeSnapshot %q did not become ready, describing for diagnostics", snapshot.Name))
+			out, descErr := exec.Command("kubectl", "describe", "volumesnapshot", snapshot.Name, "-n", t.namespace.Name).CombinedOutput()
+			if descErr != nil {
+				fmt.Fprintf(os.Stderr, "failed to describe VolumeSnapshot %s: %v\n", snapshot.Name, descErr)
+			} else {
+				fmt.Printf("kubectl describe volumesnapshot %s:\n%s\n", snapshot.Name, string(out))
+			}
+		}
 		framework.ExpectNoError(err)
 	}
 }
