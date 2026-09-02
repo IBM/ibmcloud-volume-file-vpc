@@ -18,9 +18,9 @@
 package provider
 
 import (
+	"fmt"
 	"time"
 
-	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
 	"github.com/IBM/ibmcloud-volume-interface/lib/metrics"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
@@ -52,7 +52,7 @@ func (vpcIks *IksVpcSession) GetVolumeProfileBands(profile string) ([]provider.V
 		vpcIks.Logger.Error("Failed to fetch share profile bands",
 			zap.String("profile", profile),
 			zap.Error(err))
-		return nil, userError.GetUserError("StorageFindFailed", err)
+		return nil, fmt.Errorf("failed to fetch share profile bands for %q: %w", profile, err)
 	}
 
 	vpcIks.Logger.Info("Successfully fetched share profile bands",

@@ -264,7 +264,7 @@ type FileShareService struct {
 		arg1 string
 		arg2 *zap.Logger
 	}
-	getVolumeProfileBandsReturns struct {
+	getShareProfileBandsReturns struct {
 		result1 []provider.VolumeProfileBand
 		result2 error
 	}
@@ -1333,7 +1333,7 @@ func (fake *FileShareService) GetShareProfileBands(arg1 string, arg2 *zap.Logger
 		arg2 *zap.Logger
 	}{arg1, arg2})
 	stub := fake.GetShareProfileBandsStub
-	fakeReturns := fake.getVolumeProfileBandsReturns
+	fakeReturns := fake.getShareProfileBandsReturns
 	fake.recordInvocation("GetShareProfileBands", []interface{}{arg1, arg2})
 	fake.getShareProfileBandsMutex.Unlock()
 	if stub != nil {
@@ -1351,11 +1351,40 @@ func (fake *FileShareService) GetShareProfileBandsCallCount() int {
 	return len(fake.getShareProfileBandsArgsForCall)
 }
 
+func (fake *FileShareService) GetShareProfileBandsCalls(stub func(string, *zap.Logger) ([]provider.VolumeProfileBand, error)) {
+	fake.getShareProfileBandsMutex.Lock()
+	defer fake.getShareProfileBandsMutex.Unlock()
+	fake.GetShareProfileBandsStub = stub
+}
+
+func (fake *FileShareService) GetShareProfileBandsArgsForCall(i int) (string, *zap.Logger) {
+	fake.getShareProfileBandsMutex.RLock()
+	defer fake.getShareProfileBandsMutex.RUnlock()
+	argsForCall := fake.getShareProfileBandsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
 func (fake *FileShareService) GetShareProfileBandsReturns(result1 []provider.VolumeProfileBand, result2 error) {
 	fake.getShareProfileBandsMutex.Lock()
 	defer fake.getShareProfileBandsMutex.Unlock()
 	fake.GetShareProfileBandsStub = nil
-	fake.getVolumeProfileBandsReturns = struct {
+	fake.getShareProfileBandsReturns = struct {
+		result1 []provider.VolumeProfileBand
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FileShareService) GetShareProfileBandsReturnsOnCall(i int, result1 []provider.VolumeProfileBand, result2 error) {
+	fake.getShareProfileBandsMutex.Lock()
+	defer fake.getShareProfileBandsMutex.Unlock()
+	fake.GetShareProfileBandsStub = nil
+	if fake.getShareProfileBandsReturnsOnCall == nil {
+		fake.getShareProfileBandsReturnsOnCall = make(map[int]struct {
+			result1 []provider.VolumeProfileBand
+			result2 error
+		})
+	}
+	fake.getShareProfileBandsReturnsOnCall[i] = struct {
 		result1 []provider.VolumeProfileBand
 		result2 error
 	}{result1, result2}
