@@ -28,11 +28,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// ShareProfileBand is a type alias for provider.ShareProfileBand.
-// The canonical struct is defined in ibmcloud-volume-interface so it is
-// shared across all session implementations without duplication.
-type ShareProfileBand = provider.ShareProfileBand
-
 // volumeProfileResponse mirrors the JSON envelope returned by armada-storage-api
 // GET /v2/storage/vpc/volumeProfile?profile=<name>.
 type volumeProfileResponse struct {
@@ -58,11 +53,11 @@ type metricRange struct {
 
 // ParseShareProfileBands decodes a raw armada-storage-api
 // GET /v2/storage/vpc/volumeProfile response body and returns the
-// capacity/IOPS bands as []ShareProfileBand.
+// capacity/IOPS bands as []provider.VolumeProfileBand.
 //
 // Entries without an "iops" field (e.g. throughput-only bands) are skipped.
 // Returns an error if the body cannot be decoded or no IOPS bands are found.
-func ParseShareProfileBands(body []byte, profile string) ([]ShareProfileBand, error) {
+func ParseShareProfileBands(body []byte, profile string) ([]provider.VolumeProfileBand, error) {
 	var parsed volumeProfileResponse
 	if err := json.Unmarshal(body, &parsed); err != nil {
 		return nil, fmt.Errorf("volume profile: decode response: %w", err)
@@ -72,12 +67,12 @@ func ParseShareProfileBands(body []byte, profile string) ([]ShareProfileBand, er
 		return nil, fmt.Errorf("GetShareProfileBands: no bands returned for profile %q", profile)
 	}
 
-	bands := make([]ShareProfileBand, 0, len(parsed.ConfigValidation))
+	bands := make([]provider.VolumeProfileBand, 0, len(parsed.ConfigValidation))
 	for _, entry := range parsed.ConfigValidation {
 		if entry.IOPS == nil {
 			continue
 		}
-		bands = append(bands, ShareProfileBand{
+		bands = append(bands, provider.VolumeProfileBand{
 			CapacityMin: entry.Capacity.Min,
 			CapacityMax: entry.Capacity.Max,
 			IOPSMin:     entry.IOPS.Min,
@@ -92,10 +87,10 @@ func ParseShareProfileBands(body []byte, profile string) ([]ShareProfileBand, er
 }
 
 // GetShareProfileBands GETs /v2/storage/vpc/volumeProfile?profile=<name> via
-// armada-storage-api and converts the response to []ShareProfileBand.
+// armada-storage-api and converts the response to []provider.VolumeProfileBand.
 // The IKS session client already carries the IAM bearer token set during
 // Login(), so no additional token management is needed here.
-func (vs *IKSVolumeService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]ShareProfileBand, error) {
+func (vs *IKSVolumeService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]provider.VolumeProfileBand, error) {
 	ctxLogger.Debug("Entry Backend IKSVolumeService.GetShareProfileBands")
 	defer ctxLogger.Debug("Exit Backend IKSVolumeService.GetShareProfileBands")
 

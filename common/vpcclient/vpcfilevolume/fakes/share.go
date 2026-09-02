@@ -258,18 +258,18 @@ type FileShareService struct {
 	updateVolumeReturnsOnCall map[int]struct {
 		result1 error
 	}
-	GetShareProfileBandsStub        func(string, *zap.Logger) ([]vpcfilevolume.ShareProfileBand, error)
+	GetShareProfileBandsStub        func(string, *zap.Logger) ([]provider.VolumeProfileBand, error)
 	getShareProfileBandsMutex       sync.RWMutex
 	getShareProfileBandsArgsForCall []struct {
 		arg1 string
 		arg2 *zap.Logger
 	}
 	getVolumeProfileBandsReturns struct {
-		result1 []vpcfilevolume.ShareProfileBand
+		result1 []provider.VolumeProfileBand
 		result2 error
 	}
 	getShareProfileBandsReturnsOnCall map[int]struct {
-		result1 []vpcfilevolume.ShareProfileBand
+		result1 []provider.VolumeProfileBand
 		result2 error
 	}
 	invocations      map[string][][]interface{}
@@ -1325,7 +1325,7 @@ func (fake *FileShareService) UpdateFileShareWithEtagReturnsOnCall(i int, result
 	}{result1}
 }
 
-func (fake *FileShareService) GetShareProfileBands(arg1 string, arg2 *zap.Logger) ([]vpcfilevolume.ShareProfileBand, error) {
+func (fake *FileShareService) GetShareProfileBands(arg1 string, arg2 *zap.Logger) ([]provider.VolumeProfileBand, error) {
 	fake.getShareProfileBandsMutex.Lock()
 	ret, specificReturn := fake.getShareProfileBandsReturnsOnCall[len(fake.getShareProfileBandsArgsForCall)]
 	fake.getShareProfileBandsArgsForCall = append(fake.getShareProfileBandsArgsForCall, struct {
@@ -1351,12 +1351,12 @@ func (fake *FileShareService) GetShareProfileBandsCallCount() int {
 	return len(fake.getShareProfileBandsArgsForCall)
 }
 
-func (fake *FileShareService) GetShareProfileBandsReturns(result1 []vpcfilevolume.ShareProfileBand, result2 error) {
+func (fake *FileShareService) GetShareProfileBandsReturns(result1 []provider.VolumeProfileBand, result2 error) {
 	fake.getShareProfileBandsMutex.Lock()
 	defer fake.getShareProfileBandsMutex.Unlock()
 	fake.GetShareProfileBandsStub = nil
 	fake.getVolumeProfileBandsReturns = struct {
-		result1 []vpcfilevolume.ShareProfileBand
+		result1 []provider.VolumeProfileBand
 		result2 error
 	}{result1, result2}
 }

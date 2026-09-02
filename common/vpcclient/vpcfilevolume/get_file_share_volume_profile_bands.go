@@ -20,13 +20,14 @@ package vpcfilevolume
 import (
 	"fmt"
 
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"go.uber.org/zap"
 )
 
 // GetShareProfileBands is not supported on the direct VPC (RIAAS) session.
 // Volume profile band data is only available via the armada-storage-api proxy
 // (IKS session). Callers on IKS clusters use IKSVolumeService.GetShareProfileBands.
-func (vs *FileShareService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]ShareProfileBand, error) {
+func (vs *FileShareService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]provider.VolumeProfileBand, error) {
 	ctxLogger.Warn("GetShareProfileBands is not supported on the VPC RIAAS session; use the IKS session",
 		zap.String("profile", profile))
 	return nil, fmt.Errorf("GetShareProfileBands is only available via the IKS session (armada-storage-api proxy)")

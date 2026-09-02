@@ -26,7 +26,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetShareProfileBands retrieves the capacity-to-IOPS bands for the named
+// GetVolumeProfileBands retrieves the capacity-to-IOPS bands for the named
 // VPC file volume profile (e.g. "dp2") by calling armada-storage-api through
 // the IKS session. This overrides the VPCSession stub promoted via embedding,
 // providing the real implementation for IKS clusters.
@@ -41,11 +41,11 @@ import (
 // allowCapacityRoundoffForIops=true will return a clear error at PVC creation
 // time. Retrying here would block SetupIBMCSIDriver() for minutes and cause
 // the liveness probe to kill the container before startup completes.
-func (vpcIks *IksVpcSession) GetShareProfileBands(profile string) ([]provider.ShareProfileBand, error) {
-	vpcIks.Logger.Debug("Entry of GetShareProfileBands method...", zap.String("profile", profile))
-	defer vpcIks.Logger.Debug("Exit from GetShareProfileBands method...", zap.String("profile", profile))
+func (vpcIks *IksVpcSession) GetVolumeProfileBands(profile string) ([]provider.VolumeProfileBand, error) {
+	vpcIks.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
+	defer vpcIks.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
 
-	defer metrics.UpdateDurationFromStart(vpcIks.Logger, "GetShareProfileBands", time.Now())
+	defer metrics.UpdateDurationFromStart(vpcIks.Logger, "GetVolumeProfileBands", time.Now())
 
 	bands, err := vpcIks.IksSession.Apiclient.FileShareService().GetShareProfileBands(profile, vpcIks.Logger)
 	if err != nil {

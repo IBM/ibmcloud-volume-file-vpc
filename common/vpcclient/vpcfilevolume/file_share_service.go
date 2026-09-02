@@ -42,7 +42,7 @@ type FileShareManager interface {
 
 	// GetShareProfileBands retrieves the capacity-to-IOPS bands for the named
 	// VPC file volume profile (e.g. "dp2") from the armada-storage-api proxy.
-	GetShareProfileBands(profileName string, ctxLogger *zap.Logger) ([]ShareProfileBand, error)
+	GetShareProfileBands(profileName string, ctxLogger *zap.Logger) ([]provider.VolumeProfileBand, error)
 
 	// Get all file shares lists by using filter options
 	ListFileShares(limit int, start string, filters *models.ListShareFilters, ctxLogger *zap.Logger) (*models.ShareList, error)

@@ -22,6 +22,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/riaas/test"
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume"
+	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 )
@@ -40,7 +41,7 @@ func TestGetShareProfileBands(t *testing.T) {
 
 		// Expected return
 		expectErr string
-		verify    func(*testing.T, []vpcfilevolume.ShareProfileBand, error)
+		verify    func(*testing.T, []provider.VolumeProfileBand, error)
 	}{
 		{
 			name:   "Verify that the correct endpoint is invoked",
@@ -48,7 +49,7 @@ func TestGetShareProfileBands(t *testing.T) {
 			content: `{"id":"dp2","config_validation":[` +
 				`{"capacity":{"min":10,"max":39},"iops":{"min":100,"max":1000}}` +
 				`]}`,
-			verify: func(t *testing.T, bands []vpcfilevolume.ShareProfileBand, err error) {
+			verify: func(t *testing.T, bands []provider.VolumeProfileBand, err error) {
 				assert.NoError(t, err)
 				assert.Len(t, bands, 1)
 			},
