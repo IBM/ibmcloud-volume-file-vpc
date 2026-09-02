@@ -1361,7 +1361,6 @@ func (fake *FileShareService) GetShareProfileBandsReturns(result1 []provider.Vol
 	}{result1, result2}
 }
 
-
 func (fake *FileShareService) UpdateVolume(arg1 *provider.UpdatePVC, arg2 *zap.Logger) error {
 	fake.updateVolumeMutex.Lock()
 	ret, specificReturn := fake.updateVolumeReturnsOnCall[len(fake.updateVolumeArgsForCall)]

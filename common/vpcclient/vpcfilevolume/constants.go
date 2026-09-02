@@ -30,11 +30,13 @@ const (
 	subnets            = Version + "/subnets"
 	securityGroups     = Version + "/security_groups"
 	updateVolume       = "updateVolume"
-	vpcVolumeProfile   = "vpc/volumeProfile"
 	profileName        = "profile-name"
 	shareProfiles      = Version + "/share/profiles"
 	shareProfileName   = shareProfiles + "/{" + profileName + "}"
 	snapshotsPath      = shareIDPath + "/snapshots"
 	snapshotIDParam    = "snapshot-id"
 	snapshotIDPath     = snapshotsPath + "/{" + snapshotIDParam + "}"
+	// vpcVolumeProfile is the armada-storage-api path for fetching volume profile
+	// capacity-to-IOPS bands. Unlike the paths above it is not a VPC RIAAS endpoint.
+	vpcVolumeProfile = "vpc/volumeProfile"
 )

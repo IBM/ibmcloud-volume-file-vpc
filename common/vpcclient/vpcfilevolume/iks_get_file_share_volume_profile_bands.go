@@ -42,7 +42,7 @@ func ParseShareProfileBands(body []byte, profile string) ([]provider.VolumeProfi
 	}
 
 	if len(parsed.ConfigValidation) == 0 {
-		return nil, fmt.Errorf("GetShareProfileBands: no bands returned for profile %q", profile)
+		return nil, fmt.Errorf("GetVolumeProfileBands: no bands returned for profile %q", profile)
 	}
 
 	bands := make([]provider.VolumeProfileBand, 0, len(parsed.ConfigValidation))
@@ -59,7 +59,7 @@ func ParseShareProfileBands(body []byte, profile string) ([]provider.VolumeProfi
 	}
 
 	if len(bands) == 0 {
-		return nil, fmt.Errorf("GetShareProfileBands: no iops bands found for profile %q", profile)
+		return nil, fmt.Errorf("GetVolumeProfileBands: no iops bands found for profile %q", profile)
 	}
 	return bands, nil
 }
