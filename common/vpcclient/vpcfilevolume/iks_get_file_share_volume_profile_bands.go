@@ -23,33 +23,11 @@ import (
 	"time"
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/client"
+	"github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/models"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	util "github.com/IBM/ibmcloud-volume-interface/lib/utils"
 	"go.uber.org/zap"
 )
-
-// volumeProfileResponse mirrors the JSON envelope returned by armada-storage-api
-// GET /v2/storage/vpc/volumeProfile?profile=<name>.
-type volumeProfileResponse struct {
-	ID               string                  `json:"id"`
-	ConfigValidation []configValidationEntry `json:"config_validation"`
-}
-
-// configValidationEntry is one entry in the config_validation array.
-type configValidationEntry struct {
-	Capacity capacityRange `json:"capacity"`
-	IOPS     *metricRange  `json:"iops,omitempty"`
-}
-
-type capacityRange struct {
-	Min int64 `json:"min"`
-	Max int64 `json:"max"`
-}
-
-type metricRange struct {
-	Min int64 `json:"min"`
-	Max int64 `json:"max"`
-}
 
 // ParseShareProfileBands decodes a raw armada-storage-api
 // GET /v2/storage/vpc/volumeProfile response body and returns the
@@ -58,7 +36,7 @@ type metricRange struct {
 // Entries without an "iops" field (e.g. throughput-only bands) are skipped.
 // Returns an error if the body cannot be decoded or no IOPS bands are found.
 func ParseShareProfileBands(body []byte, profile string) ([]provider.VolumeProfileBand, error) {
-	var parsed volumeProfileResponse
+	var parsed models.VolumeProfileResponse
 	if err := json.Unmarshal(body, &parsed); err != nil {
 		return nil, fmt.Errorf("volume profile: decode response: %w", err)
 	}

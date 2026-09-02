@@ -41,3 +41,28 @@ type CapIops struct {
 	Type    string `json:"type,omitempty"`
 	Value   int32  `json:"value,omitempty"`
 }
+
+// VolumeProfileResponse mirrors the JSON envelope returned by armada-storage-api
+// GET /v2/storage/vpc/volumeProfile?profile=<name>.
+type VolumeProfileResponse struct {
+	ID               string                       `json:"id"`
+	ConfigValidation []VolumeProfileConfigEntry   `json:"config_validation"`
+}
+
+// VolumeProfileConfigEntry is one entry in the config_validation array.
+type VolumeProfileConfigEntry struct {
+	Capacity VolumeProfileCapacityRange  `json:"capacity"`
+	IOPS     *VolumeProfileMetricRange   `json:"iops,omitempty"`
+}
+
+// VolumeProfileCapacityRange defines an inclusive min/max capacity range in GiB.
+type VolumeProfileCapacityRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
+
+// VolumeProfileMetricRange defines an inclusive min/max range for a metric (e.g. IOPS).
+type VolumeProfileMetricRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
