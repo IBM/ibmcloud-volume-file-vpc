@@ -28,7 +28,7 @@ import (
 // Volume profile band data is only available via the armada-storage-api proxy
 // (IKS session). Callers on IKS clusters use IKSVolumeService.GetShareProfileBands.
 func (vs *FileShareService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]provider.VolumeProfileBand, error) {
-	ctxLogger.Warn("volume profile bands are only available via the IKS session; use the IKS session",
+	ctxLogger.Warn("GetShareProfileBands is only available via the IKS session (armada-storage-api proxy)",
 		zap.String("profile", profile))
-	return nil, fmt.Errorf("volume profile bands are only available via the IKS session (armada-storage-api proxy); profile=%q", profile)
+	return nil, fmt.Errorf("GetShareProfileBands is only available via the IKS session (armada-storage-api proxy); profile=%q", profile)
 }

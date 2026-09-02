@@ -32,5 +32,7 @@ func (vpcs *VPCSession) GetVolumeProfileBands(profile string) ([]provider.Volume
 	vpcs.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
 	defer vpcs.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
 
+	vpcs.Logger.Warn("GetVolumeProfileBands is only available via the IKS session (armada-storage-api proxy)",
+		zap.String("profile", profile))
 	return nil, fmt.Errorf("GetVolumeProfileBands is only available via the IKS session (armada-storage-api proxy); profile=%q", profile)
 }
