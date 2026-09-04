@@ -37,3 +37,7 @@ const (
 	snapshotIDParam    = "snapshot-id"
 	snapshotIDPath     = snapshotsPath + "/{" + snapshotIDParam + "}"
 )
+
+const (
+	vpcVolumeProfile = "vpc/volumeProfile"
+)
