@@ -29,11 +29,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// ParseShareProfileBands decodes a raw armada-storage-api
-// GET /v2/storage/vpc/volumeProfile response body and returns the
-// capacity/IOPS bands as []provider.VolumeProfileBand.
-//
-// Entries without an "iops" field (e.g. throughput-only bands) are skipped.
+// ParseShareProfileBands decodes the GET /v2/storage/vpc/volumeProfile response
+// body and returns the capacity/IOPS bands as []provider.VolumeProfileBand.
+// Entries without an "iops" field are skipped.
 // Returns an error if the body cannot be decoded or no IOPS bands are found.
 func ParseShareProfileBands(body []byte, profile string) ([]provider.VolumeProfileBand, error) {
 	var parsed models.VolumeProfileResponse
@@ -64,10 +62,7 @@ func ParseShareProfileBands(body []byte, profile string) ([]provider.VolumeProfi
 	return bands, nil
 }
 
-// GetShareProfileBands GETs /v2/storage/vpc/volumeProfile?profile=<name> via
-// armada-storage-api and converts the response to []provider.VolumeProfileBand.
-// The IKS session client already carries the IAM bearer token set during
-// Login(), so no additional token management is needed here.
+// GetShareProfileBands fetches the capacity/IOPS bands for the named profile.
 func (vs *IKSVolumeService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]provider.VolumeProfileBand, error) {
 	ctxLogger.Debug("Entry Backend IKSVolumeService.GetShareProfileBands")
 	defer ctxLogger.Debug("Exit Backend IKSVolumeService.GetShareProfileBands")
@@ -83,10 +78,6 @@ func (vs *IKSVolumeService) GetShareProfileBands(profile string, ctxLogger *zap.
 	apiErr := vs.receiverError
 
 	request := vs.client.NewRequest(operation)
-	// This endpoint is an armada-storage-api proxy, not a VPC RIAAS endpoint.
-	// The IKS session client injects "generation" and "version" into every
-	// request by default; strip them here so armada-storage-api does not reject
-	// the call with ST0020 ("unsupported query parameter").
 	request.DeleteQueryValue("generation")
 	request.DeleteQueryValue("version")
 	// profile is passed as a query parameter, not a path segment

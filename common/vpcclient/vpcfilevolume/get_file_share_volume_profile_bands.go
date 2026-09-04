@@ -25,10 +25,6 @@ import (
 )
 
 // GetShareProfileBands is not supported on the direct VPC (RIAAS) session.
-// Volume profile band data is only available via the armada-storage-api proxy
-// (IKS session). Callers on IKS clusters use IKSVolumeService.GetShareProfileBands.
 func (vs *FileShareService) GetShareProfileBands(profile string, ctxLogger *zap.Logger) ([]provider.VolumeProfileBand, error) {
-	ctxLogger.Warn("GetShareProfileBands is only available via the IKS session (armada-storage-api proxy)",
-		zap.String("profile", profile))
-	return nil, fmt.Errorf("GetShareProfileBands is only available via the IKS session (armada-storage-api proxy); profile=%q", profile)
+	return nil, fmt.Errorf("GetShareProfileBands is not implemented for VPC endpoint")
 }

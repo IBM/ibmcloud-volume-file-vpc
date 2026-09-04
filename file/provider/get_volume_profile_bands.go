@@ -21,18 +21,9 @@ import (
 	"fmt"
 
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
-	"go.uber.org/zap"
 )
 
-// GetVolumeProfileBands is not supported on the direct VPC (RIAAS) session
-// because the profile band data is only available via the armada-storage-api
-// IKS proxy. IksVpcSession overrides this with the real implementation.
-// This satisfies the provider.VolumeManager interface.
+// GetVolumeProfileBands is not supported on the direct VPC endpoint.
 func (vpcs *VPCSession) GetVolumeProfileBands(profile string) ([]provider.VolumeProfileBand, error) {
-	vpcs.Logger.Debug("Entry of GetVolumeProfileBands method...", zap.String("profile", profile))
-	defer vpcs.Logger.Debug("Exit from GetVolumeProfileBands method...", zap.String("profile", profile))
-
-	vpcs.Logger.Warn("GetVolumeProfileBands is only available via the IKS session (armada-storage-api proxy)",
-		zap.String("profile", profile))
-	return nil, fmt.Errorf("GetVolumeProfileBands is only available via the IKS session (armada-storage-api proxy); profile=%q", profile)
+	return nil, fmt.Errorf("GetVolumeProfileBands is not implemented for VPC endpoint")
 }

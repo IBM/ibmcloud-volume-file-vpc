@@ -39,7 +39,5 @@ const (
 )
 
 const (
-	// vpcVolumeProfile is the armada-storage-api path for fetching volume profile
-	// capacity-to-IOPS bands. Unlike the paths above it is not a VPC RIAAS endpoint.
 	vpcVolumeProfile = "vpc/volumeProfile"
 )

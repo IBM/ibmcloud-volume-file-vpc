@@ -64,9 +64,6 @@ func TestGetShareProfileBands(t *testing.T) {
 	for _, testcase := range testCases {
 		t.Run(testcase.name, func(t *testing.T) {
 			mux, client, teardown := test.SetupServer(t)
-			// The path registered here documents the expected resolved URL:
-			// IksV2PathPrefix ("v2/storage/") + vpcVolumeProfile ("vpc/volumeProfile")
-			// resolved against the test server base URL yields "/v2/storage/vpc/volumeProfile".
 			test.SetupMuxResponse(t, mux, "/v2/storage/vpc/volumeProfile", http.MethodGet, nil, testcase.status, testcase.content, nil)
 
 			defer teardown()
