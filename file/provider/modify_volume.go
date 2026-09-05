@@ -79,7 +79,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	vpcs.Logger.Info("Calling VPC provider for volume Modify...")
 	var share *models.Share
 	err = retry(vpcs.Logger, func() error {
-		share, err = vpcs.Apiclient.FileShareService().ExpandVolume(
+		share, err = vpcs.Apiclient.FileShareService().ModifyVolume(
 			modifyVolumeRequest.VolumeID,
 			shareTemplate,
 			vpcs.Logger,
