@@ -258,6 +258,20 @@ type FileShareService struct {
 	updateVolumeReturnsOnCall map[int]struct {
 		result1 error
 	}
+	GetShareProfileBandsStub        func(string, *zap.Logger) ([]provider.VolumeProfileBand, error)
+	getShareProfileBandsMutex       sync.RWMutex
+	getShareProfileBandsArgsForCall []struct {
+		arg1 string
+		arg2 *zap.Logger
+	}
+	getShareProfileBandsReturns struct {
+		result1 []provider.VolumeProfileBand
+		result2 error
+	}
+	getShareProfileBandsReturnsOnCall map[int]struct {
+		result1 []provider.VolumeProfileBand
+		result2 error
+	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -1311,6 +1325,71 @@ func (fake *FileShareService) UpdateFileShareWithEtagReturnsOnCall(i int, result
 	}{result1}
 }
 
+func (fake *FileShareService) GetShareProfileBands(arg1 string, arg2 *zap.Logger) ([]provider.VolumeProfileBand, error) {
+	fake.getShareProfileBandsMutex.Lock()
+	ret, specificReturn := fake.getShareProfileBandsReturnsOnCall[len(fake.getShareProfileBandsArgsForCall)]
+	fake.getShareProfileBandsArgsForCall = append(fake.getShareProfileBandsArgsForCall, struct {
+		arg1 string
+		arg2 *zap.Logger
+	}{arg1, arg2})
+	stub := fake.GetShareProfileBandsStub
+	fakeReturns := fake.getShareProfileBandsReturns
+	fake.recordInvocation("GetShareProfileBands", []interface{}{arg1, arg2})
+	fake.getShareProfileBandsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FileShareService) GetShareProfileBandsCallCount() int {
+	fake.getShareProfileBandsMutex.RLock()
+	defer fake.getShareProfileBandsMutex.RUnlock()
+	return len(fake.getShareProfileBandsArgsForCall)
+}
+
+func (fake *FileShareService) GetShareProfileBandsCalls(stub func(string, *zap.Logger) ([]provider.VolumeProfileBand, error)) {
+	fake.getShareProfileBandsMutex.Lock()
+	defer fake.getShareProfileBandsMutex.Unlock()
+	fake.GetShareProfileBandsStub = stub
+}
+
+func (fake *FileShareService) GetShareProfileBandsArgsForCall(i int) (string, *zap.Logger) {
+	fake.getShareProfileBandsMutex.RLock()
+	defer fake.getShareProfileBandsMutex.RUnlock()
+	argsForCall := fake.getShareProfileBandsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FileShareService) GetShareProfileBandsReturns(result1 []provider.VolumeProfileBand, result2 error) {
+	fake.getShareProfileBandsMutex.Lock()
+	defer fake.getShareProfileBandsMutex.Unlock()
+	fake.GetShareProfileBandsStub = nil
+	fake.getShareProfileBandsReturns = struct {
+		result1 []provider.VolumeProfileBand
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FileShareService) GetShareProfileBandsReturnsOnCall(i int, result1 []provider.VolumeProfileBand, result2 error) {
+	fake.getShareProfileBandsMutex.Lock()
+	defer fake.getShareProfileBandsMutex.Unlock()
+	fake.GetShareProfileBandsStub = nil
+	if fake.getShareProfileBandsReturnsOnCall == nil {
+		fake.getShareProfileBandsReturnsOnCall = make(map[int]struct {
+			result1 []provider.VolumeProfileBand
+			result2 error
+		})
+	}
+	fake.getShareProfileBandsReturnsOnCall[i] = struct {
+		result1 []provider.VolumeProfileBand
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FileShareService) UpdateVolume(arg1 *provider.UpdatePVC, arg2 *zap.Logger) error {
 	fake.updateVolumeMutex.Lock()
 	ret, specificReturn := fake.updateVolumeReturnsOnCall[len(fake.updateVolumeArgsForCall)]
@@ -1410,6 +1489,8 @@ func (fake *FileShareService) Invocations() map[string][][]interface{} {
 	defer fake.updateFileShareWithEtagMutex.RUnlock()
 	fake.updateVolumeMutex.RLock()
 	defer fake.updateVolumeMutex.RUnlock()
+	fake.getShareProfileBandsMutex.RLock()
+	defer fake.getShareProfileBandsMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

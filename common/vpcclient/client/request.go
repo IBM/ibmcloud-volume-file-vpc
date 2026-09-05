@@ -127,6 +127,17 @@ func (r *Request) SetQueryValue(key, value string) *Request {
 	return r
 }
 
+// DeleteQueryValue removes a query parameter key from the request.
+// Use this to strip VPC RIAAS default parameters (e.g. "generation", "version")
+// that are automatically added to every request but are not accepted by
+// non-RIAAS endpoints such as the armada-storage-api proxy.
+func (r *Request) DeleteQueryValue(key string) *Request {
+	if r.queryValues != nil {
+		r.queryValues.Del(key)
+	}
+	return r
+}
+
 // SetHeader ...
 func (r *Request) SetHeader(key, value string) *Request {
 	r.headers.Set(key, value)

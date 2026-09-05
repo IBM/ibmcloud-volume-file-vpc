@@ -41,3 +41,27 @@ type CapIops struct {
 	Type    string `json:"type,omitempty"`
 	Value   int32  `json:"value,omitempty"`
 }
+
+// VolumeProfileResponse is the JSON envelope for the volume profile response.
+type VolumeProfileResponse struct {
+	ID               string                     `json:"id"`
+	ConfigValidation []VolumeProfileConfigEntry `json:"config_validation"`
+}
+
+// VolumeProfileConfigEntry is one entry in the config_validation array.
+type VolumeProfileConfigEntry struct {
+	Capacity VolumeProfileCapacityRange `json:"capacity"`
+	IOPS     *VolumeProfileIopsRange    `json:"iops,omitempty"`
+}
+
+// VolumeProfileRange defines an inclusive min/max range.
+type VolumeProfileRange struct {
+	Min int64 `json:"min"`
+	Max int64 `json:"max"`
+}
+
+// VolumeProfileIopsRange is a VolumeProfileRange for IOPS values.
+type VolumeProfileIopsRange VolumeProfileRange
+
+// VolumeProfileCapacityRange is a VolumeProfileRange for capacity values in GiB.
+type VolumeProfileCapacityRange VolumeProfileRange
