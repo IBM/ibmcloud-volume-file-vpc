@@ -18,7 +18,6 @@
 package provider
 
 import (
-	"strconv"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -36,28 +35,10 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	isIopsUpdate := modifyVolumeRequest.Iops > 0
 	isBandwidthUpdate := modifyVolumeRequest.Bandwidth > 0
 
-	// Return early without a GetVolume round-trip when nothing to update
+	// Nothing to update — return early without any VPC API call.
 	if !isIopsUpdate && !isBandwidthUpdate {
-		vpcs.Logger.Warn("No updates requested, fetching current volume state")
-
-		existingVolume, err := vpcs.GetVolume(modifyVolumeRequest.VolumeID)
-		if err != nil {
-			return nil, err
-		}
-
-		var currIops int64
-		if existingVolume.Iops != nil && *existingVolume.Iops != "" {
-			var parseErr error
-			currIops, parseErr = strconv.ParseInt(*existingVolume.Iops, 10, 64)
-			if parseErr != nil {
-				vpcs.Logger.Warn("Failed to parse current IOPS value", zap.String("iops", *existingVolume.Iops), zap.Error(parseErr))
-			}
-		}
-
-		return &provider.ModifyVolumeResponse{
-			Iops:      currIops,
-			Bandwidth: existingVolume.Bandwidth,
-		}, nil
+		vpcs.Logger.Warn("ModifyVolume: no iops or bandwidth requested, returning early")
+		return &provider.ModifyVolumeResponse{}, nil
 	}
 
 	vpcs.Logger.Info("Successfully validated inputs for ModifyVolume request... ")
