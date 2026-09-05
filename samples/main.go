@@ -649,7 +649,7 @@ func main() {
 			if bandwidth > 0 {
 				share.Bandwidth = bandwidth
 			}
-			ctxLogger.Info("Expand request",
+			ctxLogger.Info("Modify request",
 				zap.String("volumeID", share.VolumeID),
 				zap.Int64("iops", share.Iops),
 				zap.Int32("bandwidth", share.Bandwidth),
