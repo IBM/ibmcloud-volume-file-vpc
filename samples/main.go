@@ -634,6 +634,7 @@ func main() {
 		} else if choiceN == 24 {
 			var iops int64
 			var bandwidth int32
+			var modifyResp *provider.ModifyVolumeResponse
 			fmt.Println("You selected choice to modify volume")
 			share := &provider.ModifyVolumeRequest{}
 			fmt.Printf("Please enter volume ID to modify: ")
@@ -655,7 +656,7 @@ func main() {
 				zap.Int32("bandwidth", share.Bandwidth),
 			)
 			//Call ModifyVolume
-			modifyResp, er11 := sess.ModifyVolume(*share)
+			modifyResp, er11 = sess.ModifyVolume(*share)
 			if er11 == nil {
 				ctxLogger.Info("Successfully modified volume ================>",
 					zap.String("Volume ID", volumeID),

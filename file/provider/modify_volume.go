@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"fmt"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -32,6 +33,11 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	defer vpcs.Logger.Debug("Exit from ModifyVolume method...")
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "ModifyVolume", time.Now())
 
+	// Issue #4: validate VolumeID before making any API call.
+	if modifyVolumeRequest.VolumeID == "" {
+		return nil, userError.GetUserError("ErrorRequiredFieldMissing", nil, "VolumeID")
+	}
+
 	isIopsUpdate := modifyVolumeRequest.Iops > 0
 	isBandwidthUpdate := modifyVolumeRequest.Bandwidth > 0
 
@@ -41,24 +47,13 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		return &provider.ModifyVolumeResponse{}, nil
 	}
 
-	vpcs.Logger.Info("Successfully validated inputs for ModifyVolume request... ")
-
-	var newIops int64
-	var newBandwidth int32
-
-	if isIopsUpdate {
-		newIops = modifyVolumeRequest.Iops
-	}
-	if isBandwidthUpdate {
-		newBandwidth = modifyVolumeRequest.Bandwidth
-	}
-
+	// Issue #1: assign directly to shareTemplate — no intermediate aliases needed.
 	shareTemplate := &models.Share{}
 	if isIopsUpdate {
-		shareTemplate.Iops = newIops
+		shareTemplate.Iops = modifyVolumeRequest.Iops
 	}
 	if isBandwidthUpdate {
-		shareTemplate.Bandwidth = newBandwidth
+		shareTemplate.Bandwidth = modifyVolumeRequest.Bandwidth
 	}
 
 	vpcs.Logger.Info("Calling VPC provider for volume Modify...")
@@ -78,6 +73,11 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	if err != nil {
 		vpcs.Logger.Debug("Failed to modify volume from VPC provider", zap.Reflect("BackendError", err))
 		return nil, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
+	}
+
+	// Issue #2: guard against nil or empty share ID before polling.
+	if share == nil || share.ID == "" {
+		return nil, userError.GetUserError("FailedToModifyVolume", fmt.Errorf("empty share ID in response"), modifyVolumeRequest.VolumeID)
 	}
 
 	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable")

@@ -262,8 +262,8 @@ var messagesEn = map[string]util.Message{
 	},
 	"FailedToModifyVolume": {
 		Code:        "FailedToModifyVolume",
-		Description: "Unable to modify file share '%s'.",
-		Type:        util.ProvisioningFailed,
+		Description: "The file share '%s' could not be modified.",
+		Type:        util.UpdateFailed,
 		RC:          500,
 		Action:      "Check the backend error for more details. Run 'ibmcloud is share <SHARE-ID>' to verify the current state of the file share.",
 	},
