@@ -33,7 +33,6 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	defer vpcs.Logger.Debug("Exit from ModifyVolume method...")
 	defer metrics.UpdateDurationFromStart(vpcs.Logger, "ModifyVolume", time.Now())
 
-	// Issue #4: validate VolumeID before making any API call.
 	if modifyVolumeRequest.VolumeID == "" {
 		return nil, userError.GetUserError("ErrorRequiredFieldMissing", nil, "VolumeID")
 	}
@@ -41,13 +40,11 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	isIopsUpdate := modifyVolumeRequest.Iops > 0
 	isBandwidthUpdate := modifyVolumeRequest.Bandwidth > 0
 
-	// Nothing to update — return early without any VPC API call.
 	if !isIopsUpdate && !isBandwidthUpdate {
 		vpcs.Logger.Warn("ModifyVolume: no iops or bandwidth requested, returning early")
 		return &provider.ModifyVolumeResponse{}, nil
 	}
 
-	// Issue #1: assign directly to shareTemplate — no intermediate aliases needed.
 	shareTemplate := &models.Share{}
 	if isIopsUpdate {
 		shareTemplate.Iops = modifyVolumeRequest.Iops
@@ -75,7 +72,6 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		return nil, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
 	}
 
-	// Issue #2: guard against nil or empty share ID before polling.
 	if share == nil || share.ID == "" {
 		return nil, userError.GetUserError("FailedToModifyVolume", fmt.Errorf("empty share ID in response"), modifyVolumeRequest.VolumeID)
 	}
