@@ -45,3 +45,8 @@
    ```
    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]"  ./e2e
    ```
+
+10. Test Capacity Roundoff for DP2 profile
+   ```
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]"  ./e2e
+   ```

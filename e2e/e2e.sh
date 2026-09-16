@@ -85,6 +85,11 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
+		--run-roundoff-test-cases)
+		e2e_roundoff_test_case="$2"
+		shift
+		shift
+		;;
     		*)
     		UNKOWNPARAM+=("$1")
     		shift
@@ -287,9 +292,24 @@ else
 	echo -e "VPC-FILE-CSI-TEST-DP2-EIT: SKIP" >> $E2E_TEST_RESULT
 fi
 
+# Capacity Roundoff tests
+if [[ "$e2e_roundoff_test_case" == "true" ]]; then
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
+	rc6=$?
+	echo "Exit status for Capacity Roundoff test: $rc6"
+
+	if [[ $rc6 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-ROUNDOFF: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "VPC-FILE-CSI-TEST-ROUNDOFF: FAILED" >> $E2E_TEST_RESULT
+	fi
+else
+	echo -e "VPC-FILE-CSI-TEST-ROUNDOFF: SKIP" >> $E2E_TEST_RESULT
+fi
+
 # Publish final reports
 overall_rc=0
-for rcvar in ${rc1:-0} ${rc2:-0} ${rc3:-0} ${rc4:-0} ${rc5:-0}; do
+for rcvar in ${rc1:-0} ${rc2:-0} ${rc3:-0} ${rc4:-0} ${rc5:-0} ${rc6:-0}; do
 	if [[ "$rcvar" -ne 0 ]]; then
 		overall_rc=1
 	fi
