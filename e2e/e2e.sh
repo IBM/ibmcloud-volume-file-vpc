@@ -85,8 +85,8 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
-		--run-roundoff-test-cases)
-		e2e_roundoff_test_case="$2"
+		--run-capacity-roundoff-test-cases)
+		e2e_capacity_roundoff_test_case="$2"
 		shift
 		shift
 		;;
@@ -293,7 +293,7 @@ else
 fi
 
 # Capacity Roundoff tests
-if [[ "$e2e_roundoff_test_case" == "true" ]]; then
+if [[ "$e2e_capacity_roundoff_test_case" == "true" ]]; then
 	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 	rc6=$?
 	echo "Exit status for Capacity Roundoff test: $rc6"
