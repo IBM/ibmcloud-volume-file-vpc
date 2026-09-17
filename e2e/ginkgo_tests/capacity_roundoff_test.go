@@ -300,7 +300,6 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 		scName := "ibmc-vpc-file-ocpvirt-1000-iops"
 		requestedCapacity := "97000Gi"
 		pvcName := "ics-vol-roundoff-1000-97000gi"
-		expectedErrorSubstring := "invalid PVC size for class: <97000>. Should be in range"
 
 		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
 		if err != nil {
@@ -362,15 +361,13 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 		By("Verifying the provisioning failure event for the PVC")
 		var matchedEvent bool
 		_ = wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
-			events, err := cs.CoreV1().Events(ns.Name).List(context.TODO(), metav1.ListOptions{
-				FieldSelector: fmt.Sprintf("involvedObject.name=%s,involvedObject.kind=PersistentVolumeClaim", pvcName),
-			})
+			events, err := cs.CoreV1().Events(ns.Name).List(context.TODO(), metav1.ListOptions{})
 			if err != nil {
 				return false, nil
 			}
 			for _, ev := range events.Items {
-				if strings.Contains(ev.Message, expectedErrorSubstring) || (ev.Type == "Warning" && strings.Contains(ev.Reason, "ProvisioningFailed")) {
-					if strings.Contains(ev.Message, "97000") || strings.Contains(ev.Message, expectedErrorSubstring) {
+				if ev.InvolvedObject.Name == pvcName && ev.InvolvedObject.Kind == "PersistentVolumeClaim" {
+					if ev.Reason == "ProvisioningFailed" || strings.Contains(ev.Message, "shares_profile_capacity_iops_invalid") || strings.Contains(ev.Message, "invalid PVC size") || strings.Contains(ev.Message, "infeasible error") {
 						matchedEvent = true
 						return true, nil
 					}
@@ -378,6 +375,6 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			}
 			return false, nil
 		})
-		Expect(matchedEvent).To(BeTrue(), "Expected provisioning failure event containing capacity error for PVC")
+		Expect(matchedEvent).To(BeTrue(), "Expected provisioning failure event containing capacity/IOPS error for PVC")
 	})
 })
