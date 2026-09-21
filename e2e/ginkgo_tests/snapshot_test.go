@@ -82,42 +82,38 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
-		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync",
-			CmdExits: false,
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-rfs-snap-",
-					VolumeType:    "ibmc-vpc-file-regional",
-					ClaimSize:     "20Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
+		test := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod: testsuites.PodDetails{
+				Cmd:      "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync",
+				CmdExits: false,
+				Volumes: []testsuites.VolumeDetails{
+					{
+						PVCName:       "ics-vpcfile-rfs-snap-",
+						VolumeType:    "ibmc-vpc-file-regional",
+						ClaimSize:     "20Gi",
+						ReclaimPolicy: &reclaimPolicy,
+						VolumeMount: testsuites.VolumeMountDetails{
+							NameGenerate:      "test-volume-",
+							MountPathGenerate: "/mnt/test-",
+						},
 					},
 				},
 			},
-		}
-
-		restoredPodSame := testsuites.PodDetails{
-			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-rfs-snap-",
-					VolumeType:    "ibmc-vpc-file-regional",
-					ClaimSize:     "20Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
+			RestoredPod: testsuites.PodDetails{
+				Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+				Volumes: []testsuites.VolumeDetails{
+					{
+						PVCName:       "ics-vpcfile-rfs-snap-",
+						VolumeType:    "ibmc-vpc-file-regional",
+						ReclaimPolicy: &reclaimPolicy,
+						VolumeMount: testsuites.VolumeMountDetails{
+							NameGenerate:      "test-volume-",
+							MountPathGenerate: "/mnt/test-",
+						},
 					},
 				},
 			},
-		}
-
-		test1 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
-			Pod:         pod,
-			RestoredPod: restoredPodSame,
+			RestoreClaimSizes: [3]string{"20Gi", "10Gi", "30Gi"},
 			PodCheck: &testsuites.PodExecCheck{
 				Cmd:              []string{"cat", "/mnt/test-1/data"},
 				ExpectedString01: "hello world\n",
@@ -125,58 +121,8 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 			},
 		}
 
-		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE SAME SIZE")
-		test1.Run(cs, snapshotrcs, ns)
-
-		restoredPodLess := testsuites.PodDetails{
-			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-rfs-snap-",
-					VolumeType:    "ibmc-vpc-file-regional",
-					ClaimSize:     "10Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test2 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
-			Pod:         pod,
-			RestoredPod: restoredPodLess,
-			PodCheck:    test1.PodCheck,
-		}
-
-		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
-		test2.VolumeSizeLess(cs, snapshotrcs, ns)
-
-		restoredPodMore := testsuites.PodDetails{
-			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-rfs-snap-",
-					VolumeType:    "ibmc-vpc-file-regional",
-					ClaimSize:     "30Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test3 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
-			Pod:         pod,
-			RestoredPod: restoredPodMore,
-			PodCheck:    test1.PodCheck,
-		}
-
-		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
-		test3.Run(cs, snapshotrcs, ns)
+		By("VPC-FILE-CSI-TEST: RFS PROFILE | SNAPSHOT | RESTORE SAME SIZE + LESS + MORE")
+		test.RunAllRestoreVariants(cs, snapshotrcs, ns)
 	})
 
 	It("should run snapshot lifecycle tests for DP2 VPC File", func() {
@@ -209,42 +155,38 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 
 		reclaimPolicy := v1.PersistentVolumeReclaimDelete
 
-		pod := testsuites.PodDetails{
-			Cmd:      "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync",
-			CmdExits: false,
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-dp2-snap-",
-					VolumeType:    "ibmc-vpc-file-min-iops",
-					ClaimSize:     "20Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
+		test := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
+			Pod: testsuites.PodDetails{
+				Cmd:      "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync",
+				CmdExits: false,
+				Volumes: []testsuites.VolumeDetails{
+					{
+						PVCName:       "ics-vpcfile-dp2-snap-",
+						VolumeType:    "ibmc-vpc-file-min-iops",
+						ClaimSize:     "20Gi",
+						ReclaimPolicy: &reclaimPolicy,
+						VolumeMount: testsuites.VolumeMountDetails{
+							NameGenerate:      "test-volume-",
+							MountPathGenerate: "/mnt/test-",
+						},
 					},
 				},
 			},
-		}
-
-		restoredPodSame := testsuites.PodDetails{
-			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-dp2-snap-",
-					VolumeType:    "ibmc-vpc-file-min-iops",
-					ClaimSize:     "20Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
+			RestoredPod: testsuites.PodDetails{
+				Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
+				Volumes: []testsuites.VolumeDetails{
+					{
+						PVCName:       "ics-vpcfile-dp2-snap-",
+						VolumeType:    "ibmc-vpc-file-min-iops",
+						ReclaimPolicy: &reclaimPolicy,
+						VolumeMount: testsuites.VolumeMountDetails{
+							NameGenerate:      "test-volume-",
+							MountPathGenerate: "/mnt/test-",
+						},
 					},
 				},
 			},
-		}
-
-		test1 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
-			Pod:         pod,
-			RestoredPod: restoredPodSame,
+			RestoreClaimSizes: [3]string{"20Gi", "10Gi", "30Gi"},
 			PodCheck: &testsuites.PodExecCheck{
 				Cmd:              []string{"cat", "/mnt/test-1/data"},
 				ExpectedString01: "hello world\n",
@@ -252,57 +194,7 @@ var _ = Describe("[ics-e2e] [snapshot] Dynamic Provisioning of Snapshot for dp2 
 			},
 		}
 
-		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE SAME SIZE")
-		test1.Run(cs, snapshotrcs, ns)
-
-		restoredPodLess := testsuites.PodDetails{
-			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-dp2-snap-",
-					VolumeType:    "ibmc-vpc-file-min-iops",
-					ClaimSize:     "10Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test2 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
-			Pod:         pod,
-			RestoredPod: restoredPodLess,
-			PodCheck:    test1.PodCheck,
-		}
-
-		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE LESS")
-		test2.VolumeSizeLess(cs, snapshotrcs, ns)
-
-		restoredPodMore := testsuites.PodDetails{
-			Cmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done",
-			Volumes: []testsuites.VolumeDetails{
-				{
-					PVCName:       "ics-vpcfile-dp2-snap-",
-					VolumeType:    "ibmc-vpc-file-min-iops",
-					ClaimSize:     "30Gi",
-					ReclaimPolicy: &reclaimPolicy,
-					VolumeMount: testsuites.VolumeMountDetails{
-						NameGenerate:      "test-volume-",
-						MountPathGenerate: "/mnt/test-",
-					},
-				},
-			},
-		}
-
-		test3 := testsuites.DynamicallyProvisionedVolumeSnapshotTest{
-			Pod:         pod,
-			RestoredPod: restoredPodMore,
-			PodCheck:    test1.PodCheck,
-		}
-
-		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE CLAIM SIZE MORE")
-		test3.Run(cs, snapshotrcs, ns)
+		By("VPC-FILE-CSI-TEST: DP2 PROFILE | SNAPSHOT | RESTORE SAME SIZE + LESS + MORE")
+		test.RunAllRestoreVariants(cs, snapshotrcs, ns)
 	})
 })

@@ -2,13 +2,14 @@
 
 1. Create a VPC Cluster
 2. Export the KUBECONFIG
-   In kube config file use abosulte path for `certificate-authority`, `client-certificate` and `client-key`
+   In kube config file use absolute path for `certificate-authority`, `client-certificate` and `client-key`
 3. Deploy the Driver (with SC)
-4. Export enviornment variables
+4. Export environment variables
    ```
    # Mandatory
    export GO111MODULE=on
    export GOPATH=<GOPATH>
+   export KUBECONFIG=<absolute-path-to-kubeconfig>
    export E2E_TEST_RESULT=<absolute-path to a file where the results should be redirected>
    export TEST_ENV=<stage/prod>
    export IC_REGION=<us-south>
@@ -25,28 +26,28 @@
 
 5. Test DP2 profile with deployment
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
    ```
 6. Test volume expansion
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
    ```
 7. Test EIT enabled volume test cases
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
    ```
    
 8. Test RFS profile and it's storage classes
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
    ```
 
 9. Test Snapshot for DP2 and RFS profile 
    ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]"  ./e2e
+   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
    ```
 
 10. Test Capacity Roundoff for DP2 profile
-   ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]"  ./e2e
-   ```
+    ```
+    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
+    ```
