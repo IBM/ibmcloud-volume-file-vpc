@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 IBM Corp.
+ * Copyright 2026 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 		ns = f.Namespace
 	})
 
-	It("TC-1: with 3000 iops sc: should round off requested capacity from 60Gi to 80Gi and reach Bound state", func() {
+	It("TC-1: with ibmc-vpc-file-ocpvirt-3000-iops sc: should round off requested capacity from 60Gi to 80Gi and reach Bound state", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -64,12 +64,18 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			panic(err)
 		}
 
+		var boundPVC *v1.PersistentVolumeClaim
 		DeferCleanup(func() {
 			if fpointer != nil {
+				provisionedCap := "unknown"
+				if boundPVC != nil {
+					cap := boundPVC.Status.Capacity[v1.ResourceStorage]
+					provisionedCap = cap.String()
+				}
 				if CurrentSpecReport().Failed() {
-					fpointer.WriteString(fmt.Sprintf("❌ CAPACITY ROUNDOFF: 3000 IOPS (60Gi -> 80Gi) WITH %s STORAGE CLASS\n", scName))
+					fpointer.WriteString(fmt.Sprintf("❌ CAPACITY ROUNDOFF: 3000 IOPS (60Gi -> 80Gi) WITH %s STORAGE CLASS (provisioned: %s)\n", scName, provisionedCap))
 				} else {
-					fpointer.WriteString(fmt.Sprintf("✅ CAPACITY ROUNDOFF: 3000 IOPS (60Gi -> 80Gi) WITH %s STORAGE CLASS\n", scName))
+					fpointer.WriteString(fmt.Sprintf("✅ CAPACITY ROUNDOFF: 3000 IOPS (60Gi -> 80Gi) WITH %s STORAGE CLASS (provisioned: %s)\n", scName, provisionedCap))
 				}
 				fpointer.Close()
 			}
@@ -104,7 +110,6 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 		})
 
 		By("Waiting for PVC to reach Bound state")
-		var boundPVC *v1.PersistentVolumeClaim
 		err = wait.PollImmediate(5*time.Second, 10*time.Minute, func() (bool, error) {
 			boundPVC, err = cs.CoreV1().PersistentVolumeClaims(ns.Name).Get(context.TODO(), createdPVC.Name, metav1.GetOptions{})
 			if err != nil {
@@ -128,7 +133,7 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			fmt.Sprintf("Expected PV capacity to be %s, but got %s", expectedCapacity, pvCap.String()))
 	})
 
-	It("TC-2: with 1000 iops sc: should round off requested capacity from 5Gi to 10Gi and reach Bound state", func() {
+	It("TC-2: with ibmc-vpc-file-ocpvirt-1000-iops sc: should round off requested capacity from 5Gi to 10Gi and reach Bound state", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -145,12 +150,18 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			panic(err)
 		}
 
+		var boundPVC *v1.PersistentVolumeClaim
 		DeferCleanup(func() {
 			if fpointer != nil {
+				provisionedCap := "unknown"
+				if boundPVC != nil {
+					cap := boundPVC.Status.Capacity[v1.ResourceStorage]
+					provisionedCap = cap.String()
+				}
 				if CurrentSpecReport().Failed() {
-					fpointer.WriteString(fmt.Sprintf("❌ CAPACITY ROUNDOFF: 1000 IOPS (5Gi -> 10Gi) WITH %s STORAGE CLASS\n", scName))
+					fpointer.WriteString(fmt.Sprintf("❌ CAPACITY ROUNDOFF: 1000 IOPS (5Gi -> 10Gi) WITH %s STORAGE CLASS (provisioned: %s)\n", scName, provisionedCap))
 				} else {
-					fpointer.WriteString(fmt.Sprintf("✅ CAPACITY ROUNDOFF: 1000 IOPS (5Gi -> 10Gi) WITH %s STORAGE CLASS\n", scName))
+					fpointer.WriteString(fmt.Sprintf("✅ CAPACITY ROUNDOFF: 1000 IOPS (5Gi -> 10Gi) WITH %s STORAGE CLASS (provisioned: %s)\n", scName, provisionedCap))
 				}
 				fpointer.Close()
 			}
@@ -185,7 +196,6 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 		})
 
 		By("Waiting for PVC to reach Bound state")
-		var boundPVC *v1.PersistentVolumeClaim
 		err = wait.PollImmediate(5*time.Second, 10*time.Minute, func() (bool, error) {
 			boundPVC, err = cs.CoreV1().PersistentVolumeClaims(ns.Name).Get(context.TODO(), createdPVC.Name, metav1.GetOptions{})
 			if err != nil {
@@ -209,7 +219,7 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			fmt.Sprintf("Expected PV capacity to be %s, but got %s", expectedCapacity, pvCap.String()))
 	})
 
-	It("TC-3: with 3000 iops sc: should keep requested capacity at 100Gi without roundoff and reach Bound state", func() {
+	It("TC-3: with ibmc-vpc-file-ocpvirt-3000-iops sc: should keep requested capacity at 100Gi without roundoff and reach Bound state", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
@@ -226,12 +236,18 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			panic(err)
 		}
 
+		var boundPVC *v1.PersistentVolumeClaim
 		DeferCleanup(func() {
 			if fpointer != nil {
+				provisionedCap := "unknown"
+				if boundPVC != nil {
+					cap := boundPVC.Status.Capacity[v1.ResourceStorage]
+					provisionedCap = cap.String()
+				}
 				if CurrentSpecReport().Failed() {
-					fpointer.WriteString(fmt.Sprintf("❌ CAPACITY ROUNDOFF: 3000 IOPS (100Gi ABOVE MINIMUM) WITH %s STORAGE CLASS\n", scName))
+					fpointer.WriteString(fmt.Sprintf("❌ CAPACITY ROUNDOFF: 3000 IOPS (100Gi ABOVE MINIMUM) WITH %s STORAGE CLASS (provisioned: %s)\n", scName, provisionedCap))
 				} else {
-					fpointer.WriteString(fmt.Sprintf("✅ CAPACITY ROUNDOFF: 3000 IOPS (100Gi ABOVE MINIMUM) WITH %s STORAGE CLASS\n", scName))
+					fpointer.WriteString(fmt.Sprintf("✅ CAPACITY ROUNDOFF: 3000 IOPS (100Gi ABOVE MINIMUM) WITH %s STORAGE CLASS (provisioned: %s)\n", scName, provisionedCap))
 				}
 				fpointer.Close()
 			}
@@ -266,7 +282,6 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 		})
 
 		By("Waiting for PVC to reach Bound state")
-		var boundPVC *v1.PersistentVolumeClaim
 		err = wait.PollImmediate(5*time.Second, 10*time.Minute, func() (bool, error) {
 			boundPVC, err = cs.CoreV1().PersistentVolumeClaims(ns.Name).Get(context.TODO(), createdPVC.Name, metav1.GetOptions{})
 			if err != nil {
@@ -290,7 +305,7 @@ var _ = Describe("[ics-e2e] [roundoff] Dynamic Provisioning with allowCapacityRo
 			fmt.Sprintf("Expected PV capacity to be %s, but got %s", expectedCapacity, pvCap.String()))
 	})
 
-	It("TC-4: with 1000 iops sc: should fail provisioning when requested capacity (97000Gi) is outside maximum supported range", func() {
+	It("TC-4: with ibmc-vpc-file-ocpvirt-1000-iops sc: should fail provisioning when requested capacity (97000Gi) is outside maximum supported range", func() {
 		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
 		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
 		if labelerr != nil {
