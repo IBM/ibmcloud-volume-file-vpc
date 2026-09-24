@@ -79,6 +79,9 @@ type FileShareManager interface {
 	// ExpandVolume expand the share by share ID and target
 	ExpandVolume(shareID string, shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
 
+	// ModifyVolume modifies the share IOPS/bandwidth by share ID
+	ModifyVolume(shareID string, shareTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error)
+
 	// Get all subnets by using filter options
 	ListSubnets(limit int, start string, filters *models.ListSubnetFilters, ctxLogger *zap.Logger) (*models.SubnetList, error)
 
