@@ -278,8 +278,8 @@ fi
 
 # EIT based tests
 if [[ "$e2e_eit_test_case" == "true" ]]; then
-	# EIT based tests (To be run only for addon version >=2.0)
-	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
+	# EIT dp2 tests (To be run only for addon version >=2.0)
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" --skip="\[eit-rfs\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
 	rc3=$?
 	echo "Exit status for EIT volume test: $rc3"
 
@@ -288,8 +288,20 @@ if [[ "$e2e_eit_test_case" == "true" ]]; then
 	else
 		echo -e "VPC-FILE-CSI-TEST-DP2-EIT: FAILED" >> $E2E_TEST_RESULT
 	fi
+
+	# EIT-RFS (stunnel) tests
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit-rfs\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
+	rc6=$?
+	echo "Exit status for EIT-RFS stunnel test: $rc6"
+
+	if [[ $rc6 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-EIT-RFS: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "VPC-FILE-CSI-TEST-EIT-RFS: FAILED" >> $E2E_TEST_RESULT
+	fi
 else
 	echo -e "VPC-FILE-CSI-TEST-DP2-EIT: SKIP" >> $E2E_TEST_RESULT
+	echo -e "VPC-FILE-CSI-TEST-EIT-RFS: SKIP" >> $E2E_TEST_RESULT
 fi
 
 # Capacity Roundoff tests
