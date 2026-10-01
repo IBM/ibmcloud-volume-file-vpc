@@ -65,6 +65,7 @@ var skipErrorCodes = map[string]bool{
 	"shares_target_one_per_vpc":                 true,
 	"bad_field":                                 true,
 	"shares_name_duplicate":                     true,
+	"shares_target_virtual_network_interface_lif_capacity_reached": true,
 	"shares_subnet_zone_mismatch":               true,
 	"targets_primary_ip_id_required":            true,
 	"targets_subnet_and_primary_ip_missing":     true,
