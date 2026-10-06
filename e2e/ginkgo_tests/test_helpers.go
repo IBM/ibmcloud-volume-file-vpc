@@ -53,9 +53,6 @@ const (
 var (
 	testResultFile = os.Getenv("E2E_TEST_RESULT")
 	err            error
-	fpointer       *os.File
-	sc             = os.Getenv("SC")
-	sc_retain      = os.Getenv("SC_RETAIN")
 )
 
 func rebootWorkersForRHCOS(cs clientset.Interface) {
