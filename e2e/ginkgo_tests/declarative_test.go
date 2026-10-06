@@ -40,6 +40,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -58,8 +60,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// defaultTestConfigFile is used when TEST_CONFIG_FILE is not set.
-const defaultTestConfigFile = "e2e/testcases/testcases.yml"
+// defaultTestConfigFile returns the absolute path to testcases.yml, resolved
+// relative to this source file's location. This works regardless of the
+// working directory from which `go test` or `ginkgo` is invoked.
+func defaultTestConfigFile() string {
+	_, thisFile, _, _ := runtime.Caller(0)
+	// thisFile = …/e2e/ginkgo_tests/declarative_test.go
+	// testcases.yml lives at  …/e2e/testcases/testcases.yml
+	return filepath.Join(filepath.Dir(thisFile), "..", "testcases", "testcases.yml")
+}
 
 // ---------------------------------------------------------------------------
 // Suite registration
@@ -69,7 +78,7 @@ var _ = Describe("[ics-e2e] [declarative] VPC File CSI — YAML-driven test suit
 	// Load the test case file once at suite setup time.
 	testConfigFile := os.Getenv("TEST_CONFIG_FILE")
 	if testConfigFile == "" {
-		testConfigFile = defaultTestConfigFile
+		testConfigFile = defaultTestConfigFile()
 	}
 
 	tcs, loadErr := testcases.LoadTestCases(testConfigFile)

@@ -86,13 +86,26 @@ TEST_CONFIG_FILE=e2e/testcases/my_eit_only.yml \
 IC_LOGIN=true \
 ./e2e/e2e.sh
 
-# Or run the declarative suite directly without e2e.sh
-export TEST_CONFIG_FILE=e2e/testcases/testcases.yml
+# Or run the declarative suite directly without e2e.sh.
+# TEST_CONFIG_FILE is OPTIONAL — when omitted, the binary resolves
+# testcases.yml relative to its own source file location automatically,
+# so this works correctly regardless of working directory.
 export E2E_TEST_RESULT=/tmp/e2e-test.out
 export SC=ibmc-vpc-file-min-iops
 export SC_RETAIN=ibmc-vpc-file-retain-500-iops
+# TEST_ENV and IC_REGION must be set so InitializeVPCClient() can pick
+# the right IC_API_KEY_PROD / IC_API_KEY_STAG value.
+export TEST_ENV=stage
+export IC_REGION=us-south
 
 ginkgo -v -nodes=1 \
+  --focus="\[ics-e2e\] \[declarative\]" \
+  ./e2e/ginkgo_tests \
+  -- -e2e-verify-service-account=false
+
+# To run a custom YAML (e.g. only DP2 tests), set TEST_CONFIG_FILE explicitly
+# to any absolute path:
+TEST_CONFIG_FILE=/tmp/my_subset.yml ginkgo -v -nodes=1 \
   --focus="\[ics-e2e\] \[declarative\]" \
   ./e2e/ginkgo_tests \
   -- -e2e-verify-service-account=false
