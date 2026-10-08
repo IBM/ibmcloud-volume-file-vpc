@@ -18,6 +18,7 @@
 package provider
 
 import (
+	"os"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -97,10 +98,17 @@ func (vpcs *VPCSession) CreateVolume(volumeRequest provider.Volume) (volumeRespo
 		//Set transit_encryption to ipsec, none, stunnel
 		shareTargetTemplate.TransitEncryption = volumeRequest.TransitEncryption
 
-		volumeAccessPointList := make([]models.ShareTarget, 1)
-		volumeAccessPointList[0] = shareTargetTemplate
-
-		shareTemplate.ShareTargets = &volumeAccessPointList
+		// DEBUG ONLY: set FORCE_ACCESS_POINT_REATTEMPT=true to skip the inline mount_target
+		// in POST /shares — simulates the real failure mode where VPC creates the share but
+		// not the inline target, forcing the CSI controller re-attempt branch.
+		// Revert before merging.
+		if os.Getenv("FORCE_ACCESS_POINT_REATTEMPT") != "true" {
+			volumeAccessPointList := make([]models.ShareTarget, 1)
+			volumeAccessPointList[0] = shareTargetTemplate
+			shareTemplate.ShareTargets = &volumeAccessPointList
+		} else {
+			vpcs.Logger.Warn("FORCE_ACCESS_POINT_REATTEMPT is set: omitting inline ShareTargets from POST /shares request")
+		}
 	}
 
 	var encryptionKeyCRN string
