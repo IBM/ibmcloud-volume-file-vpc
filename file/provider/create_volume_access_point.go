@@ -18,7 +18,6 @@
 package provider
 
 import (
-	"os"
 	"time"
 
 	userError "github.com/IBM/ibmcloud-volume-file-vpc/common/messages"
@@ -57,19 +56,12 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 		/*First , check if volume target is already created
 		Even if we remove this check RIAAS will respond "shares_target_vpc_duplicate" erro code.
 		We need to again do GetVolumeAccessPoint to fetch the already created access point */
-
-		// DEBUG ONLY: set FORCE_ACCESS_POINT_REATTEMPT=true to bypass the idempotency GET
-		// so that POST /shares/{id}/mount_targets is actually called. Revert before merging.
-		if os.Getenv("FORCE_ACCESS_POINT_REATTEMPT") != "true" {
-			vpcs.Logger.Info("Checking if volume accessPoint is already created by other thread")
-			currentVolAccessPoint, err := vpcs.GetVolumeAccessPoint(volumeAccessPointRequest)
-			if err == nil && currentVolAccessPoint != nil {
-				vpcs.Logger.Info("Volume accessPoint is already created", zap.Reflect("currentVolAccessPoint", currentVolAccessPoint))
-				varp = currentVolAccessPoint
-				return nil, true // stop retry volume accessPoint already created
-			}
-		} else {
-			vpcs.Logger.Warn("FORCE_ACCESS_POINT_REATTEMPT is set: skipping idempotency check, will attempt POST directly")
+		vpcs.Logger.Info("Checking if volume accessPoint is already created by other thread")
+		currentVolAccessPoint, err := vpcs.GetVolumeAccessPoint(volumeAccessPointRequest)
+		if err == nil && currentVolAccessPoint != nil {
+			vpcs.Logger.Info("Volume accessPoint is already created", zap.Reflect("currentVolAccessPoint", currentVolAccessPoint))
+			varp = currentVolAccessPoint
+			return nil, true // stop retry volume accessPoint already created
 		}
 
 		// If ENI/VNI is enabled
