@@ -26,131 +26,91 @@ import (
 	restclientset "k8s.io/client-go/rest"
 )
 
-// DynamicallyProvisionedVolumeSnapshotTest will provision required StorageClass(es),VolumeSnapshotClass(es), PVC(s) and Pod(s)
-// Waiting for the PV provisioner to create a new PV
-// Testing if the Pod(s) can write and read to mounted volumes
-// Create a snapshot, validate the data is still on the disk, and then write and read to it again
-// And finally delete the snapshot
-// This test only supports a single volume
-
+// DynamicallyProvisionedVolumeSnapshotTest provisions a source PVC and snapshot,
+// then restores to three target sizes: same, smaller (negative), and larger.
+// RestoreClaimSizes must contain exactly three values: [same, less, more].
 type DynamicallyProvisionedVolumeSnapshotTest struct {
-	Pod         PodDetails
-	RestoredPod PodDetails
-	PodCheck    *PodExecCheck
-	PVCFail     bool
+	Pod               PodDetails
+	RestoredPod       PodDetails
+	RestoreClaimSizes [3]string
+	PodCheck          *PodExecCheck
 }
 
-func (t *DynamicallyProvisionedVolumeSnapshotTest) Run(client clientset.Interface, restclient restclientset.Interface, namespace *v1.Namespace) {
-	By("Executing Positive test scenario for volume snapshot")
+// RunAllRestoreVariants creates one source PVC, one pod, and one snapshot, then
+// exercises all three restore size variants (same / less / more) against it.
+func (t *DynamicallyProvisionedVolumeSnapshotTest) RunAllRestoreVariants(client clientset.Interface, restclient restclientset.Interface, namespace *v1.Namespace) {
+	By("Executing snapshot lifecycle: single source PVC + snapshot, three restore variants")
 
-	// --- Step 1: Create POD-1 with PVC-1 ---
-	tpod := NewTestPod(client, namespace, t.Pod.Cmd)
+	// ── Step 1: source PVC ───────────────────────────────────────────────────
 	volume := t.Pod.Volumes[0]
-
-	// 1. PVC-1 + PV
 	tpvc, pvcCleanup := volume.SetupDynamicPersistentVolumeClaim(client, namespace, false)
-
-	// Defer PVC-1 cleanup last
 	for i := len(pvcCleanup) - 1; i >= 0; i-- {
 		defer pvcCleanup[i]()
 	}
 
-	tpod.SetupVolume(tpvc.persistentVolumeClaim, volume.VolumeMount.NameGenerate+"1", volume.VolumeMount.MountPathGenerate+"1", volume.VolumeMount.ReadOnly)
-
-	// 2. POD-1 creation
-	By("Deploying POD-1")
-	tpod.Create()
-	defer tpod.Cleanup() // POD-1 cleanup (will run before PVC-1)
-
-	By("Checking that POD-1 command exits with no error")
-	tpod.WaitForSuccess()
-
-	// --- Step 2: Create Snapshot-1 ---
-	By("Taking snapshots")
-	tvsc, cleanup := CreateVolumeSnapshotClass(restclient, namespace)
-	defer cleanup() // snapshot class cleanup (runs last among snapshot/PVC-2 defers)
-
-	snapshot := tvsc.CreateSnapshot(tpvc.persistentVolumeClaim)
-
-	tvsc.ReadyToUse(snapshot, false)
-	By("Snapshot Creation Completed")
-
-	// --- Step 3: Restore snapshot-1 to PVC-2 ---
-	t.RestoredPod.Volumes[0].DataSource = &DataSource{Name: snapshot.Name}
-	trpod := NewTestPod(client, namespace, t.RestoredPod.Cmd)
-	rvolume := t.RestoredPod.Volumes[0]
-
-	By("Creating PersistentVolumeClaim from a Volume Snapshot")
-	trpvc, rpvcCleanup := rvolume.SetupDynamicPersistentVolumeClaim(client, namespace, false)
-
-	// Defer PVC-2 cleanup before snapshot deletion (LIFO: snapshot deletion registered
-	// after PVC-2 cleanup so it executes first, allowing the restored PV to be deleted).
-	for i := len(rpvcCleanup) - 1; i >= 0; i-- {
-		defer rpvcCleanup[i]()
-	}
-	defer tvsc.DeleteSnapshot(snapshot) // snapshot-1 deletion (runs before PVC-2 cleanup)
-
-	trpod.SetupVolume(trpvc.persistentVolumeClaim, rvolume.VolumeMount.NameGenerate+"1", rvolume.VolumeMount.MountPathGenerate+"1", rvolume.VolumeMount.ReadOnly)
-
-	By("Deploying POD-2 with a volume restored from the snapshot")
-	trpod.Create()
-	defer trpod.Cleanup() // POD-2 cleanup (runs first)
-
-	By("Checking that POD-2 command exits with no error")
-	trpod.WaitForRunningSlow()
-	trpod.Exec(t.PodCheck.Cmd, t.PodCheck.ExpectedString01)
-}
-
-func (t *DynamicallyProvisionedVolumeSnapshotTest) VolumeSizeLess(client clientset.Interface, restclient restclientset.Interface, namespace *v1.Namespace) {
-	By("Executing Negative test scenario for snapshot restore with smaller PVC size")
-
-	volume := t.Pod.Volumes[0]
-
-	// 1. Create PVC-1
-	tpvc, pvc1Cleanup := volume.SetupDynamicPersistentVolumeClaim(client, namespace, false)
-
-	for i := len(pvc1Cleanup) - 1; i >= 0; i-- {
-		defer pvc1Cleanup[i]()
-	}
-
-	// 2. Create POD-1 with PVC-1 and write data
+	// ── Step 2: source POD — writes data ─────────────────────────────────────
 	tpod := NewTestPod(client, namespace, t.Pod.Cmd)
 	tpod.SetupVolume(tpvc.persistentVolumeClaim, volume.VolumeMount.NameGenerate+"1", volume.VolumeMount.MountPathGenerate+"1", volume.VolumeMount.ReadOnly)
-
 	By("Deploying POD-1")
 	tpod.Create()
 	defer tpod.Cleanup()
-
-	By("Waiting for POD-1 to succeed")
+	By("Checking that POD-1 command exits with no error")
 	tpod.WaitForSuccess()
 
-	// 3. Create snapshot-1
+	// ── Step 3: Snapshot ─────────────────────────────────────────────────────
+	By("Taking snapshot")
 	tvsc, vscCleanup := CreateVolumeSnapshotClass(restclient, namespace)
 	defer vscCleanup()
-
-	By("Creating snapshot-1")
 	snapshot := tvsc.CreateSnapshot(tpvc.persistentVolumeClaim)
 	defer tvsc.DeleteSnapshot(snapshot)
-
 	tvsc.ReadyToUse(snapshot, false)
-	By("Snapshot-1 is ready")
+	By("Snapshot creation completed")
 
-	// 4. Attempt restore to smaller PVC-2 — expected to stay Pending (VPC rejects smaller restore).
-	// SetupDynamicPersistentVolumeClaim with pvcErrExpected=true calls WaitForPending() internally,
-	// which confirms the PVC never bound. The returned tpvc has no backing PV, so we must NOT call
-	// tpvc.Cleanup() (it would panic on a nil persistentVolume). Delete the PVC directly instead.
-	By("Attempting restore to PVC-2 with smaller size (should stay Pending)")
+	rVol := t.RestoredPod.Volumes[0]
 
-	t.RestoredPod.Volumes[0].DataSource = &DataSource{Name: snapshot.Name}
-	rvolume := t.RestoredPod.Volumes[0]
+	// ── Variant A: restore same size (positive) ──────────────────────────────
+	By("RESTORE SAME SIZE: Creating PVC from snapshot")
+	sameVol := rVol
+	sameVol.ClaimSize = t.RestoreClaimSizes[0]
+	sameVol.DataSource = &DataSource{Name: snapshot.Name}
+	trpvcSame, rpvcCleanupSame := sameVol.SetupDynamicPersistentVolumeClaim(client, namespace, false)
+	for i := len(rpvcCleanupSame) - 1; i >= 0; i-- {
+		defer rpvcCleanupSame[i]()
+	}
+	trpodSame := NewTestPod(client, namespace, t.RestoredPod.Cmd)
+	trpodSame.SetupVolume(trpvcSame.persistentVolumeClaim, rVol.VolumeMount.NameGenerate+"1", rVol.VolumeMount.MountPathGenerate+"1", rVol.VolumeMount.ReadOnly)
+	By("Deploying POD-2 (same-size restore)")
+	trpodSame.Create()
+	defer trpodSame.Cleanup()
+	trpodSame.WaitForRunningSlow()
+	trpodSame.Exec(t.PodCheck.Cmd, t.PodCheck.ExpectedString01)
 
-	restoredPVC, _ := rvolume.SetupDynamicPersistentVolumeClaim(client, namespace, true)
-
-	By("PVC-2 stayed Pending as expected — cleaning up and marking test as PASS")
-	if restoredPVC != nil {
+	// ── Variant B: restore smaller size (negative — expected to stay Pending) ─
+	By("RESTORE SIZE LESS: Attempting restore to smaller PVC (should stay Pending)")
+	lessVol := rVol
+	lessVol.ClaimSize = t.RestoreClaimSizes[1]
+	lessVol.DataSource = &DataSource{Name: snapshot.Name}
+	restoredPVCLess, _ := lessVol.SetupDynamicPersistentVolumeClaim(client, namespace, true)
+	By("PVC stayed Pending as expected — cleaning up")
+	if restoredPVCLess != nil {
 		_ = client.CoreV1().PersistentVolumeClaims(namespace.Name).
-			Delete(context.TODO(), restoredPVC.persistentVolumeClaim.Name, metav1.DeleteOptions{})
+			Delete(context.TODO(), restoredPVCLess.persistentVolumeClaim.Name, metav1.DeleteOptions{})
 	}
 
-	// Cleanup of POD-1, snapshot-1, PVC-1 handled by defers above
+	// ── Variant C: restore larger size (positive) ────────────────────────────
+	By("RESTORE SIZE MORE: Creating PVC from snapshot with larger size")
+	moreVol := rVol
+	moreVol.ClaimSize = t.RestoreClaimSizes[2]
+	moreVol.DataSource = &DataSource{Name: snapshot.Name}
+	trpvcMore, rpvcCleanupMore := moreVol.SetupDynamicPersistentVolumeClaim(client, namespace, false)
+	for i := len(rpvcCleanupMore) - 1; i >= 0; i-- {
+		defer rpvcCleanupMore[i]()
+	}
+	trpodMore := NewTestPod(client, namespace, t.RestoredPod.Cmd)
+	trpodMore.SetupVolume(trpvcMore.persistentVolumeClaim, rVol.VolumeMount.NameGenerate+"1", rVol.VolumeMount.MountPathGenerate+"1", rVol.VolumeMount.ReadOnly)
+	By("Deploying POD-3 (larger-size restore)")
+	trpodMore.Create()
+	defer trpodMore.Cleanup()
+	trpodMore.WaitForRunningSlow()
+	trpodMore.Exec(t.PodCheck.Cmd, t.PodCheck.ExpectedString01)
 }

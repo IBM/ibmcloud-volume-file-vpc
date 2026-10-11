@@ -83,6 +83,10 @@ func (vpcs *VPCSession) CreateVolumeAccessPoint(volumeAccessPointRequest provide
 			}
 		}
 
+		// Set access protocol and transit encryption — mandatory for mount target creation
+		volumeAccessPoint.AccessProtocol = "nfs4"
+		volumeAccessPoint.TransitEncryption = volumeAccessPointRequest.TransitEncryption
+
 		//Try creating volume accessPoint if it's not already created or there is error in getting current volume accessPoint
 		vpcs.Logger.Info("Creating volume accessPoint from VPC provider...")
 		volumeAccessPointResult, err = vpcs.Apiclient.FileShareService().CreateFileShareTarget(&volumeAccessPoint, vpcs.Logger)
