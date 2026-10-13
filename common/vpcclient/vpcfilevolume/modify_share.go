@@ -26,15 +26,15 @@ import (
 	"go.uber.org/zap"
 )
 
-// ModifyVolume PATCH to /shares/{shareID} for IOPS/bandwidth modification
-func (vs *FileShareService) ModifyVolume(shareID string, volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error) {
-	ctxLogger.Debug("Entry Backend ModifyVolume")
-	defer ctxLogger.Debug("Exit Backend ModifyVolume")
+// ModifyShare PATCH to /shares/{shareID} for IOPS/bandwidth modification
+func (vs *FileShareService) ModifyShare(shareID string, volumeTemplate *models.Share, ctxLogger *zap.Logger) (*models.Share, error) {
+	ctxLogger.Debug("Entry Backend ModifyShare")
+	defer ctxLogger.Debug("Exit Backend ModifyShare")
 
-	defer util.TimeTracker("ModifyVolume", time.Now())
+	defer util.TimeTracker("ModifyShare", time.Now())
 
 	operation := &client.Operation{
-		Name:        "ModifyVolume",
+		Name:        "ModifyShare",
 		Method:      "PATCH",
 		PathPattern: shareIDPath,
 	}
@@ -47,7 +47,7 @@ func (vs *FileShareService) ModifyVolume(shareID string, volumeTemplate *models.
 	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", req.URL()), zap.Reflect("Payload", volumeTemplate), zap.Reflect("Operation", operation))
 	_, err := req.JSONBody(volumeTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
-		ctxLogger.Info("Exit Backend ModifyVolume due to error.", zap.Reflect("Error: ", err))
+		ctxLogger.Info("Exit Backend ModifyShare due to error.", zap.Reflect("Error: ", err))
 		return nil, err
 	}
 

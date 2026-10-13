@@ -81,18 +81,18 @@ type FileShareService struct {
 		result1 *models.Share
 		result2 error
 	}
-	ModifyVolumeStub        func(string, *models.Share, *zap.Logger) (*models.Share, error)
-	modifyVolumeMutex       sync.RWMutex
-	modifyVolumeArgsForCall []struct {
+	ModifyShareStub        func(string, *models.Share, *zap.Logger) (*models.Share, error)
+	modifyShareMutex       sync.RWMutex
+	modifyShareArgsForCall []struct {
 		arg1 string
 		arg2 *models.Share
 		arg3 *zap.Logger
 	}
-	modifyVolumeReturns struct {
+	modifyShareReturns struct {
 		result1 *models.Share
 		result2 error
 	}
-	modifyVolumeReturnsOnCall map[int]struct {
+	modifyShareReturnsOnCall map[int]struct {
 		result1 *models.Share
 		result2 error
 	}
@@ -614,18 +614,18 @@ func (fake *FileShareService) ExpandVolumeReturnsOnCall(i int, result1 *models.S
 	}{result1, result2}
 }
 
-func (fake *FileShareService) ModifyVolume(arg1 string, arg2 *models.Share, arg3 *zap.Logger) (*models.Share, error) {
-	fake.modifyVolumeMutex.Lock()
-	ret, specificReturn := fake.modifyVolumeReturnsOnCall[len(fake.modifyVolumeArgsForCall)]
-	fake.modifyVolumeArgsForCall = append(fake.modifyVolumeArgsForCall, struct {
+func (fake *FileShareService) ModifyShare(arg1 string, arg2 *models.Share, arg3 *zap.Logger) (*models.Share, error) {
+	fake.modifyShareMutex.Lock()
+	ret, specificReturn := fake.modifyShareReturnsOnCall[len(fake.modifyShareArgsForCall)]
+	fake.modifyShareArgsForCall = append(fake.modifyShareArgsForCall, struct {
 		arg1 string
 		arg2 *models.Share
 		arg3 *zap.Logger
 	}{arg1, arg2, arg3})
-	stub := fake.ModifyVolumeStub
-	fakeReturns := fake.modifyVolumeReturns
-	fake.recordInvocation("ModifyVolume", []interface{}{arg1, arg2, arg3})
-	fake.modifyVolumeMutex.Unlock()
+	stub := fake.ModifyShareStub
+	fakeReturns := fake.modifyShareReturns
+	fake.recordInvocation("ModifyShare", []interface{}{arg1, arg2, arg3})
+	fake.modifyShareMutex.Unlock()
 	if stub != nil {
 		return stub(arg1, arg2, arg3)
 	}
@@ -635,46 +635,46 @@ func (fake *FileShareService) ModifyVolume(arg1 string, arg2 *models.Share, arg3
 	return fakeReturns.result1, fakeReturns.result2
 }
 
-func (fake *FileShareService) ModifyVolumeCallCount() int {
-	fake.modifyVolumeMutex.RLock()
-	defer fake.modifyVolumeMutex.RUnlock()
-	return len(fake.modifyVolumeArgsForCall)
+func (fake *FileShareService) ModifyShareCallCount() int {
+	fake.modifyShareMutex.RLock()
+	defer fake.modifyShareMutex.RUnlock()
+	return len(fake.modifyShareArgsForCall)
 }
 
-func (fake *FileShareService) ModifyVolumeCalls(stub func(string, *models.Share, *zap.Logger) (*models.Share, error)) {
-	fake.modifyVolumeMutex.Lock()
-	defer fake.modifyVolumeMutex.Unlock()
-	fake.ModifyVolumeStub = stub
+func (fake *FileShareService) ModifyShareCalls(stub func(string, *models.Share, *zap.Logger) (*models.Share, error)) {
+	fake.modifyShareMutex.Lock()
+	defer fake.modifyShareMutex.Unlock()
+	fake.ModifyShareStub = stub
 }
 
-func (fake *FileShareService) ModifyVolumeArgsForCall(i int) (string, *models.Share, *zap.Logger) {
-	fake.modifyVolumeMutex.RLock()
-	defer fake.modifyVolumeMutex.RUnlock()
-	argsForCall := fake.modifyVolumeArgsForCall[i]
+func (fake *FileShareService) ModifyShareArgsForCall(i int) (string, *models.Share, *zap.Logger) {
+	fake.modifyShareMutex.RLock()
+	defer fake.modifyShareMutex.RUnlock()
+	argsForCall := fake.modifyShareArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3
 }
 
-func (fake *FileShareService) ModifyVolumeReturns(result1 *models.Share, result2 error) {
-	fake.modifyVolumeMutex.Lock()
-	defer fake.modifyVolumeMutex.Unlock()
-	fake.ModifyVolumeStub = nil
-	fake.modifyVolumeReturns = struct {
+func (fake *FileShareService) ModifyShareReturns(result1 *models.Share, result2 error) {
+	fake.modifyShareMutex.Lock()
+	defer fake.modifyShareMutex.Unlock()
+	fake.ModifyShareStub = nil
+	fake.modifyShareReturns = struct {
 		result1 *models.Share
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FileShareService) ModifyVolumeReturnsOnCall(i int, result1 *models.Share, result2 error) {
-	fake.modifyVolumeMutex.Lock()
-	defer fake.modifyVolumeMutex.Unlock()
-	fake.ModifyVolumeStub = nil
-	if fake.modifyVolumeReturnsOnCall == nil {
-		fake.modifyVolumeReturnsOnCall = make(map[int]struct {
+func (fake *FileShareService) ModifyShareReturnsOnCall(i int, result1 *models.Share, result2 error) {
+	fake.modifyShareMutex.Lock()
+	defer fake.modifyShareMutex.Unlock()
+	fake.ModifyShareStub = nil
+	if fake.modifyShareReturnsOnCall == nil {
+		fake.modifyShareReturnsOnCall = make(map[int]struct {
 			result1 *models.Share
 			result2 error
 		})
 	}
-	fake.modifyVolumeReturnsOnCall[i] = struct {
+	fake.modifyShareReturnsOnCall[i] = struct {
 		result1 *models.Share
 		result2 error
 	}{result1, result2}
