@@ -47,7 +47,7 @@ func (vs *FileShareService) ModifyShare(shareID string, volumeTemplate *models.S
 	ctxLogger.Info("Equivalent curl command and payload details", zap.Reflect("URL", req.URL()), zap.Reflect("Payload", volumeTemplate), zap.Reflect("Operation", operation))
 	_, err := req.JSONBody(volumeTemplate).JSONSuccess(&share).JSONError(&apiErr).Invoke()
 	if err != nil {
-		ctxLogger.Info("Exit Backend ModifyShare due to error.", zap.Reflect("Error: ", err))
+		ctxLogger.Error("Exit Backend ModifyShare due to error.", zap.Error(err))
 		return nil, err
 	}
 
