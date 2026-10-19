@@ -68,7 +68,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	})
 
 	if err != nil {
-		vpcs.Logger.Debug("Failed to modify volume from VPC provider", zap.Reflect("BackendError", err))
+		vpcs.Logger.Error("Failed to modify volume from VPC provider", zap.NamedError("BackendError", err))
 		return nil, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
 	}
 
