@@ -38,6 +38,8 @@ github.com/IBM/ibmcloud-volume-interface v1.2.23-0.20260905190036-ad92602ec0a4 h
 github.com/IBM/ibmcloud-volume-interface v1.2.23-0.20260905190036-ad92602ec0a4/go.mod h1:doR0bexx68aSBec2x2gp/1B7WnM19KmlnxQWayGHuZY=
 github.com/IBM/ibmcloud-volume-interface v1.2.23-0.20261013141242-3e3fe158e0d3 h1:NxQun0KGezMp4yarFVL+qRFbRY/ez+QhcwTmnrZPWUk=
 github.com/IBM/ibmcloud-volume-interface v1.2.23-0.20261013141242-3e3fe158e0d3/go.mod h1:doR0bexx68aSBec2x2gp/1B7WnM19KmlnxQWayGHuZY=
+github.com/IBM/ibmcloud-volume-interface v1.2.23-0.20261020062344-41a79e3821cc h1:H/HPEk86haaHm97182S3XT8lKw0Vu2My8bQFf4/qeAI=
+github.com/IBM/ibmcloud-volume-interface v1.2.23-0.20261020062344-41a79e3821cc/go.mod h1:doR0bexx68aSBec2x2gp/1B7WnM19KmlnxQWayGHuZY=
 github.com/IBM/secret-common-lib v1.1.15 h1:r2oQE7UAjHiPHhUUWJmI1NYYmuTRHWENtFolTSbXMwI=
 github.com/IBM/secret-common-lib v1.1.15/go.mod h1:bJO2iazBFnfjj6jhfgy/T4FQQQE/aIxio1CrNZ83+0U=
 github.com/IBM/secret-utils-lib v1.1.16 h1:RIainy11ICJVWjgi9FWSvBsl8xOwhzLvTKBI8AWq7wI=

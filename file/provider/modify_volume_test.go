@@ -63,9 +63,11 @@ func TestModifyVolume(t *testing.T) {
 		},
 		{
 			testCaseName: "successful IOPS modify (dp2)",
-			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", Iops: 5000},
+			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
 			modifyShareResp: &models.Share{
 				ID:     "share-id",
+				Href:   "https://example/shares/share-id",
+				CRN:    "crn:v1:share-id",
 				Status: models.StatusType("stable"),
 				Iops:   5000,
 			},
@@ -78,7 +80,7 @@ func TestModifyVolume(t *testing.T) {
 		},
 		{
 			testCaseName: "successful bandwidth modify (rfs)",
-			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", Bandwidth: 5000},
+			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Bandwidth: 5000}},
 			modifyShareResp: &models.Share{
 				ID:        "share-id",
 				Status:    models.StatusType("stable"),
@@ -93,14 +95,14 @@ func TestModifyVolume(t *testing.T) {
 		},
 		{
 			testCaseName:       "ModifyShare client error returns FailedToModifyVolume",
-			request:            provider.ModifyVolumeRequest{VolumeID: "share-id", Iops: 5000},
+			request:            provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
 			modifyShareErr:     errors.New("backend failure"),
 			expectErr:          true,
 			expectedReasonCode: "FailedToModifyVolume",
 		},
 		{
 			testCaseName:    "ModifyShare returns empty share ID returns FailedToModifyVolume",
-			request:         provider.ModifyVolumeRequest{VolumeID: "share-id", Iops: 5000},
+			request:         provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
 			modifyShareResp: &models.Share{
 				// empty ID simulates empty share ID in response
 			},
@@ -109,7 +111,7 @@ func TestModifyVolume(t *testing.T) {
 		},
 		{
 			testCaseName: "volume stuck in non-stable state returns VolumeNotInValidState",
-			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", Iops: 5000},
+			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
 			modifyShareResp: &models.Share{
 				ID:     "share-id",
 				Status: models.StatusType("pending"),
@@ -158,6 +160,9 @@ func TestModifyVolume(t *testing.T) {
 				assert.Nil(t, err)
 				if testcase.request.Iops > 0 || testcase.request.Bandwidth > 0 {
 					assert.NotNil(t, resp)
+					assert.Equal(t, testcase.modifyShareResp.ID, resp.VolumeID)
+					assert.Equal(t, testcase.modifyShareResp.Href, resp.Href)
+					assert.Equal(t, testcase.modifyShareResp.CRN, resp.CRN)
 				}
 			}
 		})

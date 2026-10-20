@@ -85,7 +85,12 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", share))
 
 	return &provider.ModifyVolumeResponse{
-		Iops:      share.Iops,
-		Bandwidth: share.Bandwidth,
+		VolumeID: share.ID,
+		Href:     share.Href,
+		CRN:      share.CRN,
+		VolumePerformance: provider.VolumePerformance{
+			Iops:      share.Iops,
+			Bandwidth: share.Bandwidth,
+		},
 	}, nil
 }
