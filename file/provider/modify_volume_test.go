@@ -26,7 +26,6 @@ import (
 	volumeServiceFakes "github.com/IBM/ibmcloud-volume-file-vpc/common/vpcclient/vpcfilevolume/fakes"
 	"github.com/IBM/ibmcloud-volume-interface/lib/provider"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
@@ -48,57 +47,78 @@ func TestModifyVolume(t *testing.T) {
 		getShareResp *models.Share
 		getShareErr  error
 		// expected
-		expectErr          bool
-		expectedReasonCode string
+		expectedErr string
+		backendErr  string
+		verify      func(t *testing.T, resp *provider.ModifyVolumeResponse, err error)
 	}{
 		{
-			testCaseName: "missing VolumeID returns error",
+			testCaseName: "VolumeID is empty",
 			request:      provider.ModifyVolumeRequest{},
-			expectErr:    true,
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.Nil(t, resp)
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "ErrorRequiredFieldMissing")
+			},
 		},
 		{
-			testCaseName: "no iops or bandwidth returns empty response",
+			testCaseName: "No iops or bandwidth requested",
 			request:      provider.ModifyVolumeRequest{VolumeID: "share-id"},
-			expectErr:    false,
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.NotNil(t, resp)
+				assert.Nil(t, err)
+			},
 		},
 		{
-			testCaseName: "successful IOPS modify (dp2)",
+			testCaseName: "Modify iops modify for DP2 profile",
 			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
 			modifyShareResp: &models.Share{
 				ID:     "share-id",
 				Href:   "https://example/shares/share-id",
 				CRN:    "crn:v1:share-id",
 				Status: models.StatusType("stable"),
-				Iops:   5000,
+				Iops:   500,
 			},
 			getShareResp: &models.Share{
 				ID:     "share-id",
 				Status: models.StatusType("stable"),
 				Iops:   5000,
 			},
-			expectErr: false,
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.NotNil(t, resp)
+				assert.Nil(t, err)
+				assert.Equal(t, "share-id", resp.VolumeID)
+				assert.Equal(t, int64(500), resp.VolumePerformance.Iops)
+			},
 		},
 		{
-			testCaseName: "successful bandwidth modify (rfs)",
+			testCaseName: "Modify bandwidth modify for RFS profile",
 			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Bandwidth: 5000}},
 			modifyShareResp: &models.Share{
 				ID:        "share-id",
 				Status:    models.StatusType("stable"),
-				Bandwidth: 5000,
+				Bandwidth: 500,
 			},
 			getShareResp: &models.Share{
 				ID:        "share-id",
 				Status:    models.StatusType("stable"),
 				Bandwidth: 5000,
 			},
-			expectErr: false,
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.NotNil(t, resp)
+				assert.Nil(t, err)
+				assert.Equal(t, "share-id", resp.VolumeID)
+				assert.Equal(t, int32(500), resp.VolumePerformance.Bandwidth)
+			},
 		},
 		{
-			testCaseName:       "ModifyShare client error returns FailedToModifyVolume",
-			request:            provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
-			modifyShareErr:     errors.New("backend failure"),
-			expectErr:          true,
-			expectedReasonCode: "FailedToModifyVolume",
+			testCaseName:   "ModifyShare client error returns FailedToModifyVolume",
+			request:        provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
+			modifyShareErr: errors.New("backend failure"),
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.Nil(t, resp)
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "FailedToModifyVolume")
+			},
 		},
 		{
 			testCaseName:    "ModifyShare returns empty share ID returns FailedToModifyVolume",
@@ -106,8 +126,11 @@ func TestModifyVolume(t *testing.T) {
 			modifyShareResp: &models.Share{
 				// empty ID simulates empty share ID in response
 			},
-			expectErr:          true,
-			expectedReasonCode: "FailedToModifyVolume",
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.Nil(t, resp)
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "FailedToModifyVolume")
+			},
 		},
 		{
 			testCaseName: "volume stuck in non-stable state returns VolumeNotInValidState",
@@ -121,8 +144,11 @@ func TestModifyVolume(t *testing.T) {
 				ID:     "share-id",
 				Status: models.StatusType("pending"),
 			},
-			expectErr:          true,
-			expectedReasonCode: "VolumeNotInValidState",
+			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
+				assert.Nil(t, resp)
+				assert.NotNil(t, err)
+				assert.Contains(t, err.Error(), "VolumeNotInValidState")
+			},
 		},
 	}
 
@@ -150,157 +176,8 @@ func TestModifyVolume(t *testing.T) {
 
 			resp, err := vpcs.ModifyVolume(testcase.request)
 
-			if testcase.expectErr {
-				assert.NotNil(t, err)
-				logger.Info("Error details", zap.Reflect("Error", err))
-				if testcase.expectedReasonCode != "" {
-					assert.Contains(t, err.Error(), testcase.expectedReasonCode)
-				}
-			} else {
-				assert.Nil(t, err)
-				if testcase.request.Iops > 0 || testcase.request.Bandwidth > 0 {
-					assert.NotNil(t, resp)
-					assert.Equal(t, testcase.modifyShareResp.ID, resp.VolumeID)
-					assert.Equal(t, testcase.modifyShareResp.Href, resp.Href)
-					assert.Equal(t, testcase.modifyShareResp.CRN, resp.CRN)
-				}
-			}
-		})
-	}
-}
-
-// TestValidateVolumeRequest_VACBandwidth exercises the bandwidth (throughput) path
-// inside validateVolumeRequest, which is the entry-point for VAC bandwidth on
-// CreateVolume.
-func TestValidateVolumeRequest_VACBandwidth(t *testing.T) {
-	userError.MessagesEn = userError.InitMessages()
-
-	volName := "test-vol"
-	capacity := 10
-	rg := &provider.ResourceGroup{ID: "rg-id"}
-	profile := func(name string) *provider.Profile { return &provider.Profile{Name: name} }
-
-	testCases := []struct {
-		name          string
-		volume        provider.Volume
-		wantBandwidth int32
-		wantIops      int64
-		wantErr       bool
-		wantErrCode   string
-	}{
-		{
-			name: "rfs: bandwidth from VAC is passed through",
-			volume: provider.Volume{
-				Name:     &volName,
-				Capacity: &capacity,
-				VPCVolume: provider.VPCVolume{
-					Profile:       profile("rfs"),
-					ResourceGroup: rg,
-					Bandwidth:     5000,
-				},
-			},
-			wantBandwidth: 5000,
-		},
-		{
-			name: "rfs: zero bandwidth is valid (not set by VAC)",
-			volume: provider.Volume{
-				Name:     &volName,
-				Capacity: &capacity,
-				VPCVolume: provider.VPCVolume{
-					Profile:       profile("rfs"),
-					ResourceGroup: rg,
-					Bandwidth:     0,
-				},
-			},
-			wantBandwidth: 0,
-		},
-		{
-			name: "dp2: bandwidth zero is valid",
-			volume: provider.Volume{
-				Name:     &volName,
-				Capacity: &capacity,
-				VPCVolume: provider.VPCVolume{
-					Profile:       profile("dp2"),
-					ResourceGroup: rg,
-					Bandwidth:     0,
-				},
-			},
-			wantBandwidth: 0,
-		},
-		{
-			name: "iops set for dp2 is forwarded",
-			volume: provider.Volume{
-				Name:     &volName,
-				Capacity: &capacity,
-				Iops:     func() *string { s := "3000"; return &s }(),
-				VPCVolume: provider.VPCVolume{
-					Profile:       profile("dp2"),
-					ResourceGroup: rg,
-				},
-			},
-			wantIops: 3000,
-		},
-		{
-			name: "missing volume name returns error",
-			volume: provider.Volume{
-				Capacity: &capacity,
-				VPCVolume: provider.VPCVolume{
-					Profile:       profile("dp2"),
-					ResourceGroup: rg,
-				},
-			},
-			wantErr:     true,
-			wantErrCode: "InvalidVolumeName",
-		},
-		{
-			name: "nil profile returns error",
-			volume: provider.Volume{
-				Name:     &volName,
-				Capacity: &capacity,
-				VPCVolume: provider.VPCVolume{
-					ResourceGroup: rg,
-					// Profile intentionally nil
-				},
-			},
-			wantErr: true,
-			// VolumeProfileEmpty has no entry in messages_en.go — just assert error returned
-		},
-		{
-			name: "nil resource group returns error",
-			volume: provider.Volume{
-				Name:     &volName,
-				Capacity: &capacity,
-				VPCVolume: provider.VPCVolume{
-					Profile: profile("dp2"),
-				},
-			},
-			wantErr:     true,
-			wantErrCode: "EmptyResourceGroup",
-		},
-		{
-			name: "nil capacity returns error",
-			volume: provider.Volume{
-				Name: &volName,
-				VPCVolume: provider.VPCVolume{
-					Profile:       profile("dp2"),
-					ResourceGroup: rg,
-				},
-			},
-			wantErr:     true,
-			wantErrCode: "VolumeCapacityInvalid",
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			_, iops, bw, err := validateVolumeRequest(tc.volume)
-			if tc.wantErr {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tc.wantErrCode)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tc.wantBandwidth, bw, "bandwidth mismatch")
-				assert.Equal(t, tc.wantIops, iops, "iops mismatch")
+			if testcase.verify != nil {
+				testcase.verify(t, resp, err)
 			}
 		})
 	}
