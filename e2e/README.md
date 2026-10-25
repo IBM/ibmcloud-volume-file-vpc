@@ -1,53 +1,134 @@
-## How to execute E2E?
+# VPC File CSI Driver — End-to-End Tests
 
-1. Create a VPC Cluster
-2. Export the KUBECONFIG
-   In kube config file use absolute path for `certificate-authority`, `client-certificate` and `client-key`
-3. Deploy the Driver (with SC)
-4. Export environment variables
-   ```
-   # Mandatory
-   export GO111MODULE=on
-   export GOPATH=<GOPATH>
-   export KUBECONFIG=<absolute-path-to-kubeconfig>
-   export E2E_TEST_RESULT=<absolute-path to a file where the results should be redirected>
-   export TEST_ENV=<stage/prod>
-   export IC_REGION=<us-south>
-   export IC_API_KEY_PROD=<prod API key> | export IC_API_KEY_STAG=<stage API key>
-   export e2e_addon_version=<1.2 or 2.0>
-   export icrImage=<Give the image which will be used by pods>
-   export SC=<storage-class-name-with-delete-reclaim-policy>
-   export SC_RETAIN=<storage-class-name-with-retain-reclaim-policy>
+## Overview
 
-   # Optional
-   export E2E_POD_COUNT="1"
-   export E2E_PVC_COUNT="1"
-   ```
+The e2e suite uses a **declarative, YAML-driven** approach.
+Every test scenario is an entry in [`testcases/testcases.yml`](testcases/testcases.yml).
+Adding, skipping, or modifying a test never requires touching Go source code.
 
-5. Test DP2 profile with deployment
-   ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc\] \[with-deploy\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
-   ```
-6. Test volume expansion
-   ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[resize\] \[pv\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
-   ```
-7. Test EIT enabled volume test cases
-   ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[eit\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
-   ```
-   
-8. Test RFS profile and it's storage classes
-   ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[sc_rfs\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
-   ```
+```
+e2e/
+├── e2e.sh                       # CI entry-point — reads Jenkins env vars, runs tests
+├── testcases/
+│   ├── parser.go                # Go types + LoadTestCases() loader
+│   └── testcases.yml            # ← every test case lives here
+└── ginkgo_tests/
+    ├── declarative_test.go      # single Ginkgo loop — iterates testcases.yml
+    └── test_helpers.go          # shared helpers (SC management, EIT utils, …)
+```
 
-9. Test Snapshot for DP2 and RFS profile 
-   ```
-   ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[snapshot\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
-   ```
+---
 
-10. Test Capacity Roundoff for DP2 profile
-    ```
-    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
-    ```
+## How test selection works
+
+`testcases.yml` has one entry per test. Optional-feature tests ship with
+`wantToSkip: true`. `e2e.sh` reads the Jenkins env vars and generates a
+**runtime copy** of the YAML where the relevant entries are flipped to
+`wantToSkip: false`. The committed file is never modified.
+
+| Jenkins param | Controls |
+|---|---|
+| `RUN_EIT_TEST_CASES=true` | All `EIT:` test cases |
+| `RUN_REGIONAL_PROFILE_TEST_CASES=true` | All `RFS:` test cases |
+| `RUN_SNAPSHOT_TEST_CASES=true` | All `SNAPSHOT:` test cases |
+| `RUN_CAPACITY_ROUNDOFF_TEST_CASES=true` | All `ROUNDOFF` test cases |
+
+DP2 and RESIZE test cases always run (they have `wantToSkip: false` in the committed YAML).
+
+---
+
+## Running locally
+
+### Prerequisites
+
+```bash
+# Log in and export kubeconfig
+ibmcloud login ...
+ibmcloud ks cluster config --cluster <cluster-name>
+
+export GOPATH=<your-gopath>
+export KUBECONFIG=<absolute-path-to-kubeconfig>
+export IC_API_KEY_PROD=<prod-api-key>   # or IC_API_KEY_STAG for stage
+export E2E_TEST_RESULT=$GOPATH/src/github.com/IBM/ibmcloud-volume-file-vpc/e2e-test.out
+```
+
+### Run all tests (the same way CI does)
+
+```bash
+cd $GOPATH/src/github.com/IBM/ibmcloud-volume-file-vpc
+
+IC_LOGIN=true \
+TEST_ENV=stage \
+IC_REGION=us-south \
+./e2e/e2e.sh
+```
+
+### Run with optional feature tests enabled
+
+```bash
+IC_LOGIN=true \
+TEST_ENV=stage \
+IC_REGION=us-south \
+RUN_EIT_TEST_CASES=true \
+RUN_REGIONAL_PROFILE_TEST_CASES=true \
+RUN_SNAPSHOT_TEST_CASES=true \
+RUN_CAPACITY_ROUNDOFF_TEST_CASES=true \
+./e2e/e2e.sh
+```
+
+### Run a specific subset directly with ginkgo (developer workflow)
+
+```bash
+cd $GOPATH/src/github.com/IBM/ibmcloud-volume-file-vpc
+
+# Run only the EIT entries from a custom YAML file
+TEST_CONFIG_FILE=e2e/testcases/my_eit_only.yml \
+IC_LOGIN=true \
+./e2e/e2e.sh
+
+# Or run the declarative suite directly without e2e.sh.
+# TEST_CONFIG_FILE is OPTIONAL — when omitted, the binary resolves
+# testcases.yml relative to its own source file location automatically,
+# so this works correctly regardless of working directory.
+export E2E_TEST_RESULT=/tmp/e2e-test.out
+export SC=ibmc-vpc-file-min-iops
+export SC_RETAIN=ibmc-vpc-file-retain-500-iops
+# TEST_ENV and IC_REGION must be set so InitializeVPCClient() can pick
+# the right IC_API_KEY_PROD / IC_API_KEY_STAG value.
+export TEST_ENV=stage
+export IC_REGION=us-south
+
+ginkgo -v -nodes=1 \
+  --focus="\[ics-e2e\] \[declarative\]" \
+  ./e2e/ginkgo_tests \
+  -- -e2e-verify-service-account=false
+
+# To run a custom YAML (e.g. only DP2 tests), set TEST_CONFIG_FILE explicitly
+# to any absolute path:
+TEST_CONFIG_FILE=/tmp/my_subset.yml ginkgo -v -nodes=1 \
+  --focus="\[ics-e2e\] \[declarative\]" \
+  ./e2e/ginkgo_tests \
+  -- -e2e-verify-service-account=false
+```
+
+
+## Environment variables reference
+
+| Variable | Required | Description |
+|---|---|---|
+| `IC_LOGIN` | Yes | Must be `"true"` — confirms IBM Cloud login is done |
+| `TEST_ENV` | Yes | `stage` or `prod` |
+| `IC_REGION` | Yes | IBM Cloud region (e.g. `us-south`) |
+| `PLATFORM` | No | `iks` or `ocp` — logged in setup output |
+| `OS` | No | Worker OS (e.g. `REDHAT_8_64`) — logged in setup output |
+| `ADDON_VERSION` | No | CSI driver addon version — logged in setup output |
+| `MULTI_ZONE` | No | `true`/`false` — logged in setup output |
+| `USE_TRUSTED_PROFILE` | No | `true` to run the trusted-profile identity check |
+| `STAGE_TRUSTED_PROFILE_ID` | No | Expected profile ID for stage trusted-profile check |
+| `PROD_TRUSTED_PROFILE_ID` | No | Expected profile ID for prod trusted-profile check |
+| `E2E_TEST_RESULT` | No | Output file for pass/fail summary (default: `$GOPATH/.../e2e-test.out`) |
+| `E2E_TEST_SETUP` | No | Output file for cluster/driver info (default: `$GOPATH/.../e2e-setup.out`) |
+| `SC` | No | Default dp2 StorageClass name (default: `ibmc-vpc-file-min-iops`) |
+| `SC_RETAIN` | No | Default retain StorageClass name (default: `ibmc-vpc-file-retain-500-iops`) |
+| `TEST_CONFIG_FILE` | No | Path to testcases YAML. Set by `e2e.sh` automatically; override for custom suites |
+| `BASE_TESTCASES_FILE` | No | Path to the committed source YAML (default: `e2e/testcases/testcases.yml`) |

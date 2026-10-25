@@ -1,0 +1,498 @@
+# VPC File CSI Driver — declarative e2e test cases
+#
+# Every entry here corresponds to exactly one Ginkgo It() node.
+# To skip a test temporarily: set wantToSkip: true  (no code change needed).
+# To add a new test variant: add a new entry below   (no code change needed).
+#
+# Fields:
+#   testCase           — name shown in Ginkgo output (must be unique)
+#   description        — optional free-text explanation
+#   input.storageClass — pre-existing StorageClass name; omit when using customSC
+#   input.customSC     — creates a SC on-the-fly with the given params, deleted after the test
+#   input.pvc          — PVC spec (pvcNamePrefix, claimSize, accessMode, reclaimPolicy, etc.)
+#   input.workload     — workload to mount the PVC (type: deployment|pod|daemonset|statefulset)
+#   input.resize       — optional: expand PVC to expandToGi after workload is running
+#   input.snapshot     — optional: snapshot the PVC and restore into restoreClaimSizes
+#   input.eit          — optional: EIT config (workerPool, expectMountFail)
+#   input.capacityRoundoff — optional: verify allowCapacityRoundoff behaviour
+#   input.testCaseExpectation — true = test must pass, false = test must fail
+#   input.wantToSkip   — true = register but skip (replaces Jenkins boolean params)
+
+# ===========================================================================
+# DP2 — basic dynamic provisioning (always-on, replaces --focus [ics-e2e][sc])
+# ===========================================================================
+
+- testCase: "DP2: Deployment with retain StorageClass — write/read across pod restart"
+  description: >
+    Provisions a PVC with ibmc-vpc-file-retain-500-iops, starts a 1-replica
+    Deployment, writes data, deletes the pod, and verifies data persists on
+    the re-spawned pod.
+  input:
+    storageClass: ibmc-vpc-file-retain-500-iops
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 15Gi
+      reclaimPolicy: Retain
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 1
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    testCaseExpectation: true
+    wantToSkip: false
+
+- testCase: "DP2: Deployment with dp2 StorageClass — write/read across pod restart"
+  description: >
+    Provisions a PVC with ibmc-vpc-file-min-iops (dp2 profile), starts a
+    1-replica Deployment, writes data, and verifies data on re-mount.
+  input:
+    storageClass: ibmc-vpc-file-min-iops
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 15Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 1
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    testCaseExpectation: true
+    wantToSkip: false
+
+- testCase: "DP2: Deployment with dp2 StorageClass — 4 replicas on same node (RWX)"
+  description: >
+    Same as the previous test but scales to 4 replicas to verify that multiple
+    pods on the same node can concurrently access the same RWX volume.
+  input:
+    storageClass: ibmc-vpc-file-min-iops
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 15Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 4
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    testCaseExpectation: true
+    wantToSkip: false
+
+- testCase: "DP2: Deployment with dp2 StorageClass — RWO mode, 4 pods (only first mounts)"
+  description: >
+    Verifies ReadWriteOnce semantics: the first pod mounts successfully; the
+    remaining 3 pods are expected to stay Pending / fail to mount.
+  input:
+    storageClass: ibmc-vpc-file-min-iops
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 15Gi
+      accessMode: ReadWriteOnce
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 4
+      cmd: "df -h; echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done"
+    testCaseExpectation: true
+    wantToSkip: false
+
+- testCase: "DP2: DaemonSet with dp2 StorageClass — multi-zone write/read"
+  description: >
+    Deploys a DaemonSet so that every node in the cluster gets a pod that
+    mounts a distinct PVC. Verifies cross-zone volume provisioning.
+  input:
+    storageClass: ibmc-vpc-file-min-iops
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 20Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: daemonset
+      cmd: "echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+    testCaseExpectation: true
+    wantToSkip: false
+
+# ===========================================================================
+# RESIZE (always-on, replaces --focus [ics-e2e][resize][pv])
+# ===========================================================================
+
+- testCase: "RESIZE: dp2 StorageClass — online PVC expansion 20Gi → 40Gi"
+  description: >
+    Starts a pod with a 20 Gi dp2 PVC, writes data, then resizes the PVC to
+    40 Gi while the pod is running and verifies both PVC and PV reflect the
+    new size.
+  input:
+    storageClass: ibmc-vpc-file-min-iops
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 20Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: pod
+      cmd: "echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    resize:
+      expandToGi: 40
+      expectedGi: 40
+    testCaseExpectation: true
+    wantToSkip: false
+
+# ===========================================================================
+# RFS — Regional File Storage profile (controlled by wantToSkip)
+# ===========================================================================
+
+- testCase: "RFS: ibmc-vpc-file-regional — Deployment write/read (default bandwidth)"
+  description: >
+    Provisions a 15 Gi PVC with the regional (RFS) profile at default
+    bandwidth and verifies write/read with a 1-replica Deployment.
+  input:
+    storageClass: ibmc-vpc-file-regional
+    pvc:
+      pvcNamePrefix: ics-vol-rfs-
+      claimSize: 15Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 1
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    testCaseExpectation: true
+    wantToSkip: true   # set false to enable — was: e2e_rfs_test_case Jenkins param
+
+- testCase: "RFS: ibmc-vpc-file-regional-max-bandwidth — Deployment write/read"
+  description: >
+    Same as above but uses the max-bandwidth variant of the regional SC.
+  input:
+    storageClass: ibmc-vpc-file-regional-max-bandwidth
+    pvc:
+      pvcNamePrefix: ics-vol-rfs-
+      claimSize: 15Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 1
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    testCaseExpectation: true
+    wantToSkip: true
+
+- testCase: "RFS: custom SC (throughput=0) — Deployment write/read (default throughput)"
+  description: >
+    Creates a custom StorageClass with profile=rfs, throughput=0 (driver
+    chooses default), runs a 1-replica Deployment, and cleans up the SC.
+  input:
+    customSC:
+      name: custom-rfs-sc
+      params:
+        profile: rfs
+        throughput: "0"
+    pvc:
+      pvcNamePrefix: ics-vol-rfs-
+      claimSize: 15Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 1
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    testCaseExpectation: true
+    wantToSkip: true
+
+- testCase: "RFS: custom SC (throughput=9000) — PVC provisioning must fail (invalid bandwidth)"
+  description: >
+    Creates a custom SC with an unsupported bandwidth of 9000 and verifies
+    that the PVC stays Pending and emits a ProvisioningFailed event.
+  input:
+    customSC:
+      name: custom-rfs-sc-1
+      params:
+        profile: rfs
+        throughput: "9000"
+    pvc:
+      pvcNamePrefix: rfs-test-pvc
+      claimSize: 10Gi
+      mountPath: /mnt/test-1
+    testCaseExpectation: false   # provisioning must fail
+    wantToSkip: true
+
+- testCase: "RFS: custom SC (iops provided for rfs profile) — PVC provisioning must fail"
+  description: >
+    The rfs profile does not support the iops parameter. Verifies that
+    providing iops causes provisioning to fail.
+  input:
+    customSC:
+      name: custom-rfs-sc-2
+      params:
+        profile: rfs
+        throughput: "100"
+        iops: "36000"
+    pvc:
+      pvcNamePrefix: rfs-test-pvc
+      claimSize: 10Gi
+      mountPath: /mnt/test-1
+    testCaseExpectation: false
+    wantToSkip: true
+
+- testCase: "RFS: custom SC (zone provided for rfs profile) — PVC provisioning must fail"
+  description: >
+    The rfs (regional) profile spans all zones and therefore rejects an
+    explicit zone parameter.
+  input:
+    customSC:
+      name: custom-rfs-sc-3
+      params:
+        profile: rfs
+        throughput: "100"
+        zone: us-south-1
+    pvc:
+      pvcNamePrefix: rfs-test-pvc
+      claimSize: 10Gi
+      mountPath: /mnt/test-1
+    testCaseExpectation: false
+    wantToSkip: true
+
+# ===========================================================================
+# SNAPSHOT (controlled by wantToSkip)
+# ===========================================================================
+
+- testCase: "SNAPSHOT: RFS profile — create snapshot, restore at same/less/more size"
+  description: >
+    Writes data to an ibmc-vpc-file-regional PVC, snapshots it, then restores
+    to three different sizes (20 Gi, 10 Gi, 30 Gi) and verifies data integrity.
+  input:
+    storageClass: ibmc-vpc-file-regional
+    pvc:
+      pvcNamePrefix: ics-vpcfile-rfs-snap-
+      claimSize: 20Gi
+      reclaimPolicy: Delete
+      mountPath: /mnt/test-1
+    workload:
+      type: pod
+      cmd: "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    snapshot:
+      restoreClaimSizes: ["20Gi", "10Gi", "30Gi"]
+      restoredCmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done"
+    testCaseExpectation: true
+    wantToSkip: true   # set false to enable — was: e2e_snapshot_test_case Jenkins param
+
+- testCase: "SNAPSHOT: DP2 profile — create snapshot, restore at same/less/more size"
+  description: >
+    Same lifecycle test as above but using the ibmc-vpc-file-min-iops (dp2)
+    profile.
+  input:
+    storageClass: ibmc-vpc-file-min-iops
+    pvc:
+      pvcNamePrefix: ics-vpcfile-dp2-snap-
+      claimSize: 20Gi
+      reclaimPolicy: Delete
+      mountPath: /mnt/test-1
+    workload:
+      type: pod
+      cmd: "echo 'hello world' >> /mnt/test-1/data && grep 'hello world' /mnt/test-1/data && sync"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    snapshot:
+      restoreClaimSizes: ["20Gi", "10Gi", "30Gi"]
+      restoredCmd: "grep 'hello world' /mnt/test-1/data && while true; do sleep 2; done"
+    testCaseExpectation: true
+    wantToSkip: true
+
+# ===========================================================================
+# EIT — Encrypted-in-Transit (controlled by wantToSkip)
+# ===========================================================================
+
+- testCase: "EIT: verify EIT installation — all default worker-pool nodes in EIT_ENABLED_WORKER_NODES"
+  description: >
+    Enables EIT on the 'default' worker pool via the addon ConfigMap, waits
+    for package installation, then verifies every node in that pool appears in
+    the file-csi-driver-status ConfigMap.
+  input:
+    eit:
+      workerPool: default
+    testCaseExpectation: true
+    wantToSkip: true   # set false to enable — was: e2e_eit_test_case Jenkins param
+
+- testCase: "EIT: ibmc-vpc-file-eit — Deployment scaled to 3 replicas (multi-pod RWX)"
+  description: >
+    With EIT enabled on 'default', provisions a 10 Gi ibmc-vpc-file-eit PVC,
+    starts a 3-replica Deployment, and verifies multi-pod read/write.
+  input:
+    storageClass: ibmc-vpc-file-eit
+    pvc:
+      pvcNamePrefix: ics-vol-scale-
+      claimSize: 10Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 3
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+      nodeSelector:
+        ibm-cloud.kubernetes.io/worker-pool-name: default
+    eit:
+      workerPool: default
+    testCaseExpectation: true
+    wantToSkip: true
+
+- testCase: "EIT: ibmc-vpc-file-eit — PVC expansion 10Gi → 40Gi while pod is running"
+  description: >
+    With EIT enabled, provisions a 10 Gi EIT PVC, starts a pod, then performs
+    an online resize to 40 Gi and verifies the new capacity.
+  input:
+    storageClass: ibmc-vpc-file-eit
+    pvc:
+      pvcNamePrefix: ics-vol-resize-
+      claimSize: 10Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: pod
+      cmd: "echo 'hello world' > /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+      nodeSelector:
+        ibm-cloud.kubernetes.io/worker-pool-name: default
+    resize:
+      expandToGi: 40
+      expectedGi: 40
+    eit:
+      workerPool: default
+    testCaseExpectation: true
+    wantToSkip: true
+
+- testCase: "EIT: ibmc-vpc-file-eit on pool without EIT — pod must stay in ContainerCreating"
+  description: >
+    Negative test: disables EIT entirely, then tries to mount an
+    ibmc-vpc-file-eit volume.  Expects the Deployment pods to get stuck in
+    ContainerCreating because the node lacks the EIT kernel module.
+  input:
+    storageClass: ibmc-vpc-file-eit
+    pvc:
+      pvcNamePrefix: ics-vol-dp2-
+      claimSize: 10Gi
+      reclaimPolicy: Delete
+      mountOptions: [rw]
+      mountPath: /mnt/test-1
+    workload:
+      type: deployment
+      replicas: 3
+      cmd: "echo 'hello world' >> /mnt/test-1/data && while true; do sleep 2; done"
+      readCmd: [cat, /mnt/test-1/data]
+      expectedOutput01: "hello world\n"
+      expectedOutput02: "hello world\nhello world\n"
+    eit:
+      workerPool: default
+      expectMountFail: true
+    testCaseExpectation: false   # mount must fail
+    wantToSkip: true
+
+# ===========================================================================
+# CAPACITY ROUNDOFF (controlled by wantToSkip)
+# ===========================================================================
+
+- testCase: "ROUNDOFF TC-1: ibmc-vpc-file-ocpvirt-3000-iops — 60Gi request rounds up to 80Gi"
+  description: >
+    Requests a PVC of 60 Gi on the 3000-iops OCP Virt storage class, which
+    has a minimum capacity of 80 Gi.  Verifies both PVC status and PV spec
+    show 80 Gi after the PVC reaches Bound.
+  input:
+    storageClass: ibmc-vpc-file-ocpvirt-3000-iops
+    capacityRoundoff:
+      requestedCapacity: 60Gi
+      expectedCapacity: 80Gi
+    pvc:
+      pvcNamePrefix: ics-vol-roundoff-3000-60gi
+      claimSize: 60Gi
+      accessMode: ReadWriteMany
+      mountPath: /mnt/test-1
+    testCaseExpectation: true
+    wantToSkip: true   # set false to enable — was: e2e_capacity_roundoff_test_case Jenkins param
+
+- testCase: "ROUNDOFF TC-2: ibmc-vpc-file-ocpvirt-1000-iops — 5Gi request rounds up to 10Gi"
+  input:
+    storageClass: ibmc-vpc-file-ocpvirt-1000-iops
+    capacityRoundoff:
+      requestedCapacity: 5Gi
+      expectedCapacity: 10Gi
+    pvc:
+      pvcNamePrefix: ics-vol-roundoff-1000-5gi
+      claimSize: 5Gi
+      accessMode: ReadWriteMany
+      mountPath: /mnt/test-1
+    testCaseExpectation: true
+    wantToSkip: true
+
+- testCase: "ROUNDOFF TC-3: ibmc-vpc-file-ocpvirt-3000-iops — 100Gi request stays at 100Gi (above minimum)"
+  input:
+    storageClass: ibmc-vpc-file-ocpvirt-3000-iops
+    capacityRoundoff:
+      requestedCapacity: 100Gi
+      expectedCapacity: 100Gi
+    pvc:
+      pvcNamePrefix: ics-vol-roundoff-3000-100gi
+      claimSize: 100Gi
+      accessMode: ReadWriteMany
+      mountPath: /mnt/test-1
+    testCaseExpectation: true
+    wantToSkip: true
+
+- testCase: "ROUNDOFF TC-4: ibmc-vpc-file-ocpvirt-1000-iops — 97000Gi outside maximum range must fail"
+  description: >
+    Negative test: requests a PVC far outside the maximum supported capacity.
+    Expects the PVC to NOT reach Bound state and a ProvisioningFailed event
+    to appear.
+  input:
+    storageClass: ibmc-vpc-file-ocpvirt-1000-iops
+    capacityRoundoff:
+      requestedCapacity: 97000Gi
+      expectProvisionFail: true
+    pvc:
+      pvcNamePrefix: ics-vol-roundoff-1000-97000gi
+      claimSize: 97000Gi
+      accessMode: ReadWriteMany
+      mountPath: /mnt/test-1
+    testCaseExpectation: false
+    wantToSkip: true
