@@ -1210,6 +1210,7 @@ if [[ "$e2e_create_new_cluster" == "true" ]]; then
         echo "Info: Second Vlan: Private: [$SECOND_PRIV_VLAN] / [$SECOND_ZONE]"
     fi
     echo "Info: K8S Platforn: [$K8S_PLATFORM], Platform version: [$PLATFORM_VERSION]"
+    PLATFORM_VERSION="${PLATFORM_VERSION%,}"
     set -x
     ibmcloud ks versions --show-version $K8S_PLATFORM
     if [[ "$PLATFORM_VERSION" == "default" ]]; then
