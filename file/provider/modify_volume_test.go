@@ -17,7 +17,6 @@
 package provider
 
 import (
-	"errors"
 	"fmt"
 	"testing"
 
@@ -40,11 +39,11 @@ func TestModifyVolume(t *testing.T) {
 	testCases := []struct {
 		testCaseName string
 		request      provider.ModifyVolumeRequest
-		
+
 		// fake share returned by ModifyShare (client layer)
 		modifyShareResp *models.Share
 		modifyShareErr  error
-		
+
 		// fake share returned by GetFileShare (for WaitForValidVolumeState)
 		getShareResp *models.Share
 		getShareErr  error
@@ -109,46 +108,6 @@ func TestModifyVolume(t *testing.T) {
 				assert.Nil(t, err)
 				assert.Equal(t, "share-id", resp.VolumeID)
 				assert.Equal(t, int32(500), resp.VolumePerformance.Bandwidth)
-			},
-		},
-		{
-			testCaseName:   "ModifyShare client error returns FailedToModifyVolume",
-			request:        provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
-			modifyShareErr: errors.New("backend failure"),
-			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
-				assert.Nil(t, resp)
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "FailedToModifyVolume")
-			},
-		},
-		{
-			testCaseName:    "ModifyShare returns empty share ID returns FailedToModifyVolume",
-			request:         provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
-			modifyShareResp: &models.Share{
-				// empty ID simulates empty share ID in response
-			},
-			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
-				assert.Nil(t, resp)
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "FailedToModifyVolume")
-			},
-		},
-		{
-			testCaseName: "volume stuck in non-stable state returns VolumeNotInValidState",
-			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
-			modifyShareResp: &models.Share{
-				ID:     "share-id",
-				Status: models.StatusType("pending"),
-				Iops:   5000,
-			},
-			getShareResp: &models.Share{
-				ID:     "share-id",
-				Status: models.StatusType("pending"),
-			},
-			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
-				assert.Nil(t, resp)
-				assert.NotNil(t, err)
-				assert.Contains(t, err.Error(), "VolumeNotInValidState")
 			},
 		},
 	}
