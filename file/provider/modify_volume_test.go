@@ -40,16 +40,17 @@ func TestModifyVolume(t *testing.T) {
 	testCases := []struct {
 		testCaseName string
 		request      provider.ModifyVolumeRequest
+		
 		// fake share returned by ModifyShare (client layer)
 		modifyShareResp *models.Share
 		modifyShareErr  error
+		
 		// fake share returned by GetFileShare (for WaitForValidVolumeState)
 		getShareResp *models.Share
 		getShareErr  error
-		// expected
-		expectedErr string
-		backendErr  string
-		verify      func(t *testing.T, resp *provider.ModifyVolumeResponse, err error)
+
+		// expected verification
+		verify func(t *testing.T, resp *provider.ModifyVolumeResponse, err error)
 	}{
 		{
 			testCaseName: "VolumeID is empty",
@@ -69,7 +70,7 @@ func TestModifyVolume(t *testing.T) {
 			},
 		},
 		{
-			testCaseName: "Modify iops modify for DP2 profile",
+			testCaseName: "Modify iops for DP2 profile",
 			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Iops: 5000}},
 			modifyShareResp: &models.Share{
 				ID:     "share-id",
@@ -91,7 +92,7 @@ func TestModifyVolume(t *testing.T) {
 			},
 		},
 		{
-			testCaseName: "Modify bandwidth modify for RFS profile",
+			testCaseName: "Modify bandwidth for RFS profile",
 			request:      provider.ModifyVolumeRequest{VolumeID: "share-id", VolumePerformance: provider.VolumePerformance{Bandwidth: 5000}},
 			modifyShareResp: &models.Share{
 				ID:        "share-id",
