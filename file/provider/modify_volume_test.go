@@ -76,12 +76,12 @@ func TestModifyVolume(t *testing.T) {
 				Href:   "https://example/shares/share-id",
 				CRN:    "crn:v1:share-id",
 				Status: models.StatusType("stable"),
-				Iops:   500,
+				Iops:   6000,
 			},
 			getShareResp: &models.Share{
 				ID:     "share-id",
 				Status: models.StatusType("stable"),
-				Iops:   5000,
+				Iops:   6000,
 			},
 			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
 				assert.NotNil(t, resp)
@@ -96,12 +96,12 @@ func TestModifyVolume(t *testing.T) {
 			modifyShareResp: &models.Share{
 				ID:        "share-id",
 				Status:    models.StatusType("stable"),
-				Bandwidth: 500,
+				Bandwidth: 6000,
 			},
 			getShareResp: &models.Share{
 				ID:        "share-id",
 				Status:    models.StatusType("stable"),
-				Bandwidth: 5000,
+				Bandwidth: 6000,
 			},
 			verify: func(t *testing.T, resp *provider.ModifyVolumeResponse, err error) {
 				assert.NotNil(t, resp)
