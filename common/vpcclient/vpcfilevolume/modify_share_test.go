@@ -49,12 +49,12 @@ func TestModifyShare(t *testing.T) {
 				Iops: 5000,
 			},
 			status:      http.StatusOK,
-			content:     `{"id":"share-id","name":"share-name","size":100,"iops":5000,"lifecycle_state":"updating","zone":{"name":"us-south-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/us-south-1"},"crn":"crn:v1:bluemix:public:is:us-south-1:a/rg1::share:share-id"}`,
+			content:     `{"id":"share-id","name":"share-name","size":100,"iops":6000,"lifecycle_state":"updating","zone":{"name":"us-south-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/us-south-1"},"crn":"crn:v1:bluemix:public:is:us-south-1:a/rg1::share:share-id"}`,
 			expectShare: true,
 			verify: func(t *testing.T, share *models.Share, err error) {
 				if assert.NoError(t, err) && assert.NotNil(t, share) {
 					assert.Equal(t, "share-id", share.ID)
-					assert.Equal(t, int64(5000), share.Iops)
+					assert.Equal(t, int64(6000), share.Iops)
 				}
 			},
 		},
@@ -65,12 +65,12 @@ func TestModifyShare(t *testing.T) {
 				Bandwidth: 5000,
 			},
 			status:      http.StatusOK,
-			content:     `{"id":"share-id","name":"share-name","size":100,"iops":3000,"bandwidth":5000,"lifecycle_state":"updating","zone":{"name":"us-south-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/us-south-1"},"crn":"crn:v1:bluemix:public:is:us-south-1:a/rg1::share:share-id"}`,
+			content:     `{"id":"share-id","name":"share-name","size":100,"iops":3000,"bandwidth":6000,"lifecycle_state":"updating","zone":{"name":"us-south-1","href":"https://us-south.iaas.cloud.ibm.com/v1/regions/us-south/zones/us-south-1"},"crn":"crn:v1:bluemix:public:is:us-south-1:a/rg1::share:share-id"}`,
 			expectShare: true,
 			verify: func(t *testing.T, share *models.Share, err error) {
 				if assert.NoError(t, err) && assert.NotNil(t, share) {
 					assert.Equal(t, "share-id", share.ID)
-					assert.Equal(t, int32(5000), share.Bandwidth)
+					assert.Equal(t, int32(6000), share.Bandwidth)
 				}
 			},
 		},
