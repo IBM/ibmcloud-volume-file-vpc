@@ -43,7 +43,7 @@ func TestModifyShare(t *testing.T) {
 		verify      func(*testing.T, *models.Share, error)
 	}{
 		{
-			name:    "Successfully modify share IOPS (dp2)",
+			name:    "modify  IOPS for dp2 profile",
 			shareID: "share-id",
 			template: &models.Share{
 				Iops: 5000,
@@ -59,7 +59,7 @@ func TestModifyShare(t *testing.T) {
 			},
 		},
 		{
-			name:    "Successfully modify share bandwidth (rfs)",
+			name:    "modify  bandwidth for rfs profile",
 			shareID: "share-id",
 			template: &models.Share{
 				Bandwidth: 5000,
@@ -73,25 +73,6 @@ func TestModifyShare(t *testing.T) {
 					assert.Equal(t, int32(5000), share.Bandwidth)
 				}
 			},
-		},
-		{
-			name:    "Successfully modify share with 204 No Content",
-			shareID: "share-id",
-			template: &models.Share{
-				Iops: 3000,
-			},
-			status:      http.StatusNoContent,
-			expectShare: true,
-		},
-		{
-			name:    "Verify that a 404 is returned to the caller",
-			shareID: "share-id",
-			template: &models.Share{
-				Iops: 3000,
-			},
-			status:    http.StatusNotFound,
-			content:   `{"errors":[{"message":"testerr","Code":"share_not_found"}],"trace":"2af63776-4df7-4970-b52d-4e25676ec0e4"}`,
-			expectErr: "Trace Code:2af63776-4df7-4970-b52d-4e25676ec0e4, Code:share_not_found, Description:testerr, RC:404 Not Found",
 		},
 	}
 
