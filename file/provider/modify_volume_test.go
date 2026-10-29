@@ -87,7 +87,7 @@ func TestModifyVolume(t *testing.T) {
 				assert.NotNil(t, resp)
 				assert.Nil(t, err)
 				assert.Equal(t, "share-id", resp.VolumeID)
-				assert.Equal(t, int64(500), resp.VolumePerformance.Iops)
+				assert.Equal(t, int64(6000), resp.VolumePerformance.Iops)
 			},
 		},
 		{
@@ -107,7 +107,7 @@ func TestModifyVolume(t *testing.T) {
 				assert.NotNil(t, resp)
 				assert.Nil(t, err)
 				assert.Equal(t, "share-id", resp.VolumeID)
-				assert.Equal(t, int32(500), resp.VolumePerformance.Bandwidth)
+				assert.Equal(t, int32(6000), resp.VolumePerformance.Bandwidth)
 			},
 		},
 	}
