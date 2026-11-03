@@ -17,6 +17,7 @@ package e2e
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -25,6 +26,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -32,9 +34,11 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	clientset "k8s.io/client-go/kubernetes"
@@ -257,6 +261,168 @@ func grantSCCToServiceAccount(cs clientset.Interface, namespace string) func() {
 		if err := cs.RbacV1().ClusterRoleBindings().Delete(context.TODO(), crbName, metav1.DeleteOptions{}); err != nil && !apierrors.IsNotFound(err) {
 			fmt.Printf("Warning: failed to delete ClusterRoleBinding %q: %v\n", crbName, err)
 		}
+	}
+}
+
+// =============================================================================
+// VAC (VolumeAttributesClass) helpers
+// =============================================================================
+
+const (
+	vacPollInterval = 5 * time.Second
+	vacPollTimeout  = 2 * time.Minute
+)
+
+// createVAC creates a VolumeAttributesClass with the given name, driverName and
+// parameters. It is cleaned up automatically via DeferCleanup.
+func createVAC(cs clientset.Interface, name string, params map[string]string) {
+	vac := &storagev1.VolumeAttributesClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+		DriverName: "vpc.file.csi.ibm.io",
+		Parameters: params,
+	}
+	_, err := cs.StorageV1().VolumeAttributesClasses().Create(context.TODO(), vac, metav1.CreateOptions{})
+	Expect(err).NotTo(HaveOccurred(), "failed to create VolumeAttributesClass %q", name)
+	DeferCleanup(func() {
+		deleteVAC(cs, name)
+	})
+}
+
+// deleteVAC deletes a VolumeAttributesClass, ignoring not-found errors.
+func deleteVAC(cs clientset.Interface, name string) {
+	err := cs.StorageV1().VolumeAttributesClasses().Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil && !apierrors.IsNotFound(err) {
+		fmt.Printf("Warning: failed to delete VolumeAttributesClass %q: %v\n", name, err)
+	}
+}
+
+// createDP2PVC creates a PVC using the dp2 StorageClass and returns its name.
+// It is cleaned up automatically via DeferCleanup.
+func createDP2PVC(cs clientset.Interface, namespace, pvcName, scName, size string) *corev1.PersistentVolumeClaim {
+	reclaimPolicy := corev1.PersistentVolumeReclaimDelete
+	accessMode := corev1.ReadWriteMany
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pvcName,
+			Namespace: namespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &scName,
+			AccessModes:      []corev1.PersistentVolumeAccessMode{accessMode},
+			Resources: corev1.VolumeResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: resource.MustParse(size),
+				},
+			},
+		},
+	}
+	_ = reclaimPolicy
+	created, err := cs.CoreV1().PersistentVolumeClaims(namespace).Create(context.TODO(), pvc, metav1.CreateOptions{})
+	Expect(err).NotTo(HaveOccurred(), "failed to create PVC %q", pvcName)
+	DeferCleanup(func() {
+		_ = cs.CoreV1().PersistentVolumeClaims(namespace).Delete(context.TODO(), pvcName, metav1.DeleteOptions{})
+	})
+	return created
+}
+
+// createRFSPVCForVAC creates an RFS PVC and returns it. Cleaned up via DeferCleanup.
+func createRFSPVCForVAC(cs clientset.Interface, namespace, pvcName, scName, size string) *corev1.PersistentVolumeClaim {
+	accessMode := corev1.ReadWriteMany
+	pvc := &corev1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      pvcName,
+			Namespace: namespace,
+		},
+		Spec: corev1.PersistentVolumeClaimSpec{
+			StorageClassName: &scName,
+			AccessModes:      []corev1.PersistentVolumeAccessMode{accessMode},
+			Resources: corev1.VolumeResourceRequirements{
+				Requests: corev1.ResourceList{
+					corev1.ResourceStorage: resource.MustParse(size),
+				},
+			},
+		},
+	}
+	created, err := cs.CoreV1().PersistentVolumeClaims(namespace).Create(context.TODO(), pvc, metav1.CreateOptions{})
+	Expect(err).NotTo(HaveOccurred(), "failed to create PVC %q", pvcName)
+	DeferCleanup(func() {
+		_ = cs.CoreV1().PersistentVolumeClaims(namespace).Delete(context.TODO(), pvcName, metav1.DeleteOptions{})
+	})
+	return created
+}
+
+// waitForPVCBound polls until the PVC is Bound.
+func waitForPVCBound(cs clientset.Interface, namespace, pvcName string) {
+	err := wait.PollImmediate(vacPollInterval, 5*time.Minute, func() (bool, error) {
+		pvc, err := cs.CoreV1().PersistentVolumeClaims(namespace).Get(context.TODO(), pvcName, metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		return pvc.Status.Phase == corev1.ClaimBound, nil
+	})
+	Expect(err).NotTo(HaveOccurred(), "PVC %q did not become Bound", pvcName)
+}
+
+// patchPVCWithVAC patches the PVC spec to request the given VAC.
+func patchPVCWithVAC(cs clientset.Interface, namespace, pvcName, vacName string) {
+	patch := map[string]interface{}{
+		"spec": map[string]interface{}{
+			"volumeAttributesClassName": vacName,
+		},
+	}
+	patchBytes, err := json.Marshal(patch)
+	Expect(err).NotTo(HaveOccurred())
+	_, err = cs.CoreV1().PersistentVolumeClaims(namespace).Patch(
+		context.TODO(), pvcName, types.MergePatchType, patchBytes, metav1.PatchOptions{})
+	Expect(err).NotTo(HaveOccurred(), "failed to patch PVC %q with VAC %q", pvcName, vacName)
+}
+
+// waitForVACApplied polls until the PVC's currentVolumeAttributesClassName
+// matches the expected VAC name (VolumeModifySuccessful path).
+func waitForVACApplied(cs clientset.Interface, namespace, pvcName, vacName string) {
+	err := wait.PollImmediate(vacPollInterval, vacPollTimeout, func() (bool, error) {
+		pvc, err := cs.CoreV1().PersistentVolumeClaims(namespace).Get(context.TODO(), pvcName, metav1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		if pvc.Status.CurrentVolumeAttributesClassName != nil &&
+			*pvc.Status.CurrentVolumeAttributesClassName == vacName {
+			return true, nil
+		}
+		return false, nil
+	})
+	Expect(err).NotTo(HaveOccurred(),
+		"PVC %q currentVolumeAttributesClassName did not become %q within timeout", pvcName, vacName)
+}
+
+// waitForVACFailed polls until a Warning/VolumeModifyFailed event appears on
+// the PVC, then asserts the VAC was NOT applied.
+func waitForVACFailed(cs clientset.Interface, namespace, pvcName, vacName string) {
+	err := wait.PollImmediate(vacPollInterval, vacPollTimeout, func() (bool, error) {
+		events, err := cs.CoreV1().Events(namespace).List(context.TODO(), metav1.ListOptions{
+			FieldSelector: fields.AndSelectors(
+				fields.OneTermEqualSelector("involvedObject.name", pvcName),
+				fields.OneTermEqualSelector("involvedObject.kind", "PersistentVolumeClaim"),
+				fields.OneTermEqualSelector("type", "Warning"),
+				fields.OneTermEqualSelector("reason", "VolumeModifyFailed"),
+			).String(),
+		})
+		if err != nil {
+			return false, err
+		}
+		return len(events.Items) > 0, nil
+	})
+	Expect(err).NotTo(HaveOccurred(),
+		"expected VolumeModifyFailed Warning event on PVC %q but none appeared", pvcName)
+
+	// Confirm VAC was NOT applied
+	pvc, err := cs.CoreV1().PersistentVolumeClaims(namespace).Get(context.TODO(), pvcName, metav1.GetOptions{})
+	Expect(err).NotTo(HaveOccurred())
+	if pvc.Status.CurrentVolumeAttributesClassName != nil {
+		Expect(*pvc.Status.CurrentVolumeAttributesClassName).NotTo(Equal(vacName),
+			"PVC %q should NOT have currentVolumeAttributesClassName=%q after VolumeModifyFailed", pvcName, vacName)
 	}
 }
 
