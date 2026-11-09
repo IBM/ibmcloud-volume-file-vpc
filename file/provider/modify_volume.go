@@ -76,13 +76,22 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		return nil, userError.GetUserError("FailedToModifyVolume", fmt.Errorf("empty share ID in response"), modifyVolumeRequest.VolumeID)
 	}
 
-	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable")
+	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable", zap.String("VolumeID", share.ID), zap.String("State", string(share.Status)))
 	err = WaitForValidVolumeState(vpcs, share.ID)
 	if err != nil {
 		return nil, userError.GetUserError("VolumeNotInValidState", err, share.ID)
 	}
 
-	vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", share))
+	vpcs.Logger.Info("Volume got valid (stable) state", zap.String("VolumeID", share.ID), zap.Reflect("VolumeDetails", share))
+
+	if isIopsUpdate {
+		vpcs.Logger.Info("IOPS updated", zap.String("VolumeID", share.ID),
+			zap.Int64("RequestedIops", modifyVolumeRequest.Iops), zap.Int64("CurrentIops", share.Iops))
+	}
+	if isBandwidthUpdate {
+		vpcs.Logger.Info("Throughput (bandwidth) updated", zap.String("VolumeID", share.ID),
+			zap.Int32("RequestedBandwidth", modifyVolumeRequest.Bandwidth), zap.Int32("CurrentBandwidth", share.Bandwidth))
+	}
 
 	return &provider.ModifyVolumeResponse{
 		VolumeID: share.ID,
