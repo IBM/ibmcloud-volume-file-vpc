@@ -76,6 +76,12 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		return nil, userError.GetUserError("FailedToModifyVolume", fmt.Errorf("empty share ID in response"), modifyVolumeRequest.VolumeID)
 	}
 
+	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable", zap.String("VolumeID", share.ID), zap.String("State", string(share.Status)))
+	err = WaitForValidVolumeState(vpcs, share.ID)
+	if err != nil {
+		return nil, userError.GetUserError("VolumeNotInValidState", err, share.ID)
+	}
+
 	vpcs.Logger.Info("Volume got valid (stable) state", zap.String("VolumeID", share.ID), zap.Reflect("VolumeDetails", share))
 
 	if isIopsUpdate {
