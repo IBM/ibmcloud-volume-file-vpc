@@ -168,6 +168,13 @@ func skipRetry(err *models.Error) bool {
 		if ok {
 			return skipStatus
 		}
+		// Skip retry if error is related to unsupported or invalid IOPS/bandwidth/throughput
+		codeLower := strings.ToLower(string(errorItem.Code))
+		messageLower := strings.ToLower(errorItem.Message)
+		if strings.Contains(codeLower, "iops") || strings.Contains(codeLower, "bandwidth") ||
+			strings.Contains(messageLower, "iops") || strings.Contains(messageLower, "bandwidth") {
+			return true
+		}
 	}
 	return false
 }
