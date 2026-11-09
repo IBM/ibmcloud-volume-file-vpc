@@ -41,7 +41,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	isBandwidthUpdate := modifyVolumeRequest.Bandwidth > 0
 
 	if !isIopsUpdate && !isBandwidthUpdate {
-		vpcs.Logger.Warn("ModifyVolume: no iops or bandwidth requested, returning early")
+		vpcs.Logger.Warn("ModifyVolume: no iops or bandwidth requested, returning early", zap.String("VolumeID", modifyVolumeRequest.VolumeID))
 		return &provider.ModifyVolumeResponse{}, nil
 	}
 
@@ -53,7 +53,10 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		shareTemplate.Bandwidth = modifyVolumeRequest.Bandwidth
 	}
 
-	vpcs.Logger.Info("Calling VPC provider for volume Modify...")
+	vpcs.Logger.Info("Calling VPC provider for volume Modify...",
+		zap.String("VolumeID", modifyVolumeRequest.VolumeID),
+		zap.Int64("Iops", modifyVolumeRequest.Iops),
+		zap.Int32("Bandwidth", modifyVolumeRequest.Bandwidth))
 	var (
 		share *models.Share
 		err   error
@@ -68,7 +71,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	})
 
 	if err != nil {
-		vpcs.Logger.Error("Failed to modify volume from VPC provider", zap.NamedError("BackendError", err))
+		vpcs.Logger.Error("Failed to modify volume from VPC provider", zap.String("VolumeID", modifyVolumeRequest.VolumeID), zap.NamedError("BackendError", err))
 		return nil, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
 	}
 
@@ -76,13 +79,18 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		return nil, userError.GetUserError("FailedToModifyVolume", fmt.Errorf("empty share ID in response"), modifyVolumeRequest.VolumeID)
 	}
 
-	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable")
-	err = WaitForValidVolumeState(vpcs, share.ID)
-	if err != nil {
-		return nil, userError.GetUserError("VolumeNotInValidState", err, share.ID)
-	}
+	vpcs.Logger.Info("Successfully accepted volume modify request, now waiting for volume state equal to stable", zap.String("VolumeID", share.ID))
 
-	vpcs.Logger.Info("Volume got valid (stable) state", zap.Reflect("VolumeDetails", share))
+	vpcs.Logger.Info("Volume got valid (stable) state", zap.String("VolumeID", share.ID), zap.Reflect("VolumeDetails", share))
+
+	if isIopsUpdate {
+		vpcs.Logger.Info("IOPS updated", zap.String("VolumeID", share.ID),
+			zap.Int64("RequestedIops", modifyVolumeRequest.Iops), zap.Int64("CurrentIops", share.Iops))
+	}
+	if isBandwidthUpdate {
+		vpcs.Logger.Info("Throughput (bandwidth) updated", zap.String("VolumeID", share.ID),
+			zap.Int32("RequestedBandwidth", modifyVolumeRequest.Bandwidth), zap.Int32("CurrentBandwidth", share.Bandwidth))
+	}
 
 	return &provider.ModifyVolumeResponse{
 		VolumeID: share.ID,
