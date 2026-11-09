@@ -41,7 +41,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	isBandwidthUpdate := modifyVolumeRequest.Bandwidth > 0
 
 	if !isIopsUpdate && !isBandwidthUpdate {
-		vpcs.Logger.Warn("ModifyVolume: no iops or bandwidth requested, returning early", zap.String("VolumeID", modifyVolumeRequest.VolumeID))
+		vpcs.Logger.Warn("ModifyVolume: no iops or bandwidth requested, returning early")
 		return &provider.ModifyVolumeResponse{}, nil
 	}
 
@@ -53,10 +53,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 		shareTemplate.Bandwidth = modifyVolumeRequest.Bandwidth
 	}
 
-	vpcs.Logger.Info("Calling VPC provider for volume Modify...",
-		zap.String("VolumeID", modifyVolumeRequest.VolumeID),
-		zap.Int64("Iops", modifyVolumeRequest.Iops),
-		zap.Int32("Bandwidth", modifyVolumeRequest.Bandwidth))
+	vpcs.Logger.Info("Calling VPC provider for volume Modify...")
 	var (
 		share *models.Share
 		err   error
@@ -71,7 +68,7 @@ func (vpcs *VPCSession) ModifyVolume(modifyVolumeRequest provider.ModifyVolumeRe
 	})
 
 	if err != nil {
-		vpcs.Logger.Error("Failed to modify volume from VPC provider", zap.String("VolumeID", modifyVolumeRequest.VolumeID), zap.NamedError("BackendError", err))
+		vpcs.Logger.Error("Failed to modify volume from VPC provider", zap.NamedError("BackendError", err))
 		return nil, userError.GetUserError("FailedToModifyVolume", err, modifyVolumeRequest.VolumeID)
 	}
 
