@@ -338,28 +338,26 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 // VolumeAttributesClass (VAC) tests — rfs profile
 //
 // The driver does not check the volume's profile. It forwards iops/throughput
-// to VPC, and VPC rejects parameters the profile does not accept. The driver
-// returns that backend error as gRPC InvalidArgument and csi-resizer records
-// a VolumeModifyFailed event on the PVC (use a separate VAC per profile).
+// to VPC, and VPC rejects parameters the profile does not accept
+// (shares_profile_iops_not_allowed for rfs). The driver returns that backend
+// error as gRPC InvalidArgument and csi-resizer records a VolumeModifyFailed
+// event on the PVC; the specs assert on that code (see waitForVACRejected) and
+// that the share is left unchanged. Use a separate VAC per profile.
 //
-// SC1 — rfs PVC + VAC(iops + throughput) → FAIL
-//       iops is not accepted for rfs → rejected by VPC
-//       → VolumeModifyFailed event on PVC.
+// Scenario IDs: SC1–SC4 here (rfs), SC5–SC8 in dp2_test.go (dp2).
 //
-// SC2 — rfs PVC + VAC(iops out-of-range, 99999) → FAIL
-//       rejected by VPC → VolumeModifyFailed event on PVC.
-//
-// SC3 — rfs PVC + VAC(throughput out-of-range, 99999) → FAIL
-//       rejected by VPC → VolumeModifyFailed event on PVC.
-//
-// SC4 — rfs PVC + VAC(iops only) → FAIL
-//       iops is not accepted for rfs → rejected by VPC
-//       → VolumeModifyFailed event on PVC.
-//
-// SC5 — rfs PVC + VAC(throughput only, in-range 512 Mbps) → PASS
-//       throughput is sent as bandwidth; the driver waits for the share to
-//       become stable, then the VAC is reported as applied.
+// SC1 — rfs PVC + VAC(iops + throughput) → rejected, iops is not accepted
+// SC2 — rfs PVC + VAC(iops only)         → rejected, iops is not accepted
+// SC3 — rfs PVC + VAC(throughput 99999)  → rejected, throughput out of range
+// SC4 — rfs PVC + VAC(throughput 512)    → applied, share bandwidth is 512 Mbps
 // =============================================================================
+
+var rfsVACCases = []vacCase{
+	{id: "SC1", profile: "rfs", summary: "iops+throughput", params: map[string]string{"iops": "500", "throughput": "512"}, reject: true},
+	{id: "SC2", profile: "rfs", summary: "iops only", params: map[string]string{"iops": "500"}, reject: true},
+	{id: "SC3", profile: "rfs", summary: "throughput out-of-range", params: map[string]string{"throughput": "99999"}, reject: true},
+	{id: "SC4", profile: "rfs", summary: "throughput only, in-range", params: map[string]string{"throughput": "512"}, wantBandwidth: 512},
+}
 
 var _ = Describe("[ics-e2e] [vac] [rfs] VolumeAttributesClass tests for rfs profile", func() {
 	f := framework.NewDefaultFramework("ics-e2e-vac-rfs")
@@ -379,216 +377,14 @@ var _ = Describe("[ics-e2e] [vac] [rfs] VolumeAttributesClass tests for rfs prof
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
+		skipIfVACUnsupported(cs)
+		prepareVACNamespace(cs, ns.Name)
 		DeferCleanup(grantSCCToServiceAccount(cs, ns.Name))
 	})
 
-	// -------------------------------------------------------------------------
-	// SC1 — NEGATIVE
-	// rfs PVC + VAC(iops + throughput)
-	// iops is not accepted for rfs → VPC rejects the PATCH
-	// → driver returns InvalidArgument → VolumeModifyFailed event on PVC.
-	// -------------------------------------------------------------------------
-	It("SC1: rfs PVC + VAC(iops+throughput): should fail with VolumeModifyFailed (iops not supported for rfs)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC1: RFS PVC + VAC(iops+throughput) → FAIL (expected VolumeModifyFailed)\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC1: RFS PVC + VAC(iops+throughput) → FAIL (VolumeModifyFailed as expected)\n")
-				}
-				fpointer.Close()
-			}
+	for _, c := range rfsVACCases {
+		It(c.title(), func() {
+			runVACSpec(cs, ns.Name, rfsSC, c)
 		})
-
-		vacName := "e2e-rfs-vac-sc1"
-		pvcName := "e2e-rfs-pvc-sc1"
-
-		createVAC(cs, vacName, map[string]string{
-			"iops":       "500",
-			"throughput": "512",
-		})
-
-		createRFSPVCForVAC(cs, ns.Name, pvcName, rfsSC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACFailed(cs, ns.Name, pvcName, vacName)
-	})
-
-	// -------------------------------------------------------------------------
-	// SC2 — NEGATIVE
-	// rfs PVC + VAC(iops out-of-range)
-	// 99999 IOPS → rejected by VPC
-	// → VolumeModifyFailed event on PVC.
-	// -------------------------------------------------------------------------
-	It("SC2: rfs PVC + VAC(iops out-of-range): should fail with VolumeModifyFailed (iops outside of range)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC2: RFS PVC + VAC(iops out-of-range) → FAIL (expected VolumeModifyFailed)\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC2: RFS PVC + VAC(iops out-of-range) → FAIL (VolumeModifyFailed as expected)\n")
-				}
-				fpointer.Close()
-			}
-		})
-
-		vacName := "e2e-rfs-vac-sc2"
-		pvcName := "e2e-rfs-pvc-sc2"
-
-		createVAC(cs, vacName, map[string]string{
-			"iops": "99999",
-		})
-
-		createRFSPVCForVAC(cs, ns.Name, pvcName, rfsSC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACFailed(cs, ns.Name, pvcName, vacName)
-	})
-
-	// -------------------------------------------------------------------------
-	// SC3 — NEGATIVE
-	// rfs PVC + VAC(throughput out-of-range)
-	// 99999 Mbps → rejected by VPC
-	// → VolumeModifyFailed event on PVC.
-	// -------------------------------------------------------------------------
-	It("SC3: rfs PVC + VAC(throughput out-of-range): should fail with VolumeModifyFailed (throughput outside of range)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC3: RFS PVC + VAC(throughput out-of-range) → FAIL (expected VolumeModifyFailed)\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC3: RFS PVC + VAC(throughput out-of-range) → FAIL (VolumeModifyFailed as expected)\n")
-				}
-				fpointer.Close()
-			}
-		})
-
-		vacName := "e2e-rfs-vac-sc3"
-		pvcName := "e2e-rfs-pvc-sc3"
-
-		createVAC(cs, vacName, map[string]string{
-			"throughput": "99999",
-		})
-
-		createRFSPVCForVAC(cs, ns.Name, pvcName, rfsSC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACFailed(cs, ns.Name, pvcName, vacName)
-	})
-
-	// -------------------------------------------------------------------------
-	// SC4 — NEGATIVE
-	// rfs PVC + VAC(iops only)
-	// iops is not accepted for rfs → VPC rejects the PATCH
-	// → driver returns InvalidArgument → VolumeModifyFailed event on PVC.
-	// -------------------------------------------------------------------------
-	It("SC4: rfs PVC + VAC(iops only): should fail with VolumeModifyFailed (no applicable parameter for rfs)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC4: RFS PVC + VAC(iops only) → FAIL (expected VolumeModifyFailed)\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC4: RFS PVC + VAC(iops only) → FAIL (VolumeModifyFailed as expected)\n")
-				}
-				fpointer.Close()
-			}
-		})
-
-		vacName := "e2e-rfs-vac-sc4"
-		pvcName := "e2e-rfs-pvc-sc4"
-
-		createVAC(cs, vacName, map[string]string{
-			"iops": "500",
-		})
-
-		createRFSPVCForVAC(cs, ns.Name, pvcName, rfsSC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACFailed(cs, ns.Name, pvcName, vacName)
-	})
-
-	// -------------------------------------------------------------------------
-	// SC5 — POSITIVE
-	// rfs PVC + VAC(throughput only, in-range 512 Mbps)
-	// throughput maps directly to bandwidth → applied successfully.
-	// -------------------------------------------------------------------------
-	It("SC5: rfs PVC + VAC(throughput only, in-range): should apply VAC successfully (throughput→bandwidth applied)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC5: RFS PVC + VAC(throughput only) → PASS\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC5: RFS PVC + VAC(throughput only) → PASS\n")
-				}
-				fpointer.Close()
-			}
-		})
-
-		vacName := "e2e-rfs-vac-sc5"
-		pvcName := "e2e-rfs-pvc-sc5"
-
-		createVAC(cs, vacName, map[string]string{
-			"throughput": "512",
-		})
-
-		createRFSPVCForVAC(cs, ns.Name, pvcName, rfsSC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACApplied(cs, ns.Name, pvcName, vacName)
-	})
+	}
 })

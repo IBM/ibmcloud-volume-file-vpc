@@ -22,6 +22,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -436,26 +437,29 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 })
 
 // =============================================================================
-// VAC (VolumeAttributesClass) tests for dp2 profile
+// VolumeAttributesClass (VAC) tests — dp2 profile
 //
 // The driver does not check the volume's profile. It forwards iops/throughput
 // to VPC, and VPC rejects parameters the profile does not accept
 // (shares_profile_bandwidth_not_allowed for dp2). The driver returns that
 // backend error as gRPC InvalidArgument and csi-resizer records a
-// VolumeModifyFailed event on the PVC.
+// VolumeModifyFailed event on the PVC; the specs assert on that code (see
+// waitForVACRejected) and that the share is left unchanged.
 //
-// SC6 — dp2 PVC + VAC(iops + throughput) → FAIL
-//       throughput is not accepted for dp2 → VPC rejects the whole PATCH
-//       → VolumeModifyFailed event on PVC
+// Scenario IDs: SC1–SC4 in rfs_test.go (rfs), SC5–SC8 here (dp2).
 //
-// SC7 — dp2 PVC + VAC(iops only) → PASS
-//       iops applied; the driver waits for the share to become stable and
-//       the test verifies the new iops on the VPC share
-//
-// SC8 — dp2 PVC + VAC(throughput only) → FAIL
-//       throughput is not accepted for dp2 → VPC rejects the PATCH
-//       → VolumeModifyFailed event on PVC
+// SC5 — dp2 PVC + VAC(iops + throughput) → rejected, throughput is not accepted
+// SC6 — dp2 PVC + VAC(throughput only)   → rejected, throughput is not accepted
+// SC7 — dp2 PVC + VAC(iops 99999999)     → rejected, iops out of range
+// SC8 — dp2 PVC + VAC(iops 500)          → applied, share iops is 500
 // =============================================================================
+
+var dp2VACCases = []vacCase{
+	{id: "SC5", profile: "dp2", summary: "iops+throughput", params: map[string]string{"iops": "500", "throughput": "512"}, reject: true},
+	{id: "SC6", profile: "dp2", summary: "throughput only", params: map[string]string{"throughput": "500"}, reject: true},
+	{id: "SC7", profile: "dp2", summary: "iops out-of-range", params: map[string]string{"iops": "99999999"}, reject: true},
+	{id: "SC8", profile: "dp2", summary: "iops only", params: map[string]string{"iops": "500"}, wantIops: 500},
+}
 
 var _ = Describe("[ics-e2e] [vac] [dp2] VolumeAttributesClass tests for dp2 profile", func() {
 	f := framework.NewDefaultFramework("ics-e2e-vac-dp2")
@@ -467,139 +471,23 @@ var _ = Describe("[ics-e2e] [vac] [dp2] VolumeAttributesClass tests for dp2 prof
 	)
 
 	// dp2 StorageClass name — read from env so it can be overridden per cluster.
+	// Falls back to the SC env var used by the existing dp2 tests.
 	dp2SC := os.Getenv("DP2_SC")
 	if dp2SC == "" {
-		dp2SC = sc // falls back to the SC env var used by existing dp2 tests
+		dp2SC = sc
 	}
 
 	BeforeEach(func() {
 		cs = f.ClientSet
 		ns = f.Namespace
+		Expect(dp2SC).NotTo(BeEmpty(), "set DP2_SC (or SC) to a dp2 StorageClass; an empty name would leave the PVC Pending for the full bind timeout")
+		skipIfVACUnsupported(cs)
+		prepareVACNamespace(cs, ns.Name)
 	})
 
-	// -------------------------------------------------------------------------
-	// SC6 — NEGATIVE
-	// dp2 PVC + VAC(iops + throughput)
-	// throughput is NOT accepted for dp2 — VPC rejects the PATCH even when iops
-	// is also present. VolumeModifyFailed event must appear on PVC.
-	// -------------------------------------------------------------------------
-	It("SC6: dp2 PVC + VAC(iops+throughput): should fail with VolumeModifyFailed (throughput not applicable for dp2)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC6: DP2 PVC + VAC(iops+throughput) → FAIL (expected VolumeModifyFailed)\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC6: DP2 PVC + VAC(iops+throughput) → FAIL (VolumeModifyFailed as expected)\n")
-				}
-				fpointer.Close()
-			}
+	for _, c := range dp2VACCases {
+		It(c.title(), func() {
+			runVACSpec(cs, ns.Name, dp2SC, c)
 		})
-
-		vacName := "e2e-dp2-vac-sc6"
-		pvcName := "e2e-dp2-pvc-sc6"
-
-		createVAC(cs, vacName, map[string]string{
-			"iops":       "500",
-			"throughput": "512",
-		})
-
-		createDP2PVC(cs, ns.Name, pvcName, dp2SC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACFailed(cs, ns.Name, pvcName, vacName)
-	})
-
-	// -------------------------------------------------------------------------
-	// SC7 — POSITIVE
-	// dp2 PVC + VAC(iops only)
-	// iops applied and verified on the VPC share once it is stable.
-	// -------------------------------------------------------------------------
-	It("SC7: dp2 PVC + VAC(iops only): should apply VAC successfully (iops applied, bandwidth auto-adjusts)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC7: DP2 PVC + VAC(iops only) → PASS\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC7: DP2 PVC + VAC(iops only) → PASS\n")
-				}
-				fpointer.Close()
-			}
-		})
-
-		vacName := "e2e-dp2-vac-sc7"
-		pvcName := "e2e-dp2-pvc-sc7"
-
-		createVAC(cs, vacName, map[string]string{
-			"iops": "500",
-		})
-
-		createDP2PVC(cs, ns.Name, pvcName, dp2SC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACApplied(cs, ns.Name, pvcName, vacName)
-		verifyShareIops(cs, ns.Name, pvcName, 500)
-	})
-
-	// -------------------------------------------------------------------------
-	// SC8 — NEGATIVE
-	// dp2 PVC + VAC(throughput only)
-	// throughput is not accepted for dp2 → VPC rejects the PATCH → VolumeModifyFailed.
-	// -------------------------------------------------------------------------
-	It("SC8: dp2 PVC + VAC(throughput only): should fail with VolumeModifyFailed (no applicable param for dp2)", func() {
-		payload := `{"metadata": {"labels": {"security.openshift.io/scc.podSecurityLabelSync": "false","pod-security.kubernetes.io/enforce": "privileged"}}}`
-		_, labelerr := cs.CoreV1().Namespaces().Patch(context.TODO(), ns.Name, types.StrategicMergePatchType, []byte(payload), metav1.PatchOptions{})
-		if labelerr != nil {
-			panic(labelerr)
-		}
-
-		fpointer, err = os.OpenFile(testResultFile, os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			panic(err)
-		}
-		DeferCleanup(func() {
-			if fpointer != nil {
-				if CurrentSpecReport().Failed() {
-					fpointer.WriteString("❌ VAC SC8: DP2 PVC + VAC(throughput only) → FAIL (expected VolumeModifyFailed)\n")
-				} else {
-					fpointer.WriteString("✅ VAC SC8: DP2 PVC + VAC(throughput only) → FAIL (VolumeModifyFailed as expected)\n")
-				}
-				fpointer.Close()
-			}
-		})
-
-		vacName := "e2e-dp2-vac-sc8"
-		pvcName := "e2e-dp2-pvc-sc8"
-
-		createVAC(cs, vacName, map[string]string{
-			"throughput": "500",
-		})
-
-		createDP2PVC(cs, ns.Name, pvcName, dp2SC, "10Gi")
-		waitForPVCBound(cs, ns.Name, pvcName)
-
-		patchPVCWithVAC(cs, ns.Name, pvcName, vacName)
-		waitForVACFailed(cs, ns.Name, pvcName, vacName)
-	})
+	}
 })

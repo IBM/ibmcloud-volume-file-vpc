@@ -51,3 +51,9 @@
     ```
     ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[roundoff\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
     ```
+
+11. Test VolumeAttributesClass (VAC) for DP2 and RFS profiles
+    ```
+    ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[vac\]" ./ginkgo_tests -- --kubeconfig=$KUBECONFIG -e2e-verify-service-account=false
+    ```
+
