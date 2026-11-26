@@ -22,6 +22,7 @@ import (
 
 	"github.com/IBM/ibmcloud-volume-file-vpc/e2e/testsuites"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -433,4 +434,60 @@ var _ = Describe("[ics-e2e] [sc] [with-daemonset] Dynamic Provisioning using dae
 		}
 		test.Run(cs, ns, false)
 	})
+})
+
+// =============================================================================
+// VolumeAttributesClass (VAC) tests — dp2 profile
+//
+// The driver does not check the volume's profile. It forwards iops/throughput
+// to VPC, and VPC rejects parameters the profile does not accept
+// (shares_profile_bandwidth_not_allowed for dp2). The driver returns that
+// backend error as gRPC InvalidArgument and csi-resizer records a
+// VolumeModifyFailed event on the PVC; the specs assert on that code (see
+// waitForVACRejected) and that the share is left unchanged.
+//
+// Scenario IDs: SC1–SC4 in rfs_test.go (rfs), SC5–SC8 here (dp2).
+//
+// SC5 — dp2 PVC + VAC(iops + throughput) → rejected, throughput is not accepted
+// SC6 — dp2 PVC + VAC(throughput only)   → rejected, throughput is not accepted
+// SC7 — dp2 PVC + VAC(iops 99999999)     → rejected, iops out of range
+// SC8 — dp2 PVC + VAC(iops 500)          → applied, share iops is 500
+// =============================================================================
+
+var dp2VACCases = []vacCase{
+	{id: "SC5", profile: "dp2", summary: "iops+throughput", params: map[string]string{"iops": "500", "throughput": "512"}, reject: true},
+	{id: "SC6", profile: "dp2", summary: "throughput only", params: map[string]string{"throughput": "500"}, reject: true},
+	{id: "SC7", profile: "dp2", summary: "iops out-of-range", params: map[string]string{"iops": "99999999"}, reject: true},
+	{id: "SC8", profile: "dp2", summary: "iops only", params: map[string]string{"iops": "500"}, wantIops: 500},
+}
+
+var _ = Describe("[ics-e2e] [vac] [dp2] VolumeAttributesClass tests for dp2 profile", func() {
+	f := framework.NewDefaultFramework("ics-e2e-vac-dp2")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
+
+	// dp2 StorageClass name — read from env so it can be overridden per cluster.
+	// Falls back to the SC env var used by the existing dp2 tests.
+	dp2SC := os.Getenv("DP2_SC")
+	if dp2SC == "" {
+		dp2SC = sc
+	}
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		Expect(dp2SC).NotTo(BeEmpty(), "set DP2_SC (or SC) to a dp2 StorageClass; an empty name would leave the PVC Pending for the full bind timeout")
+		skipIfVACUnsupported(cs)
+		prepareVACNamespace(cs, ns.Name)
+	})
+
+	for _, c := range dp2VACCases {
+		It(c.title(), func() {
+			runVACSpec(cs, ns.Name, dp2SC, c)
+		})
+	}
 })

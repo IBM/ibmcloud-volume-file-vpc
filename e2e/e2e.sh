@@ -90,6 +90,11 @@ while [[ $# -gt 0 ]]; do
 		shift
 		shift
 		;;
+		--run-vac-test-cases)
+		e2e_vac_test_case="$2"
+		shift
+		shift
+		;;
     		*)
     		UNKOWNPARAM+=("$1")
     		shift
@@ -307,9 +312,26 @@ else
 	echo -e "VPC-FILE-CSI-TEST-ROUNDOFF: SKIP" >> $E2E_TEST_RESULT
 fi
 
+# VolumeAttributesClass (VAC) tests for DP2 and RFS profiles.
+# Needs Kubernetes >= 1.34 (VAC GA); the specs skip themselves on older clusters.
+# Set DP2_SC (defaults to $SC) and RFS_SC (defaults to ibmc-vpc-file-regional) to Immediate-binding storage classes.
+if [[ "$e2e_vac_test_case" == "true" ]]; then
+	ginkgo -v -nodes=1 --focus="\[ics-e2e\] \[vac\]" ./e2e/ginkgo_tests -- -e2e-verify-service-account=false
+	rc7=$?
+	echo "Exit status for VAC test: $rc7"
+
+	if [[ $rc7 -eq 0 ]]; then
+		echo -e "VPC-FILE-CSI-TEST-VAC: PASS" >> $E2E_TEST_RESULT
+	else
+		echo -e "VPC-FILE-CSI-TEST-VAC: FAILED" >> $E2E_TEST_RESULT
+	fi
+else
+	echo -e "VPC-FILE-CSI-TEST-VAC: SKIP" >> $E2E_TEST_RESULT
+fi
+
 # Publish final reports
 overall_rc=0
-for rcvar in ${rc1:-0} ${rc2:-0} ${rc3:-0} ${rc4:-0} ${rc5:-0} ${rc6:-0}; do
+for rcvar in ${rc1:-0} ${rc2:-0} ${rc3:-0} ${rc4:-0} ${rc5:-0} ${rc6:-0} ${rc7:-0}; do
 	if [[ "$rcvar" -ne 0 ]]; then
 		overall_rc=1
 	fi

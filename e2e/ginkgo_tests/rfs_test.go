@@ -333,3 +333,58 @@ var _ = Describe("[ics-e2e] [sc_rfs] Dynamic Provisioning for RFS SC with Deploy
 		}()
 	})
 })
+
+// =============================================================================
+// VolumeAttributesClass (VAC) tests — rfs profile
+//
+// The driver does not check the volume's profile. It forwards iops/throughput
+// to VPC, and VPC rejects parameters the profile does not accept
+// (shares_profile_iops_not_allowed for rfs). The driver returns that backend
+// error as gRPC InvalidArgument and csi-resizer records a VolumeModifyFailed
+// event on the PVC; the specs assert on that code (see waitForVACRejected) and
+// that the share is left unchanged. Use a separate VAC per profile.
+//
+// Scenario IDs: SC1–SC4 here (rfs), SC5–SC8 in dp2_test.go (dp2).
+//
+// SC1 — rfs PVC + VAC(iops + throughput) → rejected, iops is not accepted
+// SC2 — rfs PVC + VAC(iops only)         → rejected, iops is not accepted
+// SC3 — rfs PVC + VAC(throughput 99999)  → rejected, throughput out of range
+// SC4 — rfs PVC + VAC(throughput 512)    → applied, share bandwidth is 512 Mbps
+// =============================================================================
+
+var rfsVACCases = []vacCase{
+	{id: "SC1", profile: "rfs", summary: "iops+throughput", params: map[string]string{"iops": "500", "throughput": "512"}, reject: true},
+	{id: "SC2", profile: "rfs", summary: "iops only", params: map[string]string{"iops": "500"}, reject: true},
+	{id: "SC3", profile: "rfs", summary: "throughput out-of-range", params: map[string]string{"throughput": "99999"}, reject: true},
+	{id: "SC4", profile: "rfs", summary: "throughput only, in-range", params: map[string]string{"throughput": "512"}, wantBandwidth: 512},
+}
+
+var _ = Describe("[ics-e2e] [vac] [rfs] VolumeAttributesClass tests for rfs profile", func() {
+	f := framework.NewDefaultFramework("ics-e2e-vac-rfs")
+	f.NamespacePodSecurityEnforceLevel = admissionapi.LevelPrivileged
+
+	var (
+		cs clientset.Interface
+		ns *v1.Namespace
+	)
+
+	// rfs StorageClass name — read from env so it can be overridden per cluster.
+	rfsSC := os.Getenv("RFS_SC")
+	if rfsSC == "" {
+		rfsSC = "ibmc-vpc-file-regional"
+	}
+
+	BeforeEach(func() {
+		cs = f.ClientSet
+		ns = f.Namespace
+		skipIfVACUnsupported(cs)
+		prepareVACNamespace(cs, ns.Name)
+		DeferCleanup(grantSCCToServiceAccount(cs, ns.Name))
+	})
+
+	for _, c := range rfsVACCases {
+		It(c.title(), func() {
+			runVACSpec(cs, ns.Name, rfsSC, c)
+		})
+	}
+})
